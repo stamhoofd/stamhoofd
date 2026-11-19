@@ -7,7 +7,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { Order, Organization, OrganizationFactory } from '@stamhoofd/models';
-import { File, Image, PaymentMethod, Product, ProductPrice, RichText, STPackageBundle, WebshopLayout, WebshopTicketType } from '@stamhoofd/structures';
+import { File, Image, PaymentMethod, Product, ProductPrice, RichText, STPackageBundle, WebshopLayout, WebshopOrderMode, WebshopTicketType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { WebshopOrderFlow } from '../flows/WebshopOrderFlow.js';
@@ -38,6 +38,14 @@ async function waitForNavigationTransition(page: Page) {
 
 async function fetchOrders(webshopId: string) {
     return await Order.select().where('webshopId', webshopId).fetch();
+}
+
+/**
+ * A description that is longer than the screen of a smartphone
+ */
+function longDescription(paragraphCount = 40) {
+    const paragraphs = Array.from({ length: paragraphCount }, (_, i) => `Paragraaf ${i + 1} met alle info over deze actie`);
+    return RichText.create({ text: paragraphs.join('\n'), html: paragraphs.map(p => `<p>${p}</p>`).join('') });
 }
 
 test.describe('Modern webshop view @webshop-modern', () => {
@@ -564,6 +572,234 @@ test.describe('Modern webshop view @webshop-modern', () => {
         await expect(page.locator('.modern-webshop-view').getByTestId('single-order-button')).toBeVisible({ timeout: 15000 });
         await expect(page.getByTestId('cart-item-view')).toHaveCount(0);
         await expect(page.locator('.preview-panel-column')).toBeHidden();
+    });
+
+    test('Points to the order button of one product below a long description', async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Modern long description ${WorkerData.id}`,
+            productCount: 1,
+            cartEnabled: false,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+        webshop.meta.description = longDescription();
+        webshop.products[0].description = 'Info over het product';
+        await webshop.save();
+
+        await page.goto(WorkerData.urls.webshopUri(webshop.uri));
+        const orderButton = page.locator('.modern-webshop-view').getByTestId('single-order-button');
+        const hint = page.getByTestId('order-hint-button');
+
+        // The order button is below the description: the hint has its text and scrolls to it
+        await expect(hint).toBeInViewport({ ratio: 1, timeout: 15000 });
+        await expect(hint).toContainText('Bestellen');
+        await expect(orderButton).not.toBeInViewport();
+
+        await hint.click();
+        await expect(orderButton).toBeInViewport({ ratio: 1 });
+        await expect(hint).toBeHidden();
+    });
+
+    test('Points to the button of the form on the page until it is on the screen', async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Modern seats hint ${WorkerData.id}`,
+            ticketType: WebshopTicketType.Tickets,
+            productCount: 1,
+            cartEnabled: false,
+            withSeatingPlan: true,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+        webshop.meta.description = longDescription(25);
+        await webshop.save();
+
+        await page.goto(WorkerData.urls.webshopUri(webshop.uri));
+        const hint = page.getByTestId('order-hint-button');
+        const form = page.locator('.modern-webshop-view').getByTestId('cart-item-view');
+        const saveButton = form.getByTestId('save-button');
+
+        // The form starts on the screen, but its button (choosing seats) is below it: the hint has the same text
+        await expect(hint).toBeInViewport({ ratio: 1, timeout: 15000 });
+        await expect(hint).toContainText('Kies plaatsen');
+        await expect(form).toBeInViewport();
+        await expect(saveButton).not.toBeInViewport();
+
+        // Scrolled until the button of the form is against the bottom of the screen: the hint still covers it, with space below it
+        await saveButton.evaluate((button) => {
+            let scroller = button.parentElement;
+            while (scroller && !(scroller.scrollHeight > scroller.clientHeight && ['auto', 'scroll'].includes(getComputedStyle(scroller).overflowY))) {
+                scroller = scroller.parentElement;
+            }
+            (scroller ?? document.scrollingElement!).scrollTop += button.getBoundingClientRect().bottom - window.innerHeight + 1;
+        });
+        await expect(saveButton).toBeInViewport({ ratio: 1 });
+        await expect(hint).toBeVisible();
+
+        // At the place of the button of the hint, only the button of the form is shown
+        await hint.click();
+        await expect(hint).toBeHidden();
+        await expect(saveButton).toBeInViewport({ ratio: 1 });
+        const box = (await saveButton.boundingBox())!;
+        expect(page.viewportSize()!.height - (box.y + box.height)).toBeGreaterThanOrEqual(10);
+    });
+
+    test('Points to the products below a long description', async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Modern order hint ${WorkerData.id}`,
+            orderMode: WebshopOrderMode.Single,
+            paymentMethods: [PaymentMethod.PointOfSale],
+            buildProducts: () => [
+                Product.create({ name: 'Kamp kapoenen', prices: [ProductPrice.create({ price: 120_0000 })] }),
+                Product.create({ name: 'Kamp welpen', prices: [ProductPrice.create({ price: 140_0000 })] }),
+            ],
+        });
+        webshop.meta.description = longDescription();
+        await webshop.save();
+
+        await page.goto(WorkerData.urls.webshopUri(webshop.uri));
+        const hint = page.getByTestId('order-hint-button');
+        const firstProduct = page.getByTestId('single-product-row').first();
+
+        // The products are below the screen: the hint at the bottom of the screen scrolls to them
+        await expect(hint).toBeInViewport({ ratio: 1, timeout: 15000 });
+        await expect(firstProduct).not.toBeInViewport();
+        await hint.click();
+        await expect(firstProduct).toBeInViewport();
+        await expect(hint).toBeHidden();
+    });
+
+    test('Does not point to the products when they are on the screen', async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Modern no order hint ${WorkerData.id}`,
+            orderMode: WebshopOrderMode.Single,
+            paymentMethods: [PaymentMethod.PointOfSale],
+            buildProducts: () => [
+                Product.create({ name: 'Kamp kapoenen', prices: [ProductPrice.create({ price: 120_0000 })] }),
+                Product.create({ name: 'Kamp welpen', prices: [ProductPrice.create({ price: 140_0000 })] }),
+            ],
+        });
+        webshop.meta.description = RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' });
+        await webshop.save();
+
+        await page.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await expect(page.getByTestId('single-product-row').first()).toBeInViewport({ timeout: 15000 });
+        await expect(page.getByTestId('order-hint-button')).toBeHidden();
+    });
+
+    test('Points to the form on the page with the text of its order button', async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Modern form hint ${WorkerData.id}`,
+            productCount: 1,
+            cartEnabled: false,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+        webshop.meta.description = longDescription();
+        await webshop.save();
+
+        await page.goto(WorkerData.urls.webshopUri(webshop.uri));
+        const hint = page.getByTestId('order-hint-button');
+        const saveButton = page.locator('.modern-webshop-view').getByTestId('cart-item-view').getByTestId('save-button');
+        await expect(hint).toBeInViewport({ ratio: 1, timeout: 15000 });
+        await expect(hint).toContainText('Bestellen');
+        await expect(saveButton).toContainText('Bestellen');
+
+        await hint.click();
+        await expect(saveButton).toBeInViewport({ ratio: 1 });
+        await expect(hint).toBeHidden();
+    });
+
+    test('Does not point to a form on the page that can not be ordered', async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Modern sold out hint ${WorkerData.id}`,
+            productCount: 1,
+            cartEnabled: false,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+        webshop.meta.description = longDescription();
+        webshop.products[0].stock = 0;
+        await webshop.save();
+
+        await page.goto(WorkerData.urls.webshopUri(webshop.uri));
+        const form = page.locator('.modern-webshop-view').getByTestId('cart-item-view');
+        // The form is below the description, but has no order button to point to
+        await expect(form).toHaveCount(1, { timeout: 15000 });
+        await expect(form.getByTestId('save-button')).toHaveCount(0);
+        await expect(form).not.toBeInViewport();
+        // The hint starts hidden: only check it once the position of the form was observed (delivered before the next frame)
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        await expect(page.getByTestId('order-hint-button')).toBeHidden();
+    });
+
+    test('Only points to the products when they are below the content and the cart is empty', async ({ page }) => {
+        await page.setViewportSize({ width: 1440, height: 900 });
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Modern split hint ${WorkerData.id}`,
+            productCount: 2,
+            cartEnabled: true,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+        webshop.meta.layout = WebshopLayout.Split;
+        webshop.meta.description = longDescription();
+        await webshop.save();
+
+        const flow = new WebshopOrderFlow(page, { cartEnabled: true });
+        await page.goto(WorkerData.urls.webshopUri(webshop.uri));
+
+        // Next to the content, the products are always on the screen
+        await expect(page.locator('.preview-panel-column').getByTestId('product-box')).toHaveCount(2, { timeout: 15000 });
+        await expect(page.getByTestId('order-hint-button')).toHaveCount(0);
+
+        // Below the content, they are below the long description
+        await page.setViewportSize({ width: 390, height: 844 });
+        const hint = page.getByTestId('order-hint-button');
+        await expect(hint).toBeInViewport({ ratio: 1 });
+        await expect(hint).toContainText('Bestellen');
+
+        // With something in the cart, the cart button sticks to the bottom of the screen instead
+        await flow.addProduct('Product 1');
+        await expect(page.getByTestId('open-cart-button')).toBeVisible();
+        await expect(hint).toHaveCount(0);
+    });
+
+    test('Does not point to the order button before the webshop opens', async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Modern opens later ${WorkerData.id}`,
+            productCount: 1,
+            cartEnabled: false,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+        webshop.meta.description = longDescription();
+        webshop.meta.openAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        webshop.products[0].description = 'Info over het product';
+        await webshop.save();
+
+        await page.goto(WorkerData.urls.webshopUri(webshop.uri));
+        const view = page.locator('.modern-webshop-view');
+        // The products can be viewed, but ordering is not pushed forward until it is possible
+        await expect(view.getByTestId('single-order-button')).toHaveCount(1, { timeout: 15000 });
+        await expect(view.getByTestId('single-order-button')).not.toBeInViewport();
+        await expect(page.getByTestId('order-hint-button')).toHaveCount(0);
     });
 
     test('Shows the product form below the description when the product has no description or photo', async ({ page }) => {

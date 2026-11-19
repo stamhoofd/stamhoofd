@@ -38,12 +38,13 @@
                 </div>
 
                 <template v-if="!showPreview">
-                    <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" />
-                    <WebshopProducts v-else-if="canOrder" :webshop="webshop" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
+                    <CartItemView v-if="embeddedCartItem" ref="embeddedForm" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" />
+                    <WebshopProducts v-else-if="canOrder" ref="productsPart" :webshop="webshop" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
                     <WebshopCartButton v-if="showCartButton" :count="cartCount" @open="showCart().catch(console.error)" />
                     <WebshopPlatformFooter />
                 </template>
                 <PreviewOutlet />
+                <WebshopOrderHint v-if="showOrderHint" :text="orderHintText" :target="orderHintTarget" :whole-target="!!embeddedCartItem || !!orderButtonProduct" />
 
                 <!-- The platform footer is shown right below the ordering part instead -->
                 <LegalFooter :organization="organization" :webshop="webshop" :hide-platform-footer="true" />
@@ -53,8 +54,8 @@
         <!-- Ordering happens next to the content (below it on small screens) -->
         <template v-if="showPreview" #preview>
             <!-- Only next to the content (wide) the ordering part gets a title: below the content it follows the title of the webshop -->
-            <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" :title="previewWide ? (webshop.meta.orderTitle || embeddedCartItem.product.name) : ''" />
-            <WebshopProducts v-else :webshop="webshop" :list-title="previewWide ? orderListTitle : ''" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
+            <CartItemView v-if="embeddedCartItem" ref="embeddedForm" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" :title="previewWide ? (webshop.meta.orderTitle || embeddedCartItem.product.name) : ''" />
+            <WebshopProducts v-else ref="productsPart" :webshop="webshop" :list-title="previewWide ? orderListTitle : ''" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
             <WebshopCartButton v-if="showCartButton" :count="cartCount" @open="showCart().catch(console.error)" />
             <WebshopPlatformFooter />
         </template>
@@ -82,13 +83,14 @@ import { UrlHelper } from '@stamhoofd/networking/UrlHelper';
 import type { Payment, Product } from '@stamhoofd/structures';
 import { Cart, CartItem, PaymentStatus, WebshopLayout, WebshopOrderMode } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
-import { computed, onDeactivated, onMounted, ref, watch } from 'vue';
+import { computed, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useCheckoutManager } from '../composables/useCheckoutManager';
 import { useWebshopManager } from '../composables/useWebshopManager';
 import type { CheckoutStep } from './checkout/CheckoutStepsManager';
 import { CheckoutStepsManager } from './checkout/CheckoutStepsManager';
 import CrowdfundingBar from './components/CrowdfundingBar.vue';
 import WebshopCartButton from './components/WebshopCartButton.vue';
+import WebshopOrderHint from './components/WebshopOrderHint.vue';
 import WebshopPlatformFooter from './components/WebshopPlatformFooter.vue';
 import WebshopProducts from './components/WebshopProducts.vue';
 import { getCartComponent } from './checkout/getCartComponent';
@@ -384,6 +386,38 @@ const showPreview = computed(() => {
     return canOrder.value;
 });
 
+/**
+ * Below the content, a long description can push the ordering part below the screen: the hint points to it. Not needed when
+ * the ordering part is next to the content, or when the cart button already sticks to the bottom of the screen. Not before
+ * the webshop opens: the products can be viewed, but ordering is not pushed forward yet.
+ */
+const showOrderHint = computed(() => {
+    if (closed.value || (showPreview.value && previewWide.value) || showCartButton.value) {
+        return false;
+    }
+    return canOrder.value;
+});
+
+const embeddedForm = useTemplateRef<InstanceType<typeof CartItemView>>('embeddedForm');
+const productsPart = useTemplateRef<InstanceType<typeof WebshopProducts>>('productsPart');
+
+/**
+ * The hint is needed until the visitor sees how to order: the button at the end of the form on the page, the order button
+ * of one product, or the products. A form without that button (e.g. a sold out product) gets no hint.
+ */
+const orderHintTarget = computed((): HTMLElement | null => {
+    if (embeddedCartItem.value) {
+        return embeddedForm.value?.orderButton ?? null;
+    }
+    if (orderButtonProduct.value) {
+        return productsPart.value?.orderButton ?? null;
+    }
+    return (productsPart.value?.$el as HTMLElement | undefined) ?? null;
+});
+
+// The same text as the button the hint leads to
+const orderHintText = computed(() => embeddedForm.value?.orderButtonText ?? productsPart.value?.orderButtonText ?? '');
+
 const embeddedCartItem = ref(null) as Ref<CartItem | null>;
 // Also when the checkout is replaced (e.g. cleared after an order), so the form keeps editing the item in the cart
 watch([embeddedProduct, checkout], ([product]) => {
@@ -639,6 +673,13 @@ async function resumeStep(destination: string, animated = true) {
 
     .preview-panel-preview {
         padding-bottom: var(--preview-panel-padding-bottom);
+    }
+}
+
+// The order hint scrolls to these: an order button ends up where the button of the hint was, not against the bottom of the screen
+.modern-webshop {
+    .cart-item-view.embedded button[type="submit"], .webshop-products, .webshop-products .single-order-button {
+        scroll-margin-bottom: calc(15px + var(--st-safe-area-bottom, 0px));
     }
 }
 
