@@ -1011,10 +1011,13 @@ export class AuthenticatedStructures {
             const record = judicialRecords.find((r) => r.memberId === blob.id);
             const member = members.find((m) => m.id === blob.id);
 
+            // identityMatches is answered here rather than in the struct: the hash is a backend concern and
+            // the frontend has no business being able to recompute one.
             blob.judicialRecord =
                 record && member
                     ? MemberJudicialRecord.create({
                           reviewDecision: record.reviewDecision,
+                          identityMatches: record.identityHash === member.identityHash,
                           reviewedAt: record.reviewedAt,
                           hasDocument: (record.file?.reference ?? null) !== null,
                           comment: ownMemberIds.has(blob.id)

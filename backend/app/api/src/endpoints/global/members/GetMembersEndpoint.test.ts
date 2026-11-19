@@ -4271,6 +4271,9 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 email: 'mieke@example.com',
                 comment: 'Enkel onder begeleiding van een tweede leiding.',
             });
+
+            // Copied from the member rather than recomputed, which is what the delivery flow does.
+            record.identityHash = member.identityHash!;
             await record.save();
             return record;
         }
@@ -4296,6 +4299,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const approved = response.body.results.members.find((m) => m.id === members.adult.id);
             expect(approved?.judicialRecord?.reviewDecision).toBe(JudicialRecordReviewDecision.Ok);
+            expect(approved?.judicialRecord?.identityMatches).toBe(true);
 
             // The comment is for the member themselves; an administrator reads it through the review endpoint
             expect(approved?.judicialRecord?.comment).toBeNull();
@@ -4316,6 +4320,52 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     },
                 }),
             ).toIncludeSameMembers([members.adult.id]);
+        });
+
+        test('A renamed member stops matching the approval that was granted to them', async () => {
+            const { token, members, memberIds } = await setupMembers();
+            await approve(members.adult);
+
+            members.adult.details.lastName = members.adult.details.lastName + '-Janssens';
+            await members.adult.save();
+
+            const response = await testServer.test(
+                endpoint,
+                Request.get({
+                    path: baseUrl,
+                    host: platformHost,
+                    query: new LimitedFilteredRequest({
+                        filter: { id: { $in: memberIds } },
+                        sort: [{ key: 'id', order: SortItemDirection.ASC }],
+                        limit: 100,
+                    }),
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                }),
+            );
+            expect(response.status).toBe(200);
+
+            const renamed = response.body.results.members.find((m) => m.id === members.adult.id);
+            expect(renamed?.judicialRecord?.identityMatches).toBe(false);
+
+            // So they are asked for a new extract, in the list as well as in the member view
+            expect(
+                await fetchMemberIds({
+                    token,
+                    filter: {
+                        id: { $in: memberIds },
+                        judicialRecordStatus: { $in: [JudicialRecordStatus.Ok] },
+                    },
+                }),
+            ).toHaveLength(0);
+            expect(
+                await fetchMemberIds({
+                    token,
+                    filter: {
+                        id: { $in: memberIds },
+                        judicialRecordStatus: { $in: [JudicialRecordStatus.Required] },
+                    },
+                }),
+            ).toContain(members.adult.id);
         });
 
         test('Lists the members that need an extract', async () => {
@@ -4386,6 +4436,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
             record.memberId = member.id;
             record.reviewDecision = JudicialRecordReviewDecision.Ok;
             record.reviewedAt = new Date();
+            record.identityHash = member.identityHash!;
             record.reviewDetails = JudicialRecordReviewDetails.create({
                 userId: uuidv4(),
                 name: 'Wies Beoordelaar',
@@ -4458,6 +4509,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             // The record itself stays: without it the member view falls back to Required for an approved member
             expect(record?.reviewDecision).toBe(JudicialRecordReviewDecision.Ok);
+            expect(record?.identityMatches).toBe(true);
             expect(record?.reviewDetails).toBeNull();
         });
 

@@ -300,10 +300,15 @@ describe('JudicialRecordHelper.getStoredStatus', () => {
 
     function record(
         reviewDecision: JudicialRecordReviewDecision,
-        options: { reviewedAt?: Date | null; hasDocument?: boolean } = {},
+        options: {
+            reviewedAt?: Date | null;
+            hasDocument?: boolean;
+            identityMatches?: boolean;
+        } = {},
     ): JudicialRecordCurrentRecord {
         return {
             reviewDecision,
+            identityMatches: options.identityMatches ?? true,
             reviewedAt:
                 options.reviewedAt === undefined ? new Date(2026, 0, 1) : options.reviewedAt,
             hasDocument: options.hasDocument ?? true,
@@ -340,6 +345,15 @@ describe('JudicialRecordHelper.getStoredStatus', () => {
 
         expect(status).toBe(JudicialRecordStatus.ConditionallyAccepted);
         expect(status).not.toBe(JudicialRecordStatus.Ok);
+    });
+
+    test('a record for a different name or birth date decides nothing', () => {
+        expect(
+            JudicialRecordHelper.getStoredStatus(
+                record(JudicialRecordReviewDecision.Ok, { identityMatches: false }),
+                atDate,
+            ),
+        ).toBeNull();
     });
 
     test('an approval older than the validity window decides nothing', () => {
