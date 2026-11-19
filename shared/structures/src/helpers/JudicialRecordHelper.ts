@@ -100,6 +100,21 @@ export class JudicialRecordHelper {
         }
     }
 
+    static getReviewDecisionName(status: JudicialRecordReviewDecision): string {
+        switch (status) {
+            case JudicialRecordReviewDecision.UnderReview:
+                return $t(`Wordt beoordeeld`);
+            case JudicialRecordReviewDecision.Ok:
+                return $t(`Goedgekeurd`);
+            case JudicialRecordReviewDecision.ConditionallyAccepted:
+                return $t(`Goedgekeurd onder voorwaarden`);
+            case JudicialRecordReviewDecision.TemporarilyRejected:
+                return $t(`Tijdelijk afgekeurd`);
+            case JudicialRecordReviewDecision.PermanentlyRejected:
+                return $t(`Definitief afgekeurd`);
+        }
+    }
+
     /**
      * The status a member's current record gives them, or null when the record does not decide it.
      *
