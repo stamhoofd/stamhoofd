@@ -136,13 +136,12 @@ export class SettlementsExportEndpoint extends Endpoint<Params, Query, Body, Res
             Email.send({
                 from: Email.getWebmasterFromEmail(),
                 to: [{ email: user.email, name: user.name }],
-                subject: 'Uitbetalingen export mislukt',
+                subject: $t('Uitbetalingen export mislukt'),
                 text:
-                    'Het maken van de export van ' +
-                    Formatter.dateTime(start) +
-                    ' tot ' +
-                    Formatter.dateTime(end) +
-                    ' is mislukt. Probeer een kortere periode of neem contact op.\n',
+                    $t(
+                        'Het maken van de export van {start} tot {end} is mislukt. Probeer een kortere periode of neem contact op.',
+                        { start: Formatter.dateTime(start), end: Formatter.dateTime(end) },
+                    ) + '\n',
                 type: 'transactional',
             });
         });

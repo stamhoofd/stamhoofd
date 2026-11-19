@@ -187,10 +187,10 @@ export class SettlementExporter {
         const zipWriterAdapter = new ArchiverWriterAdapter(output);
         const writer = new XlsxWriter(zipWriterAdapter);
 
-        const settlementsSheet = await writer.addSheet('Uitbetalingen');
-        const paymentsSheet = await writer.addSheet('Betalingen');
-        const chargesSheet = await writer.addSheet('Kosten');
-        const providerInvoicesSheet = await writer.addSheet('Facturen provider');
+        const settlementsSheet = await writer.addSheet($t('Uitbetalingen'));
+        const paymentsSheet = await writer.addSheet($t('Betalingen'));
+        const chargesSheet = await writer.addSheet($t('Kosten'));
+        const providerInvoicesSheet = await writer.addSheet($t('Facturen provider'));
         await writer.ready();
 
         try {
@@ -245,47 +245,47 @@ export class SettlementExporter {
             settlements.some((settlement) => settlement.syncErrors !== null);
 
         await writer.addRow(sheets.settlementsSheet, [
-            textCell('Provider', 10),
-            textCell('Uitbetaling', 30),
-            textCell('Referentie', 25),
-            textCell('Uitbetaald op', 13),
-            textCell('Bedrag', 13),
-            textCell('Totaal betalingen', 16),
-            textCell('Totaal kosten', 13),
-            textCell('Status', 10),
-            textCell('Gesynchroniseerd', 16),
-            textCell('Transacties', 11),
-            textCell('Onverklaard', 13),
-            ...(this.hasPendingFees ? [textCell('Niet-gefactureerde kosten', 22)] : []),
-            ...(this.hasUncollectibleFees ? [textCell('Niet-aanrekenbare kosten', 22)] : []),
-            textCell('Check', 20),
-            ...(this.hasSyncErrors ? [textCell('Sync fouten', 60)] : []),
+            textCell($t('Provider'), 10),
+            textCell($t('Uitbetaling'), 30),
+            textCell($t('Referentie'), 25),
+            textCell($t('Uitbetaald op'), 13),
+            textCell($t('Bedrag'), 13),
+            textCell($t('Totaal betalingen'), 16),
+            textCell($t('Totaal kosten'), 13),
+            textCell($t('Status'), 10),
+            textCell($t('Gesynchroniseerd'), 16),
+            textCell($t('Transacties'), 11),
+            textCell($t('Onverklaard'), 13),
+            ...(this.hasPendingFees ? [textCell($t('Niet-gefactureerde kosten'), 22)] : []),
+            ...(this.hasUncollectibleFees ? [textCell($t('Niet-aanrekenbare kosten'), 22)] : []),
+            textCell($t('Check'), 20),
+            ...(this.hasSyncErrors ? [textCell($t('Sync fouten'), 60)] : []),
         ]);
 
         await writer.addRow(sheets.paymentsSheet, [
-            textCell('Uitbetaling', 30),
-            textCell('Uitbetaald op', 13),
-            textCell('Betaling', 36),
-            textCell('Type', 12),
-            textCell('Bedrag', 13),
-            textCell('Transactie', 30),
-            textCell('Datum', 13),
+            textCell($t('Uitbetaling'), 30),
+            textCell($t('Uitbetaald op'), 13),
+            textCell($t('Betaling'), 36),
+            textCell($t('Type'), 12),
+            textCell($t('Bedrag'), 13),
+            textCell($t('Transactie'), 30),
+            textCell($t('Datum'), 13),
             ...(this.organization.meta.invoicesEnabled
                 ? [
-                      textCell('Factuur', 15),
-                      textCell('Factuurdatum', 13),
-                      textCell('Factuurtotaal', 13),
+                      textCell($t('Factuur'), 15),
+                      textCell($t('Factuurdatum'), 13),
+                      textCell($t('Factuurtotaal'), 13),
                   ]
                 : []),
         ]);
 
         await writer.addRow(sheets.chargesSheet, [
-            textCell('Uitbetaling', 30),
-            textCell('Type', 32),
-            textCell('Bedrag', 13),
-            textCell('Beschrijving', 45),
-            textCell('Factuur provider', 18),
-            textCell('Betaling', 36),
+            textCell($t('Uitbetaling'), 30),
+            textCell($t('Type'), 32),
+            textCell($t('Bedrag'), 13),
+            textCell($t('Beschrijving'), 45),
+            textCell($t('Factuur provider'), 18),
+            textCell($t('Betaling'), 36),
         ]);
 
         for (const settlement of settlements) {
@@ -313,10 +313,10 @@ export class SettlementExporter {
                 settlement.uncollectibleFees !==
             0
         ) {
-            return 'Ontbrekende gegevens';
+            return $t('Ontbrekende gegevens');
         }
         if (settlement.pendingFees !== 0) {
-            return 'Kosten nog niet gefactureerd';
+            return $t('Kosten nog niet gefactureerd');
         }
         return '✓';
     }
@@ -338,7 +338,7 @@ export class SettlementExporter {
             currencyCell(linesTotal),
             currencyCell(chargesTotal),
             textCell(settlement.status),
-            textCell(settlement.syncedAt ? '✓' : 'Niet gesynchroniseerd'),
+            textCell(settlement.syncedAt ? '✓' : $t('Niet gesynchroniseerd')),
             { value: settlement.transactionCount },
             currencyCell(settlement.unexplainedAmount),
             ...(this.hasPendingFees ? [currencyCell(settlement.pendingFees)] : []),
@@ -588,15 +588,15 @@ export class SettlementExporter {
 
     private async writeProviderInvoices(writer: XlsxWriter, sheet: symbol) {
         await writer.addRow(sheet, [
-            textCell('Gefactureerd door', 17),
-            textCell('Factuur', 20),
-            textCell('Transactiekosten', 16),
-            textCell('Servicekosten', 16),
-            textCell('Accountkosten', 16),
-            textCell('BTW', 13),
-            textCell('Totaal', 13),
-            textCell('Kosten buiten dit overzicht', 22),
-            textCell('Check', 28),
+            textCell($t('Gefactureerd door'), 17),
+            textCell($t('Factuur'), 20),
+            textCell($t('Transactiekosten'), 16),
+            textCell($t('Servicekosten'), 16),
+            textCell($t('Accountkosten'), 16),
+            textCell($t('BTW'), 13),
+            textCell($t('Totaal'), 13),
+            textCell($t('Kosten buiten dit overzicht'), 22),
+            textCell($t('Check'), 28),
         ]);
 
         for (const totals of this.getProviderInvoiceTotals()) {
@@ -649,7 +649,7 @@ export class SettlementExporter {
         }
 
         if (!totals.stamped) {
-            return 'Nog niet (volledig) gefactureerd';
+            return $t('Nog niet (volledig) gefactureerd');
         }
 
         const invoice = await Invoice.select()
@@ -658,7 +658,7 @@ export class SettlementExporter {
             .first(false);
 
         if (!invoice) {
-            return 'Nog niet (volledig) gefactureerd';
+            return $t('Nog niet (volledig) gefactureerd');
         }
 
         // What this invoice bills for exactly these fees: their balance items, as far as this
@@ -680,12 +680,12 @@ export class SettlementExporter {
             fees.map((fee) => fee.balanceItemId).filter((id): id is string => id !== null),
         );
         if (balanceItemIds.length === 0) {
-            return 'Nog niet (volledig) gefactureerd';
+            return $t('Nog niet (volledig) gefactureerd');
         }
 
         const invoicedPayments = await Payment.select().where('invoiceId', invoice.id).fetch();
         if (invoicedPayments.length === 0) {
-            return 'Nog niet (volledig) gefactureerd';
+            return $t('Nog niet (volledig) gefactureerd');
         }
 
         const invoicedFees =
@@ -698,7 +698,7 @@ export class SettlementExporter {
                 .sum(SQL.column('price'))) ?? 0;
 
         if (invoicedFees !== fullTotal) {
-            return 'Nog niet (volledig) gefactureerd';
+            return $t('Nog niet (volledig) gefactureerd');
         }
         return '✓';
     }
@@ -708,21 +708,22 @@ export class SettlementExporter {
 
         const startMonth = Formatter.dateWithoutDay(this.start, { timezone: 'UTC' });
         const endMonth = Formatter.dateWithoutDay(this.end, { timezone: 'UTC' });
-        const subject =
-            'Uitbetalingen export ' +
-            startMonth +
-            (endMonth !== startMonth ? ' - ' + endMonth : '');
+        const subject = $t('Uitbetalingen export {period}', {
+            period: startMonth + (endMonth !== startMonth ? ' - ' + endMonth : ''),
+        });
 
         Email.send({
             from: Email.getWebmasterFromEmail(),
             to,
             subject,
             text:
-                'In bijlage het overzicht van de opgeslagen uitbetalingen van ' +
-                Formatter.dateTime(this.start) +
-                ' tot ' +
-                Formatter.dateTime(this.end) +
-                '.\n',
+                $t(
+                    'In bijlage het overzicht van de opgeslagen uitbetalingen van {start} tot {end}.',
+                    {
+                        start: Formatter.dateTime(this.start),
+                        end: Formatter.dateTime(this.end),
+                    },
+                ) + '\n',
             type: 'transactional',
             attachments: [
                 {
