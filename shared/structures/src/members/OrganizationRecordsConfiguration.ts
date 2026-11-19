@@ -90,34 +90,34 @@ export class FinancialSupportSettings extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 319 })
     preventSelfAssignmentText: string | null = null;
 
-    // todo translations
     static get defaultDescription() {
-        return 'We doen ons best om de kostprijs van onze activiteiten zo laag mogelijk te houden. Daarnaast voorzien we middelen om gezinnen die dat nodig hebben te ondersteunen. Om de drempel zo laag mogelijk te houden, voorzien we een discrete checkbox waarmee je kan aangeven dat je ondersteuning nodig hebt. We gaan hier uiterst discreet mee om.';
+        return $t(
+            'We doen ons best om de kostprijs van onze activiteiten zo laag mogelijk te houden. Daarnaast voorzien we middelen om gezinnen die dat nodig hebben te ondersteunen. Om de drempel zo laag mogelijk te houden, voorzien we een discrete checkbox waarmee je kan aangeven dat je ondersteuning nodig hebt. We gaan hier uiterst discreet mee om.',
+        );
     }
 
-    // todo translations
     static get defaultTitle() {
-        return 'Financiële ondersteuning';
+        return $t('Financiële ondersteuning');
     }
 
-    // todo translations
     static get defaultPriceName() {
-        return 'Verlaagd tarief';
+        return $t('Verlaagd tarief');
     }
 
-    // todo translations
     static get defaultCheckboxLabel() {
-        return 'Mijn gezin heeft nood aan financiële ondersteuning en ik wil dit discreet kenbaar maken';
+        return $t(
+            'Mijn gezin heeft nood aan financiële ondersteuning en ik wil dit discreet kenbaar maken',
+        );
     }
 
-    // todo translations
     static get defaultWarningText() {
-        return 'Gebruikt financiële ondersteuning';
+        return $t('Gebruikt financiële ondersteuning');
     }
 
-    // todo translations
     static get defaultPreventSelfAssignmentText() {
-        return 'Er is goedkeuring nodig om in te schrijven met financiële ondersteuning. Gelieve de groep te contacteren.';
+        return $t(
+            'Er is goedkeuring nodig om in te schrijven met financiële ondersteuning. Gelieve de groep te contacteren.',
+        );
     }
 }
 

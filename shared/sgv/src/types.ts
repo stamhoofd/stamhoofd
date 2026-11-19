@@ -82,9 +82,10 @@ export class SGVFoutenDecoder implements Decoder<SimpleErrors> {
                     new SimpleError({
                         code: 'unknown_SGVError',
                         message: JSON.stringify(data.data),
-                        human:
-                            'Foutmelding van de groepsadministratie. Kijk na of er niets vreemd is aan de gegevens van dit lid, zoals een adres zonder huisnummer, foutieve postcode, rare straat en huisnummer volgorde, postcode of gemeente ingevuld bij straatnaam, onjuiste schrijfwijze straat, ... en probeer opnieuw. Foutmelding groepsadministratie: ' +
-                            JSON.stringify(data.data),
+                        human: $t(
+                            'Foutmelding van de groepsadministratie. Kijk na of er niets vreemd is aan de gegevens van dit lid, zoals een adres zonder huisnummer, foutieve postcode, rare straat en huisnummer volgorde, postcode of gemeente ingevuld bij straatnaam, onjuiste schrijfwijze straat, ... en probeer opnieuw. Foutmelding groepsadministratie: {message}',
+                            { message: JSON.stringify(data.data) },
+                        ),
                     }),
                 );
             } catch (e) {
@@ -92,7 +93,9 @@ export class SGVFoutenDecoder implements Decoder<SimpleErrors> {
                     new SimpleError({
                         code: 'unknown_SGVError',
                         message: data.data + '',
-                        human: 'Foutmelding van de groepsadministratie. Kijk na of er niets vreemd is aan de gegevens van dit lid, zoals een adres zonder huisnummer, foutieve postcode, rare straat en huisnummer volgorde, postcode of gemeente ingevuld bij straatnaam, onjuiste schrijfwijze straat, ... en probeer opnieuw.',
+                        human: $t(
+                            'Foutmelding van de groepsadministratie. Kijk na of er niets vreemd is aan de gegevens van dit lid, zoals een adres zonder huisnummer, foutieve postcode, rare straat en huisnummer volgorde, postcode of gemeente ingevuld bij straatnaam, onjuiste schrijfwijze straat, ... en probeer opnieuw.',
+                        ),
                     }),
                 );
             }

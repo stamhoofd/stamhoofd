@@ -286,7 +286,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'too_many_items',
                 message: 'Too many items',
-                human: 'Je kan maximaal 1000 items tegelijkertijd bestellen',
+                human: $t('Je kan maximaal 1000 items tegelijkertijd bestellen'),
                 field: 'cart',
             });
         }
