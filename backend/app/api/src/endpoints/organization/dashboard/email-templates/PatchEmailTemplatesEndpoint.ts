@@ -47,7 +47,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
             }
         }
         const templates: EmailTemplate[] = [];
-        const platform = await Platform.getShared()
+        const platform = await Platform.getShared();
 
         // Get all patches
         for (const patch of request.body.getPatches()) {
