@@ -31,7 +31,7 @@ describe('MembersPdfDocument', () => {
         const document = new MembersPdfDocument([], sheet, sheet, 'Leden', 'Startavond 2025 - Leden', null);
         await document.download();
 
-        expect(downloadedName).toBe('startavond-2025-leden.pdf');
+        expect(downloadedName).toBe('Startavond 2025 - Leden.pdf');
 
         expect(downloaded).toBeInstanceOf(Blob);
         const bytes = new Uint8Array(await (downloaded as unknown as Blob).arrayBuffer());

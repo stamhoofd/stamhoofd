@@ -624,8 +624,8 @@ export class RegistrationActionBuilder {
             fetchLimitSettings: { limit: 500, createErrorMessage: (count, limit) => {
                 return $t('%17W', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
-            handler: async (registrations: PlatformRegistration[]) => {
-                await this.exportToPdf(registrations.map(r => r.member));
+            handler: async (registrations: PlatformRegistration[], _wereItemsFetched, selection) => {
+                await this.exportToPdf(registrations.map(r => r.member), this.getExportTitle(selection));
             },
         });
     }
@@ -886,7 +886,7 @@ export class RegistrationActionBuilder {
                         filter: selection.filter,
                         workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.groups, this.context.auth),
                         configurationId: 'registrations',
-                        title: this.getExportTitle(selection.markedRows && selection.markedRowsAreSelected && selection.markedRows.size === 1 ? [...selection.markedRows.values()][0].member.member.name : null),
+                        title: this.getExportTitle(selection),
                     }),
                 }),
             ],
@@ -894,7 +894,11 @@ export class RegistrationActionBuilder {
         });
     }
 
-    private getExportTitle(singleMemberName: string | null = null) {
+    /**
+     * Shared by the Excel and PDF export so both files get the same name.
+     */
+    private getExportTitle(selection: TableActionSelection<PlatformRegistration>) {
+        const singleMemberName = selection.markedRows.size === 1 && selection.markedRowsAreSelected ? [...selection.markedRows.values()][0].member.member.name : null;
         return getMembersExportTitle({
             organizations: this.organizations,
             platform: this.platform,
@@ -906,14 +910,14 @@ export class RegistrationActionBuilder {
         });
     }
 
-    private async exportToPdf(members: PlatformMember[]) {
+    private async exportToPdf(members: PlatformMember[], fileName: string) {
         await presentExportMembersToPdf({
             members,
             platform: this.platform,
             organizations: this.organizations,
             groups: this.groups,
             present: this.present,
-            fileName: this.getExportTitle(members.length === 1 ? members[0].member.name : null),
+            fileName,
         });
     }
 
