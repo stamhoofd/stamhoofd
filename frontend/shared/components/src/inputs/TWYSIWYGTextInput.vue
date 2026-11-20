@@ -20,7 +20,7 @@
         </div>
 
         <template #right>
-            <TInputButton v-model="value" />
+            <TInputButton v-model="value" @translate="translate" />
         </template>
     </STInputBox>
 </template>
@@ -33,6 +33,7 @@ import type { Language } from '@stamhoofd/types/Language';
 import { computed } from 'vue';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
 import { registerTranslateableComponent } from './hooks/useEditorContext';
+import { useTranslateRichText } from './hooks/useTranslateRichText';
 import STInputBox from './STInputBox.vue';
 import TInputButton from './TInputButton.vue';
 import WYSIWYGTextInput from './WYSIWYGTextInput.vue';
@@ -42,7 +43,7 @@ const value = defineModel<TranslatedRichText>({ required: true });
 const { hasLanguages } = useSwitchLanguage();
 registerTranslateableComponent(value);
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         title: string;
         placeholder?: string | TranslatedString;
@@ -57,6 +58,15 @@ withDefaults(
         editorClass: '',
     },
 );
+
+const translateToOtherLanguages = useTranslateRichText({ headingStartLevel: props.headingStartLevel });
+
+async function translate() {
+    const translated = await translateToOtherLanguages(value.value);
+    if (translated) {
+        value.value = translated;
+    }
+}
 
 const listedLanguages = computed(() => {
     if (!hasLanguages || value.value.isDefault) {

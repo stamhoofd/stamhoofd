@@ -153,7 +153,7 @@ import { Toast } from '../overlays/Toast';
 import ProgressRing from '../icons/ProgressRing.vue';
 import EmailLanguageButton from './EmailLanguageButton.vue';
 import { confirmStaleEmailContentLanguages, useEmailContentLanguage } from './hooks/useEmailContentLanguage';
-import { useEmailTranslator } from './hooks/useEmailTranslator';
+import { useTranslator } from '#hooks/useTranslator.ts';
 import { useReplacementsForLanguage } from './hooks/useReplacementsForLanguage';
 
 const props = withDefaults(defineProps<{
@@ -266,7 +266,7 @@ const contentLanguage = useEmailContentLanguage({
     editor: () => editor.value,
     patched: () => patchedEmail.value ?? Email.create({}),
     addPatch,
-    translate: useEmailTranslator(),
+    translate: useTranslator(),
 });
 
 // The example values are shown in the language that is being edited: the backend returns the
