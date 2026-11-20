@@ -106,11 +106,14 @@ function isUuid(key: string) {
  * Regexes matching a translation key usage in source files. The key is the first capture group.
  * - TypeScript / Vue: `$t('key')`, `$t("key")`, `$t(`key`)`, optionally followed by arguments
  * - Handlebars: `{{$t "key"}}`, `{{$t 'key'}}`
+ *
+ * The formatter wraps a call that exceeds the line width, putting the key on its own line, so
+ * whitespace between `$t(` and the key is part of the normal shape and not a style choice.
  */
 const keyUsageRegexes: RegExp[] = [
-    /\$t\('([^']+)'(,.+)?[),]/g,
-    /\$t\("([^"]+)"(,.+)?[),]/g,
-    /\$t\(`([^`]+)`(,.+)?[),]/g,
+    /\$t\(\s*'([^']+)'(,.+)?[),]/g,
+    /\$t\(\s*"([^"]+)"(,.+)?[),]/g,
+    /\$t\(\s*`([^`]+)`(,.+)?[),]/g,
     /\$t\s+'([^']+)'/g,
     /\$t\s+"([^"]+)"/g,
 ];
@@ -133,9 +136,9 @@ export function findTranslationKeyUsages(fileContent: string): Set<string> {
 function createKeyPatterns(key: string): { searchValue: RegExp; replaceValue: (newKey: string) => string }[] {
     const escapedKey = escapeRegExp(key);
     return [
-        { searchValue: createRegexPattern(`$t('${key}'`), replaceValue: newKey => `$t('${newKey}'` },
-        { searchValue: createRegexPattern(`$t("${key}"`), replaceValue: newKey => `$t("${newKey}"` },
-        { searchValue: createRegexPattern(`$t(\`${key}\``), replaceValue: newKey => `$t(\`${newKey}\`` },
+        { searchValue: new RegExp(`\\$t\\((\\s*)'${escapedKey}'`, 'g'), replaceValue: newKey => `$t($1'${newKey}'` },
+        { searchValue: new RegExp(`\\$t\\((\\s*)"${escapedKey}"`, 'g'), replaceValue: newKey => `$t($1"${newKey}"` },
+        { searchValue: new RegExp(`\\$t\\((\\s*)\`${escapedKey}\``, 'g'), replaceValue: newKey => `$t($1\`${newKey}\`` },
         { searchValue: new RegExp(`\\$t(\\s+)'${escapedKey}'`, 'g'), replaceValue: newKey => `$t$1'${newKey}'` },
         { searchValue: new RegExp(`\\$t(\\s+)"${escapedKey}"`, 'g'), replaceValue: newKey => `$t$1"${newKey}"` },
     ];
@@ -179,7 +182,7 @@ export async function findUnusedTranslationKeys(keys: Set<string>, files: string
     for (const key of keys) {
         maxKeyLength = Math.max(maxKeyLength, key.length);
     }
-    const keyStart = /\$t(?:\((['"`])|\s+(['"]))/g;
+    const keyStart = /\$t(?:\(\s*(['"`])|\s+(['"]))/g;
     let completed = 0;
     await reportProgress(onProgress, { phase: 'scan', completed, total: files.length });
     for (const file of files) {
@@ -206,8 +209,4 @@ export async function findUnusedTranslationKeys(keys: Set<string>, files: string
 
 function escapeRegExp(stringToGoIntoTheRegex: string): string {
     return stringToGoIntoTheRegex.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-}
-
-function createRegexPattern(stringToGoIntoTheRegex: string): RegExp {
-    return new RegExp(escapeRegExp(stringToGoIntoTheRegex), 'g');
 }
