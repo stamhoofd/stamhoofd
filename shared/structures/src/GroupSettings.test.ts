@@ -388,3 +388,26 @@ describe('GroupSettings.validateName', () => {
         expect(() => settings.validateName()).toThrow(SimpleError);
     });
 });
+
+describe('GroupSettings.throwIfInvalidOptionMenus', () => {
+    it('throws for an option menu without options', () => {
+        const settings = GroupSettings.create({
+            optionMenus: [
+                GroupOptionMenu.create({ name: 'Maat', options: [] }),
+            ],
+        });
+
+        expect(() => settings.throwIfInvalidOptionMenus()).toThrow(SimpleError);
+    });
+
+    it('accepts option menus with at least one option', () => {
+        const settings = GroupSettings.create({
+            optionMenus: [
+                GroupOptionMenu.create({ name: 'Maat', options: [GroupOption.create({ name: 'S' })] }),
+                GroupOptionMenu.create({ name: 'Extra', multipleChoice: true, options: [GroupOption.create({ name: 'Bus' })] }),
+            ],
+        });
+
+        expect(() => settings.throwIfInvalidOptionMenus()).not.toThrow();
+    });
+});

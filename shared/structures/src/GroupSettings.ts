@@ -274,6 +274,21 @@ export class GroupOptionMenu extends AutoEncoder {
 
         return this.options.filter((o) => !o.hidden)[0];
     }
+
+    /**
+     * A single choice menu without options blocks registrations, because a registration needs a selected option for every single choice menu.
+     */
+    throwIfEmpty() {
+        if (this.options.length === 0) {
+            throw new SimpleError({
+                code: 'empty_option_menu',
+                message: 'Option menu has no options',
+                human: this.name
+                    ? $t('Het keuzemenu “{name}” heeft geen keuzes. Voeg minstens één keuze toe of verwijder het keuzemenu.', { name: this.name })
+                    : $t('Een keuzemenu heeft geen keuzes. Voeg minstens één keuze toe of verwijder het keuzemenu.'),
+            });
+        }
+    }
 }
 
 export enum WaitingListType {
@@ -1122,6 +1137,12 @@ export class GroupSettings extends AutoEncoder {
         }
 
         this.name = TranslatedString.create(name);
+    }
+
+    throwIfInvalidOptionMenus() {
+        for (const menu of this.optionMenus) {
+            menu.throwIfEmpty();
+        }
     }
 
     throwIfInvalidPrices() {
