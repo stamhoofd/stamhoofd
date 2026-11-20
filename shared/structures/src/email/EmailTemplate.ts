@@ -560,7 +560,14 @@ export class EmailTemplate extends AutoEncoder {
         }
     }
 
-    static allowPlatformLevel(type: EmailTemplateType): boolean {
+    static allowPlatformLevel(
+        type: EmailTemplateType,
+        platform: {
+            config: {
+                featureFlags: string[];
+            };
+        },
+    ): boolean {
         if (STAMHOOFD.userMode === 'platform') {
             if (type.includes('Drip') || type.includes('Expiration')) {
                 return false;
@@ -571,6 +578,12 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.ChargebackPayingOrganization:
             case EmailTemplateType.AutomaticChargeFailedPayingOrganization:
                 return STAMHOOFD.userMode === 'organization';
+            case EmailTemplateType.EventNotificationAccepted:
+            case EmailTemplateType.EventNotificationPartiallyAccepted:
+            case EmailTemplateType.EventNotificationRejected:
+            case EmailTemplateType.EventNotificationSubmittedCopy:
+            case EmailTemplateType.EventNotificationSubmittedReviewer:
+                return platform.config.featureFlags?.includes('event-notifications') ?? false;
         }
 
         return true;

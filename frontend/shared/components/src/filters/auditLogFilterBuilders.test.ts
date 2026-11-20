@@ -1,4 +1,4 @@
-import { AuditLogType } from '@stamhoofd/structures';
+import { AuditLogType, Platform } from '@stamhoofd/structures';
 import type { AuditLogTypeContext } from '#audit-logs/auditLogTypeCategories.ts';
 import { AuditLogTypeCategory, auditLogTypeOrder, getAuditLogTypeCategory, getAuditLogTypeCategoryName } from '#audit-logs/auditLogTypeCategories.ts';
 import { describe, expect, test } from 'vitest';
@@ -6,7 +6,10 @@ import { getAuditLogUIFilterBuilders } from './filterBuilders';
 import { GroupUIFilterBuilder, GroupUIFilterMode } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder } from './MultipleChoiceUIFilter';
 
-const platformAdmin: AuditLogTypeContext = { isPlatform: true, isOrganizationLog: false };
+const platformWithEventNotifications = Platform.create({});
+const platformWithoutEventNotifications = Platform.create({});
+platformWithEventNotifications.config.featureFlags.push('event-notifications');
+const platformAdmin: AuditLogTypeContext = { isPlatform: true, isOrganizationLog: false, platform: platformWithEventNotifications };
 
 function getBuilders(options: AuditLogTypeContext = platformAdmin, packages = { members: true, webshops: true }) {
     const [root, ...categoryBuilders] = getAuditLogUIFilterBuilders({ ...options, packages });
@@ -69,7 +72,7 @@ describe('audit log type filters', () => {
             };
         };
 
-        const platformOrganization = typesOf({ isPlatform: true, isOrganizationLog: true });
+        const platformOrganization = typesOf({ isPlatform: true, isOrganizationLog: true, platform: platformWithEventNotifications });
         expect(platformOrganization.types.has(AuditLogType.MemberPlatformMembershipAdded)).toBe(true);
         expect(platformOrganization.types.has(AuditLogType.EventNotificationAdded)).toBe(true);
         expect(platformOrganization.types.has(AuditLogType.OrganizationEdited)).toBe(true);
@@ -166,5 +169,24 @@ describe('audit log type filters', () => {
         expect(membersOnly.categories).toContain(name(AuditLogTypeCategory.Members));
         expect(membersOnly.types.has(AuditLogType.RegistrationPeriodAdded)).toBe(true);
         expect(membersOnly.types.has(AuditLogType.MemberSecurityCodeUsed)).toBe(true);
+    });
+
+    test('On platform-mode with event-notifications disabled it hides the filters and shows the correct name', async () => {
+        const typesOf = (options: AuditLogTypeContext) => {
+            const { categoryBuilders } = getBuilders(options);
+            expect(categoryBuilders.every(b => b.multipleChoiceOptions.length > 0)).toBe(true);
+            return {
+                categories: categoryBuilders.map(b => b.name),
+                types: new Set(categoryBuilders.flatMap(b => b.multipleChoiceOptions.map(o => o.value))),
+            };
+        };
+
+        const options = { isPlatform: true, isOrganizationLog: true, platform: platformWithoutEventNotifications };
+        const platformOrganization = typesOf(options);
+        expect(platformOrganization.types.has(AuditLogType.EventNotificationAdded)).toBe(false);
+        expect(platformOrganization.types.has(AuditLogType.EventNotificationDeleted)).toBe(false);
+        expect(platformOrganization.types.has(AuditLogType.EventNotificationEdited)).toBe(false);
+
+        expect(getAuditLogTypeCategoryName(AuditLogTypeCategory.Events, options)).toBe('Activiteiten');
     });
 });
