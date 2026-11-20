@@ -142,6 +142,18 @@
                 </p>
             </STListItem>
 
+            <STListItem v-if="canEnableDataRetention" :selectable="true" element-name="label" data-testid="data-retention-feature-checkbox">
+                <template #left>
+                    <Checkbox :model-value="getFeatureFlag('data-retention')" @update:model-value="setFeatureFlag('data-retention', !!$event)" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Bewaartermijnen') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Stel in hoe lang gegevens bewaard blijven voor ze automatisch geanonimiseerd of verwijderd worden. Voorlopig wordt er nog niets geanonimiseerd of verwijderd.') }}
+                </p>
+            </STListItem>
+
             <STListItem v-if="!$isPlatform" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="disableCalendar" />
@@ -363,7 +375,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { useTwoFactorEnabled } from '@stamhoofd/components/hooks/useTwoFactorEnabled.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
-import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
+import { DATA_RETENTION_FEATURE_FLAG, Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, ref, shallowRef } from 'vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
@@ -434,6 +446,9 @@ async function openApiUsers(animated = true) {
         animated,
     });
 }
+
+// Within a platform, the platform flag enables it for every organization
+const canEnableDataRetention = computed(() => STAMHOOFD.userMode === 'organization' && platform.value.config.featureFlags.includes(DATA_RETENTION_FEATURE_FLAG));
 
 function getFeatureFlag(flag: string) {
     return organization.value.privateMeta?.featureFlags.includes(flag) ?? false;

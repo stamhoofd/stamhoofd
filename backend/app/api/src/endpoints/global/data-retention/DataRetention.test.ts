@@ -78,9 +78,19 @@ async function fresh(user: User) {
     return await SessionService.createSession(user, { authenticatedAt: new Date() });
 }
 
-async function initOrganization() {
+async function setPlatformFlag(enabled: boolean) {
+    const platform = await Platform.getForEditing();
+    platform.config.featureFlags = enabled ? ['data-retention'] : [];
+    await platform.save();
+}
+
+/**
+ * With the flag on the platform and on the organization, so it is available in both user modes.
+ */
+async function initOrganization({ organizationFlag = true }: { organizationFlag?: boolean } = {}) {
+    await setPlatformFlag(true);
     const organization = await new OrganizationFactory({}).create();
-    organization.privateMeta.featureFlags = ['data-retention'];
+    organization.privateMeta.featureFlags = organizationFlag ? ['data-retention'] : [];
     await organization.save();
     const admin = await new UserFactory({
         organization,
@@ -129,14 +139,34 @@ describe('Endpoint.DataRetention', () => {
     });
 
     describe('Access', () => {
-        test('It is not available without the feature flag', async () => {
-            const { organization, token, host } = await initOrganization();
-            organization.privateMeta.featureFlags = [];
-            await organization.save();
+        test('An organization cannot turn it on without the platform', async () => {
+            const { token, host } = await initOrganization();
+            await setPlatformFlag(false);
 
             await expect(send(getEndpoint, 'GET', '/data-retention', host, token)).rejects.toThrow(
                 STExpect.simpleError({ code: 'not_available' }),
             );
+        });
+
+        test('Within a platform, the flag of the platform turns it on for every organization', async () => {
+            const { token, host } = await initOrganization({ organizationFlag: false });
+
+            await expect(
+                send(getEndpoint, 'GET', '/data-retention', host, token),
+            ).resolves.toBeDefined();
+        });
+
+        test('In userMode organization, an organization also has to turn it on itself', async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+            const withoutFlag = await initOrganization({ organizationFlag: false });
+            await expect(
+                send(getEndpoint, 'GET', '/data-retention', withoutFlag.host, withoutFlag.token),
+            ).rejects.toThrow(STExpect.simpleError({ code: 'not_available' }));
+
+            const withFlag = await initOrganization();
+            await expect(
+                send(getEndpoint, 'GET', '/data-retention', withFlag.host, withFlag.token),
+            ).resolves.toBeDefined();
         });
 
         test('An administrator without full access cannot view or change terms', async () => {

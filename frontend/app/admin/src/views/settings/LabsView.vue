@@ -131,6 +131,10 @@
             {{ $t('%Zui') }}
         </Checkbox>
 
+        <Checkbox :model-value="getFeatureFlag('data-retention')" @update:model-value="setFeatureFlag('data-retention', !!$event)">
+            {{ $t('Bewaartermijnen') }}
+        </Checkbox>
+
         <Checkbox v-model="onlyAdminCanChangeOrganizationName">
             {{ $t('%Zyq') }}
         </Checkbox>

@@ -1,6 +1,6 @@
 import { SimpleError } from '@common/errors';
 import type { Organization, User } from '@stamhoofd/models';
-import { DataRetentionPolicy, DataRetentionRun } from '@stamhoofd/models';
+import { DataRetentionPolicy, DataRetentionRun, Platform } from '@stamhoofd/models';
 import { SQLWhereSign } from '@stamhoofd/sql';
 import type { DataRetentionCategory } from '@stamhoofd/structures';
 import {
@@ -9,6 +9,7 @@ import {
     DataRetentionSettings,
     DataRetentionTerms,
     getDataRetentionCategories,
+    isDataRetentionEnabled,
     isEarlierDataRetentionDeletion,
     resolveDataRetentionTerms,
 } from '@stamhoofd/structures';
@@ -41,7 +42,13 @@ export class DataRetentionPolicyService {
             });
         }
 
-        if (!(await Context.checkFeatureFlag('data-retention'))) {
+        const platform = await Platform.getSharedStruct();
+        if (
+            !isDataRetentionEnabled({
+                platformFeatureFlags: platform.config.featureFlags,
+                organizationFeatureFlags: organization?.privateMeta.featureFlags ?? null,
+            })
+        ) {
             throw new SimpleError({
                 code: 'not_available',
                 message: 'Data retention is not enabled',

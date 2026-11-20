@@ -77,6 +77,7 @@ export * from './Permissions.js';
 export * from './PermissionsByRole.js';
 export * from './PermissionsResourceType.js';
 export * from './DataRetention.js';
+export * from './DataRetentionFeature.js';
 export * from './Platform.js';
 export * from './PlatformServerConfig.js';
 export * from './Policy.js';
