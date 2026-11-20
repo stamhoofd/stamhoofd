@@ -319,7 +319,7 @@ onMounted(() => {
     if (props.isCopy) {
         addPatch(PrivateWebshop.patch({
             meta: WebshopMetaData.patch({
-                name: `${originalWebshop.meta.name} (kopie)`,
+                name: $t('{name} (kopie)', { name: originalWebshop.meta.name }),
             }),
         }));
     }
@@ -764,7 +764,7 @@ function setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false
         arr.addPut(method);
     } else {
         if (!force && config.value.paymentMethods.length == 1) {
-            new Toast('Je moet minimaal één betaalmethode accepteren', 'error red').show();
+            new Toast($t('Je moet minimaal één betaalmethode accepteren'), 'error red').show();
             return;
         }
 

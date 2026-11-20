@@ -107,7 +107,7 @@ async function save() {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'maxPersons',
-                message: "Je hebt geen enkel artikel in jouw webshop met type 'Personen'. Het maximum aantal voor personen werkt dan niet. Voeg eerst een product toe aan je webshop met type 'Personen'.",
+                message: $t("Je hebt geen enkel artikel in jouw webshop met type 'Personen'. Het maximum aantal voor personen werkt dan niet. Voeg eerst een product toe aan je webshop met type 'Personen'."),
             });
         }
     } catch (e) {
@@ -123,7 +123,7 @@ async function save() {
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
         title: $t('%ZnD'),
-        confirmText: 'Verwijderen',
+        confirmText: $t('Verwijderen'),
         description: $t('%ZnJ'),
         availabilityDelay: 2_000,
     })) {
@@ -139,7 +139,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
 }
 
 defineExpose({

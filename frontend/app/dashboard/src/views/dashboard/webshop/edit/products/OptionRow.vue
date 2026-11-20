@@ -66,7 +66,7 @@ function moveDown() {
 async function doDelete() {
     if (!(await CenteredMessage.confirm({
         title: props.option.name ? $t('%Zn2', { name: props.option.name }) : $t('Deze keuze verwijderen?'),
-        confirmText: 'Verwijderen',
+        confirmText: $t('Verwijderen'),
         description: $t('%6E'),
         availabilityDelay: 2_000,
     }))) {
@@ -81,7 +81,7 @@ function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Verplaats omhoog',
+                name: $t('Verplaats omhoog'),
                 icon: 'arrow-up',
                 action: () => {
                     moveUp();
@@ -89,7 +89,7 @@ function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Verplaats omlaag',
+                name: $t('Verplaats omlaag'),
                 icon: 'arrow-down',
                 action: () => {
                     moveDown();
@@ -99,7 +99,7 @@ function showContextMenu(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: 'Verwijderen',
+                name: $t('Verwijderen'),
                 destructive: true,
                 icon: 'trash',
                 disabled: props.optionMenu.options.length <= 1,

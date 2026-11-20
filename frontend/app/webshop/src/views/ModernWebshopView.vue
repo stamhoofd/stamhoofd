@@ -176,7 +176,7 @@ async function openCheckout(animated = true, reload = false) {
         if (!nextStep) {
             throw new SimpleError({
                 code: 'missing_config',
-                message: 'Er ging iets mis bij het ophalen van de volgende stap',
+                message: $t('Er ging iets mis bij het ophalen van de volgende stap'),
             });
         }
 

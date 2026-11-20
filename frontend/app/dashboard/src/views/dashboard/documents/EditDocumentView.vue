@@ -70,7 +70,7 @@ function markReviewed() {
     }
 }
 
-const title = props.isNew ? 'Nieuw document' : 'Document bewerken';
+const title = props.isNew ? $t('Nieuw document') : $t('Document bewerken');
 const description = computed({
     get: () => patchedDocument.value.data.description,
     set: (value) => {
@@ -95,7 +95,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
 }
 
 async function validate() {

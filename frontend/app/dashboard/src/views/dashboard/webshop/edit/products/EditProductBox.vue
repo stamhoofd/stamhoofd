@@ -926,9 +926,9 @@ const newImage = computed({
 
 function addOptionMenu() {
     const optionMenu = OptionMenu.create({
-        name: 'Naamloos',
+        name: $t('Naamloos'),
     });
-    optionMenu.options[0].name = 'Naamloos';
+    optionMenu.options[0].name = $t('Naamloos');
 
     const p = Product.patch({ id: props.product.id });
     p.optionMenus.addPut(optionMenu);
@@ -995,7 +995,7 @@ async function addProductPrice(enableUitpasSocialTariff: boolean = false) {
         }
         const onFixed = async (navigationActions?: NavigationActions) => {
             price.uitpasBaseProductPriceId = productPricesAvailableForUitpasBaseProductPrice.value[0].id;
-            price.name = 'UiTPAS kansentarief';
+            price.name = $t('UiTPAS kansentarief');
             const p = Product.patch({ id: props.product.id });
             p.prices.addPut(price);
             if (navigationActions) {

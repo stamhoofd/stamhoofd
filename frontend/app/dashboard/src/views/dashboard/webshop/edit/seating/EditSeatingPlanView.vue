@@ -147,7 +147,7 @@ const { patch: patchWebshop, addPatch: addWebshopPatch, hasChanges: hasWebshopCh
 const { patch: patchSeatingPlan, patched: patchedSeatingPlan, addPatch, hasChanges: hasSeatingPlanChanges } = usePatch(props.seatingPlan);
 const hasChanges = computed(() => hasWebshopChanges.value || hasSeatingPlanChanges.value);
 
-const title = props.isNew ? 'Nieuwe zaalplan maken' : 'Zaalplan aanpassen';
+const title = props.isNew ? $t('Nieuwe zaalplan maken') : $t('Zaalplan aanpassen');
 
 const name = computed({
     get: () => patchedSeatingPlan.value.name,
@@ -175,7 +175,7 @@ async function save() {
         errors.errorBox = new ErrorBox(
             new SimpleError({
                 code: 'invalid_field',
-                message: 'De naam van de zaal moet minstens 2 karakters lang zijn',
+                message: $t('De naam van de zaal moet minstens 2 karakters lang zijn'),
                 field: 'name',
             }),
         );
@@ -189,7 +189,7 @@ async function save() {
                 errors.errorBox = new ErrorBox(
                     new SimpleError({
                         code: 'invalid_field',
-                        message: 'De naam van een zone mag niet leeg zijn',
+                        message: $t('De naam van een zone mag niet leeg zijn'),
                         field: 'sections[' + section.id + '].name',
                     }),
                 );
@@ -199,7 +199,7 @@ async function save() {
                 errors.errorBox = new ErrorBox(
                     new SimpleError({
                         code: 'invalid_field',
-                        message: 'De naam van een zone moet uniek zijn',
+                        message: $t('De naam van een zone moet uniek zijn'),
                         field: 'sections[' + section.id + '].name',
                     }),
                 );
@@ -239,7 +239,7 @@ function addSection() {
 async function deleteSection(section: SeatingPlanSection) {
     if (!(await CenteredMessage.confirm({
         title: section.name ? $t('%Zn2', { name: section.name }) : $t('Deze zone verwijderen?'),
-        confirmText: 'Verwijderen',
+        confirmText: $t('Verwijderen'),
         description: $t('%Zn7'),
         availabilityDelay: 2_000,
     }))) {
@@ -255,7 +255,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
 }
 
 const downloadingSettings = ref(false);
@@ -283,7 +283,7 @@ async function downloadSettings() {
         await AppManager.shared.downloadFile(zipBlob, Formatter.fileSlug(patchedSeatingPlan.value.name) + '.plan');
     } catch (e) {
         console.error(e);
-        new Toast('Er is iets misgelopen bij het downloaden van het zaalplan. Probeer om alles eerst op te slaan en daarna de pagina te herladen. Als het probleem zich blijft voordoen, neem dan contact met ons op.', 'error red');
+        new Toast($t('Er is iets misgelopen bij het downloaden van het zaalplan. Probeer om alles eerst op te slaan en daarna de pagina te herladen. Als het probleem zich blijft voordoen, neem dan contact met ons op.'), 'error red');
     } finally {
         downloadingSettings.value = false;
     }
@@ -297,7 +297,7 @@ function addCategory() {
     }
     const category = SeatingPlanCategory.create({
         id: id.toString(),
-        name: 'Naamloos',
+        name: $t('Naamloos'),
     });
     const patch = SeatingPlan.patch({});
     patch.categories.addPut(category);

@@ -49,7 +49,7 @@ const props = withDefaults(defineProps<{
 });
 
 const pop = usePop();
-const title = 'Selecteer een artikel';
+const title = $t('Selecteer een artikel');
 
 const categories = computed(() => {
     const categories = props.webshop.categories.filter(c => getCategoryProducts(c).length > 0) ?? [];

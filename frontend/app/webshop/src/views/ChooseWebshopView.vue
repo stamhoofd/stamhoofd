@@ -74,7 +74,7 @@ useMetaInfo({
         {
             id: 'description',
             name: 'description',
-            content: 'Kies een webshop om door te gaan',
+            content: $t('Kies een webshop om door te gaan'),
         },
         {
             id: 'og:site_name',

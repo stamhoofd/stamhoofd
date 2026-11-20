@@ -163,7 +163,7 @@ async function createGroupedChart(range: DateOption, dataGenerator: (callback: (
         groupingLabel = (date: Date) => {
             const lux = Formatter.luxon(date);
             const start = lux.startOf('week');
-            return 'Week van ' + Formatter.date(start.toJSDate(), true);
+            return $t('Week van {date}', { date: Formatter.date(start.toJSDate(), true) });
         };
         groupingInterval = { days: 7 };
 
@@ -222,7 +222,7 @@ async function createGroupedChart(range: DateOption, dataGenerator: (callback: (
         labels: data.map(d => groupingLabel(d.date)),
         data: [
             GraphData.create({
-                label: 'Omzet',
+                label: $t('Omzet'),
                 values: data.map(d => d.total),
             }),
         ],
@@ -301,14 +301,14 @@ async function loadScanGraph(range: DateOption, filterVouchers: boolean): Promis
 }
 
 const revenueGraph: Ref<GraphViewConfiguration> = ref(new GraphViewConfiguration({
-    title: 'Omzet',
+    title: $t('Omzet'),
     load: range => loadOrderGraph(range, 'revenue'),
     formatter: (value: number) => Formatter.price(value),
     sum: true,
 }));
 
 const countGraph: Ref<GraphViewConfiguration> = ref(new GraphViewConfiguration({
-    title: 'Aantal bestellingen',
+    title: $t('Aantal bestellingen'),
     load: range => loadOrderGraph(range, 'count'),
     formatter: (value: number) => value.toString(),
     sum: true,
@@ -325,7 +325,7 @@ function buildTicketDateRangeOptions() {
     const options: DateOption[] = [];
     // Fill options here
     if (firstScannedTicketDate.value && lastScannedTicketDate.value) {
-        options.push(new DateOption('Altijd', {
+        options.push(new DateOption($t('Altijd'), {
             start: Formatter.luxon(firstScannedTicketDate.value).startOf('minute').toJSDate(),
             end: Formatter.luxon(lastScannedTicketDate.value).endOf('minute').toJSDate(),
         }));
@@ -340,7 +340,7 @@ function buildDateRangeOptions() {
 
     // Fill options here
     if (firstOrderDate.value && lastOrderDate.value) {
-        options.push(new DateOption('Altijd', {
+        options.push(new DateOption($t('Altijd'), {
             start: Formatter.luxon(firstOrderDate.value).startOf('day').toJSDate(),
             end: Formatter.luxon(lastOrderDate.value).endOf('day').toJSDate(),
         }));
@@ -349,22 +349,22 @@ function buildDateRangeOptions() {
     // Fill options here
     const year = new Date(reference);
     year.setFullYear(reference.getFullYear() - 1);
-    options.push(new DateOption('Afgelopen jaar', { start: year, end: reference }));
+    options.push(new DateOption($t('Afgelopen jaar'), { start: year, end: reference }));
 
     // Fill options here
     const months3 = new Date(reference);
     months3.setMonth(reference.getMonth() - 3);
-    options.push(new DateOption('Afgelopen 3 maanden', { start: months3, end: reference }));
+    options.push(new DateOption($t('Afgelopen 3 maanden'), { start: months3, end: reference }));
 
     // Fill options here
     const months6 = new Date(reference);
     months6.setMonth(reference.getMonth() - 6);
-    options.push(new DateOption('Afgelopen 6 maanden', { start: months6, end: reference }));
+    options.push(new DateOption($t('Afgelopen 6 maanden'), { start: months6, end: reference }));
 
     // Fill options here
     const month = new Date(reference);
     month.setMonth(reference.getMonth() - 1);
-    options.push(new DateOption('Afgelopen maand', { start: month, end: reference }));
+    options.push(new DateOption($t('Afgelopen maand'), { start: month, end: reference }));
 
     return options;
 }
@@ -407,7 +407,7 @@ const totalByCategory = computed(() => {
 
     const other = {
         id: 'other',
-        name: 'Overige',
+        name: $t('Overige'),
         products: [] as { amount: number; name: string; description: string; price: number; category: Category | null }[],
     };
 
@@ -563,7 +563,7 @@ async function reload() {
             const group: GraphViewConfiguration[] = [];
             if (totalScannedTickets.value > 0) {
                 group.push(new GraphViewConfiguration({
-                    title: 'Gescande tickets',
+                    title: $t('Gescande tickets'),
                     options: buildTicketDateRangeOptions(),
                     formatter: (value: number) => value.toString(),
                     sum: true,
@@ -573,7 +573,7 @@ async function reload() {
 
             if (totalScannedVouchers.value > 0) {
                 group.push(new GraphViewConfiguration({
-                    title: 'Gescande vouchers',
+                    title: $t('Gescande vouchers'),
                     options: buildTicketDateRangeOptions(),
                     formatter: (value: number) => value.toString(),
                     sum: true,

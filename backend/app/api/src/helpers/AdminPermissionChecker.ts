@@ -2866,8 +2866,9 @@ export class AdminPermissionChecker {
                 } else {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message:
+                        message: $t(
                             'Je hebt geen toegangsrechten om de financiële status van dit lid aan te passen',
+                        ),
                         statusCode: 400,
                     });
                 }
@@ -2877,8 +2878,9 @@ export class AdminPermissionChecker {
                 if (data.details.uitpasNumberDetails) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message:
+                        message: $t(
                             'Je hebt geen toegangsrechten om het UiTPAS-nummer van dit lid aan te passen',
+                        ),
                         statusCode: 400,
                     });
                 }
@@ -2887,8 +2889,9 @@ export class AdminPermissionChecker {
             if (data.outstandingBalance) {
                 throw new SimpleError({
                     code: 'permission_denied',
-                    message:
+                    message: $t(
                         'Je hebt geen toegangsrechten om het openstaande saldo van dit lid aan te passen',
+                    ),
                     statusCode: 400,
                 });
             }
@@ -2897,8 +2900,9 @@ export class AdminPermissionChecker {
                 if (registration.price) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message:
+                        message: $t(
                             'Je hebt geen toegangsrechten om de prijs van een inschrijving te bepalen',
+                        ),
                         statusCode: 400,
                     });
                 }
@@ -2906,8 +2910,9 @@ export class AdminPermissionChecker {
                 if (registration.pricePaid) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message:
+                        message: $t(
                             'Je hebt geen toegangsrechten om het betaalde bedrag van een inschrijving te bepalen',
+                        ),
                         statusCode: 400,
                     });
                 }
@@ -2918,8 +2923,9 @@ export class AdminPermissionChecker {
             if (data.details.nationalRegisterNumber) {
                 throw new SimpleError({
                     code: 'permission_denied',
-                    message:
+                    message: $t(
                         'Je hebt geen toegangsrechten om het rijksregisternummer van dit lid aan te passen',
+                    ),
                     statusCode: 400,
                 });
             }
@@ -2928,8 +2934,9 @@ export class AdminPermissionChecker {
                 if (parent.nationalRegisterNumber) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message:
+                        message: $t(
                             'Je hebt geen toegangsrechten om het rijksregisternummer van een ouder aan te passen',
+                        ),
                         statusCode: 400,
                     });
                 }

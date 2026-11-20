@@ -58,7 +58,7 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
             if (!(await Context.auth.canAccessUser(editUser, PermissionLevel.Full))) {
                 throw new SimpleError({
                     code: 'permission_denied',
-                    message: 'Je hebt geen rechten om de rechten van deze API-user te wijzigen',
+                    message: $t('Je hebt geen rechten om de rechten van deze API-user te wijzigen'),
                 });
             }
 
@@ -83,7 +83,7 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
                     ) {
                         throw new SimpleError({
                             code: 'permission_denied',
-                            message: 'Je kan jezelf niet verwijderen als hoofdbeheerder',
+                            message: $t('Je kan jezelf niet verwijderen als hoofdbeheerder'),
                         });
                     }
                 } else {
@@ -103,7 +103,7 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
                     ) {
                         throw new SimpleError({
                             code: 'permission_denied',
-                            message: 'Je kan jezelf niet verwijderen als hoofdbeheerder',
+                            message: $t('Je kan jezelf niet verwijderen als hoofdbeheerder'),
                         });
                     }
                 }

@@ -131,7 +131,7 @@ export class SGVSyncReport {
                         continue;
                     }
 
-                    const code: string = functie.omschrijving || functie.code || 'Onbekende functie';
+                    const code: string = functie.omschrijving || functie.code || $t('Onbekende functie');
                     if (counts.has(code)) {
                         counts.set(code, counts.get(code)! + 1);
                     } else {
@@ -161,7 +161,7 @@ export class SGVSyncReport {
                         const functieId = functie.functie;
                         const f = getDefaultGroepFuncties().find(f => f.id === functieId);
                         if (f) {
-                            const code = f?.beschrijving || f?.code || 'Onbekende functie';
+                            const code = f?.beschrijving || f?.code || $t('Onbekende functie');
 
                             if (counts.has(code)) {
                                 counts.set(code, counts.get(code)! + 1);
@@ -263,7 +263,7 @@ export function getPatch(member: MemberWithRegistrationsBlob, lid: {
 
     for (const [index, parent] of details.parents.entries()) {
         if (!parent.address) {
-            throw new Error('Er ontbreekt een adres bij één van de ouders');
+            throw new Error($t('Er ontbreekt een adres bij één van de ouders'));
         }
         if (parent.address && !addressMap.has(parent.address.toString().toLowerCase())) {
             const a = createOrUpdateAddress(parent.address, lid.adressen, index + 1, lid.contacten ?? []);
@@ -325,7 +325,7 @@ export function getPatch(member: MemberWithRegistrationsBlob, lid: {
     }
 
     if (!details.birthDay) {
-        throw new Error('Een geboortedatum is noodzakelijk voor de groepsadministratie');
+        throw new Error($t('Een geboortedatum is noodzakelijk voor de groepsadministratie'));
     }
 
     const managedFuncties = getManagedFuncties(groepFuncties, true);
@@ -377,7 +377,7 @@ export function getPatch(member: MemberWithRegistrationsBlob, lid: {
             ...lidFunctie,
             einde: new Date().toISOString(),
         });
-        report?.addInfo(details.name + ': functie verwijderd ' + managedFunctie.beschrijving);
+        report?.addInfo($t('{member}: functie verwijderd {functie}', { member: details.name, functie: managedFunctie.beschrijving }));
     }
 
     if (!functieAlreadyPresent && lidManagedFunctie) {
@@ -387,7 +387,7 @@ export function getPatch(member: MemberWithRegistrationsBlob, lid: {
             functie: lidManagedFunctie.id,
             begin: new Date().toISOString(),
         });
-        report?.addInfo(details.name + ': functie toegekend ' + lidManagedFunctie.beschrijving);
+        report?.addInfo($t('{member}: functie toegekend {functie}', { member: details.name, functie: lidManagedFunctie.beschrijving }));
     }
 
     if (!stamhoofdFunctieAlreadyPresent && stamhoofdFunctie) {
@@ -402,7 +402,7 @@ export function getPatch(member: MemberWithRegistrationsBlob, lid: {
     if (!lidManagedFunctie) {
         if (!stamhoofdFunctie && !lid.persoonsgegevens) {
             // Dit is een nieuw lid zonder functies
-            throw new Error('We kunnen geen lid toevoegen zonder functie. Stamhoofd kan niet weten welke functies dit lid moet krijgen. Lees de documentatie na.');
+            throw new Error($t('We kunnen geen lid toevoegen zonder functie. Stamhoofd kan niet weten welke functies dit lid moet krijgen. Lees de documentatie na.'));
         }
         // in groepsadmin, én in Stamhoofd, maar heeft geen functies
         report?.markUnmanaged(member, lid);
@@ -562,7 +562,7 @@ export function getGroepCodeMapping(groepFuncties: GroepFunctie[]): Map<string, 
         }
 
         if (!ids.has(code)) {
-            throw new Error('Er ging iets fout. We konden geen functie in de groepsadministratie vinden voor ' + code);
+            throw new Error($t('Er ging iets fout. We konden geen functie in de groepsadministratie vinden voor {code}', { code }));
         }
     }
 
@@ -651,7 +651,7 @@ export function getFunctie(details: MemberDetails, memberGroups: Group[], groepF
 
     const age = details.trackedAgeForYear(year);
     if (!age) {
-        throw new Error('Dit lid heeft geen geboortedatum ingesteld. Vul dit eerst aan.');
+        throw new Error($t('Dit lid heeft geen geboortedatum ingesteld. Vul dit eerst aan.'));
     }
 
     for (const map of ageMapping) {

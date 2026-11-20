@@ -125,7 +125,7 @@ async function validate() {
     if (!product.value) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_field',
-            message: 'Kies een artikel',
+            message: $t('Kies een artikel'),
             field: 'productId',
         }));
         return false;

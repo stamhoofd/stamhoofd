@@ -298,14 +298,14 @@ const editingType = computed({
                 loadHtml(value).catch((e) => {
                     console.error(e);
 
-                    new Toast('Er ging iets mis bij het laden van dit document type. Controleer jouw internetverbinding en probeer de pagina opnieuw te laden.', 'error red').setHide(null).show();
+                    new Toast($t('Er ging iets mis bij het laden van dit document type. Controleer jouw internetverbinding en probeer de pagina opnieuw te laden.'), 'error red').setHide(null).show();
                 });
 
                 if (definition.xmlExportDescription) {
                     loadXML(value).catch((e) => {
                         console.error(e);
 
-                        new Toast('Er ging iets mis bij het laden van dit document type. Controleer jouw internetverbinding en probeer de pagina opnieuw te laden.', 'error red').setHide(null).show();
+                        new Toast($t('Er ging iets mis bij het laden van dit document type. Controleer jouw internetverbinding en probeer de pagina opnieuw te laden.'), 'error red').setHide(null).show();
                     });
                 }
             }
@@ -505,13 +505,13 @@ function getLinkedFieldsChoices(field: RecordSettings) {
     if (field.type === RecordType.Price) {
         choices.push({
             value: 'registration.price',
-            label: 'Te betalen bedrag',
-            categories: ['Inschrijving'],
+            label: $t('Te betalen bedrag'),
+            categories: [$t('Inschrijving')],
         });
         choices.push({
             value: 'registration.pricePaid',
-            label: 'Betaald bedrag',
-            categories: ['Inschrijving'],
+            label: $t('Betaald bedrag'),
+            categories: [$t('Inschrijving')],
         });
     }
 
@@ -519,40 +519,40 @@ function getLinkedFieldsChoices(field: RecordSettings) {
     if (field.type === RecordType.Text) {
         choices.push({
             value: 'member.firstName',
-            label: 'Voornaam',
-            categories: ['Lid'],
+            label: $t('Voornaam'),
+            categories: [$t('Lid')],
         });
         choices.push({
             value: 'member.lastName',
-            label: 'Achternaam',
-            categories: ['Lid'],
+            label: $t('Achternaam'),
+            categories: [$t('Lid')],
         });
         choices.push({
             value: 'member.nationalRegisterNumber',
-            label: 'Rijksregisternummer',
-            categories: ['Lid'],
+            label: $t('Rijksregisternummer'),
+            categories: [$t('Lid')],
         });
     }
     if (field.type === RecordType.Address) {
         choices.push({
             value: 'member.address',
-            label: 'Adres',
-            categories: ['Lid'],
+            label: $t('Adres'),
+            categories: [$t('Lid')],
         });
     }
     if (field.type === RecordType.Date) {
         choices.push({
             value: 'member.birthDay',
-            label: 'Geboortedatum',
-            categories: ['Lid'],
+            label: $t('Geboortedatum'),
+            categories: [$t('Lid')],
         });
     }
 
     if (field.type === RecordType.Email) {
         choices.push({
             value: 'member.email',
-            label: 'E-mailadres',
-            categories: ['Lid'],
+            label: $t('E-mailadres'),
+            categories: [$t('Lid')],
         });
     }
 
@@ -560,66 +560,66 @@ function getLinkedFieldsChoices(field: RecordSettings) {
     if (field.type === RecordType.Text) {
         choices.push({
             value: 'parents[0].firstName',
-            label: 'Voornaam',
-            categories: ['Ouder 1'],
+            label: $t('Voornaam'),
+            categories: [$t('Ouder 1')],
         });
         choices.push({
             value: 'parents[0].lastName',
-            label: 'Achternaam',
-            categories: ['Ouder 1'],
+            label: $t('Achternaam'),
+            categories: [$t('Ouder 1')],
         });
         choices.push({
             value: 'parents[0].nationalRegisterNumber',
-            label: 'Rijksregisternummer',
-            categories: ['Ouder 1'],
+            label: $t('Rijksregisternummer'),
+            categories: [$t('Ouder 1')],
         });
     }
     if (field.type === RecordType.Address) {
         choices.push({
             value: 'parents[0].address',
-            label: 'Adres',
-            categories: ['Ouder 1'],
+            label: $t('Adres'),
+            categories: [$t('Ouder 1')],
         });
     }
     if (field.type === RecordType.Email) {
         choices.push({
             value: 'parents[0].email',
-            label: 'E-mailadres',
-            categories: ['Ouder 1'],
+            label: $t('E-mailadres'),
+            categories: [$t('Ouder 1')],
         });
     }
 
     if (field.type === RecordType.Text) {
         choices.push({
             value: 'parents[1].firstName',
-            label: 'Voornaam',
-            categories: ['Ouder 2'],
+            label: $t('Voornaam'),
+            categories: [$t('Ouder 2')],
         });
         choices.push({
             value: 'parents[1].lastName',
-            label: 'Achternaam',
-            categories: ['Ouder 2'],
+            label: $t('Achternaam'),
+            categories: [$t('Ouder 2')],
         });
         choices.push({
             value: 'parents[1].nationalRegisterNumber',
-            label: 'Rijksregisternummer',
-            categories: ['Ouder 2'],
+            label: $t('Rijksregisternummer'),
+            categories: [$t('Ouder 2')],
         });
     }
 
     if (field.type === RecordType.Address) {
         choices.push({
             value: 'parents[1].address',
-            label: 'Adres',
-            categories: ['Ouder 2'],
+            label: $t('Adres'),
+            categories: [$t('Ouder 2')],
         });
     }
 
     if (field.type === RecordType.Email) {
         choices.push({
             value: 'parents[1].email',
-            label: 'E-mailadres',
-            categories: ['Ouder 2'],
+            label: $t('E-mailadres'),
+            categories: [$t('Ouder 2')],
         });
     }
 
@@ -791,7 +791,7 @@ function autoLink() {
     }
 }
 
-const title = props.isNew ? 'Nieuw document' : 'Document bewerken';
+const title = props.isNew ? $t('Nieuw document') : $t('Document bewerken');
 
 const name = computed({
     get: () => patchedDocument.value.settings.name,
@@ -834,8 +834,8 @@ function getDefaultGlobalData(): Map<string, RecordAnswer> {
             settings: RecordSettings.create({}), // settings will be overwritten
             selectedChoice: RecordChoice.create({
                 id: 'authorities',
-                name: TranslatedString.create('Gemeenten, gemeenschappen of gewesten'),
-                description: TranslatedString.create('is vergund, erkend, gesubsidieerd of gecontroleerd door de lokale openbare besturen of openbare besturen van de gemeenschappen of gewesten'),
+                name: TranslatedString.create($t('Gemeenten, gemeenschappen of gewesten')),
+                description: TranslatedString.create($t('is vergund, erkend, gesubsidieerd of gecontroleerd door de lokale openbare besturen of openbare besturen van de gemeenschappen of gewesten')),
             }),
         }));
     }
@@ -909,7 +909,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
 }
 
 async function addGroup() {
@@ -962,7 +962,7 @@ async function validate() {
         errors.addError(new SimpleError({
             code: 'invalid_field',
             field: 'name',
-            message: 'Vul een naam in voor het document',
+            message: $t('Vul een naam in voor het document'),
         }));
     }
 
@@ -1037,14 +1037,14 @@ async function changedFile(event: InputEvent & { target: HTMLInputElement & { fi
     }
 
     if (event.target.files.length > 1) {
-        const error = 'Je kan maar één HTML-bestand toevoegen.';
+        const error = $t('Je kan maar één HTML-bestand toevoegen.');
         Toast.error(error).setHide(20 * 1000).show();
         return;
     }
 
     for (const file of event.target.files as FileList) {
         if (file.size > 1 * 1024 * 1024) {
-            const error = 'HTML-bestanden groter dan 1MB kunnen niet worden gebruikt.';
+            const error = $t('HTML-bestanden groter dan 1MB kunnen niet worden gebruikt.');
             Toast.error(error).setHide(20 * 1000).show();
             continue;
         }
@@ -1054,7 +1054,7 @@ async function changedFile(event: InputEvent & { target: HTMLInputElement & { fi
             html: htmlContents,
         });
 
-        Toast.success('HTML-bestand succesvol geüpload').setHide(10 * 1000).show();
+        Toast.success($t('HTML-bestand succesvol geüpload')).setHide(10 * 1000).show();
     }
 
     // Clear selection
