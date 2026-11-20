@@ -26,6 +26,31 @@ describe('replace-keys-with-uuid', () => {
             expect(findTranslationKeyUsages(content)).toEqual(new Set(['Aankoopbewijs', 'Factuur', 'T.a.v. ', 'Datum', ' Pagina', '%1Ab']));
         });
 
+        test('finds keys the formatter moved onto their own line', () => {
+            const content = `
+                const a = $t(
+                    'Het opgegeven UiTPAS-nummer is ongeldig.',
+                );
+                const b = $t(
+                    "Probeer het later opnieuw.",
+                );
+                const c = $t(
+                    \`De groep {{g}} werd gewijzigd\`,
+                );
+                const d = $t(
+                    'Oeps! Probeer het over {retryAfter} seconden opnieuw.',
+                    { retryAfter },
+                );
+            `;
+
+            expect(findTranslationKeyUsages(content)).toEqual(new Set([
+                'Het opgegeven UiTPAS-nummer is ongeldig.',
+                'Probeer het later opnieuw.',
+                'De groep {{g}} werd gewijzigd',
+                'Oeps! Probeer het over {retryAfter} seconden opnieuw.',
+            ]));
+        });
+
         test('ignores other helpers and plain text', () => {
             const content = '{{formatPrice total}} {{t "not a translation"}} $translate("x")';
             expect(findTranslationKeyUsages(content).size).toBe(0);
@@ -47,6 +72,11 @@ describe('replace-keys-with-uuid', () => {
         test('replaces keys in Handlebars syntax and keeps whitespace', () => {
             const content = `{{$t "Factuur"}} {{ $t "T.a.v. "}} {{$t 'BTW %'}} <th>{{$t "BTW %"}}</th> {{$t "Factuur voor"}}`;
             expect(replaceOccurrencesInContent(content, replacedKeys)).toBe(`{{$t "%1"}} {{ $t "%3"}} {{$t '%2'}} <th>{{$t "%2"}}</th> {{$t "Factuur voor"}}`);
+        });
+
+        test('replaces a key the formatter moved onto its own line, keeping the indentation', () => {
+            const content = `const a = $t(\n    'Factuur',\n);`;
+            expect(replaceOccurrencesInContent(content, replacedKeys)).toBe(`const a = $t(\n    '%1',\n);`);
         });
 
         test('replaces every occurrence', () => {
