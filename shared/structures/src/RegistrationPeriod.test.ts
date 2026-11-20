@@ -27,6 +27,26 @@ describe('RegistrationPeriodBase naming', () => {
     });
 });
 
+describe('RegistrationPeriodBase.getDefaultGroupStartDate', () => {
+    const period = RegistrationPeriod.create({
+        startDate: new Date('2025-09-01T00:00:00+02:00'),
+        endDate: new Date('2026-08-31T23:59:59+02:00'),
+    });
+
+    it('uses now when now is inside the period', () => {
+        const now = new Date('2025-11-19T10:00:00+01:00');
+        expect(period.getDefaultGroupStartDate(now)).toEqual(now);
+    });
+
+    it('uses the period start when the period has ended', () => {
+        expect(period.getDefaultGroupStartDate(new Date('2026-11-19T10:00:00+01:00'))).toEqual(period.startDate);
+    });
+
+    it('uses the period start when the period has not started yet', () => {
+        expect(period.getDefaultGroupStartDate(new Date('2025-06-01T10:00:00+02:00'))).toEqual(period.startDate);
+    });
+});
+
 describe('OrganizationRegistrationPeriod.duplicate', () => {
     it('copies bundle discounts when duplicating to a new registration period', () => {
         const period = RegistrationPeriod.create({

@@ -64,6 +64,8 @@ export class MemberAdministrationOnboardingViewModel {
             settings: GroupSettings.create({
                 name: TranslatedString.create(name),
                 genderType: this.organization.meta.genderType === OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale,
+                startDate: this.period.period.getDefaultGroupStartDate(),
+                endDate: new Date(this.period.period.endDate),
             }),
             privateSettings: GroupPrivateSettings.create({}),
         });
