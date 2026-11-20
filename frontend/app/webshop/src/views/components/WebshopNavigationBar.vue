@@ -1,5 +1,5 @@
 <template>
-    <STNavigationBar :large="true" :left-logo="true" :disable-pop="disablePop">
+    <STNavigationBar :large="true" :left-logo="true" :disable-pop="disablePop" :left-hidden-overflow="!!webshop">
         <template #left>
             <OrganizationLogo :organization="organization" :webshop="webshop" />
         </template>

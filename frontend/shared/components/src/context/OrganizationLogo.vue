@@ -1,5 +1,5 @@
 <template>
-    <MetaLogo data-testid="organization-logo" :meta-data="identity.metaData" :name="identity.name" />
+    <MetaLogo data-testid="organization-logo" :meta-data="identity.metaData" :name="identity.name" :long="!!webshop || long" />
 </template>
 
 <script lang="ts" setup>
@@ -12,6 +12,7 @@ import MetaLogo from '../MetaLogo.vue';
 const props = withDefaults(defineProps<{
     organization: Organization;
     webshop?: Webshop | null;
+    long?: boolean;
 }>(), {
     webshop: null,
 });
