@@ -55,10 +55,17 @@ export class DataRetentionCounter {
 
         let phase = run.phase;
         const loader = await DataRetentionFactsLoader.create(run.tenantId);
+        // In userMode organization only organizations that turned it on can have terms: the rest is not counted
+        const organizationIds =
+            STAMHOOFD.userMode === 'organization'
+                ? await DataRetentionFactsLoader.loadEnabledOrganizationIds()
+                : undefined;
 
         let batches = 0;
         while (Date.now() < deadline.getTime() && batches < maxBatches) {
-            if (await this.continuePhase(run, phase, loader, batchSize, new Date())) {
+            if (
+                await this.continuePhase(run, phase, loader, batchSize, new Date(), organizationIds)
+            ) {
                 batches += 1;
                 continue;
             }
@@ -86,10 +93,16 @@ export class DataRetentionCounter {
         loader: DataRetentionFactsLoader,
         batchSize: number,
         now: Date,
+        organizationIds: string[] | undefined,
     ): Promise<boolean> {
         switch (phase) {
             case DataRetentionRunPhase.Members: {
-                const batch = await loader.loadMemberBatch(run.cursor, batchSize, now);
+                const batch = await loader.loadMemberBatch(
+                    run.cursor,
+                    batchSize,
+                    now,
+                    organizationIds,
+                );
                 if (!batch) {
                     return false;
                 }
@@ -104,7 +117,7 @@ export class DataRetentionCounter {
             }
 
             case DataRetentionRunPhase.Orders: {
-                const batch = await loader.loadOrderBatch(run.cursor, batchSize);
+                const batch = await loader.loadOrderBatch(run.cursor, batchSize, organizationIds);
                 if (!batch) {
                     return false;
                 }
@@ -129,6 +142,7 @@ export class DataRetentionCounter {
                 const batch = await loader.loadOrganizationBatch(
                     run.cursor,
                     Math.min(batchSize, ORGANIZATION_BATCH_SIZE),
+                    organizationIds,
                 );
                 if (!batch) {
                     return false;
@@ -151,7 +165,7 @@ export class DataRetentionCounter {
             }
 
             case DataRetentionRunPhase.Accounts: {
-                const batch = await loader.loadAccountBatch(run.cursor, batchSize);
+                const batch = await loader.loadAccountBatch(run.cursor, batchSize, organizationIds);
                 if (!batch) {
                     return false;
                 }

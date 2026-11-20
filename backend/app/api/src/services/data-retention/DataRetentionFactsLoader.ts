@@ -14,6 +14,7 @@ import {
     SQL,
     SQLAlias,
     SQLCount,
+    SQLJsonContains,
     SQLMax,
     SQLOrderBy,
     SQLSelectAs,
@@ -22,6 +23,7 @@ import {
 import type { DataRetentionPolicy as DataRetentionPolicyStruct } from '@stamhoofd/structures';
 import {
     BalanceItemStatus,
+    DATA_RETENTION_FEATURE_FLAG,
     DATA_RETENTION_LAUNCH_DATE,
     DataRetentionCategory,
     DocumentStatus,
@@ -142,9 +144,17 @@ export class DataRetentionFactsLoader {
         afterId: string | null,
         limit: number,
         now: Date,
+        organizationIds?: string[],
     ): Promise<{ lastId: string; facts: MemberRetentionFacts[] } | null> {
-        const members = await Member.select('id', 'createdAt', 'organizationId', 'anonymizedAt')
-            .where('id', SQLWhereSign.Greater, afterId ?? '')
+        const query = Member.select('id', 'createdAt', 'organizationId', 'anonymizedAt').where(
+            'id',
+            SQLWhereSign.Greater,
+            afterId ?? '',
+        );
+        if (organizationIds) {
+            query.where('organizationId', organizationIds);
+        }
+        const members = await query
             .orderBy(new SQLOrderBy({ column: SQL.column('id'), direction: 'ASC' }))
             .limit(limit)
             .fetch();
@@ -166,6 +176,24 @@ export class DataRetentionFactsLoader {
             .where('id', memberIds)
             .fetch();
         return await this.loadMemberFacts(members, now);
+    }
+
+    /**
+     * Organizations that turned on data retention themselves. In userMode organization only these can have terms,
+     * so the nightly count only has to look at their data.
+     */
+    static async loadEnabledOrganizationIds(): Promise<string[]> {
+        const rows = await SQL.select(SQL.column('id'))
+            .from('organizations')
+            .where(
+                new SQLJsonContains(
+                    SQL.column('privateMeta'),
+                    SQL.scalar(JSON.stringify(DATA_RETENTION_FEATURE_FLAG)),
+                    SQL.scalar('$.value.featureFlags'),
+                ),
+            )
+            .fetch();
+        return rows.map((row) => row.organizations.id as string);
     }
 
     /**
@@ -297,7 +325,7 @@ export class DataRetentionFactsLoader {
     async loadOrderBatch(
         afterId: string | null,
         limit: number,
-        organizationId?: string,
+        organizationId?: string | string[],
     ): Promise<{ lastId: string; facts: OrderRetentionFacts[] } | null> {
         const query = Order.select('id', 'organizationId', 'createdAt', 'anonymizedAt', 'data')
             .where('id', SQLWhereSign.Greater, afterId ?? '')
@@ -345,18 +373,23 @@ export class DataRetentionFactsLoader {
     async loadOrganizationBatch(
         afterId: string | null,
         limit: number,
+        organizationIds?: string[],
     ): Promise<{ lastId: string; organizationIds: string[] } | null> {
-        const rows = await SQL.select(SQL.column('id'))
+        const query = SQL.select(SQL.column('id'))
             .from('organizations')
-            .where('id', SQLWhereSign.Greater, afterId ?? '')
+            .where('id', SQLWhereSign.Greater, afterId ?? '');
+        if (organizationIds) {
+            query.where('id', organizationIds);
+        }
+        const rows = await query
             .orderBy(new SQLOrderBy({ column: SQL.column('id'), direction: 'ASC' }))
             .limit(limit)
             .fetch();
         if (rows.length === 0) {
             return null;
         }
-        const organizationIds = rows.map((row) => row.organizations.id as string);
-        return { lastId: organizationIds[organizationIds.length - 1], organizationIds };
+        const ids = rows.map((row) => row.organizations.id as string);
+        return { lastId: ids[ids.length - 1], organizationIds: ids };
     }
 
     /**
@@ -406,7 +439,7 @@ export class DataRetentionFactsLoader {
     async loadAccountBatch(
         afterId: string | null,
         limit: number,
-        organizationId?: string,
+        organizationId?: string | string[],
     ): Promise<{ lastId: string; facts: AccountRetentionFacts[] } | null> {
         const query = User.select(
             'id',

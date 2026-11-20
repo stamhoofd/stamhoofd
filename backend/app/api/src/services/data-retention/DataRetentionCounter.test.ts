@@ -135,6 +135,13 @@ async function getPlatformDeletions(category: DataRetentionCategory) {
     return { due: count?.due ?? 0, upcoming: new Map(count?.upcoming ?? []) };
 }
 
+async function createEnabledOrganization() {
+    const organization = await new OrganizationFactory({}).create();
+    organization.privateMeta.featureFlags = ['data-retention'];
+    await organization.save();
+    return organization;
+}
+
 function monthsFromNow(months: number) {
     return DateTime.now().plus({ months }).toJSDate();
 }
@@ -445,7 +452,7 @@ describe('DataRetentionCounter', () => {
 
     test('In userMode organization, a member without registrations is counted for its own organization', async () => {
         TestUtils.setEnvironment('userMode', 'organization');
-        const organization = await new OrganizationFactory({}).create();
+        const organization = await createEnabledOrganization();
         await setOrganizationTerms(organization, DataRetentionCategory.Members, {
             anonymizeAfterMonths: 12,
         });
@@ -463,6 +470,45 @@ describe('DataRetentionCounter', () => {
             )?.upcoming.get(getMonthKey(monthsFromNow(12))),
         ).toBe(1);
         expect(run.result.get('platform')).toBeUndefined();
+    });
+
+    test('In userMode organization, only organizations that turned it on are counted', async () => {
+        TestUtils.setEnvironment('userMode', 'organization');
+        const enabled = await createEnabledOrganization();
+        const other = await new OrganizationFactory({}).create();
+        for (const organization of [enabled, other]) {
+            await setOrganizationTerms(organization, DataRetentionCategory.Members, {
+                anonymizeAfterMonths: 12,
+            });
+            await setOrganizationTerms(organization, DataRetentionCategory.Orders, {
+                anonymizeAfterMonths: 12,
+            });
+            const member = await createFormerMember(organization);
+            member.organizationId = organization.id;
+            await member.save();
+            const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
+            const order = await new OrderFactory({ webshop }).create();
+            order.createdAt = longAgo;
+            await order.save();
+        }
+
+        const run = await countAll();
+
+        expect(
+            getCount(
+                run.result.get(enabled.id),
+                DataRetentionCategory.Members,
+                DataRetentionAction.Anonymize,
+            )?.due,
+        ).toBe(1);
+        expect(
+            getCount(
+                run.result.get(enabled.id),
+                DataRetentionCategory.Orders,
+                DataRetentionAction.Anonymize,
+            )?.due,
+        ).toBe(1);
+        expect(run.result.get(other.id)).toBeUndefined();
     });
 
     test('Upcoming counts cover the current month and the 12 months after it', async () => {
