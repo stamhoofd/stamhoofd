@@ -1,8 +1,8 @@
 <template>
     <section class="st-view full-width box-shade choose-webshop-view">
-        <STNavigationBar :large="true">
+        <STNavigationBar :large="true" left-hidden-overflow>
             <template #left>
-                <OrganizationLogo :organization="organization" />
+                <OrganizationLogo :organization="organization" long />
             </template>
 
             <template #right>

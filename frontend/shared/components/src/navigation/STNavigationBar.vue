@@ -7,7 +7,7 @@
         </div>
         <div class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle, negative: !!($slots.default && isValidVnodes($slots.default())), 'safe-area-only': safeAreaOnly}">
             <div v-if="!safeAreaOnly" ref="bar" class="header" :class="{ large, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
-                <div v-if="hasLeft || hasRight" class="left">
+                <div v-if="hasLeft || hasRight" class="left" :class="{ overflowHidden: leftHiddenOverflow }">
                     <BackButton v-if="canPop && !disablePop" data-testid="close-button" @click="pop()" />
                     <button v-else-if="canDismiss && !disableDismiss && ($isAndroid)" class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
                     <slot name="left" />
@@ -67,6 +67,7 @@ const props = withDefaults(defineProps<{
     disableDismiss?: boolean;
     disablePop?: boolean;
     leftLogo?: boolean;
+    leftHiddenOverflow?: boolean;
     /**
      * No bar of its own: only covers the safe area at the top with a background once the view scrolls, e.g. for a bar
      * of a surrounding container that is shown in the safe area of the view
@@ -458,6 +459,10 @@ onDeactivated(() => {
             &.left{
                 > * {
                     pointer-events: all;
+                }
+
+                &.overflowHidden{
+                    overflow: hidden;
                 }
 
                 padding-right: 15px;
