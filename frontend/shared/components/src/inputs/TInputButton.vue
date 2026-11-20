@@ -8,12 +8,27 @@
 import { LanguageHelper, RichText, TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import type { TranslateableValue } from './hooks/useEditorContext';
+import { getTranslationSourceLanguage } from './hooks/useTranslateRichText';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
+import { useContext } from '#hooks/useContext.ts';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
 
 const value = defineModel<TranslateableValue>({ required: true });
+const emit = defineEmits<{ translate: [] }>();
 const { hasLanguages } = useSwitchLanguage();
+const context = useContext();
+
+/**
+ * Only rich text can be translated automatically, and only by platform admins, like an email
+ */
+function canTranslate() {
+    const v = value.value;
+    return v instanceof TranslatedRichText
+        && getTranslationSourceLanguage(v) !== null
+        && I18nController.shared.availableLanguages.length > 1
+        && (context.value?.auth?.hasPlatformFullAccess() ?? false);
+}
 
 function untranslated(): TranslateableValue {
     if (value.value instanceof TranslatedRichText) {
@@ -33,6 +48,17 @@ function withLanguage(lang: Language): TranslateableValue {
 
 async function showMenu(event: MouseEvent) {
     const menu = new ContextMenu([
+        canTranslate()
+            ? [
+                    new ContextMenuItem({
+                        name: $t('%Znv'),
+                        icon: 'wand',
+                        action: () => {
+                            emit('translate');
+                        },
+                    }),
+                ]
+            : [],
         [
             new ContextMenuItem({
                 name: $t('%14n'),

@@ -46,7 +46,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import EmailLanguageButton from './EmailLanguageButton.vue';
 import { confirmStaleEmailContentLanguages, useEmailContentLanguage } from './hooks/useEmailContentLanguage';
-import { useEmailTranslator } from './hooks/useEmailTranslator';
+import { useTranslator } from '#hooks/useTranslator.ts';
 import { useReplacementsForLanguage } from './hooks/useReplacementsForLanguage';
 
 const props = withDefaults(
@@ -73,7 +73,7 @@ const contentLanguage = useEmailContentLanguage({
     editor: () => editor.value,
     patched: () => patched.value,
     addPatch,
-    translate: useEmailTranslator(),
+    translate: useTranslator(),
 });
 const subject = contentLanguage.subject;
 
