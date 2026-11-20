@@ -1,3 +1,4 @@
+import type { Platform } from '@stamhoofd/structures';
 import { AuditLogType, getAuditLogTypeName } from '@stamhoofd/structures';
 
 /**
@@ -9,6 +10,8 @@ export type AuditLogTypeContext = {
      * True for the log of a single organization, false for the admin panel.
      */
     isOrganizationLog: boolean;
+
+    platform: Platform;
 };
 
 /**
@@ -234,6 +237,8 @@ export function getAuditLogTypeCategory(type: AuditLogType, context: AuditLogTyp
 }
 
 export function getAuditLogTypeCategoryName(category: AuditLogTypeCategory, context: AuditLogTypeContext): string {
+    const { platform } = context;
+
     switch (category) {
         case AuditLogTypeCategory.Members:
             return $t('Leden');
@@ -242,7 +247,9 @@ export function getAuditLogTypeCategoryName(category: AuditLogTypeCategory, cont
         case AuditLogTypeCategory.Groups:
             return $t('Groepen en wachtlijsten');
         case AuditLogTypeCategory.Events:
-            return context.isPlatform ? $t('Activiteiten en kampmeldingen') : $t('Activiteiten');
+            return context.isPlatform && platform.config.featureFlags.includes('event-notifications')
+                ? $t('Activiteiten en kampmeldingen')
+                : $t('Activiteiten');
         case AuditLogTypeCategory.Webshops:
             return $t('Webshops en bestellingen');
         case AuditLogTypeCategory.Payments:
