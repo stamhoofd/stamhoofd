@@ -2,11 +2,15 @@ import { isSimpleError, isSimpleErrors } from '@common/errors';
 import { ObjectData } from '@common/encoding';
 
 import {
+    DataRetentionAction,
     DataRetentionCategory,
+    DataRetentionCount,
     DataRetentionPolicy,
+    DataRetentionPreview,
     DataRetentionTerms,
     formatDataRetentionMonths,
     getDataRetentionConflicts,
+    getDataRetentionPreviewMessage,
     getDataRetentionSourceDescription,
     getDataRetentionTermsSummary,
     isEarlierDataRetentionDeletion,
@@ -521,6 +525,72 @@ describe('DataRetention', () => {
                 'De koepel bewaart langer (anonimiseren na 5 jaar). De langste termijn geldt, dus jullie kortere termijn heeft nu geen effect. Hij geldt zodra de koepel haar termijn verkort.',
                 'De koepel beschermt de laatste 2 werkjaren. Het hoogste aantal geldt. Jullie aantal geldt zodra de koepel dat verlaagt.',
             ]);
+        });
+
+        describe('getDataRetentionPreviewMessage', () => {
+            const from = new Date('2026-12-20T12:00:00.000Z');
+            const count = (values: { due?: number; upcoming?: [string, number][] }) =>
+                DataRetentionCount.create({
+                    category: DataRetentionCategory.Members,
+                    action: DataRetentionAction.Anonymize,
+                    due: values.due ?? 0,
+                    upcoming: new Map(values.upcoming ?? []),
+                });
+
+            test('A change that does not wait needs no confirmation', () => {
+                expect(
+                    getDataRetentionPreviewMessage(
+                        DataRetentionPreview.create({ waits: false, from }),
+                    ),
+                ).toBeNull();
+            });
+
+            test('Without numbers, it says the overview will show them', () => {
+                const message = getDataRetentionPreviewMessage(
+                    DataRetentionPreview.create({ waits: true, from, counts: null }),
+                );
+                expect(message?.description).toContain('Het overzicht toont de aantallen');
+            });
+
+            test('Nothing to process needs no confirmation', () => {
+                expect(
+                    getDataRetentionPreviewMessage(
+                        DataRetentionPreview.create({ waits: true, from, counts: [count({})] }),
+                    ),
+                ).toBeNull();
+            });
+
+            test('It says what is processed when it applies, and in the year after it', () => {
+                const message = getDataRetentionPreviewMessage(
+                    DataRetentionPreview.create({
+                        waits: true,
+                        from,
+                        counts: [
+                            count({
+                                due: 12,
+                                upcoming: [
+                                    ['2027-03', 20],
+                                    ['2027-08', 10],
+                                    ['later', 99],
+                                ],
+                            }),
+                        ],
+                    }),
+                );
+                expect(message?.description).toContain('Leden anonimiseren: 12 vanaf');
+                expect(message?.description).toContain('en nog 30 in het jaar daarna');
+            });
+
+            test('A few items later in the year still ask for confirmation', () => {
+                const message = getDataRetentionPreviewMessage(
+                    DataRetentionPreview.create({
+                        waits: true,
+                        from,
+                        counts: [count({ upcoming: [['2027-03', 2]] })],
+                    }),
+                );
+                expect(message?.description).toContain('Leden anonimiseren: 2 in het jaar vanaf');
+            });
         });
 
         test('There are no conflicts without a platform, or when the organization keeps longer', () => {

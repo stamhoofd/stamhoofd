@@ -96,15 +96,7 @@ export class DataRetentionCounter {
                 for (const memberFacts of batch.facts) {
                     const scopes = getScopes(getMemberOrganizationIds(memberFacts));
                     for (const decision of planMember(memberFacts, loader.index, now)) {
-                        count(
-                            run,
-                            scopes,
-                            decision.action === DataRetentionAction.RemoveSensitiveData
-                                ? DataRetentionCategory.SensitiveData
-                                : DataRetentionCategory.Members,
-                            decision,
-                            now,
-                        );
+                        count(run, scopes, getMemberDecisionCategory(decision), decision, now);
                     }
                 }
                 run.cursor = batch.lastId;
@@ -249,12 +241,16 @@ function getScopes(organizationIds: (string | null)[]): string[] {
 }
 
 /**
- * Adds a decision for amount items to the progress of each scope, in exactly one of three buckets:
- * - upcoming, per month, when the term has not passed yet
- * - held, with each reason, when the term has passed but something holds it
- * - due, when the term has passed and nothing holds it
- *
- * Decisions without a due date (no term set) are not counted.
+ * A member has decisions for two categories: removing sensitive data belongs to sensitive data, the rest to members.
+ */
+export function getMemberDecisionCategory(decision: DataRetentionDecision): DataRetentionCategory {
+    return decision.action === DataRetentionAction.RemoveSensitiveData
+        ? DataRetentionCategory.SensitiveData
+        : DataRetentionCategory.Members;
+}
+
+/**
+ * Adds a decision for amount items to the progress of each scope, through addToCounts.
  */
 function count(
     run: DataRetentionRun,
@@ -271,26 +267,45 @@ function count(
     for (const scope of scopes) {
         const overview = run.progress.get(scope) ?? DataRetentionOverview.create({});
         run.progress.set(scope, overview);
+        addToCounts(overview.counts, category, decision, now, amount);
+    }
+}
 
-        let counts = overview.counts.find(
-            (c) => c.category === category && c.action === decision.action,
-        );
-        if (!counts) {
-            counts = DataRetentionCount.create({ category, action: decision.action });
-            overview.counts.push(counts);
-        }
+/**
+ * Adds a decision for amount items to the counts, in exactly one of three buckets:
+ * - upcoming, per month, when the term has not passed yet
+ * - held, with each reason, when the term has passed but something holds it
+ * - due, when the term has passed and nothing holds it
+ *
+ * Decisions without a due date (no term set) are not counted.
+ */
+export function addToCounts(
+    counts: DataRetentionCount[],
+    category: DataRetentionCategory,
+    decision: DataRetentionDecision,
+    now: Date,
+    amount = 1,
+) {
+    if (!decision.dueAt) {
+        return;
+    }
 
-        if (decision.dueAt > now) {
-            const month = getUpcomingMonth(decision.dueAt, now);
-            counts.upcoming.set(month, (counts.upcoming.get(month) ?? 0) + amount);
-        } else if (decision.heldBy.length > 0) {
-            counts.held += amount;
-            for (const reason of decision.heldBy) {
-                counts.heldBy.set(reason, (counts.heldBy.get(reason) ?? 0) + amount);
-            }
-        } else {
-            counts.due += amount;
+    let count = counts.find((c) => c.category === category && c.action === decision.action);
+    if (!count) {
+        count = DataRetentionCount.create({ category, action: decision.action });
+        counts.push(count);
+    }
+
+    if (decision.dueAt > now) {
+        const month = getUpcomingMonth(decision.dueAt, now);
+        count.upcoming.set(month, (count.upcoming.get(month) ?? 0) + amount);
+    } else if (decision.heldBy.length > 0) {
+        count.held += amount;
+        for (const reason of decision.heldBy) {
+            count.heldBy.set(reason, (count.heldBy.get(reason) ?? 0) + amount);
         }
+    } else {
+        count.due += amount;
     }
 }
 

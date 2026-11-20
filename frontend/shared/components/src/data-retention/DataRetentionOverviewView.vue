@@ -59,7 +59,7 @@
 
 <script lang="ts" setup>
 import type { DataRetentionCount, DataRetentionOverview } from '@stamhoofd/structures';
-import { DataRetentionAction, DataRetentionCategory, DataRetentionHoldReason } from '@stamhoofd/structures';
+import { DataRetentionAction, DataRetentionCategory, DataRetentionHoldReason, getDataRetentionActionTitle } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
 import { computed } from 'vue';
@@ -82,24 +82,6 @@ function formatDateTime(date: Date) {
     return Formatter.dateTime(date);
 }
 
-function getActionTitle(count: DataRetentionCount): string {
-    switch (count.category) {
-        case DataRetentionCategory.Members:
-            return count.action === DataRetentionAction.Delete ? $t('Leden verwijderen') : $t('Leden anonimiseren');
-        case DataRetentionCategory.SensitiveData:
-            return $t('Gevoelige gegevens wissen');
-        case DataRetentionCategory.Documents:
-            return $t('Documenten verwijderen');
-        case DataRetentionCategory.Accounts:
-            return $t('Accounts verwijderen');
-        case DataRetentionCategory.Orders:
-            return $t('Bestellingen anonimiseren');
-        case DataRetentionCategory.Emails:
-            return $t('E-mails verwijderen');
-        case DataRetentionCategory.AuditLogs:
-            return $t('Logboekregels verwijderen');
-    }
-}
 
 function getHeldTitle(category: DataRetentionCategory, amount: number): string {
     const count = formatNumber(amount);
@@ -197,7 +179,7 @@ const groups = computed(() => {
             items: sortCounts(overview.counts)
                 .map(count => ({
                     key: count.category + '-' + count.action,
-                    title: getActionTitle(count),
+                    title: getDataRetentionActionTitle(count.category, count.action),
                     amount: moment.key === 'now'
                         ? count.due
                         : [...count.upcoming.entries()].filter(([key]) => moment.includes(key)).reduce((sum, [, amount]) => sum + amount, 0),

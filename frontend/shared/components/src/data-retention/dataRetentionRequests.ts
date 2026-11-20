@@ -1,7 +1,7 @@
 import type { Decoder } from '@common/encoding';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { DataRetentionCategory, DataRetentionTerms } from '@stamhoofd/structures';
-import { DataRetentionPolicyUpdate, DataRetentionSettings } from '@stamhoofd/structures';
+import { DataRetentionPolicyUpdate, DataRetentionPreview, DataRetentionSettings } from '@stamhoofd/structures';
 
 /**
  * Without an organization in scope (the administration portal), these requests use the terms of the platform.
@@ -38,6 +38,22 @@ export async function cancelPendingDataRetentionChange(context: SessionContext, 
         decoder: DataRetentionSettings as Decoder<DataRetentionSettings>,
         owner,
         shouldRetry: false,
+    });
+    return response.data;
+}
+
+/**
+ * What saving these terms would do. Does not need a fresh authentication.
+ */
+export async function previewDataRetentionTerms(context: SessionContext, owner: object, category: DataRetentionCategory, terms: DataRetentionTerms) {
+    const response = await context.authenticatedServer.request({
+        method: 'POST',
+        path: '/data-retention/preview',
+        body: DataRetentionPolicyUpdate.create({ category, terms }),
+        decoder: DataRetentionPreview as Decoder<DataRetentionPreview>,
+        owner,
+        shouldRetry: false,
+        timeout: 30 * 1000,
     });
     return response.data;
 }

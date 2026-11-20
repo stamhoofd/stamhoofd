@@ -94,48 +94,102 @@ export class DataRetentionPolicyService {
         category: DataRetentionCategory,
         terms: DataRetentionTerms,
     ) {
+        const planned = await this.planUpdate(organization, category, terms, new Date());
+        if (!planned.changed) {
+            return;
+        }
+
+        const updated = planned.model ?? new DataRetentionPolicy();
+        updated.tenantId = TenantContext.currentOrRoot.tenantId;
+        updated.organizationId = organization?.id ?? null;
+        updated.category = category;
+        updated.setTerms(planned.policy.terms);
+        updated.setPendingTerms(
+            planned.policy.pendingTerms && planned.policy.pendingFrom
+                ? { terms: planned.policy.pendingTerms, from: planned.policy.pendingFrom }
+                : null,
+        );
+        await updated.save();
+
+        await DataRetentionAuditLogService.logPolicyChanged(
+            user,
+            updated,
+            planned.before,
+            terms,
+            planned.from,
+        );
+    }
+
+    /**
+     * What saving these terms would store, without saving: also used to count what they would do before saving.
+     * policy is the policy of this level after saving. from is when the new terms start to apply.
+     */
+    static async planUpdate(
+        organization: Organization | null,
+        category: DataRetentionCategory,
+        terms: DataRetentionTerms,
+        now: Date,
+    ): Promise<{
+        model: DataRetentionPolicy | null;
+        policy: DataRetentionPolicyStruct;
+        before: DataRetentionTerms;
+        from: Date;
+        waits: boolean;
+        changed: boolean;
+    }> {
         const organizationId = organization?.id ?? null;
         const tenantId = TenantContext.currentOrRoot.tenantId;
 
         this.assertCategoryAvailable(organization, category);
         terms.validate(category);
 
-        const now = new Date();
         const model = await DataRetentionPolicy.getFor(tenantId, organizationId, category);
-        const policy =
+        const current =
             model?.getStructure() ??
             DataRetentionPolicy.getDefaultStructure(organizationId, category);
-        const before = policy.getActiveTerms(now);
+        const before = current.getActiveTerms(now);
 
         const isEarlier = await this.isEarlierDeletion(organization, category, before, terms, now);
-        const hasWaitingChange = !!policy.pendingFrom && policy.pendingFrom > now;
+        const hasWaitingChange = !!current.pendingFrom && current.pendingFrom > now;
 
-        if (isEarlier && hasWaitingChange && policy.pendingTerms?.isSameAs(terms)) {
-            return;
+        if (isEarlier && hasWaitingChange && current.pendingTerms?.isSameAs(terms)) {
+            // Saving the same waiting change again keeps its date
+            return {
+                model,
+                policy: current,
+                before,
+                from: current.pendingFrom!,
+                waits: true,
+                changed: false,
+            };
         }
 
-        if (!isEarlier && !hasWaitingChange && before.isSameAs(terms)) {
-            return;
+        if (!isEarlier) {
+            return {
+                model,
+                policy: DataRetentionPolicyStruct.create({ category, terms }),
+                before,
+                from: now,
+                waits: false,
+                changed: hasWaitingChange || !before.isSameAs(terms),
+            };
         }
 
-        const updated = model ?? new DataRetentionPolicy();
-        updated.tenantId = tenantId;
-        updated.organizationId = organizationId;
-        updated.category = category;
-
-        let from = now;
-        if (isEarlier) {
-            from = new Date(now.getTime() + DATA_RETENTION_WAITING_DAYS * 24 * 60 * 60 * 1000);
-            from.setMilliseconds(0);
-            updated.setTerms(before);
-            updated.setPendingTerms({ terms, from });
-        } else {
-            updated.setTerms(terms);
-            updated.setPendingTerms(null);
-        }
-        await updated.save();
-
-        await DataRetentionAuditLogService.logPolicyChanged(user, updated, before, terms, from);
+        const from = new Date(now.getTime() + DATA_RETENTION_WAITING_DAYS * 24 * 60 * 60 * 1000);
+        from.setMilliseconds(0);
+        return {
+            model,
+            policy: DataRetentionPolicyStruct.create({
+                category,
+                terms: before,
+                pendingTerms: terms,
+                pendingFrom: from,
+            }),
+            before,
+            from,
+            waits: true,
+            changed: true,
+        };
     }
 
     static async cancelPendingChange(

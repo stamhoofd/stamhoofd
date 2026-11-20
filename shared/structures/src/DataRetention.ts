@@ -1,6 +1,7 @@
 import {
     ArrayDecoder,
     AutoEncoder,
+    BooleanDecoder,
     DateDecoder,
     EnumDecoder,
     field,
@@ -9,6 +10,7 @@ import {
     StringDecoder,
 } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
+import { Formatter } from '@stamhoofd/utility';
 
 export enum DataRetentionCategory {
     Members = 'Members',
@@ -376,6 +378,29 @@ export class DataRetentionOverview extends AutoEncoder {
 }
 
 /**
+ * What saving terms would do, counted before they are saved.
+ */
+export class DataRetentionPreview extends AutoEncoder {
+    /**
+     * Whether the change waits before it applies. A change that does not wait never erases data sooner, so it needs no confirmation.
+     */
+    @field({ decoder: BooleanDecoder })
+    waits = false;
+
+    /**
+     * When the new terms start to apply.
+     */
+    @field({ decoder: DateDecoder })
+    from = new Date();
+
+    /**
+     * As counted on the moment the new terms apply. Null when the count did not finish in time, or when the change does not wait.
+     */
+    @field({ decoder: new ArrayDecoder(DataRetentionCount), nullable: true })
+    counts: DataRetentionCount[] | null = null;
+}
+
+/**
  * What an administrator can see and change. The frontend combines both levels with resolveDataRetentionTerms.
  */
 export class DataRetentionSettings extends AutoEncoder {
@@ -621,4 +646,104 @@ export function getDataRetentionConflicts(
         );
     }
     return conflicts;
+}
+
+/**
+ * What happens to a category, as a title: 'Leden anonimiseren'.
+ */
+export function getDataRetentionActionTitle(
+    category: DataRetentionCategory,
+    action: DataRetentionAction,
+): string {
+    switch (category) {
+        case DataRetentionCategory.Members:
+            return action === DataRetentionAction.Delete
+                ? $t('Leden verwijderen')
+                : $t('Leden anonimiseren');
+        case DataRetentionCategory.SensitiveData:
+            return $t('Gevoelige gegevens wissen');
+        case DataRetentionCategory.Documents:
+            return $t('Documenten verwijderen');
+        case DataRetentionCategory.Accounts:
+            return $t('Accounts verwijderen');
+        case DataRetentionCategory.Orders:
+            return $t('Bestellingen anonimiseren');
+        case DataRetentionCategory.Emails:
+            return $t('E-mails verwijderen');
+        case DataRetentionCategory.AuditLogs:
+            return $t('Logboekregels verwijderen');
+    }
+}
+
+/**
+ * What the confirmation before saving says, or null when saving needs no confirmation:
+ * a change that does not wait, or a count that found nothing the change would process.
+ */
+export function getDataRetentionPreviewMessage(
+    preview: DataRetentionPreview,
+): { title: string; description: string } | null {
+    if (!preview.waits) {
+        return null;
+    }
+    const date = Formatter.date(preview.from, true);
+    const waiting = $t(
+        'Je hebt {days} dagen om dit te herzien en te annuleren. Wat daarna verwerkt is, kan je niet ongedaan maken.',
+        { days: DATA_RETENTION_WAITING_DAYS },
+    );
+
+    if (!preview.counts) {
+        return {
+            title: $t('Deze termijn gaat in op {date}', { date }),
+            description:
+                $t(
+                    'We konden niet meteen berekenen hoeveel gegevens dit raakt. Het overzicht toont de aantallen na de volgende nachtelijke telling, ruim voor de termijn ingaat.',
+                ) +
+                ' ' +
+                waiting,
+        };
+    }
+
+    const lines: string[] = [];
+    for (const count of preview.counts) {
+        const title = getDataRetentionActionTitle(count.category, count.action);
+        // Every month bucket is within the year after the terms apply; 'later' is after that
+        const nextYear = [...count.upcoming.entries()]
+            .filter(([key]) => key !== 'later')
+            .reduce((sum, [, amount]) => sum + amount, 0);
+
+        if (count.due > 0 && nextYear > 0) {
+            lines.push(
+                $t('{title}: {due} vanaf {date}, en nog {later} in het jaar daarna.', {
+                    title,
+                    due: Formatter.integer(count.due),
+                    date,
+                    later: Formatter.integer(nextYear),
+                }),
+            );
+        } else if (count.due > 0) {
+            lines.push(
+                $t('{title}: {due} vanaf {date}.', {
+                    title,
+                    due: Formatter.integer(count.due),
+                    date,
+                }),
+            );
+        } else if (nextYear > 0) {
+            lines.push(
+                $t('{title}: {later} in het jaar vanaf {date}.', {
+                    title,
+                    later: Formatter.integer(nextYear),
+                    date,
+                }),
+            );
+        }
+    }
+
+    if (lines.length === 0) {
+        return null;
+    }
+    return {
+        title: $t('Dit heeft gevolgen voor bestaande gegevens'),
+        description: lines.join(' ') + ' ' + waiting,
+    };
 }

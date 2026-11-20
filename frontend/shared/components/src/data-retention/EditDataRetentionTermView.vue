@@ -103,6 +103,7 @@ import {
     getDataRetentionCapabilities,
     getDataRetentionCategoryName,
     getDataRetentionConflicts,
+    getDataRetentionPreviewMessage,
     getDataRetentionTermsSummary,
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -120,7 +121,8 @@ import STInputBox from '#inputs/STInputBox.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import SaveView from '#navigation/SaveView.vue';
-import { cancelPendingDataRetentionChange, saveDataRetentionTerms } from './dataRetentionRequests';
+import { CenteredMessage } from '#overlays/CenteredMessage.ts';
+import { cancelPendingDataRetentionChange, previewDataRetentionTerms, saveDataRetentionTerms } from './dataRetentionRequests';
 import DataRetentionMonthsInput from './DataRetentionMonthsInput.vue';
 import { getDataRetentionCategoryTexts } from './dataRetentionTexts';
 
@@ -193,6 +195,13 @@ async function save() {
     errors.errorBox = null;
     try {
         terms.value.validate(category);
+
+        const message = await getConfirmation();
+        if (message && !await CenteredMessage.confirm({ ...message, confirmText: $t('Termijn opslaan'), destructive: true, availabilityDelay: 2_000 })) {
+            saving.value = false;
+            return;
+        }
+
         const settings = await runFresh(() => saveDataRetentionTerms(context.value, owner, category, terms.value));
         props.onSaved(settings);
 
@@ -209,6 +218,22 @@ async function save() {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
+}
+
+/**
+ * A preview that fails should not block saving: then the confirmation explains the waiting time without numbers.
+ */
+async function getConfirmation() {
+    try {
+        return getDataRetentionPreviewMessage(await previewDataRetentionTerms(context.value, owner, category, terms.value));
+    }
+    catch (e) {
+        console.error(e);
+        return {
+            title: $t('Termijn opslaan?'),
+            description: $t('We konden niet nagaan hoeveel gegevens deze wijziging raakt. Een kortere termijn gaat pas na {days} dagen in, en het overzicht toont de aantallen na de volgende nachtelijke telling.', { days: DATA_RETENTION_WAITING_DAYS }),
+        };
+    }
 }
 
 async function cancelPendingChange() {

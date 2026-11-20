@@ -63,7 +63,13 @@ export class DataRetentionFactsLoader {
         private readonly periodEndDates: Map<string, Date>,
     ) {}
 
-    static async create(tenantId: string): Promise<DataRetentionFactsLoader> {
+    /**
+     * override replaces the stored policy of one level and category, to count what terms would do before they are saved.
+     */
+    static async create(
+        tenantId: string,
+        override?: { organizationId: string | null; policy: DataRetentionPolicyStruct },
+    ): Promise<DataRetentionFactsLoader> {
         const platform = new Map<DataRetentionCategory, DataRetentionPolicyStruct>();
         const organizations = new Map<
             string,
@@ -82,6 +88,18 @@ export class DataRetentionFactsLoader {
                 new Map<DataRetentionCategory, DataRetentionPolicyStruct>();
             map.set(policy.category, policy.getStructure());
             organizations.set(policy.organizationId, map);
+        }
+
+        if (override) {
+            if (override.organizationId === null) {
+                platform.set(override.policy.category, override.policy);
+            } else {
+                const map =
+                    organizations.get(override.organizationId) ??
+                    new Map<DataRetentionCategory, DataRetentionPolicyStruct>();
+                map.set(override.policy.category, override.policy);
+                organizations.set(override.organizationId, map);
+            }
         }
 
         const previousPeriodIds = new Map<string, string | null>();
@@ -134,7 +152,48 @@ export class DataRetentionFactsLoader {
         if (members.length === 0) {
             return null;
         }
+        return {
+            lastId: members[members.length - 1].id,
+            facts: await this.loadMemberFacts(members, now),
+        };
+    }
 
+    async loadMembersByIds(memberIds: string[], now: Date): Promise<MemberRetentionFacts[]> {
+        if (memberIds.length === 0) {
+            return [];
+        }
+        const members = await Member.select('id', 'createdAt', 'organizationId', 'anonymizedAt')
+            .where('id', memberIds)
+            .fetch();
+        return await this.loadMemberFacts(members, now);
+    }
+
+    /**
+     * The members whose terms this organization decides over, the same ones the nightly count counts for it:
+     * every member registered at it. In userMode organization also its members without registrations;
+     * within a platform, those only follow the platform.
+     */
+    async loadMemberIdsOfOrganization(organizationId: string): Promise<string[]> {
+        const registered = await SQL.select(SQL.column('memberId'))
+            .from('registrations')
+            .where('organizationId', organizationId)
+            .whereNot('registeredAt', null)
+            .fetch();
+        const memberIds = new Set(registered.map((row) => row.registrations.memberId as string));
+
+        if (STAMHOOFD.userMode === 'organization') {
+            const own = await SQL.select(SQL.column('id'))
+                .from('members')
+                .where('organizationId', organizationId)
+                .fetch();
+            for (const row of own) {
+                memberIds.add(row.members.id as string);
+            }
+        }
+        return [...memberIds];
+    }
+
+    private async loadMemberFacts(members: Member[], now: Date): Promise<MemberRetentionFacts[]> {
         const memberIds = members.map((m) => m.id);
         const facts = new Map<string, MemberRetentionFacts>(
             members.map((member) => [
@@ -229,7 +288,7 @@ export class DataRetentionFactsLoader {
             facts.get(memberId)!.hasOpenBalance = true;
         }
 
-        return { lastId: memberIds[memberIds.length - 1], facts: [...facts.values()] };
+        return [...facts.values()];
     }
 
     /**
@@ -238,16 +297,15 @@ export class DataRetentionFactsLoader {
     async loadOrderBatch(
         afterId: string | null,
         limit: number,
+        organizationId?: string,
     ): Promise<{ lastId: string; facts: OrderRetentionFacts[] } | null> {
-        const orders = await Order.select(
-            'id',
-            'organizationId',
-            'createdAt',
-            'anonymizedAt',
-            'data',
-        )
+        const query = Order.select('id', 'organizationId', 'createdAt', 'anonymizedAt', 'data')
             .where('id', SQLWhereSign.Greater, afterId ?? '')
-            .where('anonymizedAt', null)
+            .where('anonymizedAt', null);
+        if (organizationId) {
+            query.where('organizationId', organizationId);
+        }
+        const orders = await query
             .orderBy(new SQLOrderBy({ column: SQL.column('id'), direction: 'ASC' }))
             .limit(limit)
             .fetch();
@@ -348,8 +406,9 @@ export class DataRetentionFactsLoader {
     async loadAccountBatch(
         afterId: string | null,
         limit: number,
+        organizationId?: string,
     ): Promise<{ lastId: string; facts: AccountRetentionFacts[] } | null> {
-        const users = await User.select(
+        const query = User.select(
             'id',
             'organizationId',
             'memberId',
@@ -357,8 +416,11 @@ export class DataRetentionFactsLoader {
             'lastActiveAt',
             'email',
             'verified',
-        )
-            .where('id', SQLWhereSign.Greater, afterId ?? '')
+        ).where('id', SQLWhereSign.Greater, afterId ?? '');
+        if (organizationId) {
+            query.where('organizationId', organizationId);
+        }
+        const users = await query
             .orderBy(new SQLOrderBy({ column: SQL.column('id'), direction: 'ASC' }))
             .limit(limit)
             .fetch();

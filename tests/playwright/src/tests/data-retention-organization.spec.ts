@@ -7,7 +7,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
-import { DataRetentionPolicy, DataRetentionRun, OrganizationFactory, Platform, UserFactory } from '@stamhoofd/models';
+import { DataRetentionPolicy, DataRetentionRun, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { appToUri, DataRetentionAction, DataRetentionCategory, DataRetentionCount, DataRetentionHoldReason, DataRetentionOverview, Permissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -136,6 +136,51 @@ test.describe('Data retention @data-retention', () => {
         await activePopup(page).getByRole('button', { name: 'Opslaan' }).click();
 
         await expect(activePopup(page)).toContainText('De termijn om te verwijderen mag niet korter zijn dan de termijn om te anonimiseren.');
+        expect(await getMembersPolicy(organization)).toBeNull();
+    });
+
+    test('saving a term that processes existing data asks for confirmation with the numbers', async ({ page }) => {
+        const { organization, admin } = await createOrganizationWithAdmin();
+        const member = await new MemberFactory({ organization }).create();
+        const registration = await new RegistrationFactory({ member, organization }).create();
+        registration.endDate = new Date('2018-08-31T00:00:00.000Z');
+        await registration.save();
+
+        await loginAs({ page, user: admin, fresh: true });
+        await openMembersTerm(page, organization);
+
+        await activePopup(page).getByTestId('data-retention-anonymize').click();
+        // The member is registered in the current period, which is protected by default
+        await activePopup(page).getByTestId('data-retention-protected-periods').click();
+        await activePopup(page).getByRole('button', { name: 'Opslaan' }).click();
+
+        const confirmation = page.getByTestId('centered-message');
+        await expect(confirmation).toContainText('Leden anonimiseren: 1 vanaf');
+        await confirmation.getByRole('button', { name: 'Termijn opslaan' }).click();
+
+        await expect(activePopup(page).getByTestId('data-retention-' + DataRetentionCategory.Members)).toContainText('Wijzigt op');
+        expect((await getMembersPolicy(organization))?.pendingAnonymizeAfterMonths).toBe(24);
+    });
+
+    test('cancelling the confirmation saves nothing', async ({ page }) => {
+        const { organization, admin } = await createOrganizationWithAdmin();
+        const member = await new MemberFactory({ organization }).create();
+        const registration = await new RegistrationFactory({ member, organization }).create();
+        registration.endDate = new Date('2018-08-31T00:00:00.000Z');
+        await registration.save();
+
+        await loginAs({ page, user: admin, fresh: true });
+        await openMembersTerm(page, organization);
+
+        await activePopup(page).getByTestId('data-retention-anonymize').click();
+        await activePopup(page).getByTestId('data-retention-protected-periods').click();
+        await activePopup(page).getByRole('button', { name: 'Opslaan' }).click();
+
+        const confirmation = page.getByTestId('centered-message');
+        await expect(confirmation).toBeVisible();
+        await confirmation.getByRole('button', { name: 'Annuleren' }).click();
+        await expect(confirmation).toBeHidden();
+
         expect(await getMembersPolicy(organization)).toBeNull();
     });
 

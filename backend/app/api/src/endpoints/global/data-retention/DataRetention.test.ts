@@ -9,7 +9,7 @@ import {
     Platform,
     UserFactory,
 } from '@stamhoofd/models';
-import type { DataRetentionSettings } from '@stamhoofd/structures';
+import type { DataRetentionPreview, DataRetentionSettings } from '@stamhoofd/structures';
 import {
     AuditLogType,
     DataRetentionAction,
@@ -28,10 +28,12 @@ import { SessionService } from '../../../services/SessionService.js';
 import { DeleteDataRetentionPendingEndpoint } from './DeleteDataRetentionPendingEndpoint.js';
 import { GetDataRetentionEndpoint } from './GetDataRetentionEndpoint.js';
 import { PatchDataRetentionEndpoint } from './PatchDataRetentionEndpoint.js';
+import { PostDataRetentionPreviewEndpoint } from './PostDataRetentionPreviewEndpoint.js';
 
 const getEndpoint = new GetDataRetentionEndpoint();
 const patchEndpoint = new PatchDataRetentionEndpoint();
 const deleteEndpoint = new DeleteDataRetentionPendingEndpoint();
+const previewEndpoint = new PostDataRetentionPreviewEndpoint();
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -52,7 +54,7 @@ function fullTerms(terms: Terms) {
 
 async function send<T>(
     endpoint: Endpoint<any, any, any, any>,
-    method: 'GET' | 'PATCH' | 'DELETE',
+    method: 'GET' | 'PATCH' | 'DELETE' | 'POST',
     path: string,
     host: string,
     token: Token,
@@ -335,6 +337,90 @@ describe('Endpoint.DataRetention', () => {
             expect(getPolicy(body, DataRetentionCategory.Members).terms.protectedPeriods).toBe(2);
             expect(getPolicy(body, DataRetentionCategory.Accounts)).toBeDefined();
             expect(body.platformPolicies).toEqual([]);
+        });
+    });
+
+    describe('Preview', () => {
+        function preview(
+            host: string,
+            token: Token,
+            category: DataRetentionCategory,
+            terms: Terms,
+        ) {
+            return send<DataRetentionPreview>(
+                previewEndpoint,
+                'POST',
+                '/data-retention/preview',
+                host,
+                token,
+                {
+                    category,
+                    terms: fullTerms(terms),
+                },
+            );
+        }
+
+        test('It needs no fresh authentication, and changes nothing', async () => {
+            const { admin, host } = await initOrganization();
+            const token = await SessionService.createSession(admin);
+
+            const response = await preview(host, token, DataRetentionCategory.Members, {
+                anonymizeAfterMonths: 12,
+            });
+
+            expect(response.body.waits).toBe(true);
+            expect(response.body.counts).not.toBeNull();
+            expect(await DataRetentionPolicy.select().count()).toBe(0);
+        });
+
+        test('An administrator without full access cannot preview', async () => {
+            const { organization, host } = await initOrganization();
+            const admin = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+            }).create();
+
+            await expect(
+                preview(host, await fresh(admin), DataRetentionCategory.Members, {
+                    anonymizeAfterMonths: 12,
+                }),
+            ).rejects.toThrow(STExpect.simpleError({ code: 'permission_denied' }));
+        });
+
+        test('An administrator of another organization cannot preview', async () => {
+            const { host } = await initOrganization();
+            const other = await initOrganization();
+
+            await expect(
+                preview(host, other.token, DataRetentionCategory.Members, {
+                    anonymizeAfterMonths: 12,
+                }),
+            ).rejects.toThrow(STExpect.simpleError({ code: 'permission_denied' }));
+        });
+
+        test('It is not available without the feature flag', async () => {
+            const { token, host } = await initOrganization({ organizationFlag: false });
+            await setPlatformFlag(false);
+
+            await expect(
+                preview(host, token, DataRetentionCategory.Members, { anonymizeAfterMonths: 12 }),
+            ).rejects.toThrow(STExpect.simpleError({ code: 'not_available' }));
+        });
+
+        test('An organization within a platform cannot preview accounts', async () => {
+            const { token, host } = await initOrganization();
+
+            await expect(
+                preview(host, token, DataRetentionCategory.Accounts, { deleteAfterMonths: 12 }),
+            ).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field' }));
+        });
+
+        test('Invalid terms are refused like when saving', async () => {
+            const { token, host } = await initOrganization();
+
+            await expect(
+                preview(host, token, DataRetentionCategory.Members, { anonymizeAfterMonths: -1 }),
+            ).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field' }));
         });
     });
 
