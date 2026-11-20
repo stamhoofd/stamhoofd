@@ -28,6 +28,7 @@ import { PaymentMethod } from '../PaymentMethod.js';
 import { PermissionsByRole } from '../PermissionsByRole.js';
 import { Policy } from '../Policy.js';
 import { RichText } from '../RichText.js';
+import { TranslatedRichText } from '../TranslatedRichText.js';
 import { SeatingPlan } from '../SeatingPlan.js';
 import { SponsorConfig } from '../SponsorConfig.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
@@ -561,7 +562,8 @@ export class WebshopMetaData extends AutoEncoder {
         upgradePatch: (data) => RichText.patch({ text: data }),
         downgradePatch: (data) => data.text,
     })
-    description = RichText.create({});
+    @field(TranslatedRichText.field({ ...NextVersion }))
+    description = TranslatedRichText.create();
 
     /**
      * Serves as a hint in the UI for better suggestions and UX.
