@@ -50,6 +50,7 @@ export class DataRetentionCounter {
             run.cursor = null;
             run.progress = new Map();
             run.startedAt = new Date();
+            run.delayReportedAt = null;
         }
 
         let phase = run.phase;

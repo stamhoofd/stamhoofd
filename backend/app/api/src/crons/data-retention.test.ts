@@ -1,6 +1,8 @@
+import { EmailMocker } from '@stamhoofd/email';
 import {
     DataRetentionPolicy,
     DataRetentionRun,
+    DataRetentionRunPhase,
     OrganizationFactory,
     Platform,
 } from '@stamhoofd/models';
@@ -119,5 +121,68 @@ describe('cron.data-retention', () => {
         await runDataRetention(todayAt(3));
 
         expect((await getRun())?.finishedAt).not.toEqual(todayAt(1, { days: -1 }));
+    });
+
+    describe('A run that does not finish in one night', () => {
+        const subject = 'Telling bewaartermijnen niet afgerond in één nacht';
+
+        // Emails of other tests can still be in the queue: match on the subject
+        async function getDelayEmails() {
+            return (await EmailMocker.transactional.getSucceededEmails()).filter(
+                (e) => e.subject === subject,
+            );
+        }
+
+        async function createRunningRun(startedAt: Date) {
+            const run = await DataRetentionRun.getOrCreate(TenantContext.currentOrRoot.tenantId);
+            run.phase = DataRetentionRunPhase.Members;
+            run.startedAt = startedAt;
+            await run.save();
+            return run;
+        }
+
+        test('The webmaster is told once when a run continues from an earlier night', async () => {
+            const before = (await getDelayEmails()).length;
+            await createRunningRun(todayAt(2, { days: -1 }));
+
+            await runDataRetention(todayAt(2));
+            expect((await getDelayEmails()).length).toBe(before + 1);
+            expect((await getRun())?.delayReportedAt).toBeInstanceOf(Date);
+
+            // The same run continues again: no second email
+            const run = (await getRun())!;
+            run.phase = DataRetentionRunPhase.Orders;
+            run.startedAt = todayAt(2, { days: -1 });
+            run.finishedAt = null;
+            await run.save();
+            await runDataRetention(todayAt(3));
+            expect((await getDelayEmails()).length).toBe(before + 1);
+        });
+
+        test('A run that started this night is not reported', async () => {
+            const before = (await getDelayEmails()).length;
+            await createRunningRun(todayAt(1));
+
+            await runDataRetention(todayAt(2));
+
+            expect((await getDelayEmails()).length).toBe(before);
+            expect((await getRun())?.delayReportedAt).toBeNull();
+        });
+
+        test('A new run can be reported again', async () => {
+            const run = await createRunningRun(todayAt(2, { days: -1 }));
+            run.delayReportedAt = todayAt(2, { days: -1 });
+            await run.save();
+
+            // Finishes the old run, so the next night starts a new one
+            await runDataRetention(todayAt(2));
+            const finished = (await getRun())!;
+            expect(finished.phase).toBeNull();
+
+            finished.finishedAt = todayAt(1, { days: -1 });
+            await finished.save();
+            await runDataRetention(todayAt(2));
+            expect((await getRun())?.delayReportedAt).toBeNull();
+        });
     });
 });

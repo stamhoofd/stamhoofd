@@ -3,6 +3,7 @@
  * anonymize or delete. It does not change any other data yet: processing comes later, behind the data-retention-execute feature flag.
  */
 
+import { Email } from '@stamhoofd/email';
 import { DataRetentionRun, Platform } from '@stamhoofd/models';
 import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
@@ -51,5 +52,31 @@ export async function runDataRetention(now = new Date()) {
         return;
     }
 
+    if (run.phase && run.startedAt && !isSameDay(run.startedAt, now) && !run.delayReportedAt) {
+        reportDelay(run, run.startedAt);
+        run.delayReportedAt = now;
+        await run.save();
+    }
+
     await DataRetentionCounter.continueRun(run, { deadline: new Date(Date.now() + MAX_DURATION) });
+}
+
+/**
+ * A run that keeps continuing would leave the overview on old numbers without anyone noticing, so the webmaster hears it once per run.
+ */
+function reportDelay(run: DataRetentionRun, startedAt: Date) {
+    Email.sendWebmaster({
+        subject: 'Telling bewaartermijnen niet afgerond in één nacht',
+        text:
+            'De telling van de bewaartermijnen (tenant ' +
+            run.tenantId +
+            ') startte op ' +
+            Formatter.dateTime(startedAt) +
+            ' en is nog niet klaar. Ze loopt nu verder bij ' +
+            run.phase +
+            ' (cursor ' +
+            (run.cursor ?? 'begin') +
+            ').\n\n' +
+            'Het overzicht toont tot dan de laatste volledige telling. Blijft dit elke nacht gebeuren, dan past de telling niet meer in de nacht.',
+    });
 }

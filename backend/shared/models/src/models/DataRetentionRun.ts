@@ -72,6 +72,12 @@ export class DataRetentionRun extends QueryableModel {
     @column({ type: 'datetime', nullable: true })
     finishedAt: Date | null = null;
 
+    /**
+     * When the webmaster was told that the running run did not finish in the night it started. Reset when a new run starts.
+     */
+    @column({ type: 'datetime', nullable: true })
+    delayReportedAt: Date | null = null;
+
     @column({
         type: 'datetime',
         beforeSave(old?: any) {
