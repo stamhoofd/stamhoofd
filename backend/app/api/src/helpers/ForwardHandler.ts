@@ -123,11 +123,11 @@ export class ForwardHandler {
                       }
                     : Email.getWebmasterToEmail(),
                 to: [{ email: from }],
-                subject: 'Ongeldig e-mailadres',
-                text:
-                    'Beste,\n\nDe vereniging die je probeert te bereiken via ' +
-                    email +
-                    ' is helaas niet bereikbaar via dit e-mailadres. Dit e-mailadres wordt enkel gebruikt voor het versturen van automatische e-mails in naam van een vereniging. Probeer de vereniging te contacteren via een ander e-mailadres.\n\nBedankt.',
+                subject: $t('Ongeldig e-mailadres'),
+                text: $t(
+                    'Beste,\n\nDe vereniging die je probeert te bereiken via {email} is helaas niet bereikbaar via dit e-mailadres. Dit e-mailadres wordt enkel gebruikt voor het versturen van automatische e-mails in naam van een vereniging. Probeer de vereniging te contacteren via een ander e-mailadres.\n\nBedankt.',
+                    { email: email ?? '' },
+                ),
             };
         }
 

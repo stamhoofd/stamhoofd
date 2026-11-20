@@ -65,7 +65,9 @@ export class ReferralService {
             credit = new BalanceItem();
             credit.type = BalanceItemType.ReferralDiscount;
             credit.name = otherOrganization
-                ? 'Tegoed gekregen van ' + otherOrganization.name
+                ? $t('Tegoed gekregen van {organization}', {
+                      organization: otherOrganization.name,
+                  })
                 : code.description;
             credit.payingOrganizationId = organization.id;
             credit.organizationId = membershipOrganization.id;
@@ -96,29 +98,33 @@ export class ReferralService {
                     // Delay email until everything is validated and saved
                     delayEmails.push({
                         to: admins,
-                        subject:
-                            organization.name + ' heeft jullie doorverwijzingslink gebruikt 🥳',
+                        subject: $t('{organization} heeft jullie doorverwijzingslink gebruikt 🥳', {
+                            organization: organization.name,
+                        }),
                         type: 'transactional',
-                        text:
-                            'Dag ' +
-                            otherOrganization.name +
-                            ',\n\nGoed nieuws! ' +
-                            organization.name +
-                            ' heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren.\n\n— Stamhoofd',
+                        text: $t(
+                            'Dag {receiver},\n\nGoed nieuws! {organization} heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren.\n\n— Stamhoofd',
+                            {
+                                receiver: otherOrganization.name,
+                                organization: organization.name,
+                            },
+                        ),
                     });
                 } else {
                     // Delay email until everything is validated and saved
                     delayEmails.push({
                         to: admins,
-                        subject:
-                            organization.name + ' heeft jullie doorverwijzingslink gebruikt 🥳',
+                        subject: $t('{organization} heeft jullie doorverwijzingslink gebruikt 🥳', {
+                            organization: organization.name,
+                        }),
                         type: 'transactional',
-                        text:
-                            'Dag ' +
-                            otherOrganization.name +
-                            ',\n\nGoed nieuws! ' +
-                            organization.name +
-                            ' heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren. Als zij minstens 1 euro op Stamhoofd uitgeven ontvangen jullie een tegoed dat kan oplopen tot 100 euro per vereniging (zie daarvoor Stamhoofd > Instellingen). Lees zeker onze tips na om nog een groter bedrag te verzamelen.\n\n— Stamhoofd',
+                        text: $t(
+                            'Dag {receiver},\n\nGoed nieuws! {organization} heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren. Als zij minstens 1 euro op Stamhoofd uitgeven ontvangen jullie een tegoed dat kan oplopen tot 100 euro per vereniging (zie daarvoor Stamhoofd > Instellingen). Lees zeker onze tips na om nog een groter bedrag te verzamelen.\n\n— Stamhoofd',
+                            {
+                                receiver: otherOrganization.name,
+                                organization: organization.name,
+                            },
+                        ),
                     });
                 }
             }
@@ -222,7 +228,9 @@ export class ReferralService {
             // The receiving organization is invoiced instead of the organization for the usage of Stamhoofd.
             const item = new BalanceItem();
             item.type = BalanceItemType.Other;
-            item.name = 'Aankoop Stamhoofd voor ' + organization.name;
+            item.name = $t('Aankoop Stamhoofd voor {organization}', {
+                organization: organization.name,
+            });
             item.payingOrganizationId = receivingOrganization.id;
             item.organizationId = membershipOrganizationId;
             item.VATPercentage = 21;
@@ -245,42 +253,52 @@ export class ReferralService {
                 Email.send({
                     to: admins,
                     from: Email.getQuickFromEmail(receivingOrganization.address.country),
-                    subject: `${organization.name} heeft jullie tegoed gebruikt`,
-                    text:
-                        'Dag ' +
-                        receivingOrganization.name +
-                        ',\n\n' +
-                        organization.name +
-                        ' had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze dit ook gebruikt. Zoals afgesproken wordt hiervoor ' +
-                        Formatter.price(code.invoiceValue) +
-                        ' aangerekend via jullie openstaand saldo in jullie Stamhoofd account.' +
-                        '\n\n— Stamhoofd',
+                    subject: $t('{organization} heeft jullie tegoed gebruikt', {
+                        organization: organization.name,
+                    }),
+                    text: $t(
+                        'Dag {receiver},\n\n{organization} had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze dit ook gebruikt. Zoals afgesproken wordt hiervoor {price} aangerekend via jullie openstaand saldo in jullie Stamhoofd account.\n\n— Stamhoofd',
+                        {
+                            receiver: receivingOrganization.name,
+                            organization: organization.name,
+                            price: Formatter.price(code.invoiceValue),
+                        },
+                    ),
                 });
             } else {
                 // Delay email until everything is validated and saved
                 Email.send({
                     from: Email.getQuickFromEmail(receivingOrganization.address.country),
                     to: admins,
-                    subject:
-                        'Je hebt ' + Formatter.price(-credit.unitPrice) + ' tegoed ontvangen 💰',
+                    subject: $t('Je hebt {price} tegoed ontvangen 💰', {
+                        price: Formatter.price(-credit.unitPrice),
+                    }),
                     text:
-                        'Dag ' +
-                        receivingOrganization.name +
-                        ',\n\nGeweldig nieuws! ' +
-                        organization.name +
-                        ' had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze ook voor het eerst minstens één euro uitgegeven. Daardoor ontvangen jullie ' +
-                        Formatter.price(-credit.unitPrice) +
                         // eslint-disable-next-line secure-coding/no-improper-sanitization -- This is a plain-text email body, not an HTML sink.
-                        ' tegoed voor Stamhoofd (zie daarvoor Stamhoofd > Instellingen). ' +
+                        $t(
+                            'Dag {receiver},\n\nGeweldig nieuws! {organization} had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze ook voor het eerst minstens één euro uitgegeven. Daardoor ontvangen jullie {price} tegoed voor Stamhoofd (zie daarvoor Stamhoofd > Instellingen). ',
+                            {
+                                receiver: receivingOrganization.name,
+                                organization: organization.name,
+                                price: Formatter.price(-credit.unitPrice),
+                            },
+                        ) +
                         (-credit.unitPrice <= 90 * 100_00
-                            ? 'Bij de volgende vereniging ontvangen jullie nog meer: ' +
-                              Formatter.price(-credit.unitPrice + 10 * 100_00) +
-                              '. '
+                            ? $t(
+                                  'Bij de volgende vereniging ontvangen jullie nog meer: {price}. ',
+                                  {
+                                      price: Formatter.price(-credit.unitPrice + 10 * 100_00),
+                                  },
+                              )
                             : '') +
                         (-credit.unitPrice <= 80 * 100_00
-                            ? 'En dat blijft oplopen tot € 100,00 per vereniging die je aanbrengt.'
+                            ? $t(
+                                  'En dat blijft oplopen tot € 100,00 per vereniging die je aanbrengt.',
+                              )
                             : '') +
-                        'Doe zo verder! Lees zeker onze tips na om nog een groter bedrag te verzamelen.\n\n— Stamhoofd',
+                        $t(
+                            'Doe zo verder! Lees zeker onze tips na om nog een groter bedrag te verzamelen.\n\n— Stamhoofd',
+                        ),
                 });
             }
         }
