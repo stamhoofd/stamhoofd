@@ -4,7 +4,10 @@
 
         <main>
             <h1>{{ title }}</h1>
-            <p>{{ $t('Kies hoe lang gegevens bewaard blijven. Daarna worden ze automatisch geanonimiseerd of verwijderd.') }}</p>
+            <p>
+                {{ $t('Kies hoe lang gegevens bewaard blijven. Daarna worden ze automatisch geanonimiseerd of verwijderd.') }}
+                <a :href="$domains.getDocs('bewaartermijnen')" class="inline-link" target="_blank" rel="noopener">{{ $t('%19t') }}</a>
+            </p>
             <p v-if="isOrganizationWithinPlatform">
                 {{ $t('Elke rij toont wat er voor jullie vereniging echt geldt. Tussen de koepel en jullie vereniging geldt altijd de langste termijn.') }}
             </p>
@@ -34,12 +37,33 @@
                     </STListItem>
                 </STList>
             </LoadingBoxTransition>
+
+            <template v-if="settings">
+                <hr>
+                <h2>{{ $t('Overzicht') }}</h2>
+                <STList>
+                    <STListItem :selectable="true" data-testid="open-data-retention-overview" @click="openOverview">
+                        <template #left>
+                            <span class="icon calendar" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ $t('Wat staat er te gebeuren?') }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ $t('Wat er de komende maanden verwerkt wordt') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
         </main>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@browser/navigation';
 import type { DataRetentionPolicy, DataRetentionSettings } from '@stamhoofd/structures';
 import {
     DataRetentionCategory,
@@ -67,6 +91,7 @@ const context = useContext();
 const owner = useRequestOwner();
 const errors = useErrors();
 const present = usePresent();
+const show = useShow();
 const organization = useOrganization();
 
 const title = $t('Bewaartermijnen');
@@ -113,6 +138,16 @@ function hasDocumentsWarning(policy: DataRetentionPolicy) {
 
 function formatDate(date: Date) {
     return Formatter.date(date, true);
+}
+
+async function openOverview() {
+    await show({
+        components: [
+            AsyncComponent(() => import('./DataRetentionOverviewView.vue'), {
+                overview: settings.value?.overview ?? null,
+            }),
+        ],
+    });
 }
 
 async function edit(policy: DataRetentionPolicy) {

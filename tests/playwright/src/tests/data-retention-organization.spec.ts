@@ -7,9 +7,9 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
-import { DataRetentionPolicy, OrganizationFactory, Platform, UserFactory } from '@stamhoofd/models';
+import { DataRetentionPolicy, DataRetentionRun, OrganizationFactory, Platform, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { appToUri, DataRetentionCategory, Permissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { appToUri, DataRetentionAction, DataRetentionCategory, DataRetentionCount, DataRetentionHoldReason, DataRetentionOverview, Permissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
@@ -58,10 +58,14 @@ async function createOrganizationWithAdmin() {
     return { organization, admin };
 }
 
-async function openMembersTerm(page: Page, organization: Organization) {
+async function openDataRetention(page: Page, organization: Organization) {
     await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}`);
     await selectTab(page, 'settings');
     await page.getByTestId('open-data-retention-settings').click();
+}
+
+async function openMembersTerm(page: Page, organization: Organization) {
+    await openDataRetention(page, organization);
     await activePopup(page).getByTestId('data-retention-' + DataRetentionCategory.Members).click();
 }
 
@@ -133,5 +137,43 @@ test.describe('Data retention @data-retention', () => {
 
         await expect(activePopup(page)).toContainText('De termijn om te verwijderen mag niet korter zijn dan de termijn om te anonimiseren.');
         expect(await getMembersPolicy(organization)).toBeNull();
+    });
+
+    test('the overview shows what the last count found, per month and what is held', async ({ page }) => {
+        const { organization, admin } = await createOrganizationWithAdmin();
+        // Next month is shown on its own, a month two years from now is part of the rest.
+        // The middle of the month, so the time zone cannot move it to another month.
+        const today = new Date();
+        const nextMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 15));
+        const muchLater = new Date(Date.UTC(today.getUTCFullYear() + 2, today.getUTCMonth() + 1, 15));
+        const monthKey = (date: Date) => date.toISOString().slice(0, 7);
+        await DataRetentionRun.delete();
+        const run = await DataRetentionRun.getOrCreate('1');
+        run.finishedAt = new Date();
+        run.result = new Map([[organization.id, DataRetentionOverview.create({
+            counts: [
+                DataRetentionCount.create({
+                    category: DataRetentionCategory.Members,
+                    action: DataRetentionAction.Anonymize,
+                    due: 5,
+                    held: 2,
+                    heldBy: new Map([[DataRetentionHoldReason.OpenBalance, 2]]),
+                    upcoming: new Map([[monthKey(nextMonth), 3], [monthKey(muchLater), 4], ['later', 6]]),
+                }),
+            ],
+        })]]);
+        await run.save();
+
+        await loginAs({ page, user: admin, fresh: true });
+        await openDataRetention(page, organization);
+        await activePopup(page).getByTestId('open-data-retention-overview').click();
+
+        // Grouped per moment, in the order things happen
+        const group = (key: string) => activePopup(page).getByTestId('data-retention-overview-' + key);
+        await expect(group('now')).toContainText('Leden anonimiseren');
+        await expect(group('now')).toContainText('5');
+        await expect(group(monthKey(nextMonth))).toContainText('3');
+        await expect(group('later')).toContainText('10');
+        await expect(activePopup(page)).toContainText('Openstaand bedrag of betaling in verwerking');
     });
 });
