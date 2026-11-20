@@ -93,7 +93,7 @@ export class DownloadablePdf {
      * @param title title of the pdf document
      */
     async download(title: string) {
-        const fileName = Formatter.slug(title) + '.pdf';
+        const fileName = Formatter.fileSlug(title) + '.pdf';
         const blob = new Blob([new Uint8Array(this.buffer)], { type: 'application/pdf' });
 
         if (AppManager.shared.downloadFile) {

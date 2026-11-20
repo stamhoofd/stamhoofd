@@ -36,6 +36,7 @@ import type { PlatformFamilyManager } from '../PlatformFamilyManager';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
 import { RegistrationsActionBuilder } from './RegistrationsActionBuilder';
+import { getMembersExportTitle } from './getMembersExportTitle';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[]; categories?: GroupCategoryTree[]; organizationPeriod?: OrganizationRegistrationPeriod | null }) {
@@ -1047,7 +1048,7 @@ export class MemberActionBuilder {
                         filter: selection.filter,
                         workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.groups, this.context.auth),
                         configurationId: 'members',
-                        title: this.getExcelTitle(selection),
+                        title: this.getExportTitle(selection),
                     }),
                 }),
             ],
@@ -1055,20 +1056,20 @@ export class MemberActionBuilder {
         });
     }
 
-    private getExcelTitle(selection: TableActionSelection<PlatformMember>) {
-        if (selection.markedRows && selection.markedRowsAreSelected && selection.markedRows.size === 1) {
-            return [...selection.markedRows.values()][0].member.name;
-        }
-        const parts = [
-            this.organizations.length === 1 && this.context.auth.hasSomePlatformAccess() ? this.organizations[0].name : null,
-            this.organizations.length === 1 && this.organizations[0].period.period.id !== this.platform.period.id ? this.organizations[0].period.period.name : null,
-            this.categories.length === 1
-                ? this.categories[0].settings.name
-                : (this.groups.length === 1 ? this.groups[0].settings.name : null),
-            $t('%1EH'),
-        ];
-
-        return parts.filter(Boolean).join(' - ');
+    /**
+     * Shared by the Excel and PDF export so both files get the same name.
+     */
+    private getExportTitle(selection: TableActionSelection<PlatformMember>) {
+        const singleMemberName = selection.markedRows.size === 1 && selection.markedRowsAreSelected ? [...selection.markedRows.values()][0].member.name : null;
+        return getMembersExportTitle({
+            organizations: this.organizations,
+            platform: this.platform,
+            categories: this.categories,
+            groups: this.groups,
+            includeOrganizationName: this.context.auth.hasSomePlatformAccess(),
+            suffix: $t('%1EH'),
+            singleMemberName,
+        });
     }
 
     private getExportToPdfAction() {
@@ -1080,19 +1081,20 @@ export class MemberActionBuilder {
             fetchLimitSettings: { limit: 500, createErrorMessage: (count, limit) => {
                 return $t('%17W', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
-            handler: async (members: PlatformMember[]) => {
-                await this.exportToPdf(members);
+            handler: async (members: PlatformMember[], _wereItemsFetched, selection) => {
+                await this.exportToPdf(members, this.getExportTitle(selection));
             },
         });
     }
 
-    private async exportToPdf(members: PlatformMember[]) {
+    private async exportToPdf(members: PlatformMember[], fileName: string) {
         await presentExportMembersToPdf({
             members,
             platform: this.platform,
             organizations: this.organizations,
             groups: this.groups,
             present: this.present,
+            fileName,
         });
     }
 
@@ -1313,7 +1315,7 @@ export async function presentDeleteMembers({ members, present, platformFamilyMan
     });
 }
 
-export async function presentExportMembersToPdf({ members, platform, organizations, groups, present }: { members: PlatformMember[]; platform: Platform; organizations: Organization[]; groups: Group[]; present: ReturnType<typeof usePresent> }) {
+export async function presentExportMembersToPdf({ members, platform, organizations, groups, present, fileName }: { members: PlatformMember[]; platform: Platform; organizations: Organization[]; groups: Group[]; present: ReturnType<typeof usePresent>; fileName: string }) {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
@@ -1323,6 +1325,7 @@ export async function presentExportMembersToPdf({ members, platform, organizatio
                     groups,
                     configurationId: 'members',
                     items: members,
+                    fileName,
                 }),
             }),
         ],

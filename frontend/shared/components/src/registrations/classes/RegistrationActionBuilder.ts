@@ -8,6 +8,7 @@ import type { PlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
 import { usePlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup } from '#members/checkout/useCheckoutRegisterItem.ts';
 import { canDeleteMembersInBulk, deleteInvitationsForMembers, getActionsForCategory, getCategoryTreeOfGroupsLinkedToWaitingList, inviteMembersForGroup, isMemberInvited, isMemberRegistered, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf } from '#members/classes/MemberActionBuilder.ts';
+import { getMembersExportTitle } from '#members/classes/getMembersExportTitle.ts';
 import type { TableAction, TableActionSelection } from '#tables/classes/TableAction.ts';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
@@ -623,8 +624,8 @@ export class RegistrationActionBuilder {
             fetchLimitSettings: { limit: 500, createErrorMessage: (count, limit) => {
                 return $t('%17W', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
-            handler: async (registrations: PlatformRegistration[]) => {
-                await this.exportToPdf(registrations.map(r => r.member));
+            handler: async (registrations: PlatformRegistration[], _wereItemsFetched, selection) => {
+                await this.exportToPdf(registrations.map(r => r.member), this.getExportTitle(selection));
             },
         });
     }
@@ -885,7 +886,7 @@ export class RegistrationActionBuilder {
                         filter: selection.filter,
                         workbook: getSelectableWorkbook(this.platform, this.organizations.length === 1 ? this.organizations[0] : null, this.groups, this.context.auth),
                         configurationId: 'registrations',
-                        title: this.getExcelTitle(selection),
+                        title: this.getExportTitle(selection),
                     }),
                 }),
             ],
@@ -893,29 +894,30 @@ export class RegistrationActionBuilder {
         });
     }
 
-    private getExcelTitle(selection: TableActionSelection<PlatformRegistration>) {
-        if (selection.markedRows && selection.markedRowsAreSelected && selection.markedRows.size === 1) {
-            return [...selection.markedRows.values()][0].member.member.name;
-        }
-        const parts = [
-            this.organizations.length === 1 && this.context.auth.hasSomePlatformAccess() ? this.organizations[0].name : null,
-            this.organizations.length === 1 && this.organizations[0].period.period.id !== this.platform.period.id ? this.organizations[0].period.period.name : null,
-            this.categories.length === 1
-                ? this.categories[0].settings.name
-                : (this.groups.length === 1 ? this.groups[0].settings.name : null),
-            $t('%1EI'),
-        ];
-
-        return parts.filter(Boolean).join(' - ');
+    /**
+     * Shared by the Excel and PDF export so both files get the same name.
+     */
+    private getExportTitle(selection: TableActionSelection<PlatformRegistration>) {
+        const singleMemberName = selection.markedRows.size === 1 && selection.markedRowsAreSelected ? [...selection.markedRows.values()][0].member.member.name : null;
+        return getMembersExportTitle({
+            organizations: this.organizations,
+            platform: this.platform,
+            categories: this.categories,
+            groups: this.groups,
+            includeOrganizationName: this.context.auth.hasSomePlatformAccess(),
+            suffix: $t('%1EI'),
+            singleMemberName,
+        });
     }
 
-    private async exportToPdf(members: PlatformMember[]) {
+    private async exportToPdf(members: PlatformMember[], fileName: string) {
         await presentExportMembersToPdf({
             members,
             platform: this.platform,
             organizations: this.organizations,
             groups: this.groups,
             present: this.present,
+            fileName,
         });
     }
 

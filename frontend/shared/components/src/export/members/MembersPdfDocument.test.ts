@@ -14,8 +14,10 @@ describe('MembersPdfDocument', () => {
 
     it('renders a pdf without depending on the ticket builder having loaded first', async () => {
         let downloaded: Blob | File | URL | null = null;
-        AppManager.shared.downloadFile = async (data) => {
+        let downloadedName: string | null = null;
+        AppManager.shared.downloadFile = async (data, filename) => {
             downloaded = data;
+            downloadedName = filename;
         };
 
         const sheet = new SelectablePdfSheet<PlatformMember>({
@@ -26,8 +28,10 @@ describe('MembersPdfDocument', () => {
             ],
         });
 
-        const document = new MembersPdfDocument([], sheet, sheet, 'Leden', null);
+        const document = new MembersPdfDocument([], sheet, sheet, 'Leden', 'Startavond 2025 - Leden', null);
         await document.download();
+
+        expect(downloadedName).toBe('Startavond 2025 - Leden.pdf');
 
         expect(downloaded).toBeInstanceOf(Blob);
         const bytes = new Uint8Array(await (downloaded as unknown as Blob).arrayBuffer());
