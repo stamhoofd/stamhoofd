@@ -730,7 +730,7 @@ function getUnavailableAuditLogTypes(context: AuditLogFilterContext): Set<AuditL
         unavailable.add(AuditLogType.EventNotificationEdited);
         unavailable.add(AuditLogType.EventNotificationDeleted);
     } else {
-        if (!platform.config.featureFlags.includes('event-notifications')) {
+        if (platform && !platform.config.featureFlags.includes('event-notifications')) {
             unavailable.add(AuditLogType.EventNotificationAdded);
             unavailable.add(AuditLogType.EventNotificationDeleted);
             unavailable.add(AuditLogType.EventNotificationEdited);

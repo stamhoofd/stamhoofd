@@ -11,7 +11,7 @@ export type AuditLogTypeContext = {
      */
     isOrganizationLog: boolean;
 
-    platform: Platform;
+    platform?: Platform;
 };
 
 /**
@@ -247,7 +247,7 @@ export function getAuditLogTypeCategoryName(category: AuditLogTypeCategory, cont
         case AuditLogTypeCategory.Groups:
             return $t('Groepen en wachtlijsten');
         case AuditLogTypeCategory.Events:
-            return context.isPlatform && platform.config.featureFlags.includes('event-notifications')
+            return context.isPlatform && platform && platform.config.featureFlags.includes('event-notifications')
                 ? $t('Activiteiten en kampmeldingen')
                 : $t('Activiteiten');
         case AuditLogTypeCategory.Webshops:

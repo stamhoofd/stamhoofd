@@ -1498,7 +1498,7 @@ export class AdminPermissionChecker {
             if (template.organizationId === null) {
                 // Public templates
 
-                return EmailTemplateStruct.allowPlatformLevel(template.type);
+                return EmailTemplateStruct.allowPlatformLevel(template.type, this.platform);
             }
 
             if (!(await this.canReadEmailTemplates(template.organizationId))) {

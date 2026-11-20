@@ -47,6 +47,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
             }
         }
         const templates: EmailTemplate[] = [];
+        const platform = await Platform.getShared()
 
         // Get all patches
         for (const patch of request.body.getPatches()) {
@@ -91,7 +92,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
                 throw Context.auth.error();
             }
 
-            if (!organization && !EmailTemplateStruct.allowPlatformLevel(struct.type)) {
+            if (!organization && !EmailTemplateStruct.allowPlatformLevel(struct.type, platform)) {
                 throw Context.auth.error();
             }
 

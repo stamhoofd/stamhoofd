@@ -75,7 +75,7 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
         const types = (request.query.types ?? [...Object.values(EmailTemplateType)]).filter(
             (type) => {
                 if (!organization) {
-                    return EmailTemplateStruct.allowPlatformLevel(type);
+                    return EmailTemplateStruct.allowPlatformLevel(type, platform);
                 }
                 return EmailTemplateStruct.allowOrganizationLevel(type, organization, platform);
             },
