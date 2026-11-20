@@ -74,6 +74,21 @@
                     </template>
                 </STListItem>
 
+                <STListItem v-if="dataRetentionFeature" :selectable="true" class="left-center" data-testid="open-data-retention-settings" @click="$navigate(Routes.DataRetention)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/clock.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Bewaartermijnen') }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ $t('Kies hoe lang gegevens bewaard blijven') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.PaymentAccounts)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
@@ -332,7 +347,7 @@ import { defineRoutes, useNavigate } from '@browser/navigation';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { LoginMethodConfig } from '@stamhoofd/structures';
-import { DataPermissionsSettings, DetailedPayableBalance, EmailTemplate, EmailTemplateType, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, LoginMethod, LoginProviderType, Organization, OrganizationMetaData } from '@stamhoofd/structures';
+import { DataPermissionsSettings, DetailedPayableBalance, EmailTemplate, EmailTemplateType, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, isDataRetentionEnabled, LoginMethod, LoginProviderType, Organization, OrganizationMetaData } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 import { usePatchOrganization } from '@stamhoofd/components/organizations/usePatchOrganization.ts';
@@ -360,6 +375,7 @@ enum Routes {
     DataPermissions = 'toestemming-gegevensverzameling',
     Invoices = 'uitgaande-facturen',
     Mailchimp = 'mailchimp',
+    DataRetention = 'bewaartermijnen',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -369,6 +385,10 @@ const organization = useRequiredOrganization();
 const patchOrganization = usePatchOrganization();
 const uitpasFeature = useFeatureFlagComputed('uitpas');
 const mailchimpFeature = useFeatureFlagComputed('mailchimp');
+const dataRetentionFeature = computed(() => isDataRetentionEnabled({
+    platformFeatureFlags: platform.value.config.featureFlags,
+    organizationFeatureFlags: organization.value.privateMeta?.featureFlags ?? [],
+}));
 
 defineRoutes([
     {
@@ -389,6 +409,11 @@ defineRoutes([
         url: Routes.Personalization,
         component: async () => (await import('./PersonalizeSettingsView.vue')).default,
         present: 'popup',
+    },
+    {
+        url: Routes.DataRetention,
+        present: 'popup',
+        component: async () => (await import('@stamhoofd/components/data-retention/DataRetentionView.vue')).default,
     },
     {
         url: Routes.Privacy,

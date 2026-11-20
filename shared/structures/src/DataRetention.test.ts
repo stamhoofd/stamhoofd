@@ -5,6 +5,10 @@ import {
     DataRetentionCategory,
     DataRetentionPolicy,
     DataRetentionTerms,
+    formatDataRetentionMonths,
+    getDataRetentionConflicts,
+    getDataRetentionSourceDescription,
+    getDataRetentionTermsSummary,
     isEarlierDataRetentionDeletion,
     resolveDataRetentionTerms,
 } from '#/index.ts';
@@ -428,6 +432,110 @@ describe('DataRetention', () => {
                 { version: Version },
             );
             expect(() => DataRetentionTerms.decode(data)).toThrow(/Expected a number/);
+        });
+    });
+
+    describe('descriptions', () => {
+        // The test environment returns keys without filling in placeholders: do that here, as I18n.replace does
+        const original = (globalThis as any).$t;
+        beforeAll(() => {
+            (globalThis as any).$t = (key: string, replace?: Record<string, unknown>) =>
+                Object.entries(replace ?? {}).reduce(
+                    (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+                    key,
+                );
+        });
+        afterAll(() => {
+            (globalThis as any).$t = original;
+        });
+
+        test('A term is shown in years when possible', () => {
+            expect(formatDataRetentionMonths(12)).toBe('1 jaar');
+            expect(formatDataRetentionMonths(60)).toBe('5 jaar');
+            expect(formatDataRetentionMonths(18)).toBe('18 maanden');
+            expect(formatDataRetentionMonths(3)).toBe('3 maanden');
+        });
+
+        test('The summary lists every action, or says that nothing is set', () => {
+            expect(
+                getDataRetentionTermsSummary({ anonymizeAfterMonths: 24, deleteAfterMonths: 60 }),
+            ).toBe('Anonimiseren na 2 jaar · verwijderen na 5 jaar');
+            expect(
+                getDataRetentionTermsSummary({ anonymizeAfterMonths: null, deleteAfterMonths: 12 }),
+            ).toBe('Verwijderen na 1 jaar');
+            expect(
+                getDataRetentionTermsSummary({
+                    anonymizeAfterMonths: null,
+                    deleteAfterMonths: null,
+                }),
+            ).toBe('Geen termijn: blijft bewaard');
+        });
+
+        test.each([
+            {
+                name: 'only the platform has a term',
+                platform: { anonymizeAfterMonths: 24 },
+                organization: {},
+                expected: 'Termijn van de koepel. Jullie stelden niets in.',
+            },
+            {
+                name: 'nobody has a term',
+                platform: {},
+                organization: {},
+                expected: 'Jullie stelden niets in, en de koepel ook niet.',
+            },
+            {
+                name: 'the organization keeps longer',
+                platform: { anonymizeAfterMonths: 24 },
+                organization: { anonymizeAfterMonths: 84 },
+                expected: 'Jullie termijn. De langste termijn geldt.',
+            },
+            {
+                name: 'the platform keeps longer',
+                platform: { deleteAfterMonths: 36 },
+                organization: { deleteAfterMonths: 12 },
+                expected:
+                    'De koepel bewaart langer, en de langste termijn geldt. Jullie kortere termijn geldt zodra de koepel die verkort.',
+            },
+        ])(
+            'The source says whose term applies when $name',
+            ({ platform, organization, expected }) => {
+                expect(
+                    getDataRetentionSourceDescription(policy(platform), policy(organization), now),
+                ).toBe(expected);
+            },
+        );
+
+        test('A shorter own term, a conflict between the levels and fewer protected periods are explained', () => {
+            const conflicts = getDataRetentionConflicts(
+                DataRetentionTerms.create({ anonymizeAfterMonths: 60, protectedPeriods: 2 }),
+                DataRetentionTerms.create({
+                    anonymizeAfterMonths: 24,
+                    deleteAfterMonths: 36,
+                    protectedPeriods: 1,
+                }),
+            );
+
+            expect(conflicts).toEqual([
+                'Koepel en vereniging samen zouden verwijderen voor er geanonimiseerd wordt. De langste termijn geldt, dus er wordt pas na 5 jaar verwijderd.',
+                'De koepel bewaart langer (anonimiseren na 5 jaar). De langste termijn geldt, dus jullie kortere termijn heeft nu geen effect. Hij geldt zodra de koepel haar termijn verkort.',
+                'De koepel beschermt de laatste 2 werkjaren. Het hoogste aantal geldt. Jullie aantal geldt zodra de koepel dat verlaagt.',
+            ]);
+        });
+
+        test('There are no conflicts without a platform, or when the organization keeps longer', () => {
+            expect(
+                getDataRetentionConflicts(
+                    null,
+                    DataRetentionTerms.create({ deleteAfterMonths: 12 }),
+                ),
+            ).toEqual([]);
+            expect(
+                getDataRetentionConflicts(
+                    DataRetentionTerms.create({ deleteAfterMonths: 12 }),
+                    DataRetentionTerms.create({ deleteAfterMonths: 36 }),
+                ),
+            ).toEqual([]);
         });
     });
 });

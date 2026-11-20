@@ -90,6 +90,17 @@ export function getDataRetentionCategoryName(category: DataRetentionCategory): s
     }
 }
 
+/**
+ * Which settings a category supports. An action that is not possible is shown as unavailable, with the reason.
+ */
+export function getDataRetentionCapabilities(category: DataRetentionCategory): {
+    anonymize: boolean;
+    delete: boolean;
+    protectedPeriods: boolean;
+} {
+    return CATEGORY_CAPABILITIES[category];
+}
+
 export function isDataRetentionCategory(value: string): value is DataRetentionCategory {
     return (Object.values(DataRetentionCategory) as string[]).includes(value);
 }
@@ -481,4 +492,133 @@ function getLongest(a: number | null | undefined, b: number | null | undefined):
 
 function isIntegerInRange(value: number, minimum: number, maximum: number): boolean {
     return Number.isInteger(value) && value >= minimum && value <= maximum;
+}
+
+/**
+ * A term in whole years when possible: '2 jaar', '18 maanden'.
+ */
+export function formatDataRetentionMonths(months: number): string {
+    if (months % 12 === 0) {
+        return $t('{count} jaar', { count: months / 12 });
+    }
+    return months === 1 ? $t('1 maand') : $t('{count} maanden', { count: months });
+}
+
+/**
+ * What applies to a category, in one line: 'Anonimiseren na 2 jaar · verwijderen na 5 jaar'.
+ */
+export function getDataRetentionTermsSummary(
+    terms: Pick<ResolvedDataRetentionTerms, 'anonymizeAfterMonths' | 'deleteAfterMonths'>,
+): string {
+    const parts: string[] = [];
+    if (terms.anonymizeAfterMonths !== null) {
+        parts.push(
+            $t('Anonimiseren na {term}', {
+                term: formatDataRetentionMonths(terms.anonymizeAfterMonths),
+            }),
+        );
+    }
+    if (terms.deleteAfterMonths !== null) {
+        const term = formatDataRetentionMonths(terms.deleteAfterMonths);
+        parts.push(
+            parts.length === 0
+                ? $t('Verwijderen na {term}', { term })
+                : $t('verwijderen na {term}', { term }),
+        );
+    }
+    if (parts.length === 0) {
+        return $t('Geen termijn: blijft bewaard');
+    }
+    return parts.join(' · ');
+}
+
+/**
+ * For an organization within a platform: whose term applies.
+ */
+export function getDataRetentionSourceDescription(
+    platform: DataRetentionPolicy,
+    organization: DataRetentionPolicy,
+    now: Date,
+): string {
+    const platformTerms = platform.getActiveTerms(now);
+    const organizationTerms = organization.getActiveTerms(now);
+    const actions = ['anonymizeAfterMonths', 'deleteAfterMonths'] as const;
+
+    const hasOwnTerm = actions.some((action) => organizationTerms[action] !== null);
+    if (!hasOwnTerm) {
+        return actions.some((action) => platformTerms[action] !== null)
+            ? $t('Termijn van de koepel. Jullie stelden niets in.')
+            : $t('Jullie stelden niets in, en de koepel ook niet.');
+    }
+
+    const isOverruled = actions.some((action) => {
+        const own = organizationTerms[action];
+        const platformTerm = platformTerms[action];
+        return own !== null && platformTerm !== null && platformTerm > own;
+    });
+    if (isOverruled) {
+        return $t(
+            'De koepel bewaart langer, en de langste termijn geldt. Jullie kortere termijn geldt zodra de koepel die verkort.',
+        );
+    }
+    return $t('Jullie termijn. De langste termijn geldt.');
+}
+
+/**
+ * Why the terms of an organization do not apply as they were filled in, because the platform keeps data longer.
+ * These are only messages: an organization can always save its own terms.
+ */
+export function getDataRetentionConflicts(
+    platform: DataRetentionTerms | null,
+    organization: DataRetentionTerms,
+): string[] {
+    if (!platform) {
+        return [];
+    }
+    const conflicts: string[] = [];
+    const resolved = resolveDataRetentionTerms(
+        DataRetentionPolicy.create({ category: DataRetentionCategory.Members, terms: platform }),
+        DataRetentionPolicy.create({
+            category: DataRetentionCategory.Members,
+            terms: organization,
+        }),
+        new Date(),
+    );
+
+    if (resolved.deleteExtendedByAnonymize && resolved.deleteAfterMonths !== null) {
+        conflicts.push(
+            $t(
+                'Koepel en vereniging samen zouden verwijderen voor er geanonimiseerd wordt. De langste termijn geldt, dus er wordt pas na {term} verwijderd.',
+                { term: formatDataRetentionMonths(resolved.deleteAfterMonths) },
+            ),
+        );
+    }
+
+    const shorter = (['anonymizeAfterMonths', 'deleteAfterMonths'] as const).filter((action) => {
+        const own = organization[action];
+        const platformTerm = platform[action];
+        return own !== null && platformTerm !== null && platformTerm > own;
+    });
+    if (shorter.length > 0) {
+        conflicts.push(
+            $t(
+                'De koepel bewaart langer ({terms}). De langste termijn geldt, dus jullie kortere termijn heeft nu geen effect. Hij geldt zodra de koepel haar termijn verkort.',
+                { terms: getDataRetentionTermsSummary(platform).toLocaleLowerCase() },
+            ),
+        );
+    }
+
+    if (
+        organization.protectedPeriods !== null &&
+        platform.protectedPeriods !== null &&
+        platform.protectedPeriods > organization.protectedPeriods
+    ) {
+        conflicts.push(
+            $t(
+                'De koepel beschermt de laatste {count} werkjaren. Het hoogste aantal geldt. Jullie aantal geldt zodra de koepel dat verlaagt.',
+                { count: platform.protectedPeriods },
+            ),
+        );
+    }
+    return conflicts;
 }

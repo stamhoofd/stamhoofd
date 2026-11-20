@@ -183,6 +183,29 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
+
+                <STListItem
+                    v-if="dataRetentionEnabled"
+                    :selectable="true"
+                    class="left-center"
+                    data-testid="open-data-retention-settings"
+                    @click="$navigate(Routes.DataRetention)"
+                >
+                    <template #left>
+                        <img
+                            src="@stamhoofd/assets/images/illustrations/clock.svg"
+                        >
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Bewaartermijnen') }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ $t('Kies hoe lang gegevens bewaard blijven') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
             </STList>
 
             <hr>
@@ -333,6 +356,7 @@ import type {
 import {
     DataPermissionsSettings,
     FinancialSupportSettings,
+    isDataRetentionEnabled,
     Platform,
     PlatformConfig,
 } from '@stamhoofd/structures';
@@ -358,9 +382,11 @@ enum Routes {
     Labs = 'experimenten',
     OrganizationRecordConfiguration = 'organisatie-gegevens',
     Mailchimp = 'mailchimp',
+    DataRetention = 'bewaartermijnen',
 }
 
 const platform = usePlatform();
+const dataRetentionEnabled = computed(() => isDataRetentionEnabled({ platformFeatureFlags: platform.value.config.featureFlags, organizationFeatureFlags: null }));
 const patchPlatform = usePatchPlatform();
 const $feature = useFeatureFlag();
 
@@ -530,6 +556,11 @@ defineRoutes([
         url: Routes.DefaultAgeGroups,
         present: 'popup',
         component: async () => (await import('./default-age-groups/EditDefaultAgeGroupsView.vue')).default,
+    },
+    {
+        url: Routes.DataRetention,
+        present: 'popup',
+        component: async () => (await import('@stamhoofd/components/data-retention/DataRetentionView.vue')).default,
     },
     {
         url: Routes.Terms,
