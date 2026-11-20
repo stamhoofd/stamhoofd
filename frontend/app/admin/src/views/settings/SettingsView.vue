@@ -143,6 +143,7 @@
                 </STListItem>
 
                 <STListItem
+                    v-if="!dataRetentionEnabled"
                     :selectable="true"
                     class="left-center"
                     @click="$navigate(Routes.DataPermissions)"
@@ -164,6 +165,7 @@
                 </STListItem>
 
                 <STListItem
+                    v-if="!dataRetentionEnabled"
                     :selectable="true"
                     class="left-center"
                     @click="$navigate(Routes.Terms)"
@@ -188,19 +190,19 @@
                     v-if="dataRetentionEnabled"
                     :selectable="true"
                     class="left-center"
-                    data-testid="open-data-retention-settings"
-                    @click="$navigate(Routes.DataRetention)"
+                    data-testid="open-privacy-and-data"
+                    @click="$navigate(Routes.PrivacyAndData)"
                 >
                     <template #left>
                         <img
-                            src="@stamhoofd/assets/images/illustrations/clock.svg"
+                            src="@stamhoofd/assets/images/illustrations/privacy-policy.svg"
                         >
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Bewaartermijnen') }}
+                        {{ $t('Privacy en gegevens') }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('Kies hoe lang gegevens bewaard blijven') }}
+                        {{ $t('Toestemming, voorwaarden en bewaartermijnen') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />
@@ -382,7 +384,7 @@ enum Routes {
     Labs = 'experimenten',
     OrganizationRecordConfiguration = 'organisatie-gegevens',
     Mailchimp = 'mailchimp',
-    DataRetention = 'bewaartermijnen',
+    PrivacyAndData = 'privacy-en-gegevens',
 }
 
 const platform = usePlatform();
@@ -558,9 +560,8 @@ defineRoutes([
         component: async () => (await import('./default-age-groups/EditDefaultAgeGroupsView.vue')).default,
     },
     {
-        url: Routes.DataRetention,
-        present: 'popup',
-        component: async () => (await import('@stamhoofd/components/data-retention/DataRetentionView.vue')).default,
+        url: Routes.PrivacyAndData,
+        component: async () => (await import('./PrivacyAndDataView.vue')).default,
     },
     {
         url: Routes.Terms,

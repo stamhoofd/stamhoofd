@@ -59,7 +59,22 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.Privacy)">
+                <STListItem v-if="!isPlatform && dataRetentionFeature" :selectable="true" class="left-center" data-testid="open-privacy-and-data" @click="$navigate(Routes.PrivacyAndData)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/privacy-policy.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('Privacy en gegevens') }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ $t('Privacyvoorwaarden, toestemming en bewaartermijnen') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="!isPlatform && !dataRetentionFeature" :selectable="true" class="left-center" @click="$navigate(Routes.Privacy)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/privacy-policy.svg">
                     </template>
@@ -74,7 +89,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="dataRetentionFeature" :selectable="true" class="left-center" data-testid="open-data-retention-settings" @click="$navigate(Routes.DataRetention)">
+                <STListItem v-if="isPlatform && dataRetentionFeature" :selectable="true" class="left-center" data-testid="open-data-retention-settings" @click="$navigate(Routes.DataRetention)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/clock.svg">
                     </template>
@@ -376,6 +391,7 @@ enum Routes {
     Invoices = 'uitgaande-facturen',
     Mailchimp = 'mailchimp',
     DataRetention = 'bewaartermijnen',
+    PrivacyAndData = 'privacy-en-gegevens',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -404,6 +420,10 @@ defineRoutes([
     {
         url: Routes.Members,
         component: async () => (await import('./MembersSettingsView.vue')).default,
+    },
+    {
+        url: Routes.PrivacyAndData,
+        component: async () => (await import('./PrivacyAndDataView.vue')).default,
     },
     {
         url: Routes.Personalization,

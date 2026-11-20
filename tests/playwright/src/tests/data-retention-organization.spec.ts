@@ -61,6 +61,8 @@ async function createOrganizationWithAdmin() {
 async function openDataRetention(page: Page, organization: Organization) {
     await page.goto(`${WorkerData.urls.dashboard}/${appToUri('dashboard')}/${organization.uri}`);
     await selectTab(page, 'settings');
+    // Without a platform, data retention sits on the privacy and data page, together with the privacy terms and consent
+    await page.getByTestId('open-privacy-and-data').click();
     await page.getByTestId('open-data-retention-settings').click();
 }
 

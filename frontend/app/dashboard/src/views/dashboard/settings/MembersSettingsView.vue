@@ -137,7 +137,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="!props.period && !isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.DataPermissions)">
+                <STListItem v-if="!props.period && !isPlatform && !dataRetentionFeature" :selectable="true" class="left-center" @click="$navigate(Routes.DataPermissions)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/agreement.svg">
                     </template>
@@ -219,7 +219,7 @@ import { useOrganizationManager } from '@stamhoofd/frontend-application/Organiza
 import { usePatchOrganizationPeriod } from '@stamhoofd/components/hooks/networking/usePatchOrganizationPeriod';
 import { useSGVSync } from '@stamhoofd/sgv-frontend/useSGVSync';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { DataPermissionsSettings, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, Organization, OrganizationMetaData } from '@stamhoofd/structures';
+import { DataPermissionsSettings, FinancialSupportSettings, getDataPermissionSettingsOrDefault, getFinancialSupportSettingsOrDefault, isDataRetentionEnabled, Organization, OrganizationMetaData } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useEditGroupsView } from './hooks/useEditGroupsView';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
@@ -239,6 +239,11 @@ const Routes = {
 };
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
+// With data retention, consent moves to the privacy and data settings
+const dataRetentionFeature = computed(() => isDataRetentionEnabled({
+    platformFeatureFlags: platform.value.config.featureFlags,
+    organizationFeatureFlags: organization.value.privateMeta?.featureFlags ?? [],
+}));
 const $organizationManager = useOrganizationManager();
 const platform = usePlatform();
 const buildEditGroupsView = useEditGroupsView();
