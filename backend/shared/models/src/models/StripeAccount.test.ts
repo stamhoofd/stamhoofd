@@ -24,6 +24,21 @@ describe('Model.StripeAccount', () => {
         expect(account.capabilities.ideal_payments).toBe('pending');
     });
 
+    test('only includes the raw Stripe account in the structure when the blob is requested', () => {
+        const account = { requirements: {}, future_requirements: {}, company: { name: 'Acme' } };
+        const model = new StripeAccount();
+        model.accountId = 'acct_123';
+        model.setMetaFromStripeAccount(account);
+
+        expect(model.getStructure({ includeBlob: true }).meta.blob).toBe(account);
+
+        const struct = model.getStructure({ includeBlob: false });
+        expect(struct.meta.blob).toBeNull();
+        expect(struct.accountId).toBe('acct_123');
+        expect(struct.meta.company?.name).toBe('Acme');
+        expect(model.meta.blob).toBe(account);
+    });
+
     test('defaults missing Stripe capabilities to an empty Map', () => {
         const model = new StripeAccount();
         model.setMetaFromStripeAccount({ requirements: {}, future_requirements: {} });
