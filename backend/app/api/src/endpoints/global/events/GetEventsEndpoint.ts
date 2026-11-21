@@ -69,6 +69,12 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
         }
 
+        if (!Context.auth.canReadHiddenEvents()) {
+            // Users without any permissions can never read a hidden event, so skip them in the
+            // query to keep the pages complete. Admins are filtered per event in buildData.
+            query.where(await compileToSQLFilter({ 'meta.visible': true }, filterCompilers));
+        }
+
         if (q.filter) {
             query.where(await compileToSQLFilter(q.filter, filterCompilers));
         }
@@ -127,8 +133,16 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             }
         }
 
+        const readableEvents: Event[] = [];
+
+        for (const event of events) {
+            if (await Context.auth.canReadEvent(event)) {
+                readableEvents.push(event);
+            }
+        }
+
         return new PaginatedResponse<EventStruct[], LimitedFilteredRequest>({
-            results: await AuthenticatedStructures.events(events),
+            results: await AuthenticatedStructures.events(readableEvents),
             next,
         });
     }
