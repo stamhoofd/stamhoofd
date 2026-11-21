@@ -210,6 +210,8 @@ overrides:
   vue: 3.5.44
   yargs@<18: 17.7.3
   js-yaml@<5: 4.3.2
+  hono@<4.13.16: 4.13.16
+  '@hono/node-server@>=2.0.0 <2.1.6': 2.1.6
   '@colors/colors': 1.6.1
   hono: 4.13.16
   '@hono/node-server': 2.1.6
