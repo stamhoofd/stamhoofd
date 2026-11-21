@@ -1,7 +1,7 @@
 import type { Decoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
-import { Platform, User } from '@stamhoofd/models';
+import { Platform, RateLimiter, User } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../../helpers/EmailBuilder.js';
 import {
     EmailTemplateType,
@@ -18,6 +18,35 @@ type Params = Record<string, never>;
 type Query = undefined;
 type Body = ForgotPasswordRequest;
 type ResponseBody = undefined;
+
+/**
+ * Emails every address it is given, also one without an account.
+ */
+export const forgotPasswordIPLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 10,
+            duration: 15 * 60 * 1000,
+        },
+        {
+            limit: 30,
+            duration: 60 * 60 * 1000,
+        },
+    ],
+});
+
+export const forgotPasswordEmailLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 3,
+            duration: 15 * 60 * 1000,
+        },
+        {
+            limit: 10,
+            duration: 60 * 60 * 1000,
+        },
+    ],
+});
 
 export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected bodyDecoder = ForgotPasswordRequest as Decoder<ForgotPasswordRequest>;
@@ -39,6 +68,9 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
         const organization = await Context.setOptionalOrganizationScope({
             willAuthenticate: false,
         });
+
+        forgotPasswordIPLimiter.track(request.request.getIP());
+        forgotPasswordEmailLimiter.track(request.body.email.toLowerCase());
 
         if (STAMHOOFD.userMode === 'platform') {
             const platform = await Platform.getSharedPrivateStruct();
