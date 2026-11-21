@@ -617,6 +617,41 @@ export class AdminPermissionChecker {
         }
     }
 
+    /**
+     * Events that are hidden in the calendar are only readable by admins that can manage the event
+     * itself, or the group that is linked to it.
+     */
+    async canReadEvent(event: Event): Promise<boolean> {
+        if (event.meta.visible) {
+            return true;
+        }
+
+        if (!this.canReadHiddenEvents()) {
+            return false;
+        }
+
+        if (await this.canAccessEvent(event)) {
+            return true;
+        }
+
+        if (event.groupId) {
+            const group = await Group.getByID(event.groupId);
+
+            if (group && (await this.canAccessGroup(group))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Use this as a circuit breaker to filter out hidden events in SQL for users that can never read them
+     */
+    canReadHiddenEvents(): boolean {
+        return !!this.user.permissions;
+    }
+
     async canAccessEventNotification(
         notification: EventNotification,
         permissionLevel: PermissionLevel = PermissionLevel.Read,
