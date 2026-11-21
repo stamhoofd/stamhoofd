@@ -43,6 +43,41 @@ describe('RateLimitWindow category limits', () => {
         expect(window.windows.get('key')).toBe(2);
     });
 
+    test('check blocks a request that would go over the limit without counting it', () => {
+        const window = new RateLimitWindow({ limit: 2, duration: 1000 });
+        window.track('key');
+
+        expect(() => window.check('key')).not.toThrow();
+        expect(() => window.check('key', 2)).toThrow();
+        window.track('key');
+        expect(() => window.check('key')).toThrow();
+        expect(window.windows.get('key')).toBe(2);
+    });
+
+    test('check expires a window that is no longer relevant', () => {
+        vi.useFakeTimers();
+        const window = new RateLimitWindow({ limit: 1, duration: 1000 });
+        window.track('key');
+
+        expect(() => window.check('key')).toThrow();
+        vi.advanceTimersByTime(1001);
+        expect(() => window.check('key')).not.toThrow();
+    });
+
+    test('reset clears every window', () => {
+        const limiter = new RateLimiter({
+            limits: [
+                { limit: 1, duration: 1000 },
+                { limit: 1, duration: 2000 },
+            ],
+        });
+        limiter.track('key');
+        expect(() => limiter.check('key')).toThrow();
+
+        limiter.reset();
+        expect(() => limiter.track('key')).not.toThrow();
+    });
+
     test('applies every configured window', () => {
         const limiter = new RateLimiter({
             limits: [

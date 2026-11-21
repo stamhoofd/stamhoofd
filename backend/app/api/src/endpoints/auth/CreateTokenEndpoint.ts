@@ -7,6 +7,7 @@ import {
     MFAToken,
     PasswordToken,
     Platform,
+    RateLimiter,
     Token,
     User,
     WebauthnCredential,
@@ -47,6 +48,43 @@ type Body =
     | MFAGrantStruct;
 type ResponseBody = TokenStruct;
 
+/**
+ * Bounds how fast one address can try passwords. Every attempt counts, also a successful
+ * one, because this is also what bounds the password hashing work an anonymous caller can
+ * trigger. Loose on purpose: a club or school shares a single address, and the per account
+ * limiter below is what actually makes guessing slow.
+ */
+export const passwordLoginIPLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 60,
+            duration: 60 * 1000,
+        },
+        {
+            limit: 300,
+            duration: 15 * 60 * 1000,
+        },
+    ],
+});
+
+/**
+ * Bounds guesses against one account, which the IP limiter cannot do: an attacker with a
+ * botnet has a fresh budget per address. Only failed attempts count, so this only blocks
+ * someone who keeps getting the password wrong, and only until the window expires.
+ */
+export const passwordLoginUsernameLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 10,
+            duration: 5 * 60 * 1000,
+        },
+        {
+            limit: 30,
+            duration: 60 * 60 * 1000,
+        },
+    ],
+});
+
 export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected bodyDecoder = CreateTokenStruct;
 
@@ -69,7 +107,6 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // - add required CAPTCHA after x failed attempts for a given username (no matter if the username exists or not)
         // - if, even after the CAPTCHAs, the account reaches a given count of failed attempts, the account should be locked out for an hour or even a day (only login endpoint)
         // - check if not multiple attempts for the same username are started in parallel
-        // - Limit the amount of failed attemps by IP (will only make it a bit harder)
         // - Detect attacks on random accounts (using email list + most used passwords) and temorary require CAPTCHA on all accounts
         const organization = await Context.setOptionalOrganizationScope({
             willAuthenticate: false,
@@ -116,6 +153,10 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             case 'password': {
+                const username = request.body.username.toLowerCase();
+                passwordLoginIPLimiter.track(request.request.getIP());
+                passwordLoginUsernameLimiter.check(username);
+
                 if (STAMHOOFD.userMode === 'platform') {
                     const platform = await Platform.getSharedPrivateStruct();
                     const config = platform.config.loginMethods.get(LoginMethod.Password);
@@ -152,7 +193,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 };
 
                 if (!user) {
-                    // TODO: increase counter
+                    passwordLoginUsernameLimiter.track(username);
                     throw new SimpleError(errBody);
                 }
 

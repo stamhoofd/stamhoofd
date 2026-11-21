@@ -26,7 +26,11 @@ import { testServer } from '../../../tests/helpers/TestServer.js';
 import { RecoveryCodeHelper } from '../../helpers/RecoveryCodeHelper.js';
 import { TOTPHelper } from '../../helpers/TOTPHelper.js';
 import { ConfirmTOTPEndpoint } from './ConfirmTOTPEndpoint.js';
-import { CreateTokenEndpoint } from './CreateTokenEndpoint.js';
+import {
+    CreateTokenEndpoint,
+    passwordLoginIPLimiter,
+    passwordLoginUsernameLimiter,
+} from './CreateTokenEndpoint.js';
 import { DeletePasskeyEndpoint } from './DeletePasskeyEndpoint.js';
 import { DeleteTOTPEndpoint } from './DeleteTOTPEndpoint.js';
 import { GetMFAChallengeEndpoint } from './GetMFAChallengeEndpoint.js';
@@ -142,6 +146,12 @@ function totpCodeAt(secret: string, epoch: number): string {
 }
 
 describe('MFA security', () => {
+    beforeEach(() => {
+        // Rate limiters are in-memory singletons, reset them between tests
+        passwordLoginIPLimiter.reset();
+        passwordLoginUsernameLimiter.reset();
+    });
+
     // -----------------------------------------------------------------------
     // The attacker knows the password and tries to skip the second factor
     // -----------------------------------------------------------------------
