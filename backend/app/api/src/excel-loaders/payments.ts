@@ -71,7 +71,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
         let accounts: StripeAccountStruct[] = [];
         if (stripeAccountIds.length > 0) {
             accounts = (await StripeAccount.getByIDs(...stripeAccountIds)).map((s) =>
-                StripeAccountStruct.create(s),
+                s.getStructure(),
             );
         }
 

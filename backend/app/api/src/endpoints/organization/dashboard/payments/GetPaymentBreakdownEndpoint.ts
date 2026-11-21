@@ -3,7 +3,7 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { StripeAccount } from '@stamhoofd/models';
 import type { PaymentGeneral } from '@stamhoofd/structures';
-import { StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import type { StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 import { BreakdownRequest } from '@stamhoofd/structures/breakdown/BreakdownRequest.js';
 import { PaymentBreakdownBuilder } from '@stamhoofd/structures/breakdown/PaymentBreakdownBuilder.js';
 import type { PaymentBreakdown } from '@stamhoofd/structures/PaymentBreakdown.js';
@@ -41,7 +41,7 @@ class StripeAccountCache {
             }
 
             for (const account of await StripeAccount.getByIDs(...missing)) {
-                this.accounts.set(account.id, StripeAccountStruct.create(account));
+                this.accounts.set(account.id, account.getStructure());
             }
         }
 

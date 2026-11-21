@@ -327,7 +327,9 @@
 
             <hr v-if="stripeAccounts.length">
 
-            <code v-for="account of stripeAccounts" :key="'code-'+account.id" class="style-code" v-text="formatJson(account.meta.blob)" />
+            <template v-for="account of stripeAccounts" :key="'code-'+account.id">
+                <code v-if="account.meta.blob" class="style-code" v-text="formatJson(account.meta.blob)" />
+            </template>
         </template>
     </SaveView>
 </template>

@@ -3,6 +3,7 @@ import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
 import {
     Requirements,
+    StripeAccount as StripeAccountStruct,
     StripeBusinessProfile,
     StripeCompany,
     StripeMetaAccountDashboardSettings,
@@ -61,6 +62,20 @@ export class StripeAccount extends QueryableModel {
         skipUpdate: true,
     })
     updatedAt: Date;
+
+    /**
+     * The blob holds the unfiltered Stripe account, including the legal representative's personal
+     * data and bank details, so it is only readable by platform administrators.
+     */
+    getStructure({ includeBlob = false }: { includeBlob?: boolean } = {}) {
+        const meta = includeBlob ? this.meta : StripeMetaData.create({ ...this.meta, blob: null });
+
+        return StripeAccountStruct.create({
+            id: this.id,
+            accountId: this.accountId,
+            meta,
+        });
+    }
 
     setMetaFromStripeAccount(account: any) {
         this.meta = StripeMetaData.create({
