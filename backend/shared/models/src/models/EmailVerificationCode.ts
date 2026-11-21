@@ -74,7 +74,8 @@ export class EmailVerificationCode extends QueryableModel {
     code = '';
 
     /**
-     * The amount of times this code has been generated for the same e-mail address
+     * The amount of codes that have been generated in the current window, which ends when
+     * the current code expires. Capped by MAX_GENERATED_CODES.
      */
     @column({ type: 'integer' })
     generatedCount = 0;
@@ -104,17 +105,20 @@ export class EmailVerificationCode extends QueryableModel {
     static CODE_LENGTH = 6;
     static MAX_TRIES = 9; // minus 0..MAX_TRIES_VARY
 
+    /**
+     * A new code resets the try counter, so the per-code MAX_TRIES only bounds guessing if the
+     * amount of codes is bounded too: whoever can trigger a code (anyone who knows the email
+     * address) could otherwise keep requesting new ones and walk the whole 6-digit space.
+     * MAX_GENERATED_CODES * MAX_TRIES guesses are allowed before the current code expires.
+     */
+    static MAX_GENERATED_CODES = 5;
+
     async generateCode() {
         this.code = (
             (await randomInt(Math.pow(10, EmailVerificationCode.CODE_LENGTH))) + ''
         ).padStart(EmailVerificationCode.CODE_LENGTH, '0');
         this.token = bs58.encode(await randomBytes(100)).toLowerCase();
-
-        // Increase generatedCount if we changed the code
-        if (this.tries > 0) {
-            // For statistics (how many did they try and had to resend the email)
-            this.generatedCount++;
-        }
+        this.generatedCount++;
 
         // Reset the real tries
         this.tries = 0;
@@ -310,13 +314,28 @@ export class EmailVerificationCode extends QueryableModel {
             verificationCode.expiresAt = new Date(new Date().getTime() + 1000 * 60 * 60 * 3);
         } else {
             verificationCode = existing;
+            const isExpired =
+                verificationCode.expiresAt < new Date(new Date().getTime() - 15 * 60 * 1000);
 
-            if (
+            if (isExpired) {
+                // The previous code can no longer be guessed, so a new window starts
+                verificationCode.generatedCount = 0;
+                await verificationCode.generateCode();
+            } else if (
                 verificationCode.email !== email ||
-                verificationCode.expiresAt < new Date(new Date().getTime() - 15 * 60 * 1000) ||
                 verificationCode.tries >= EmailVerificationCode.MAX_TRIES
             ) {
-                // Expired: also update the token
+                if (verificationCode.generatedCount >= EmailVerificationCode.MAX_GENERATED_CODES) {
+                    // Both the real and the decoy flow run into this, so it doesn't expose
+                    // whether the email address belongs to an account
+                    throw new SimpleError({
+                        code: 'too_many_attempts',
+                        message: 'Too many codes requested for this email address',
+                        human: $t('%GL'),
+                        statusCode: 429,
+                    });
+                }
+
                 await verificationCode.generateCode();
             }
         }
