@@ -19,6 +19,7 @@ import {
     SignupResponse,
 } from '@stamhoofd/structures';
 
+import { canSendAuthEmail } from '../../helpers/AuthEmailRateLimiter.js';
 import { Context } from '../../helpers/Context.js';
 import { PasswordForgotService } from '../../services/PasswordForgotService.js';
 import { VerificationCodeService } from '../../services/VerificationCodeService.js';
@@ -134,6 +135,10 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
 
                 // We don't await this block to avoid user enumeration attack using request response time
                 (async () => {
+                    if (!canSendAuthEmail(user.email)) {
+                        return;
+                    }
+
                     // Send an e-mail to say you already have an account + follow password forgot flow
                     const recoveryUrl = await PasswordForgotService.getPasswordRecoveryUrl(
                         user,

@@ -3,6 +3,7 @@ import type { Organization } from '@stamhoofd/models';
 import { PasswordToken, Platform, User } from '@stamhoofd/models';
 import { EmailTemplateType, getAppHost, Recipient, Replacement } from '@stamhoofd/structures';
 
+import { canSendAuthEmail } from '../helpers/AuthEmailRateLimiter.js';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 
 /**
@@ -33,6 +34,10 @@ export class PasswordForgotService {
         organization: Organization | null,
         i18n: I18n,
     ) {
+        if (!canSendAuthEmail(user.email)) {
+            return;
+        }
+
         const recoveryUrl = await this.getPasswordRecoveryUrl(user, organization, i18n);
 
         await sendEmailTemplate(organization, {
