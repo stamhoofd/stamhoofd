@@ -11,18 +11,11 @@
             </p>
 
             <STList>
-                <STListItem v-for="item of items" :key="String(item.value)" :selectable="true" element-name="label">
-                    <template #left>
-                        <Radio :model-value="modelValue" :value="item.value" @update:model-value="select(item.value)" />
-                    </template>
-
-                    <h3 class="style-title-list">
-                        {{ item.name }}
-                    </h3>
+                <RadioListItem v-for="item of items" :key="String(item.value)" :model-value="modelValue" :value="item.value" :label="item.name" @update:model-value="select(item.value)">
                     <p v-for="line of item.description ?? []" :key="line" class="style-description-small">
                         {{ line }}
                     </p>
-                </STListItem>
+                </RadioListItem>
             </STList>
         </main>
     </div>
@@ -30,6 +23,7 @@
 
 <script lang="ts" setup generic="T">
 import { usePop, usePopup } from '@browser/navigation';
+import RadioListItem from './RadioListItem.vue';
 
 /**
  * Single-choice list meant for a positionable sheet or popup. Selecting an item calls onSelect and closes the sheet.
@@ -40,7 +34,7 @@ const props = defineProps<{
      * Shown under the title, so only when the sheet is not presented as a popup.
      */
     description?: string;
-    items: { value: T; name: string; description?: string[] }[];
+    items: { name: string; value: T; description?: string[] }[];
     modelValue: T;
     onSelect: (value: T) => void;
 }>();

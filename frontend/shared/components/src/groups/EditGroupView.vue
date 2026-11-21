@@ -1805,8 +1805,8 @@ const { presentPositionableSheet } = usePositionableSheet();
 const noDefaultAgeGroupDescription = $t('Deze groep wordt niet aangesloten bij #koepel');
 const selectedAgeGroupDescriptionLines = computed(() => defaultAgeGroup.value ? getAgeGroupDescriptionLines(defaultAgeGroup.value) : [noDefaultAgeGroupDescription]);
 
-const defaultAgeGroupsTitle = $t('Aansluiting/verzekering Keeo');
-const defaultAgeGroupsDescription = $t('Kies een standaard leeftijdsgroepen, zodat de benaming van jouw #groep gekoppeld kan worden aan de benaming die #koepel hanteert.');
+const defaultAgeGroupsTitle = $t('Aansluiting/verzekering #koepel');
+const defaultAgeGroupsDescription = $t('Kies een standaard leeftijdsgroep, zodat de benaming van jouw #groep gekoppeld kan worden aan de benaming die #koepel hanteert.');
 
 async function openDefaultAgeGroupSheet(event: MouseEvent) {
     await presentPositionableSheet(event, {
