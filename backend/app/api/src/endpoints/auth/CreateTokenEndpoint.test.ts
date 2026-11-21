@@ -7,11 +7,21 @@ import { Permissions, SessionClientType, Token as TokenStruct } from '@stamhoofd
 import { SessionService } from '../../services/SessionService.js';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';
-import { CreateTokenEndpoint } from './CreateTokenEndpoint.js';
+import {
+    CreateTokenEndpoint,
+    passwordLoginIPLimiter,
+    passwordLoginUsernameLimiter,
+} from './CreateTokenEndpoint.js';
 
 describe('Endpoint.CreateToken', () => {
     // Test endpoint
     const endpoint = new CreateTokenEndpoint();
+
+    beforeEach(() => {
+        // Rate limiters are in-memory singletons, reset them between tests
+        passwordLoginIPLimiter.reset();
+        passwordLoginUsernameLimiter.reset();
+    });
 
     test('Can get a token via password flow', async () => {
         const organization = await new OrganizationFactory({}).create();
@@ -359,6 +369,74 @@ describe('Endpoint.CreateToken', () => {
                 code: 'invalid_refresh_token',
             });
             expect(await Token.getByAccessToken(otherSession.accessToken)).toBeDefined();
+        });
+    });
+
+    describe('rate limits', () => {
+        const password = 'test-password-1234';
+
+        function attempt(organization: Organization, username: string, ip: string) {
+            const r = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
+                grant_type: 'password',
+                username,
+                password: 'wrong-password',
+            });
+            vi.spyOn(r, 'getIP').mockReturnValue(ip);
+            return r;
+        }
+
+        test('spraying unknown accounts from one address is blocked', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            for (let i = 0; i < 60; i++) {
+                await expect(
+                    testServer.test(
+                        endpoint,
+                        attempt(organization, `nobody${i}@example.com`, '1.2.3.4'),
+                    ),
+                ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+            }
+
+            await expect(
+                testServer.test(endpoint, attempt(organization, 'nobody60@example.com', '1.2.3.4')),
+            ).rejects.toMatchObject({ code: 'rate_limit' });
+
+            // Another address keeps its own budget
+            await expect(
+                testServer.test(endpoint, attempt(organization, 'nobody60@example.com', '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+        });
+
+        test('guessing the password of one account is blocked, also from another address', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, password }).create();
+
+            for (let i = 0; i < 10; i++) {
+                await expect(
+                    testServer.test(endpoint, attempt(organization, user.email, '1.2.3.4')),
+                ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+            }
+
+            await expect(
+                testServer.test(endpoint, attempt(organization, user.email, '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'rate_limit' });
+        });
+
+        test('a successful login does not count towards the account limit', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, password }).create();
+
+            for (let i = 0; i < 11; i++) {
+                const r = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
+                    grant_type: 'password',
+                    username: user.email,
+                    password,
+                });
+                vi.spyOn(r, 'getIP').mockReturnValue('1.2.3.4');
+
+                const response = await testServer.test(endpoint, r);
+                expect(response.body).toBeInstanceOf(TokenStruct);
+            }
         });
     });
 });
