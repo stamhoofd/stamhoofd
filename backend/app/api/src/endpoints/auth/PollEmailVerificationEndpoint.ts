@@ -1,7 +1,7 @@
 import type { Decoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
-import { EmailVerificationCode } from '@stamhoofd/models';
+import { EmailVerificationCode, RateLimiter } from '@stamhoofd/models';
 import { PollEmailVerificationRequest, PollEmailVerificationResponse } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
@@ -10,6 +10,23 @@ type Params = Record<string, never>;
 type Query = undefined;
 type Body = PollEmailVerificationRequest;
 type ResponseBody = PollEmailVerificationResponse;
+
+/**
+ * Keyed by token, not by address: the client polls this every few seconds while it waits
+ * for the email, and a lot of people behind one address can be waiting at the same time.
+ */
+export const pollEmailVerificationLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 120,
+            duration: 10 * 60 * 1000,
+        },
+        {
+            limit: 500,
+            duration: 60 * 60 * 1000,
+        },
+    ],
+});
 
 export class PollEmailVerificationEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = PollEmailVerificationRequest as Decoder<PollEmailVerificationRequest>;
@@ -31,6 +48,9 @@ export class PollEmailVerificationEndpoint extends Endpoint<Params, Query, Body,
         const organization = await Context.setOptionalOrganizationScope({
             willAuthenticate: false,
         });
+
+        pollEmailVerificationLimiter.track(request.body.token);
+
         const valid = await EmailVerificationCode.poll(
             organization?.id ?? null,
             request.body.token,
