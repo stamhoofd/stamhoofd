@@ -15,7 +15,7 @@
             <SingleProductList v-if="products.length > 1" v-model="selectedProductId" :webshop="webshop" :cart="checkout.cart" :title="listTitle" />
 
             <div class="style-button-bar">
-                <button type="button" class="button primary full" data-testid="single-order-button" @click="openSelectedProduct">
+                <button ref="orderButton" type="button" class="button primary full single-order-button" data-testid="single-order-button" @click="openSelectedProduct">
                     <span>{{ orderButtonText }}</span>
                     <span class="icon arrow-right" />
                 </button>
@@ -39,7 +39,7 @@ import CategoryBox from '@stamhoofd/components/views/CategoryBox.vue';
 import ProductGrid from '@stamhoofd/components/views/ProductGrid.vue';
 import type { CartItem, Category, Checkout, Product, Webshop } from '@stamhoofd/structures';
 import { WebshopOrderMode } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { computed, ref, useTemplateRef } from 'vue';
 import { getOrderButtonText } from '@stamhoofd/components/helpers/webshopWording.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import BulkProductList from '../products/BulkProductList.vue';
@@ -91,6 +91,14 @@ function openSelectedProduct() {
 }
 // In single mode the amount is chosen after this button
 const orderButtonText = computed(() => getOrderButtonText(props.webshop, bulk.value ? totalPrice.value : undefined));
+
+// Single mode: the button that opens the chosen product
+const orderButton = useTemplateRef<HTMLButtonElement>('orderButton');
+
+defineExpose({
+    orderButton,
+    orderButtonText,
+});
 </script>
 
 <style lang="scss">

@@ -163,7 +163,7 @@
 
             <div v-if="canOrder && embedded" class="style-button-bar">
                 <LoadingButton :loading="loading" class="max">
-                    <button class="button primary full" type="submit" data-testid="save-button">
+                    <button ref="orderButton" class="button primary full" type="submit" data-testid="save-button">
                         <span v-if="saveButton.iconLeft" :class="'icon ' + saveButton.iconLeft" />
                         <span>{{ saveButton.text }}</span>
                         <span v-if="buttonPrice" class="button-total">{{ formatPrice(buttonPrice) }}</span>
@@ -199,7 +199,7 @@ import { useContext } from '#hooks/useContext.ts';
 import { patchObject } from '@common/encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Ref } from 'vue';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { getOrderButtonText } from '../helpers/webshopWording';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
@@ -633,8 +633,14 @@ const shouldNavigateAway = async () => {
     return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
+// Embedded: the button that continues the order, null when the product can't be ordered (e.g. sold out)
+const orderButton = useTemplateRef<HTMLButtonElement>('orderButton');
+const orderButtonText = computed(() => saveButton.value.text);
+
 defineExpose({
     shouldNavigateAway,
+    orderButton,
+    orderButtonText,
 });
 
 </script>
