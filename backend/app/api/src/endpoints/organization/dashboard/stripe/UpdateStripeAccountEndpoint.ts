@@ -2,7 +2,8 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { StripeAccount } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AuditLogSource, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import type { StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { AuditLogSource } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 import { StripeHelper } from '../../../../helpers/StripeHelper.js';
@@ -56,6 +57,6 @@ export class UpdateStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
                 await model.save();
             },
         );
-        return new Response(StripeAccountStruct.create(model));
+        return new Response(model.getStructure({ includeBlob: Context.auth.isStamhoofdStaff() }));
     }
 }

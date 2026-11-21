@@ -3,7 +3,8 @@ import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { StripeAccount } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AuditLogType, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import type { StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { AuditLogType } from '@stamhoofd/structures';
 import type Stripe from 'stripe';
 
 import { Context } from '../../../../helpers/Context.js';
@@ -105,6 +106,6 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
 
         // Return information about the Stripe Account
 
-        return new Response(StripeAccountStruct.create(model));
+        return new Response(model.getStructure({ includeBlob: Context.auth.isStamhoofdStaff() }));
     }
 }
