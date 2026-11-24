@@ -1,2 +1,2 @@
-export * from './extractPdfLines.js';
+export * from './extractPdfText.js';
 export * from './readPdfText.js';

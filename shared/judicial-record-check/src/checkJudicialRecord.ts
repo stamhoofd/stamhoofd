@@ -1,5 +1,6 @@
 import { isSimpleError } from '@common/errors';
-import { extractPdfLines } from '@stamhoofd/pdf-parse';
+import type { PdfText } from '@stamhoofd/pdf-parse';
+import { extractPdfText } from '@stamhoofd/pdf-parse';
 import { verifyPdfFromFodJustitie } from '@stamhoofd/signed-pdf';
 import { JudicialRecordCheck, JudicialRecordCheckReport, JudicialRecordCheckResult, JudicialRecordCheckStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -62,10 +63,10 @@ export async function checkJudicialRecord(request: JudicialRecordCheckRequest): 
         };
     }
 
-    let lines: string[];
+    let text: PdfText;
 
     try {
-        lines = await extractPdfLines(request.data);
+        text = await extractPdfText(request.data);
     } catch (error) {
         if (!isSimpleError(error)) {
             throw error;
@@ -80,7 +81,7 @@ export async function checkJudicialRecord(request: JudicialRecordCheckRequest): 
         };
     }
 
-    const extract = readJudicialRecordExtract(lines);
+    const extract = readJudicialRecordExtract(text.lines.map(line => line.text));
 
     return {
         report: report([authentic, ...checkJudicialRecordContent(extract, request, signedAt, new Date())]),

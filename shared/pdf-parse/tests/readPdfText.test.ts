@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { extractPdfLines } from '../src/extractPdfLines.js';
+import { extractPdfText } from '../src/extractPdfText.js';
 import { parsePrintedDate, readDatedLabelledValue, readInlineLabelledValue, readLabelledValue, readMarkerDate, readValueOnNextLine } from '../src/readPdfText.js';
 import { createTestPdf } from './helpers/createTestPdf.js';
 
@@ -276,6 +276,9 @@ describe('accented labels, values and markers', () => {
     });
 });
 
+/** The readers take the text of the lines; where they were printed is another caller's concern. */
+const linesOf = async (pdf: Uint8Array) => (await extractPdfText(pdf)).lines.map(line => line.text);
+
 describe('reading a marker date out of a pdf', () => {
     // How a real extract prints it: the marker and the date are two items on one baseline
     const blancoAt = (markerY: number, dateY: number) => createTestPdf([
@@ -285,19 +288,19 @@ describe('reading a marker date out of a pdf', () => {
     ]);
 
     test('reads the date beside a marker the pdf draws as a separate item', async () => {
-        const lines = await extractPdfLines(blancoAt(400, 400));
+        const lines = await linesOf(blancoAt(400, 400));
 
         expect(readMarkerDate(lines, ['BLANCO STRAFREGISTER'])).toEqual(new Date(Date.UTC(2026, 9, 5)));
     });
 
     test('is null when the pdf prints the date below the marker instead of beside it', async () => {
-        const lines = await extractPdfLines(blancoAt(400, 380));
+        const lines = await linesOf(blancoAt(400, 380));
 
         expect(readMarkerDate(lines, ['BLANCO STRAFREGISTER'])).toBeNull();
     });
 
     test('reads accented fields out of a pdf with their accents intact', async () => {
-        const lines = await extractPdfLines(createTestPdf([
+        const lines = await linesOf(createTestPdf([
             { text: 'Prénom : HÉLÈNE', y: 800 },
             { text: 'Naam : FRANÇOIS MÜLLER', y: 780 },
             { text: 'Lieu de naissance : LIÈGE', y: 760 },

@@ -1,38 +1,48 @@
 # @stamhoofd/pdf-parse
 
 Reads the text of a pdf, in reading order, on [pdf.js](https://mozilla.github.io/pdf.js/)
-(`pdfjs-dist`). Frontend and backend both: `import { extractPdfLines } from '@stamhoofd/pdf-parse'`
+(`pdfjs-dist`). Frontend and backend both: `import { extractPdfText } from '@stamhoofd/pdf-parse'`
 is the whole setup - no worker file to copy, no bundler configuration, no asset url. See
 [pdf.js](#pdfjs) for which build that is and what it costs.
 
 ```ts
-import { extractPdfLines, parsePrintedDate, readDatedLabelledValue, readInlineLabelledValue, readLabelledValue, readMarkerDate, readValueOnNextLine } from '@stamhoofd/pdf-parse';
+import { extractPdfText, parsePrintedDate, readDatedLabelledValue, readInlineLabelledValue, readLabelledValue, readMarkerDate, readValueOnNextLine } from '@stamhoofd/pdf-parse';
 
-const lines = await extractPdfLines(bytes);
+const { pageCount, lines } = await extractPdfText(bytes);
+
+// Where each line was printed and how big, for a caller that knows the layout it expects
+lines[0]; // { text: 'Ref. doc : ...', page: 1, x: 38, y: 796, fontSize: 8 }
+
+const text = lines.map(line => line.text);
 
 // Naam :            JANSSENS
-const name = readLabelledValue(lines, ['Naam', 'Familienaam']);
+const name = readLabelledValue(text, ['Naam', 'Familienaam']);
 
 // Ref. doc : 20261102-5351 - Datum : 02/11/2026 Betreft : JANSSENS JAN - 05/04/2006 1 / 1
 // -> a field of that line ends where the next one begins, so this is '02/11/2026'
-const printedOn = parsePrintedDate(readInlineLabelledValue(lines, ['Datum']));
+const printedOn = parsePrintedDate(readInlineLabelledValue(text, ['Datum']));
 
 // Finaliteit van het uittreksel :
 // 596.2 - model bestemd voor de contacten met minderjarigen
-const purpose = readValueOnNextLine(lines, ['Finaliteit van het uittreksel']);
+const purpose = readValueOnNextLine(text, ['Finaliteit van het uittreksel']);
 
 // BLANCO STRAFREGISTER (02/11/2026)
-const blancoOn = readMarkerDate(lines, ['BLANCO STRAFREGISTER']);
+const blancoOn = readMarkerDate(text, ['BLANCO STRAFREGISTER']);
 
 // De authenticiteit van dit uittreksel kan tot 01/02/2027 gecontroleerd worden via :
 // https://...
 // -> { date: 01/02/2027, value: 'https://...' }, or null: the pair, never half of it
-const verifiable = readDatedLabelledValue(lines, ['De authenticiteit van dit uittreksel kan tot {date} gecontroleerd worden via']);
+const verifiable = readDatedLabelledValue(text, ['De authenticiteit van dit uittreksel kan tot {date} gecontroleerd worden via']);
 ```
 
 - pdf.js emits text items in generator order, not in reading order, so a label and its value can
   arrive in either sequence. Items are grouped per page on their baseline `y` and sorted by `x`, so
   the caller can match on whole lines.
+- A line carries the page it was printed on, the left edge of its leftmost item, the baseline of the
+  item that opened it, and the **largest** font size on it - a heading printed beside a smaller date
+  is a heading. A document that states something about itself states it in a particular place and
+  size, so a caller that knows the layout it expects can hold a document to it. Reading those values
+  back out of a pdf is not something this package has an opinion about: it reports them.
 - The bytes are untrusted input, so parsing runs with limits of its own on file size and page count.
   They are fixed here: a pdf that does not fit them is not a document we read. There is no time limit
   on top of those two, because there could not be a useful one: pdf.js runs on this thread, so a
@@ -42,7 +52,7 @@ const verifiable = readDatedLabelledValue(lines, ['De authenticiteit van dit uit
   pdf, `pdf_without_text` for one without a text layer, and `pdf_too_large` and `pdf_too_many_pages`
   for a document beyond the limits.
 
-Reading specific text back out of those lines is the other half: `readLabelledValue` for a field
+Reading specific text back out of the text of those lines is the other half: `readLabelledValue` for a field
 written as `Label: value` on its own line, `readInlineLabelledValue` for a label that sits inside a
 longer line next to other fields - ending where the next field of that line begins -
 `readValueOnNextLine` for one printed below its label, `readMarkerDate` for a statement the

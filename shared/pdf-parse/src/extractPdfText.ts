@@ -12,6 +12,29 @@ const LINE_TOLERANCE = 2;
 // file to the console adds noise and no reader.
 const VERBOSITY = VerbosityLevel.ERRORS;
 
+export interface PdfTextLine {
+    text: string;
+
+    /** The page it was printed on, counted from 1. */
+    page: number;
+
+    /** The left edge of its leftmost item, in pdf units from the left of the page. */
+    x: number;
+
+    /** Its baseline, in pdf units from the bottom of the page. */
+    y: number;
+
+    /** The largest font size on the line, in pdf units. */
+    fontSize: number;
+}
+
+export interface PdfText {
+    /** Every page, not only the ones carrying text. */
+    pageCount: number;
+
+    lines: PdfTextLine[];
+}
+
 interface TextItem {
     str: string;
     /** In pdf units, from the left of the page. */
@@ -23,13 +46,17 @@ interface TextItem {
 }
 
 /**
- * The text of a pdf in reading order, one string per line: pdf.js itself emits items in the order
+ * The text of a pdf in reading order, one entry per line: pdf.js itself emits items in the order
  * the file happens to draw them, so a label and its value can arrive in either sequence.
+ *
+ * Every line carries where it was printed and how big, because a document that states something
+ * about itself states it in a particular place and size, and a caller that knows the layout it
+ * expects can hold a document to it.
  *
  * Throws a `SimpleError` whose `human` message says what to do about it, so a caller can pass it
  * straight on to whoever uploaded the file.
  */
-export async function extractPdfLines(data: Uint8Array): Promise<string[]> {
+export async function extractPdfText(data: Uint8Array): Promise<PdfText> {
     if (data.byteLength === 0) {
         throw new SimpleError({
             code: 'invalid_pdf',
@@ -48,11 +75,11 @@ export async function extractPdfLines(data: Uint8Array): Promise<string[]> {
         });
     }
 
-    const pages = await readPages(data);
+    const { pageCount, pages } = await readPages(data);
 
-    const lines: string[] = [];
-    for (const items of pages) {
-        lines.push(...groupItemsIntoLines(items));
+    const lines: PdfTextLine[] = [];
+    for (const [index, items] of pages.entries()) {
+        lines.push(...groupItemsIntoLines(items, index + 1));
     }
 
     if (lines.length === 0) {
@@ -64,10 +91,10 @@ export async function extractPdfLines(data: Uint8Array): Promise<string[]> {
         });
     }
 
-    return lines;
+    return { pageCount, lines };
 }
 
-async function readPages(data: Uint8Array): Promise<TextItem[][]> {
+async function readPages(data: Uint8Array): Promise<{ pageCount: number; pages: TextItem[][] }> {
     const { worker, close } = createMainThreadWorker(VERBOSITY);
 
     try {
@@ -84,7 +111,7 @@ async function readPages(data: Uint8Array): Promise<TextItem[][]> {
                 });
             }
 
-            return await extractItems(pdf);
+            return { pageCount: pdf.numPages, pages: await extractItems(pdf) };
         } finally {
             await pdf.loadingTask.destroy();
         }
@@ -151,7 +178,7 @@ async function readPageItems(pdf: Awaited<ReturnType<typeof loadDocument>>, page
         });
 }
 
-function groupItemsIntoLines(items: TextItem[]): string[] {
+function groupItemsIntoLines(items: TextItem[], page: number): PdfTextLine[] {
     const sorted = items
         .filter(item => item.str.trim().length > 0)
         // y descends from the top of the page, since the pdf origin is bottom-left
@@ -170,8 +197,26 @@ function groupItemsIntoLines(items: TextItem[]): string[] {
     }
 
     return lines
-        .map(line => joinLine(line.sort((a, b) => a.x - b.x)))
-        .filter(line => line.length > 0);
+        .map(line => describeLine(line, page))
+        .filter(line => line.text.length > 0);
+}
+
+/**
+ * The line as a caller reads it. Its baseline is the one of the item that opened the band rather
+ * than an average over the items in it, so it is a value the document actually prints at, and its
+ * font size is the largest on the line: a heading printed beside a smaller date is a heading.
+ */
+function describeLine(items: TextItem[], page: number): PdfTextLine {
+    const baseline = items[0].y;
+    const inReadingOrder = [...items].sort((a, b) => a.x - b.x);
+
+    return {
+        text: joinLine(inReadingOrder),
+        page,
+        x: inReadingOrder[0].x,
+        y: baseline,
+        fontSize: Math.max(...items.map(item => item.fontSize)),
+    };
 }
 
 /** pdf.js splits a line at every style change, also in the middle of a word. */

@@ -5,12 +5,14 @@ export interface TestPdfLine {
     x?: number;
     /** From the bottom of the page, in pdf units. */
     y: number;
+    /** In pdf units. */
+    fontSize?: number;
 }
 
 export function createTestPdf(lines: TestPdfLine[], options: { pages?: number } = {}): Uint8Array {
     const pageCount = options.pages ?? 1;
-    const content = 'BT /F1 11 Tf\n'
-        + lines.map(line => `1 0 0 1 ${line.x ?? 50} ${line.y} Tm (${escapePdfText(line.text)}) Tj`).join('\n')
+    const content = 'BT\n'
+        + lines.map(line => `/F1 ${line.fontSize ?? 11} Tf 1 0 0 1 ${line.x ?? 50} ${line.y} Tm (${escapePdfText(line.text)}) Tj`).join('\n')
         + '\nET';
 
     const objects: string[] = [];

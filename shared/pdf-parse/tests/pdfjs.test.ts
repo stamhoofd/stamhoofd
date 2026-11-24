@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest';
 
-import { extractPdfLines } from '../src/extractPdfLines.js';
+import { extractPdfText } from '../src/extractPdfText.js';
 import { createMainThreadWorker } from '../src/pdfjs.js';
 import { createTestPdf } from './helpers/createTestPdf.js';
 
@@ -12,7 +12,7 @@ describe('the pdf.js setup', () => {
     test('leaves no worker on globalThis for another consumer to inherit', async () => {
         // pdf.js reads this global for every document anyone opens, so a package that leaves it set
         // takes a pdf viewer in the same bundle off its worker and onto the main thread
-        await extractPdfLines(createTestPdf([{ text: 'Eerste regel', y: 800 }]));
+        await extractPdfText(createTestPdf([{ text: 'Eerste regel', y: 800 }]));
 
         expect((globalThis as { pdfjsWorker?: unknown }).pdfjsWorker).toBeUndefined();
     });
@@ -31,8 +31,8 @@ describe('the pdf.js setup', () => {
     test('reads a second document after the first has been torn down', async () => {
         const pdf = createTestPdf([{ text: 'Eerste regel', y: 800 }]);
 
-        expect(await extractPdfLines(pdf)).toEqual(['Eerste regel']);
-        expect(await extractPdfLines(pdf)).toEqual(['Eerste regel']);
+        expect((await extractPdfText(pdf)).lines.map(line => line.text)).toEqual(['Eerste regel']);
+        expect((await extractPdfText(pdf)).lines.map(line => line.text)).toEqual(['Eerste regel']);
     });
 
     test('keeps pdf.js from writing its own account of a document to the console', async () => {
@@ -41,7 +41,7 @@ describe('the pdf.js setup', () => {
         try {
             // This pdf prints in Helvetica without embedding it, which pdf.js warns about: the
             // member is told what to do about a file through a SimpleError, not through the console
-            await extractPdfLines(createTestPdf([{ text: 'Eerste regel', y: 800 }]));
+            await extractPdfText(createTestPdf([{ text: 'Eerste regel', y: 800 }]));
 
             expect(warn).not.toHaveBeenCalled();
         } finally {
