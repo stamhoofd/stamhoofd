@@ -7,6 +7,8 @@ import { Formatter } from '@stamhoofd/utility';
 import type * as pkijs from 'pkijs';
 import type { JudicialRecordExtract } from './JudicialRecordExtract.js';
 import { JUDICIAL_RECORD_MODEL, readJudicialRecordExtract } from './JudicialRecordExtract.js';
+import type { JudicialRecordLayout } from './JudicialRecordLayout.js';
+import { readJudicialRecordLayout } from './JudicialRecordLayout.js';
 
 const SIGNER_NAME = 'FOD Justitie';
 
@@ -84,7 +86,7 @@ export async function checkJudicialRecord(request: JudicialRecordCheckRequest): 
     const extract = readJudicialRecordExtract(text.lines.map(line => line.text));
 
     return {
-        report: report([authentic, ...checkJudicialRecordContent(extract, request, signedAt, new Date())]),
+        report: report([authentic, ...checkJudicialRecordContent(extract, request, signedAt, new Date(), readJudicialRecordLayout(text))]),
         certificatePath,
         extract,
     };
@@ -119,27 +121,38 @@ async function checkSignature(data: Uint8Array): Promise<{ authentic: JudicialRe
     }
 }
 
-/** The checks on the text of a document whose signature already held. */
-export function checkJudicialRecordContent(extract: JudicialRecordExtract, request: Omit<JudicialRecordCheckRequest, 'data'>, signedAt: Date, atDate: Date): JudicialRecordCheckResult[] {
+/** The checks on the text of a document whose signature already held, and on where it prints it. */
+export function checkJudicialRecordContent(extract: JudicialRecordExtract, request: Omit<JudicialRecordCheckRequest, 'data'>, signedAt: Date, atDate: Date, layout: JudicialRecordLayout): JudicialRecordCheckResult[] {
     return [
-        checkModel(extract),
+        checkModel(extract, layout),
         checkIdentity(extract, request),
         checkAge(extract, signedAt, request.maxAgeInDays, atDate),
-        checkEmptyRecord(extract, signedAt),
+        checkEmptyRecord(extract, signedAt, layout),
     ];
 }
 
 /**
  * The purpose has to start with the model number rather than merely mention it: 596.2 also turns up
  * in the boilerplate of other models, so a 596.1 extract can name it while being another document.
+ *
+ * The layout is this check's too: a document that names the right model while printing it somewhere
+ * else, or over more pages than this model has, is not the document these checks read.
  */
-function checkModel(extract: JudicialRecordExtract): JudicialRecordCheckResult {
+function checkModel(extract: JudicialRecordExtract, layout: JudicialRecordLayout): JudicialRecordCheckResult {
     if (extract.purpose === null) {
         return result(JudicialRecordCheck.Model, JudicialRecordCheckStatus.Failed, $t('We vonden niet terug waarvoor dit uittreksel werd opgemaakt.'));
     }
 
     if (!extract.purpose.startsWith(JUDICIAL_RECORD_MODEL)) {
         return result(JudicialRecordCheck.Model, JudicialRecordCheckStatus.Failed, $t('Dit is geen uittreksel model {model}, het soort dat nodig is voor activiteiten met minderjarigen.', { model: JUDICIAL_RECORD_MODEL }));
+    }
+
+    if (layout.hasUnexpectedPageCount) {
+        return result(JudicialRecordCheck.Model, JudicialRecordCheckStatus.Failed, $t('Een uittreksel model {model} is één pagina, dit document bevat meer. Laad het originele pdf-bestand op dat je van {signerName} kreeg.', { model: JUDICIAL_RECORD_MODEL, signerName: SIGNER_NAME }));
+    }
+
+    if (layout.hasUnexpectedPositions) {
+        return result(JudicialRecordCheck.Model, JudicialRecordCheckStatus.Failed, $t('De opmaak van dit document is niet die van een uittreksel van {signerName}. Laad het originele pdf-bestand op dat je van {signerName} kreeg, of scan de QR-code erop.', { signerName: SIGNER_NAME }));
     }
 
     return result(JudicialRecordCheck.Model, JudicialRecordCheckStatus.Passed, $t('Uittreksel model {model}, het soort dat nodig is voor activiteiten met minderjarigen.', { model: JUDICIAL_RECORD_MODEL }));
@@ -199,10 +212,18 @@ function checkAge(extract: JudicialRecordExtract, signedAt: Date, maxAgeInDays: 
  * today that was empty a month ago says nothing about today - so that date has to be the day of the
  * document. Compared against the signing time rather than the printed header date, because that is
  * the date the age check already ties the header to.
+ *
+ * The marker also has to be printed where and as large as an extract prints it. It is the one line
+ * that carries the determination, and the words alone being somewhere on a page we have no template
+ * for is not the document stating that the record is empty.
  */
-function checkEmptyRecord(extract: JudicialRecordExtract, signedAt: Date): JudicialRecordCheckResult {
+function checkEmptyRecord(extract: JudicialRecordExtract, signedAt: Date, layout: JudicialRecordLayout): JudicialRecordCheckResult {
     if (extract.emptyRecordSince === null) {
         return result(JudicialRecordCheck.EmptyRecord, JudicialRecordCheckStatus.Failed, $t('Dit is geen blanco uittreksel uit het strafregister.'));
+    }
+
+    if (layout.hasUnexpectedMarker) {
+        return result(JudicialRecordCheck.EmptyRecord, JudicialRecordCheckStatus.Failed, $t('De vermelding dat dit uittreksel blanco is, staat niet waar {signerName} ze op een uittreksel afdrukt. Laad het originele pdf-bestand op dat je van {signerName} kreeg, of scan de QR-code erop.', { signerName: SIGNER_NAME }));
     }
 
     if (!isSameDay(extract.emptyRecordSince, signedAt)) {

@@ -41,7 +41,9 @@ costs no safety.
    document, and trying again later can still give it a verdict.
 2. **Model** — the purpose has to *start* with `596.2`, the model for activities with minors. Not
    merely mention it: the number turns up in the boilerplate of other models, so a 596.1 extract can
-   name it while being another document.
+   name it while being another document. The **layout** is this check's too: one page, and every
+   value a check reads printed where and as large as an extract prints it. See
+   [the layout](#the-layout-is-part-of-the-document).
 3. **Identity** — the name and birth date printed on the extract are the member's. An extract prints
    every given name its holder has, where a member record usually holds the one they go by, so the
    names we have must all be on the document and the document may hold more. Accents, capitals and
@@ -57,12 +59,37 @@ costs no safety.
    beside it, and that date is when the register was established to be empty. An extract drawn up
    today that was empty a month ago says nothing about today, so that date has to be the day of the
    document. It is compared against the signing time, which the age check already ties the header
-   date to: with both passed, all three dates are one day.
+   date to: with both passed, all three dates are one day. The heading also has to be printed where
+   and as large as the template prints it, since it is the one line carrying the determination.
 
 The signature comes first because it is what makes the text worth reading — a file we cannot place
 could say anything — so the content is only parsed once it holds. A document whose text we cannot
 read at all (a scan, a photo saved as a pdf) leaves checks 2 to 5 pending with the message
 [`@stamhoofd/pdf-parse`](../pdf-parse/README.md) gives for it, which says what to do about it.
+
+## The layout is part of the document
+
+`JudicialRecordLayout.ts` holds where FOD Justitie prints the values these checks read and how big,
+measured off issued extracts. A document only passes with all of them in place: one page, each value
+printed once, at its position, in its size.
+
+It is there because the determination that a record is empty rests on one line being present. The
+words alone establish nothing about a document we have no template for — so the marker has to be the
+heading this template prints, over the width of the page at twice the size of the fields above it,
+and not the same words set in body text somewhere on a second page.
+
+The marker is reported apart from the other values. It carries the empty record check, while the rest
+answer whether this is the right kind of document at all, and a member reads one thing that is wrong
+rather than two.
+
+It is deliberately **exact**, and that has a cost: if FOD Justitie changes the template, every
+delivery fails this and goes to manual review until the measurements here are updated. That is the
+safe direction - no approval rests on a layout we have not seen - but it is a template change away,
+not a theoretical risk. The same holds for the French and German extracts: appending their wordings
+to `JUDICIAL_RECORD_LABELS` is no longer enough on its own, since their geometry is unknown here.
+
+Positions and sizes are in pdf units, held to a tolerance of 2 (the template sets its field lines 14
+apart) and 0.5 respectively.
 
 ## Revocation is the caller's
 
@@ -109,7 +136,7 @@ own reason.
 
 ## Tests
 
-`stam test judicial-record-check`. The content checks run over the values of a document, so they need
-no pdf. The happy path of `checkJudicialRecord` itself cannot run here: it needs a pdf signed by FOD
+`stam test judicial-record-check`. The content checks run over the values of a document, and the
+layout over where it printed them, so they need no pdf. The happy path of `checkJudicialRecord` itself cannot run here: it needs a pdf signed by FOD
 Justitie, and a real extract holds someone's name, birth date and address, so one is never
 committed.

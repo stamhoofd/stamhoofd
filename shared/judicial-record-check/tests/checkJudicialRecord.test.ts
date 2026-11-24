@@ -3,6 +3,14 @@ import { Formatter } from '@stamhoofd/utility';
 import type { JudicialRecordCheckRequest } from '../src/checkJudicialRecord.js';
 import { checkJudicialRecord, checkJudicialRecordContent } from '../src/checkJudicialRecord.js';
 import { readJudicialRecordExtract } from '../src/JudicialRecordExtract.js';
+import type { JudicialRecordLayout } from '../src/JudicialRecordLayout.js';
+
+/** A document printed as an extract of FOD Justitie: `JudicialRecordLayout.test.ts` holds that. */
+const LAID_OUT_AS_AN_EXTRACT: JudicialRecordLayout = {
+    hasUnexpectedPageCount: false,
+    hasUnexpectedPositions: false,
+    hasUnexpectedMarker: false,
+};
 
 /** The moment the signature of the fixture says it was made, so the day the extract was drawn up. */
 const SIGNED_AT = new Date('2026-11-02T17:02:46.000Z');
@@ -37,8 +45,8 @@ function lines(overrides: { date?: string; lastName?: string; firstName?: string
     return all;
 }
 
-function check(overrides: Parameters<typeof lines>[0] = {}, member: Partial<Omit<JudicialRecordCheckRequest, 'data'>> = {}) {
-    const results = checkJudicialRecordContent(readJudicialRecordExtract(lines(overrides)), { ...MEMBER, ...member }, SIGNED_AT, NOW);
+function check(overrides: Parameters<typeof lines>[0] = {}, member: Partial<Omit<JudicialRecordCheckRequest, 'data'>> = {}, layout: Partial<JudicialRecordLayout> = {}) {
+    const results = checkJudicialRecordContent(readJudicialRecordExtract(lines(overrides)), { ...MEMBER, ...member }, SIGNED_AT, NOW, { ...LAID_OUT_AS_AN_EXTRACT, ...layout });
 
     return new Map(results.map(result => [result.check, result]));
 }
@@ -60,6 +68,29 @@ describe('checkJudicialRecordContent', () => {
 
         test('refuses a model that only mentions 596.2', () => {
             expect(check({ purpose: '596.1 - niet te verwarren met model 596.2' }).get(JudicialRecordCheck.Model)!.isFailed).toBe(true);
+        });
+
+        test('refuses a document of more than one page', () => {
+            const result = check({}, {}, { hasUnexpectedPageCount: true }).get(JudicialRecordCheck.Model)!;
+
+            expect(result.isFailed).toBe(true);
+            expect(result.reason).toContain('pagina');
+        });
+
+        test('refuses a document that prints the values of an extract somewhere else', () => {
+            const result = check({}, {}, { hasUnexpectedPositions: true }).get(JudicialRecordCheck.Model)!;
+
+            expect(result.isFailed).toBe(true);
+            expect(result.reason).toContain('opmaak');
+        });
+
+        test('says what the document is before saying how it is laid out', () => {
+            // A 596.1 extract is laid out as its own model, so its layout is wrong too: being told
+            // the wrong kind of document was uploaded is the thing to fix
+            const result = check({ purpose: '596.1 - model bestemd voor gereglementeerde activiteiten' }, {}, { hasUnexpectedPositions: true }).get(JudicialRecordCheck.Model)!;
+
+            expect(result.reason).toContain('596.2');
+            expect(result.reason).not.toContain('opmaak');
         });
     });
 
@@ -94,7 +125,7 @@ describe('checkJudicialRecordContent', () => {
         });
 
         test('fails when the name is not on the document at all', () => {
-            const results = checkJudicialRecordContent(readJudicialRecordExtract(['UITTREKSEL UIT HET STRAFREGISTER']), MEMBER, SIGNED_AT, NOW);
+            const results = checkJudicialRecordContent(readJudicialRecordExtract(['UITTREKSEL UIT HET STRAFREGISTER']), MEMBER, SIGNED_AT, NOW, LAID_OUT_AS_AN_EXTRACT);
 
             expect(results.find(result => result.check === JudicialRecordCheck.Identity)!.isFailed).toBe(true);
         });
