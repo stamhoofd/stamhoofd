@@ -56,7 +56,7 @@
         "chart.js": "3.9.1",
         "ibantools": "4.5.4",
         "jsvat-next": "3.0.4",
-        "libphonenumber-js": "1.13.15",
+        "libphonenumber-js": "1.13.16",
         "luxon": "3.7.2",
         "pdfkit": "0.20.2",
         "qrcode": "1.5.4",
