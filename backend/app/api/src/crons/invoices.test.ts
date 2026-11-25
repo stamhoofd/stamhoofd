@@ -1,8 +1,9 @@
-import type { BalanceItem, Organization } from '@stamhoofd/models';
+import type { BalanceItem } from '@stamhoofd/models';
 import {
     BalanceItemFactory,
     BalanceItemPayment,
     Invoice,
+    Organization,
     OrganizationFactory,
     Payment,
 } from '@stamhoofd/models';
@@ -16,7 +17,9 @@ import {
     PaymentType,
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { createInvoicesFor } from './invoices.js';
+import { createInvoiceCron, createInvoicesFor } from './invoices.js';
+import { InvoiceService } from '../services/InvoiceService.js';
+import { TestUtils } from '@stamhoofd/test-utils';
 
 describe('Cron.invoices', () => {
     const startOfMonth = () => Formatter.luxon().startOf('month');
@@ -130,6 +133,61 @@ describe('Cron.invoices', () => {
         await createInvoicesFor(context.organization);
 
         expect((await Payment.getByID(payment.id))!.invoiceId).not.toBeNull();
+    });
+
+    test('a restarted scan retries failed invoices, skips linked payments and signals completion', async () => {
+        const context = await init();
+        const paidAt = new Date('2026-10-31T12:00:00Z');
+        const payment = await createPayment({ ...context, price: 10_0000, paidAt });
+        const otherPayment = await createPayment({
+            ...context,
+            price: 10_0000,
+            paidAt,
+            payingOrganization: await new OrganizationFactory({}).create(),
+            balanceItem: await createBalanceItem(context.organization, 10_0000),
+        });
+        const select = Organization.select.bind(Organization);
+        const sellers = vi
+            .spyOn(Organization, 'select')
+            .mockImplementation(() => select().where('id', context.organization.id));
+        TestUtils.setEnvironment('MONTHLY_INVOICE_HEARTBEAT_URL', 'https://example.invalid/month');
+        const request = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+        vi.stubGlobal('fetch', request);
+        const create = vi
+            .spyOn(InvoiceService, 'createFrom')
+            .mockRejectedValueOnce(new Error('invoice failed'));
+        try {
+            vi.setSystemTime(new Date('2026-11-11T00:00:00Z'));
+            const tick = createInvoiceCron();
+            vi.setSystemTime(new Date('2026-11-11T06:00:00Z'));
+            await tick();
+            const invoiceIds = () =>
+                Promise.all(
+                    [payment, otherPayment].map(
+                        async (p) => (await Payment.getByID(p.id))!.invoiceId,
+                    ),
+                );
+            const beforeRestart = await invoiceIds();
+            expect(beforeRestart.filter((id) => id !== null)).toHaveLength(1);
+            await tick();
+            expect(create).toHaveBeenCalledTimes(2);
+            expect(request).toHaveBeenCalledOnce();
+
+            vi.setSystemTime(new Date('2026-11-18T09:00:00Z'));
+            const restarted = createInvoiceCron();
+            vi.setSystemTime(new Date('2026-11-18T14:00:00Z'));
+            await restarted();
+            const afterRestart = await invoiceIds();
+            expect(afterRestart).not.toContain(null);
+            expect(afterRestart).toContain(beforeRestart.find((id) => id !== null));
+            expect(create).toHaveBeenCalledTimes(3);
+            expect(request).toHaveBeenCalledTimes(2);
+        } finally {
+            vi.useRealTimers();
+            vi.unstubAllGlobals();
+            create.mockRestore();
+            sellers.mockRestore();
+        }
     });
 
     test('a refund on its own is booked with a credit note', async () => {

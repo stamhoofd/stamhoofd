@@ -43,3 +43,20 @@ From the repository root:
 ```bash
 pnpm stam test api
 ```
+
+## Monthly invoice completion
+
+Set `MONTHLY_INVOICE_HEARTBEAT_URL` only on a deployment that runs billing
+crons. Store its separate Better Stack URL in 1Password. Set a monthly deadline
+after the 10th (Europe/Brussels), with grace for the five-hour startup delay
+and enough five-minute ticks to scan all organizations (at most 50 per tick).
+
+A ping means the entire organization scan finished without interruption. An
+empty scan or one spanning a month boundary qualifies. After a restart the
+cursor starts over; completing the new scan sends another ping even in the
+same month. Payments already linked to an invoice are skipped.
+
+Customer invoice errors are reported to organization admins and do not interrupt
+the scan. Once the API's worker metrics are ingested in Better Stack, alert on
+an increase in `stamhoofd_worker_outcomes_total{worker="invoice_create",outcome="error"}`
+to detect those failures independently of scan completion.

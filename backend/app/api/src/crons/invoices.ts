@@ -1,5 +1,6 @@
 import { isSimpleError, isSimpleErrors } from '@common/errors';
 import { defineWorker } from '@node/observability/workloads';
+import { sendSuccessHeartbeat } from '@node/observability';
 import { registerTenantCron } from './helpers/registerTenantCron.js';
 import type { Invoice } from '@stamhoofd/models';
 import { Organization, Payment } from '@stamhoofd/models';
@@ -17,43 +18,64 @@ import { WebmasterReport } from '../helpers/WebmasterReport.js';
 import { useSavedIterator } from './helpers/useSavedIterator.js';
 import { OrganizationAdminService } from '../services/OrganizationAdminService.js';
 
-registerTenantCron('invoices', invoices);
+registerTenantCron('invoices', createInvoiceCron());
 const invoiceWorker = defineWorker('invoice_create');
 
-const iterator = useSavedIterator(
-    () => {
-        return Organization.select();
-    },
-    { limit: 10, maxQueries: 5 },
-);
+export function createInvoiceCron() {
+    const iterator = useSavedIterator(
+        () => {
+            return Organization.select();
+        },
+        { limit: 10, maxQueries: 5 },
+    );
 
-const bootAt = new Date();
+    const bootAt = new Date();
+    let lastBillingMonth: string | undefined;
+    let lastYieldedMonth: string | undefined;
+    let failed = false;
 
-async function invoices() {
-    if (STAMHOOFD.environment !== 'development') {
-        // Do not run within 5 hours after boot
-        if (bootAt.getTime() > new Date().getTime() - 1000 * 60 * 60 * 5) {
-            return;
-        }
-
-        // Once a month, from the 10th on: the payments of the previous month are invoiced
+    return async function invoices() {
         const today = Formatter.luxon();
-        if (today.day < 10 || Formatter.luxon(iterator.lastFullRun).hasSame(today, 'month')) {
-            return;
-        }
-    }
-
-    // A problem in one invoice usually repeats in every invoice of this run: one email for all of
-    // them
-    await WebmasterReport.group('Aanmaken facturen', async () => {
-        for await (const organization of iterator.iterate()) {
-            if (!organization.meta.invoicesEnabled) {
-                continue;
+        const month = today.toFormat('yyyy-MM');
+        if (STAMHOOFD.environment !== 'development') {
+            // Do not run within 5 hours after boot
+            if (bootAt.getTime() > new Date().getTime() - 1000 * 60 * 60 * 5) {
+                return;
             }
 
-            await createInvoicesFor(organization);
+            // Once a month, from the 10th on: the payments of the previous month are invoiced
+            if (today.day < 10 || lastBillingMonth === month) {
+                return;
+            }
         }
-    });
+
+        const previousRun = iterator.lastFullRun;
+        try {
+            // Group repeated problems into one webmaster email.
+            await WebmasterReport.group('Aanmaken facturen', async () => {
+                for await (const organization of iterator.iterate()) {
+                    lastYieldedMonth = Formatter.luxon().toFormat('yyyy-MM');
+                    if (!organization.meta.invoicesEnabled) {
+                        continue;
+                    }
+
+                    await createInvoicesFor(organization);
+                }
+            });
+        } catch (e) {
+            failed = true;
+            throw e;
+        } finally {
+            if (previousRun !== iterator.lastFullRun) {
+                lastBillingMonth = lastYieldedMonth ?? month;
+                lastYieldedMonth = undefined;
+                if (!failed) {
+                    await sendSuccessHeartbeat(STAMHOOFD.MONTHLY_INVOICE_HEARTBEAT_URL);
+                }
+                failed = false;
+            }
+        }
+    };
 }
 
 export async function createInvoicesFor(organization: Organization) {
