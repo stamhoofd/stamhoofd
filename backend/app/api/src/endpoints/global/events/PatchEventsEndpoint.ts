@@ -450,10 +450,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
     static async checkEventLimits(event: Event) {
         const type = await this.getEventType(event.typeId);
 
-        const names = event.name.isDefault
-            ? [event.name.toString()]
-            : event.name.languages.map((language) => event.name.get(language));
-        if (names.length === 0 || names.some((name) => name.trim().length < 2)) {
+        if (!event.name.hasMinimumLength(2)) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Name is too short',

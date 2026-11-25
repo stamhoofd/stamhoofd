@@ -749,8 +749,7 @@ async function createEventFromGroup(group: Group, organization: Organization) {
 
     const groupNamedObjects = await requireGroupIdsToNamedObjects(group.settings.requireGroupIds);
 
-    const name = group.settings.name.toString();
-    if (name.length < 2) {
+    if (!group.settings.name.hasMinimumLength(2)) {
         // will fail in the backend otherwise
         throw new SimpleError({
             code: 'group-name-too-short',
@@ -762,7 +761,7 @@ async function createEventFromGroup(group: Group, organization: Organization) {
     return Event.create({
         organizationId: organization.id,
         name: group.settings.name,
-        typeId: getEventTypeId(name),
+        typeId: getEventTypeId(group.settings.name.toString()),
         startDate: group.settings.startDate,
         endDate: group.settings.endDate,
         meta: EventMeta.create({
