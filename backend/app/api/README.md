@@ -75,3 +75,27 @@ partial summary still consumes that day's run; a thrown error or shutdown
 abort leaves it eligible for another tick before 06:00. An undeliverable
 heartbeat does not trigger another reconciliation. Existing problem reports
 remain the source for individual payout discrepancies.
+
+## SES queue polling
+
+Each five-minute API cron polls one queue. Keep a separate 1Password heartbeat
+URL per configured queue and deployment:
+
+| Queue setting                        | Heartbeat setting             |
+| ------------------------------------ | ----------------------------- |
+| `AWS_BOUNCE_QUEUE_URL`               | `SES_BOUNCE_HEARTBEAT_URL`    |
+| `AWS_COMPLAINTS_QUEUE_URL`           | `SES_COMPLAINT_HEARTBEAT_URL` |
+| `AWS_FORWARDING_QUEUE_URL` (replies) | `SES_REPLY_HEARTBEAT_URL`     |
+
+Enable monitors only for active consumers with AWS credentials. A successful
+empty receive or a clean bounded pass signals once. A failed receive, delete,
+unacknowledgeable or unsupported message, or handler exception suppresses that
+poll’s signal. The existing delete-before-dispatch policy still applies:
+a missing ping does not mean a failed message will be redelivered. Reply
+processing includes filtering and scheduling mail, not downstream mail delivery.
+Allow grace for a full scheduler cycle and processing time.
+
+Receive and delete errors identify the queue role and include available AWS error
+codes, HTTP status and request IDs. On a message-processing failure, the API logs
+the SQS message ID, whether deletion succeeded, the processing step and available
+source locations. Mail content and receipt handles are omitted.
