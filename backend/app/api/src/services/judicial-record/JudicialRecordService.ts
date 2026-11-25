@@ -15,7 +15,7 @@ import { Formatter } from '@stamhoofd/utility';
  * A month, as the member is told when they request one. The member portal counts the same thirty days
  * before it offers to deliver.
  */
-export const JUDICIAL_RECORD_MAX_AGE_IN_DAYS = 30;
+export const JUDICIAL_RECORD_MAX_AGE_IN_DAYS = 31;
 
 /**
  * Accepting a delivered judicial record extract for a member.
