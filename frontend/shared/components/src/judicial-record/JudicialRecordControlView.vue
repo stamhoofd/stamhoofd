@@ -106,7 +106,7 @@ import STListItem from '../layout/STListItem.vue';
 import STNavigationBar from '../navigation/STNavigationBar.vue';
 import LoadingButton from '../navigation/LoadingButton.vue';
 import STToolbar from '../navigation/STToolbar.vue';
-import { JudicialRecordCheckOutcome, getJudicialRecordCheckOutcome } from '../members/components/judicial-record/useJudicialRecordCheckTranslations';
+import { JudicialRecordCheckOutcome, getJudicialRecordCheckOutcome } from './judicialRecordCheckOutcome';
 import { useNavigationActions } from '../types/NavigationActions';
 import JudicialRecordPdfPreview from './JudicialRecordPdfPreview.vue';
 import type { JudicialRecordStepProps } from './JudicialRecordStepProps';

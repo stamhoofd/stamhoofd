@@ -1,6 +1,6 @@
 import { JudicialRecordCheck, JudicialRecordCheckReport, JudicialRecordCheckResult, JudicialRecordCheckStatus, judicialRecordChecksInOrder } from '@stamhoofd/structures';
 import { describe, expect, test } from 'vitest';
-import { JudicialRecordCheckOutcome, getJudicialRecordCheckOutcome } from './useJudicialRecordCheckTranslations';
+import { JudicialRecordCheckOutcome, getJudicialRecordCheckOutcome } from './judicialRecordCheckOutcome';
 
 function report(statuses: Partial<Record<JudicialRecordCheck, JudicialRecordCheckStatus>>): JudicialRecordCheckReport {
     return JudicialRecordCheckReport.create({
