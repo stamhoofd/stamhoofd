@@ -1,4 +1,5 @@
 import type { SQLResultNamespacedRow } from '@node/database';
+import { defineWorker } from '@node/observability/workloads';
 import {
     Group,
     Member,
@@ -920,6 +921,10 @@ export async function syncStatisticsDeletes(): Promise<void> {
     await writeSyncState('member_responsibility_records', { lastReconciledAt: new Date() });
 }
 
+const incremental = defineWorker('stats_incremental');
+const deletes = defineWorker('stats_deletes');
+const settle = defineWorker('stats_settle');
+
 /**
  * One whole run of the sync: everything that changed, then the rows whose source is gone, then the
  * periods the administration has locked since.
@@ -928,15 +933,15 @@ export async function syncStatisticsDeletes(): Promise<void> {
  * cron that schedules them.
  */
 export async function runStatisticsCycle(): Promise<void> {
-    await syncStatistics();
+    await incremental.run(syncStatistics);
 
     // After the incremental pass, never next to it: reconciling first would see a row the sync is
     // about to write back and one that was deleted since the sync read it as equally present,
     // leaving the deleted one behind for a full day.
-    await syncStatisticsDeletes();
+    await deletes.run(syncStatisticsDeletes);
 
     // Last, and only when both passes came through: a locked period has had the changes and the
     // deletions of the day it was locked written by now, so its numbers are final. A pass that threw
     // never gets here, which leaves the period to be read again by the next run.
-    await settleLockedPeriods();
+    await settle.run(settleLockedPeriods);
 }

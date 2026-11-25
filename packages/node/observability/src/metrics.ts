@@ -3,6 +3,7 @@ import { resourceFromAttributes } from '@opentelemetry/resources';
 import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { channel } from 'node:diagnostics_channel';
 import { enableHttpMetrics, disableHttpMetrics } from './http-metrics.js';
+import { enableWorkMetrics, disableWorkMetrics } from './workloads.js';
 
 /** A private provider keeps third-party instruments off the scrape endpoint. */
 export function initializeMetrics(service: string) {
@@ -48,9 +49,11 @@ export function initializeMetrics(service: string) {
             execute.record(duration, { operation, outcome });
     };
     enableHttpMetrics(meter, options);
+    enableWorkMetrics(meter);
     timings.subscribe(record);
     const unsubscribe = () => {
         disableHttpMetrics();
+        disableWorkMetrics();
         timings.unsubscribe(record);
     };
     const started = reader.startServer().catch(() => {

@@ -1,5 +1,8 @@
 import { isSimpleError, SimpleError } from '@common/errors';
+import { defineQueue } from '@node/observability/workloads';
 import { AsyncLocalStorage } from 'node:async_hooks';
+
+const worker = defineQueue('in_process');
 
 class Queue {
     name: string;
@@ -43,6 +46,8 @@ export type QueueHandlerOptions = {
 };
 
 class QueueItem<T> {
+    pending = worker.enqueue(1);
+    canceled = false;
     handler: (options: QueueHandlerOptions) => Promise<T>;
     resolve: (value: T) => void;
     reject: (reason?: any) => void;
@@ -78,6 +83,11 @@ export class AbortSignal {
 
     get isAborted() {
         return this.abortWithError !== null;
+    }
+
+    /** Distinguishes a cooperative abort from an unrelated failure after cancellation. */
+    wasAbortedWith(error: unknown) {
+        return this.isAborted && this.abortWithError === error;
     }
 
     abort(error?: unknown) {
@@ -148,6 +158,7 @@ export class QueueHandler {
         if (q) {
             // This doesn't interfere any running items
             for (const item of q.items) {
+                item.canceled = true;
                 item.handler = () => {
                     return Promise.reject(
                         error ??
@@ -167,19 +178,7 @@ export class QueueHandler {
     static abort(queue: string, error?: Error) {
         const q = this.queues.get(queue);
         if (q) {
-            // This doesn't interfere any running items
-            for (const item of q.items) {
-                item.handler = () => {
-                    return Promise.reject(
-                        error ??
-                            new SimpleError({
-                                code: 'queue-canceled',
-                                message: 'Queue ' + queue + ' was canceled',
-                            }),
-                    );
-                };
-            }
-
+            this.cancel(queue, error);
             q.abort(error);
         }
     }
@@ -332,6 +331,9 @@ export class QueueHandler {
         q.runCount += 1;
         // console.log("[QUEUE] ("+q.runCount+"/"+q.parallel+") Executing "+queue+" ("+q.items.length+" remaining)")
         const abort = q.createAbortSignal();
+        next.pending?.leave();
+        const finish = next.canceled ? undefined : worker.start();
+        if (next.canceled) worker.skip();
 
         try {
             next.resolve(
@@ -339,8 +341,17 @@ export class QueueHandler {
                     abort,
                 }),
             );
+            finish?.('success');
             // console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Resolved "+queue+" ("+q.items.length+" remaining)")
         } catch (e) {
+            finish?.(
+                abort.wasAbortedWith(e) ||
+                    isAbortedError(e) ||
+                    isDebouncedError(e) ||
+                    isCanceledError(e)
+                    ? 'aborted'
+                    : 'error',
+            );
             next.reject(e);
             if (!isDebouncedError(e) && !isCanceledError(e) && !isAbortedError(e)) {
                 console.log(

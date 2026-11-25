@@ -59,6 +59,43 @@ and transaction connections reuse their checkout; their queries still count.
 Both histograms label completed attempts with `outcome="success"` or `"error"`.
 No SQL, bindings, error details or database identifiers are collected.
 
+### Worker and queue metrics
+
+`stamhoofd_worker_running{worker}` reports active attempts. On a successful
+scrape, zero means the reporter is loaded and idle. An absent expected worker
+means its reporter was not loaded; an unreachable scrape gives no evidence of
+idle workers. Each loaded reporter exposes its supported `stamhoofd_worker_outcomes_total`
+series at zero before its first attempt. `rate(stamhoofd_worker_outcomes_total[5m])`
+measures terminal outcomes per second; it needs at least two scrapes. Zero is
+a counter baseline, not a last-success timestamp. The duration histogram is `stamhoofd_worker_duration_milliseconds`.
+It times started attempts only: skipping a schedule or canceling a queued item
+adds no duration. No success is reported until work finishes.
+
+| Service              | Expected worker coverage                                                                                          | Local scrape checks                                                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| API                  | `in_process`, `throttled_batch`, `cron_dispatch`, `ses_message`, `invoice_create`, `settlement_reconciliation`    | Compiled entry reporters; pending, running, aging, cancel, abort and failure; supported, unsupported and failed SES messages. |
+| Renderer             | `in_process` (browser acquisition)                                                                                | Reporter on compiled entry.                                                                                                   |
+| Backup               | `in_process`, `backup_full`; `cron_dispatch`, `backup_binlogs`, `backup_clean` when scheduled backups are started | Compiled entry: accepted backup request followed by worker failure. Development does not start backup crons.                  |
+| Statistics (`stats`) | `cron_dispatch`, `stats_cycle`, `stats_incremental`, `stats_deletes`, `stats_settle`                              | Real scheduler and test databases: failure stops later stages, retry completes, subsequent gated tick skips.                  |
+| Redirecter, docs     | No dedicated worker                                                                                               | Do not require worker samples. Shared modules can expose an idle reporter in a process that loads them.                       |
+
+`cron_dispatch` counts a handler returning as `returned`, not as successful
+business work. Its `skipped` includes jobs suppressed by scheduler gates or an
+overlapping run. Use the specific workers to count invoice creation attempts
+(per customer group), nightly settlement reconciliations, full backups, binary-log
+backup passes, scheduled cleanup passes, statistics cycles and their stages.
+`ses_message` counts a received message, not an empty poll or successful email delivery.
+Remote SQS backlog is not measured by these process-local gauges.
+
+`stamhoofd_queue_pending` excludes running work; `stamhoofd_queue_oldest_pending_milliseconds`
+is the age at scrape time, zero when nothing is waiting. `in_process` aggregates
+all `QueueHandler` keys and counts dispatched queue items, including debounce timers;
+recursive calls that bypass the queue are not new items. `throttled_batch` depth
+counts distinct queued items until their particular batch starts; running and throughput
+count batch callbacks. Do not add these counts to business-worker throughput:
+a single backup can also be a queue item and a cron dispatch. Labels never contain
+tenant IDs, group keys, queue URLs, message bodies or error strings.
+
 ## OTLP configuration
 
 Set `OTEL_EXPORTER_OTLP_ENDPOINT` or signal-specific traces/logs endpoint variables

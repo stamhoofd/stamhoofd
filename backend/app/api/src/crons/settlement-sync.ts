@@ -1,6 +1,7 @@
 // Nightly settlement sync for all providers. Everything is an upsert and synced payouts are
 // skipped, so the windowed re-walk is cheap.
 import { registerCron } from '@stamhoofd/crons';
+import { defineWorker } from '@node/observability/workloads';
 import { Email } from '@stamhoofd/email';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -13,6 +14,7 @@ import { SettlementSyncRunner } from '../helpers/SettlementSyncRunner.js';
 import { isApplicationFeeInvoicingEnabled } from './stripe-invoices.js';
 
 registerCron('settlement-sync', syncSettlements);
+const reconciliation = defineWorker('settlement_reconciliation');
 
 /**
  * How many days of settlements the nightly run re-walks.
@@ -32,11 +34,13 @@ let lastSettlementSync: Date | null = null;
  */
 export async function syncSettlements() {
     if (STAMHOOFD.environment !== 'production') {
+        reconciliation.skip();
         return;
     }
 
     // Between 5 and 6 AM Brussels time.
     if (Formatter.luxon().hour !== 5) {
+        reconciliation.skip();
         return;
     }
 
@@ -44,6 +48,7 @@ export async function syncSettlements() {
     const today = new Date();
     if (lastSettlementSync && Formatter.dateIso(lastSettlementSync) === Formatter.dateIso(today)) {
         console.log('Settlement sync done for this day');
+        reconciliation.skip();
         return;
     }
 
@@ -56,15 +61,21 @@ export async function syncSettlements() {
     // it is not remembered as the sync of this day: a later tick within the hour runs it again,
     // and otherwise the next day re-walks the same window anyway
     await QueueHandler.schedule('settlement-sync', async ({ abort }) => {
-        const runner = new SettlementSyncRunner();
-        await runner.run({
-            start,
-            providers: [PaymentProvider.Stripe, PaymentProvider.Mollie],
-            stripe: { retryUnsynced: true },
-            abort,
-        });
-
-        await reportProblemSettlements();
+        const finish = reconciliation.start();
+        try {
+            const runner = new SettlementSyncRunner();
+            const summary = await runner.run({
+                start,
+                providers: [PaymentProvider.Stripe, PaymentProvider.Mollie],
+                stripe: { retryUnsynced: true },
+                abort,
+            });
+            await reportProblemSettlements();
+            finish?.(summary.failed || summary.failedFeeMonths ? 'error' : 'success');
+        } catch (error) {
+            finish?.(abort.wasAbortedWith(error) ? 'aborted' : 'error');
+            throw error;
+        }
     });
 
     lastSettlementSync = new Date();

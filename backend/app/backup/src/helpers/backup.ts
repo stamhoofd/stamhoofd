@@ -7,6 +7,7 @@ import {
 } from '@aws-sdk/client-s3'; // ES Modules import
 import { Upload } from '@aws-sdk/lib-storage';
 import { Database } from '@node/database';
+import { defineWorker } from '@node/observability/workloads';
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Formatter } from '@stamhoofd/utility';
@@ -322,11 +323,18 @@ export function getBackupFileDate(filename: string) {
     return date;
 }
 
+export const fullBackup = defineWorker('backup_full');
+
 export async function backup() {
     if (QueueHandler.isRunning('backup')) {
+        fullBackup.skip();
         console.log('Backup already running');
         return;
     }
+    await fullBackup.run(createFullBackup);
+}
+
+async function createFullBackup() {
     await QueueHandler.schedule('backup', async () => {
         // Create a backup of the local server and stores it in a .sql.gz file
         const localBackupFolder = STAMHOOFD.localBackupFolder;
