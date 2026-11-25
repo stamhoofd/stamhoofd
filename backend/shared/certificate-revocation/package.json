@@ -31,6 +31,7 @@
     },
     "dependencies": {
         "@common/errors": "workspace:*",
+        "@stamhoofd/signed-pdf": "workspace:*",
         "asn1js": "4.0.0",
         "pkijs": "4.0.0"
     },

@@ -1,3 +1,4 @@
+import { getSubjectAttribute } from '@stamhoofd/signed-pdf/Certificates.js';
 import type * as pkijs from 'pkijs';
 import type { CertificateAndIssuer } from './Revocation.js';
 
@@ -19,21 +20,9 @@ export function toCertificateChain(certificatePath: pkijs.Certificate[]): Certif
         chain.push({
             certificate,
             issuer: certificatePath[index + 1],
-            name: getCommonName(certificate) ?? 'unnamed certificate',
+            name: getSubjectAttribute(certificate, COMMON_NAME_OID) ?? 'unnamed certificate',
         });
     }
 
     return chain;
-}
-
-function getCommonName(certificate: pkijs.Certificate): string | null {
-    const attributes = certificate.subject.typesAndValues.filter(entry => entry.type === COMMON_NAME_OID);
-
-    if (attributes.length !== 1) {
-        return null;
-    }
-
-    const value: unknown = attributes[0].value.valueBlock.value;
-
-    return typeof value === 'string' ? value : null;
 }
