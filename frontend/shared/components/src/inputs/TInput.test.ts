@@ -70,7 +70,7 @@ beforeEach(async () => {
 });
 
 for (const [name, component] of [['TInput', TInput], ['TTextarea', TTextarea]] as const) {
-    test(`${name} removes a cleared language while another one remains`, async () => {
+    test(`${name} keeps an emptied field until it loses focus`, async () => {
         const result = renderInput(component, new TranslatedString({
             [Language.Dutch]: 'Hallo',
             [Language.English]: 'Hello',
@@ -78,6 +78,30 @@ for (const [name, component] of [['TInput', TInput], ['TTextarea', TTextarea]] a
 
         await vi.waitFor(() => expect(fields().map(f => f.value)).toEqual(['Hallo', 'Hello']));
         await userEvent.fill(fields()[1], '');
+
+        await vi.waitFor(() => {
+            expect(lastModelValue(result)?.getIfExists(Language.English)).toBe('');
+        });
+
+        await result.rerender({ modelValue: lastModelValue(result) });
+        expect(fields().map(f => f.value)).toEqual(['Hallo', '']);
+        expect(languageLabels()).toEqual(['NL', 'EN']);
+
+        await userEvent.fill(fields()[1], 'Hello again');
+        await vi.waitFor(() => {
+            expect(lastModelValue(result)?.getIfExists(Language.English)).toBe('Hello again');
+        });
+    });
+
+    test(`${name} removes a cleared language on blur while another one remains`, async () => {
+        const result = renderInput(component, new TranslatedString({
+            [Language.Dutch]: 'Hallo',
+            [Language.English]: 'Hello',
+        }));
+
+        await vi.waitFor(() => expect(fields().map(f => f.value)).toEqual(['Hallo', 'Hello']));
+        await userEvent.fill(fields()[1], '');
+        fields()[1].blur();
 
         await vi.waitFor(() => {
             expect(lastModelValue(result)?.languages).toEqual([Language.Dutch]);
@@ -88,13 +112,14 @@ for (const [name, component] of [['TInput', TInput], ['TTextarea', TTextarea]] a
         expect(languageLabels()).toEqual(['NL']);
     });
 
-    test(`${name} keeps one untranslated field when the last language is cleared`, async () => {
+    test(`${name} keeps one untranslated field when the last language is cleared on blur`, async () => {
         const result = renderInput(component, new TranslatedString({
             [Language.Dutch]: 'Hallo',
         }));
 
         await vi.waitFor(() => expect(fields().map(f => f.value)).toEqual(['Hallo']));
         await userEvent.fill(fields()[0], '');
+        fields()[0].blur();
 
         await vi.waitFor(() => {
             const value = lastModelValue(result);

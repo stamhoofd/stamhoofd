@@ -12,6 +12,7 @@
                     :placeholder="placeholder"
                     :value="getForLanguage(language)"
                     @input="setForLanguage(($event.currentTarget as HTMLTextAreaElement).value, language)"
+                    @blur="dropEmptyLanguage(language)"
                 />
                 <span v-if="language">
                     {{ language.toUpperCase() }}
@@ -77,8 +78,19 @@ function setForLanguage(val: string, lang: Language | null) {
         return;
     }
 
+    // An emptied language is only dropped on blur, so its field stays while retyping
+    value.value = value.value.patch({
+        [lang]: val,
+    });
+}
+
+function dropEmptyLanguage(lang: Language | null) {
+    if (lang === null || !hasLanguages || value.value.getIfExists(lang)) {
+        return;
+    }
+
     const patched = value.value.patch({
-        [lang]: val || null,
+        [lang]: null,
     });
 
     // Nothing left to translate, so drop back to an untranslated value like TInputButton does
