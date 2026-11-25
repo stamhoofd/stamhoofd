@@ -295,8 +295,6 @@ describe('CoreDNS Corefile', () => {
     });
 
     it('puts the catch-all after the address templates', async () => {
-        // The template plugin answers with the first template that matches, so a catch-all placed
-        // first would turn every A and AAAA lookup into an empty answer.
         for (const corefile of [await corefileFor(), await corefileFor('192.168.1.7')]) {
             const catchAll = corefile.indexOf('template IN ANY');
             expect(catchAll).toBeGreaterThan(corefile.indexOf('template IN A '));
@@ -308,17 +306,11 @@ describe('CoreDNS Corefile', () => {
         const corefile = await corefileFor('192.168.1.7');
 
         expect(corefile).toContain('IN A 192.168.1.7');
-        // The zone has no IPv6 address to hand out, but AAAA and HTTPS must still come back as an
-        // empty NOERROR: falling through to no plugin SERVFAILs, and a resolver that asks for A and
-        // AAAA at once (Android) then fails the lookup instead of using the A record.
         expect(corefile).toContain('template IN ANY');
         expect(corefile).toContain('rcode NOERROR');
     });
 
     it('carries the zone SOA in a no-data answer', async () => {
-        // RFC 2308 wants the SOA in the authority section of a no-data answer. Without it a strict
-        // resolver cannot conclude the record is absent and retries the query instead, which is
-        // what Chrome on Android reports as ERR_TOO_MANY_RETRIES.
         for (const corefile of [await corefileFor(), await corefileFor('192.168.1.7')]) {
             expect(corefile).toMatch(/authority "\{\{ \.Zone \}\} \d+ IN SOA /);
         }
