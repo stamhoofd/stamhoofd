@@ -199,8 +199,13 @@ function checkAge(extract: JudicialRecordExtract, signedAt: Date, maxAgeInDays: 
     }
 
     const date = Formatter.date(extract.documentDate, true);
+    const age = ageInDays(extract.documentDate, atDate);
 
-    if (ageInDays(extract.documentDate, atDate) > maxAgeInDays) {
+    if (age < 0) {
+        return result(JudicialRecordCheck.Age, JudicialRecordCheckStatus.Failed, $t('Dit uittreksel werd opgemaakt op {date}, een datum in de toekomst.', { date }));
+    }
+
+    if (age > maxAgeInDays) {
         return result(JudicialRecordCheck.Age, JudicialRecordCheckStatus.Failed, $t('Dit uittreksel werd opgemaakt op {date} en mag niet ouder zijn dan {days} dagen.', { date, days: maxAgeInDays.toString() }));
     }
 
