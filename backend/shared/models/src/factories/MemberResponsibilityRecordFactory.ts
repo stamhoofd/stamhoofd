@@ -10,8 +10,6 @@ class Options {
     responsibility?: MemberResponsibility;
     member: Member;
     organizationId?: string;
-    startDate?: Date;
-    endDate?: Date | null;
 }
 
 export class MemberResponsibilityRecordFactory extends Factory<
@@ -27,8 +25,8 @@ export class MemberResponsibilityRecordFactory extends Factory<
             }).create());
         record.responsibilityId = this.options.responsibility?.id ?? responsibility.id;
         record.memberId = this.options.member.id;
-        record.startDate = this.options.startDate ?? new Date();
-        record.endDate = this.options.endDate ?? null;
+        record.startDate = new Date();
+        record.endDate = null;
         record.organizationId = this.options.organizationId ?? this.options.member.organizationId;
 
         if (!record.organizationId) {
