@@ -1,4 +1,5 @@
 import { context, logs, SeverityNumber, SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
+import { boundedMethod } from './http-metrics.js';
 
 /**
  * Observes one server response without accepting headers, payloads, or raw URLs.
@@ -9,19 +10,7 @@ export function observeRequest(method: string): { finish(status: number, route?:
     const span = trace.getTracer('@node/observability').startSpan('http.server.request', {
         kind: SpanKind.SERVER,
         attributes: {
-            'http.request.method': [
-                'GET',
-                'HEAD',
-                'POST',
-                'PUT',
-                'PATCH',
-                'DELETE',
-                'OPTIONS',
-                'CONNECT',
-                'TRACE',
-            ].includes(method)
-                ? method
-                : '_OTHER',
+            'http.request.method': boundedMethod(method),
         },
     });
     let ended = false;

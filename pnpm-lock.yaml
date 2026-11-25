@@ -711,6 +711,9 @@ importers:
       '@node/logging':
         specifier: workspace:*
         version: link:../../../packages/node/logging
+      '@node/observability':
+        specifier: workspace:*
+        version: link:../../../packages/node/observability
       '@stamhoofd/backend-env':
         specifier: workspace:*
         version: link:../../shared/env
@@ -772,6 +775,9 @@ importers:
       '@node/logging':
         specifier: workspace:*
         version: link:../../../packages/node/logging
+      '@node/observability':
+        specifier: workspace:*
+        version: link:../../../packages/node/observability
       '@stamhoofd/backend-env':
         specifier: workspace:*
         version: link:../../shared/env

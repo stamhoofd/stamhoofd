@@ -1,5 +1,5 @@
 import { Column, Database, Migration } from '@node/database';
-import { ApplicationLifecycle } from '@node/observability';
+import { ApplicationLifecycle, observeHttpServer } from '@node/observability';
 import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
 import { CORSMiddleware, LogMiddleware, VersionMiddleware } from '@stamhoofd/backend-middleware';
 import { checkReadOnly } from '@stamhoofd/crons';
@@ -198,6 +198,7 @@ export const boot = async (options: { killProcess: boolean; lifecycle?: Applicat
 
     productionLog('Opening port...');
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
+    observeHttpServer(routerServer.server);
 
     const hrend = process.hrtime(bootTime);
     productionLog(

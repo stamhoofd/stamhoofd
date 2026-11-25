@@ -1,6 +1,6 @@
 import '#nitro-internal-pollyfills';
 import { createServer } from 'node:http';
-import { runApplication } from '@node/observability';
+import { observeHttpServer, runApplication } from '@node/observability';
 
 // Nitro's standard node entry does not expose its listener to runtime plugins.
 // Own only the Node listener; reuse Nitro's router and graceful-shutdown machinery.
@@ -10,6 +10,7 @@ runApplication('docs', async (lifecycle) => {
     const { toNodeListener } = await import('h3');
     const app = useNitroApp();
     const server = createServer(toNodeListener(app.h3App));
+    observeHttpServer(server);
     app.hooks.hook('close', () => lifecycle.close());
     const port = Number(process.env.NITRO_PORT || process.env.PORT || 3000);
     server.listen(port, process.env.NITRO_HOST || process.env.HOST || '0.0.0.0');

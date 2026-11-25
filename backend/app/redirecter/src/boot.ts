@@ -1,4 +1,5 @@
 import { Router, RouterServer } from '@node/endpoints';
+import { initializeMetrics, observeHttpServer } from '@node/observability';
 import { LogMiddleware } from '@stamhoofd/backend-middleware';
 import { Country } from '@stamhoofd/types/Country';
 import { Geolocator } from './classes/Geolocator.js';
@@ -19,6 +20,7 @@ if (new Date().getTimezoneOffset() !== 0) {
 }
 
 const start = async () => {
+    const metrics = initializeMetrics('redirecter');
     await Geolocator.shared.load(import.meta.dirname + '/data/belgium.csv', Country.Belgium);
 
     // Netherlands not needed, because it is the current default
@@ -32,6 +34,7 @@ const start = async () => {
     const routerServer = new RouterServer(router);
     routerServer.verbose = false;
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
+    observeHttpServer(routerServer.server);
 
     // Send the app version along
     routerServer.addRequestMiddleware(LogMiddleware);
@@ -55,6 +58,8 @@ const start = async () => {
             console.error('Failed to stop HTTP server:');
             console.error(err);
         }
+
+        await metrics?.shutdown();
 
         // Should not be needed, but added for security as sometimes a promise hangs somewhere
         process.exit(0);

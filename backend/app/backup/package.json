@@ -33,6 +33,7 @@
         "@node/database": "workspace:*",
         "@node/endpoints": "workspace:*",
         "@node/logging": "workspace:*",
+        "@node/observability": "workspace:*",
         "@stamhoofd/backend-env": "workspace:*",
         "@stamhoofd/backend-middleware": "workspace:*",
         "@stamhoofd/crons": "workspace:*",
