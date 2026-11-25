@@ -1,4 +1,5 @@
 import { registerCron } from '@stamhoofd/crons';
+import { sendSuccessHeartbeat } from '@node/observability';
 import {
     backup,
     backupBinlogs,
@@ -30,15 +31,18 @@ async function createBackups() {
     }
 
     console.log('Creating full backup...');
-    await backup();
+    if (!(await backup())) return;
 
     console.log('Full backup created');
     lastFullBackup = now;
+    await sendSuccessHeartbeat(STAMHOOFD.FULL_BACKUP_HEARTBEAT_URL);
 }
 
 async function backupBinLogs() {
     console.log('Backing up binlogs...');
-    await binlogs.run(backupBinlogs);
+    if (await binlogs.run(backupBinlogs)) {
+        await sendSuccessHeartbeat(STAMHOOFD.BINLOG_BACKUP_HEARTBEAT_URL);
+    }
 }
 
 let lastClean = new Date(0); // on boot
