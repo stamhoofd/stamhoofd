@@ -31,6 +31,7 @@ import { AutofocusDirective } from './directives/AutofocusDirective';
 import { ColorDirective } from './directives/ColorDirective';
 import { FormatInputDirective } from './directives/FormatInputDirective';
 import STErrorsDefault from './errors/STErrorsDefault.vue';
+import { vueExceptionHandler } from './errors/vueExceptionHandler';
 import STInputBox from './inputs/STInputBox.vue';
 import TInput from './inputs/TInput.vue';
 import TTextarea from './inputs/TTextarea.vue';
@@ -134,31 +135,7 @@ export class VueGlobalHelper {
             return Formatter.pluralText(num, singular, plural);
         };
 
-        // For some reason Vue does not log the error itself
-        app.config.errorHandler = (err, instance, info) => {
-            console.group('Vue errorHandler caught');
-
-            console.error('Error:', err);
-            console.error('Info:', info);
-
-            if (instance) {
-                console.error('Component instance:', instance);
-
-                const type = instance.$?.type;
-                console.error('Component name:', type?.name);
-                console.error('Component file:', type?.__file);
-
-                console.error('Props:', instance.$props);
-                console.error('Data:', instance.$data);
-            }
-
-            console.groupEnd();
-
-            // In development, rethrow so the browser debugger stops closer to the cause.
-            if (import.meta.env.DEV) {
-                throw err;
-            }
-        };
+        app.config.errorHandler = vueExceptionHandler;
 
         app.config.warnHandler = function (msg, instance, trace) {
             // Shorter error message because the trace is complete garbage

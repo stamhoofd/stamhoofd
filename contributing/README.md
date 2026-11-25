@@ -56,6 +56,8 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 
 [Backend log privacy and forwarding gate](backend/log-privacy.md)
 
+[Exception privacy gate](backend/exception-privacy.md)
+
 ## Common patterns
 
 [OpenTelemetry decorators](../packages/common/opentelemetry-decorators/README.md)

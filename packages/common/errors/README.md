@@ -17,3 +17,6 @@ use the same workspace error implementation.
 Use `errorDiagnostics(error)` when logging a caught exception locally. It extracts
 the exception class, recognized error codes, numeric HTTP status and application
 source locations without serializing the exception or its message.
+
+For the opt-in, serialized JS exception boundary and its failure behavior, see
+[Exception privacy gate](../../../contributing/backend/exception-privacy.md).

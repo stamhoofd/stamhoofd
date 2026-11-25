@@ -3,11 +3,16 @@ import { BackendApp } from '@stamhoofd/types/BackendApp';
 import chalk from 'chalk';
 import crypto from 'crypto';
 import fs, { promises } from 'fs';
-import { errorDiagnostics } from '@common/errors';
 import { backendRecord, initializeBackendRecords, logger } from '@node/logging';
+import { errorDiagnostics, captureExceptionEnvelope } from '@common/errors';
 
-export function fatalBackendException(boundary: 'startup' | 'rejection', error: unknown): void {
+/** Preserve the fatal exit even when no exception transport is installed or delivery fails. */
+export function fatalBackendException(boundary: 'startup' | 'rejection', error: unknown): never {
     console.error('Fatal backend exception', boundary, errorDiagnostics(error));
+    captureExceptionEnvelope(
+        boundary === 'startup' ? 'backend.startup' : 'backend.rejection',
+        error,
+    );
     backendRecord(boundary === 'startup' ? 'application.startup.failed' : 'application.unhandled');
     process.exit(1);
 }
