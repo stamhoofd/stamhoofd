@@ -2135,7 +2135,10 @@ export class AdminPermissionChecker {
      * An access right the platform granted for an organization tag arrives on that organization's permissions,
      * so both have to be asked.
      */
-    private async hasMemberAccessRight(member: MemberWithUsersAndRegistrations, right: AccessRight): Promise<boolean> {
+    private async hasMemberAccessRight(
+        member: MemberWithUsersAndRegistrations,
+        right: AccessRight,
+    ): Promise<boolean> {
         const organizations: Organization[] = [];
 
         if (member.organizationId) {
@@ -2161,7 +2164,7 @@ export class AdminPermissionChecker {
         }
 
         return this.platformPermissions?.hasAccessRight(right) ?? false;
-        }
+    }
 
     /**
      * Whether the user may record a review decision on this member's delivered extract, and read the document
@@ -2176,7 +2179,7 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (!await this.canAccessMember(member, PermissionLevel.Read)) {
+        if (!(await this.canAccessMember(member, PermissionLevel.Read))) {
             return false;
         }
 

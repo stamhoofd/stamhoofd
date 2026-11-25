@@ -137,7 +137,9 @@ export class AccessRightHelper {
             case AccessRight.MemberManageNRN:
                 return $t('%lY');
             case AccessRight.MemberReviewJudicialRecord:
-                return $t(`De uittreksels uit het strafregister beoordelen die niet blanco zijn of waarbij de automatische controle mislukt.`);
+                return $t(
+                    `De uittreksels uit het strafregister beoordelen die niet blanco zijn of waarbij de automatische controle mislukt.`,
+                );
             case AccessRight.ManageEmailTemplates:
                 return $t('%1DF');
         }

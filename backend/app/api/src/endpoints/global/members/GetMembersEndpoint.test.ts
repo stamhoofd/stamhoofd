@@ -35,7 +35,6 @@ import {
     EventMeta,
     GroupStatus,
     GroupType,
-    JudicialRecordReviewDetails,
     JudicialRecordReviewDecision,
     JudicialRecordReviewDetails,
     JudicialRecordStatus,
@@ -4400,33 +4399,45 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
         async function fetchMember(user: User, host: string, memberId: string) {
             const token = await SessionService.createSession(user);
-            const response = await testServer.test(endpoint, Request.get({
-                path: baseUrl,
-                host,
-                query: new LimitedFilteredRequest({ filter: { id: memberId }, limit: 10 }),
-                headers: { authorization: 'Bearer ' + token.accessToken },
-            }));
+            const response = await testServer.test(
+                endpoint,
+                Request.get({
+                    path: baseUrl,
+                    host,
+                    query: new LimitedFilteredRequest({ filter: { id: memberId }, limit: 10 }),
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                }),
+            );
 
-            return response.body.results.members.find(m => m.id === memberId) ?? null;
+            return response.body.results.members.find((m) => m.id === memberId) ?? null;
         }
 
         /** Granted for the tag of the member's organization, which is how the platform hands this right out. */
         function reviewerForTag(tagId: string) {
             return Permissions.create({
                 level: PermissionLevel.None,
-                resources: new Map([[
-                    PermissionsResourceType.OrganizationTags,
-                    new Map([[tagId, ResourcePermissions.create({
-                        level: PermissionLevel.Full,
-                        accessRights: [AccessRight.MemberReviewJudicialRecord],
-                    })]]),
-                ]]),
+                resources: new Map([
+                    [
+                        PermissionsResourceType.OrganizationTags,
+                        new Map([
+                            [
+                                tagId,
+                                ResourcePermissions.create({
+                                    level: PermissionLevel.Full,
+                                    accessRights: [AccessRight.MemberReviewJudicialRecord],
+                                }),
+                            ],
+                        ]),
+                    ],
+                ]),
             });
         }
 
         test('A reviewer sees who decided', async () => {
             const { tag, member } = await setup();
-            const reviewer = await new UserFactory({ globalPermissions: reviewerForTag(tag.id) }).create();
+            const reviewer = await new UserFactory({
+                globalPermissions: reviewerForTag(tag.id),
+            }).create();
 
             const record = (await fetchMember(reviewer, platformHost, member.id))?.judicialRecord;
 
@@ -4441,7 +4452,9 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const record = (await fetchMember(organizationAdmin, organization.getApiHost(), member.id))?.judicialRecord;
+            const record = (
+                await fetchMember(organizationAdmin, organization.getApiHost(), member.id)
+            )?.judicialRecord;
 
             // The record itself stays: without it the member view falls back to Required for an approved member
             expect(record?.reviewDecision).toBe(JudicialRecordReviewDecision.Ok);
@@ -4451,7 +4464,9 @@ describe('Endpoint.GetMembersEndpoint', () => {
         test('A reviewer for another tag reaches neither the record nor the member', async () => {
             const { member } = await setup();
             const otherTag = await new OrganizationTagFactory({}).create();
-            const reviewer = await new UserFactory({ globalPermissions: reviewerForTag(otherTag.id) }).create();
+            const reviewer = await new UserFactory({
+                globalPermissions: reviewerForTag(otherTag.id),
+            }).create();
 
             expect(await fetchMember(reviewer, platformHost, member.id)).toBeNull();
         });

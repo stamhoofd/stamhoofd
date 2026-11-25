@@ -28,10 +28,7 @@ import {
     User,
     Webshop,
 } from '@stamhoofd/models';
-import type {
-    EmailRecipient as EmailRecipientStruct,
-    PaymentGeneral,
-} from '@stamhoofd/structures';
+import type { EmailRecipient as EmailRecipientStruct, PaymentGeneral } from '@stamhoofd/structures';
 import {
     BaseOrganization,
     getAppHost,
@@ -730,7 +727,7 @@ export class AuthenticatedStructures {
                 ? await JudicialRecord.select()
                       .where(
                           'memberId',
-                          members.map(m => m.id),
+                          members.map((m) => m.id),
                       )
                       .fetch()
                 : [];
@@ -1011,22 +1008,23 @@ export class AuthenticatedStructures {
                 });
             blob.registrationInvitations = memberRegistrationInvitations.get(blob.id) ?? [];
 
-            const record = judicialRecords.find(r => r.memberId === blob.id);
-            const member = members.find(m => m.id === blob.id);
+            const record = judicialRecords.find((r) => r.memberId === blob.id);
+            const member = members.find((m) => m.id === blob.id);
 
-            blob.judicialRecord = record && member
-                ? MemberJudicialRecord.create({
-                      reviewDecision: record.reviewDecision,
-                      reviewedAt: record.reviewedAt,
-                      hasDocument: (record.file?.reference ?? null) !== null,
-                      comment: ownMemberIds.has(blob.id)
-                          ? (record.reviewDetails?.comment ?? null)
-                          : null,
-                      reviewDetails: (await Context.auth.canReviewJudicialRecord(member))
-                          ? record.reviewDetails
-                          : null,
-                  })
-                : null;
+            blob.judicialRecord =
+                record && member
+                    ? MemberJudicialRecord.create({
+                          reviewDecision: record.reviewDecision,
+                          reviewedAt: record.reviewedAt,
+                          hasDocument: (record.file?.reference ?? null) !== null,
+                          comment: ownMemberIds.has(blob.id)
+                              ? (record.reviewDetails?.comment ?? null)
+                              : null,
+                          reviewDetails: (await Context.auth.canReviewJudicialRecord(member))
+                              ? record.reviewDetails
+                              : null,
+                      })
+                    : null;
         }
 
         return MembersBlob.create({

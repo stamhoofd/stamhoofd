@@ -562,10 +562,13 @@ describe('Unit.UserPermissions', () => {
 
             const userPermissions = UserPermissions.create({
                 organizationPermissions: new Map([
-                    ['organization-1', Permissions.create({
-                        level: PermissionLevel.Full,
-                        roles: [PermissionRole.create({ id: role.id, name: role.name })],
-                    })],
+                    [
+                        'organization-1',
+                        Permissions.create({
+                            level: PermissionLevel.Full,
+                            roles: [PermissionRole.create({ id: role.id, name: role.name })],
+                        }),
+                    ],
                 ]),
             });
 
@@ -589,9 +592,12 @@ describe('Unit.UserPermissions', () => {
 
             const userPermissions = UserPermissions.create({
                 organizationPermissions: new Map([
-                    ['organization-1', Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
+                    [
+                        'organization-1',
+                        Permissions.create({
+                            level: PermissionLevel.Full,
+                        }),
+                    ],
                 ]),
             });
 
