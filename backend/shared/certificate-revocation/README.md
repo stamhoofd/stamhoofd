@@ -22,7 +22,10 @@ authority, but it is signed, cacheable, and keeps working when the responder doe
 
 - **Nothing is believed unverified.** A response has to be signed by the issuer, or by a responder it
   delegated, and has to be about the certificate we asked for. A list has to carry the issuer's
-  signature. Anything else leaves the status unestablished.
+  signature, and has to be the whole of what that issuer revoked: a list that says it holds only some
+  revocation reasons, only authorities, one distribution point of several, or only what changed since
+  a base list, answers nothing by leaving a certificate out. Anything else leaves the status
+  unestablished.
 - **Nothing is believed stale either.** A `good` from before a revocation is the one answer that must
   not outlive it, so a response or list dated after us, or past its own `nextUpdate`, says nothing —
   and one that names no `nextUpdate` is believed for a day. Every request carries a nonce, and a

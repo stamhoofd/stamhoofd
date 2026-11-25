@@ -17,6 +17,8 @@ const KEY_ALGORITHM = {
 const BASIC_CONSTRAINTS_OID = '2.5.29.19';
 const AUTHORITY_INFO_ACCESS_OID = '1.3.6.1.5.5.7.1.1';
 const CRL_DISTRIBUTION_POINTS_OID = '2.5.29.31';
+const DELTA_CRL_INDICATOR_OID = '2.5.29.27';
+const ISSUING_DISTRIBUTION_POINT_OID = '2.5.29.28';
 const OCSP_ACCESS_METHOD_OID = '1.3.6.1.5.5.7.48.1';
 const URI_GENERAL_NAME = 6;
 
@@ -81,6 +83,16 @@ export async function issueCertificate(options: {
     await certificate.sign(options.issuer ? options.issuer.privateKey : keys.privateKey, 'SHA-256', crypto);
 
     return { certificate, privateKey: keys.privateKey };
+}
+
+/** What an `IssuingDistributionPoint` can narrow a list down to. */
+export interface CrlScope {
+    distributionPointUrl?: string;
+    onlyContainsUserCerts?: boolean;
+    onlyContainsCACerts?: boolean;
+    /** A bit string of revocation reasons: a list that holds only some of them. */
+    onlySomeReasons?: number;
+    indirectCrl?: boolean;
 }
 
 export type TestOcspStatus = 'good' | 'revoked' | 'unknown';
@@ -154,6 +166,10 @@ export async function createCrl(options: {
     nextUpdate?: Date | null;
     /** Sign with this instead of the issuer: a list signed by a stranger says nothing. */
     signedBy?: TestCertificate;
+    /** Say the list covers only part of what the issuer handed out. */
+    scope?: CrlScope;
+    /** Make it a delta list, which holds only what changed since a base list. */
+    deltaOf?: number;
 }): Promise<Uint8Array> {
     const crypto = pkijs.getCrypto(true);
     const signer = options.signedBy ?? options.issuer;
@@ -165,6 +181,12 @@ export async function createCrl(options: {
 
     if (options.nextUpdate !== null) {
         list.nextUpdate = new pkijs.Time({ type: 0, value: options.nextUpdate ?? new Date('2026-12-01T00:00:00Z') });
+    }
+
+    const extensions = crlExtensions(options);
+
+    if (extensions.length > 0) {
+        list.crlExtensions = new pkijs.Extensions({ extensions });
     }
 
     list.revokedCertificates = (options.revoked ?? []).map(certificate => new pkijs.RevokedCertificate({
@@ -209,6 +231,35 @@ export class StubRevocationHttpClient implements RevocationHttpClient {
 
         return response;
     }
+}
+
+function crlExtensions({ scope, deltaOf }: { scope?: CrlScope; deltaOf?: number }): pkijs.Extension[] {
+    const extensions: pkijs.Extension[] = [];
+
+    if (deltaOf !== undefined) {
+        extensions.push(new pkijs.Extension({
+            extnID: DELTA_CRL_INDICATOR_OID,
+            critical: true,
+            extnValue: new asn1js.Integer({ value: deltaOf }).toBER(false),
+        }));
+    }
+
+    if (scope !== undefined) {
+        extensions.push(new pkijs.Extension({
+            extnID: ISSUING_DISTRIBUTION_POINT_OID,
+            critical: true,
+            extnValue: new pkijs.IssuingDistributionPoint({
+                ...scope.distributionPointUrl === undefined ? {} : { distributionPoint: [new pkijs.GeneralName({ type: URI_GENERAL_NAME, value: scope.distributionPointUrl })] },
+                ...scope.onlySomeReasons === undefined ? {} : { onlySomeReasons: scope.onlySomeReasons },
+                onlyContainsUserCerts: scope.onlyContainsUserCerts ?? false,
+                onlyContainsCACerts: scope.onlyContainsCACerts ?? false,
+                indirectCRL: scope.indirectCrl ?? false,
+                onlyContainsAttributeCerts: false,
+            }).toSchema().toBER(false),
+        }));
+    }
+
+    return extensions;
 }
 
 function certStatus(status: TestOcspStatus): asn1js.BaseBlock {

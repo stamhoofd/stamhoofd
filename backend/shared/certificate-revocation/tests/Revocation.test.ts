@@ -163,6 +163,49 @@ describe('checkCertificateRevocation', () => {
         expect(await checkCertificateRevocation(signer.certificate, issuer.certificate, options())).toBe('unknown');
     });
 
+    test('does not take absence from a list of only some revocation reasons as good', async () => {
+        client.answer(OCSP_URL, new Error('connect timeout'));
+        // A key compromise list says nothing about a certificate withdrawn for any other reason
+        client.answer(CRL_URL, await createCrl({ issuer, scope: { onlySomeReasons: 2 } }));
+
+        expect(await checkCertificateRevocation(signer.certificate, issuer.certificate, options())).toBe('unknown');
+    });
+
+    test('does not take absence from a delta list as good', async () => {
+        client.answer(OCSP_URL, new Error('connect timeout'));
+        client.answer(CRL_URL, await createCrl({ issuer, deltaOf: 1 }));
+
+        expect(await checkCertificateRevocation(signer.certificate, issuer.certificate, options())).toBe('unknown');
+    });
+
+    test('does not take absence from a list of authority certificates as good for a signer', async () => {
+        client.answer(OCSP_URL, new Error('connect timeout'));
+        client.answer(CRL_URL, await createCrl({ issuer, scope: { onlyContainsCACerts: true } }));
+
+        expect(await checkCertificateRevocation(signer.certificate, issuer.certificate, options())).toBe('unknown');
+    });
+
+    test('does not take absence from a list of another distribution point as good', async () => {
+        client.answer(OCSP_URL, new Error('connect timeout'));
+        client.answer(CRL_URL, await createCrl({ issuer, scope: { distributionPointUrl: 'http://crl.example.com/other.crl' } }));
+
+        expect(await checkCertificateRevocation(signer.certificate, issuer.certificate, options())).toBe('unknown');
+    });
+
+    test('believes a list scoped to end entities and to the distribution point it was fetched from', async () => {
+        client.answer(OCSP_URL, new Error('connect timeout'));
+        client.answer(CRL_URL, await createCrl({ issuer, scope: { onlyContainsUserCerts: true, distributionPointUrl: CRL_URL } }));
+
+        expect(await checkCertificateRevocation(signer.certificate, issuer.certificate, options())).toBe('good');
+    });
+
+    test('finds a revoked certificate on a scoped list, whatever that scope leaves out', async () => {
+        client.answer(OCSP_URL, new Error('connect timeout'));
+        client.answer(CRL_URL, await createCrl({ issuer, revoked: [signer.certificate], scope: { onlySomeReasons: 2 } }));
+
+        expect(await checkCertificateRevocation(signer.certificate, issuer.certificate, options())).toBe('revoked');
+    });
+
     test('is unknown when the certificate says nowhere to ask', async () => {
         const withoutUrls = await issueCertificate({ commonName: 'Silent Signer', issuer });
 
