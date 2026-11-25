@@ -14,6 +14,7 @@ import {
     JudicialRecordCheckStatus,
     JudicialRecordStatus,
     judicialRecordChecksInOrder,
+    judicialRecordFeatureFlag,
     MemberResponsibility,
 } from '@stamhoofd/structures';
 import { JUDICIAL_RECORD_MAX_AGE_IN_DAYS, JudicialRecordService } from './JudicialRecordService.js';
@@ -54,6 +55,7 @@ describe('JudicialRecordService.deliver', () => {
     let responsibility: MemberResponsibility;
     let organizationResponsibility: MemberResponsibility;
     let originalResponsibilities: MemberResponsibility[];
+    let originalFeatureFlags: string[];
 
     /** Holds a responsibility that asks for an extract, and is old enough for it to apply. */
     let member: Member;
@@ -68,6 +70,11 @@ describe('JudicialRecordService.deliver', () => {
 
         const platform = await Platform.getForEditing();
         originalResponsibilities = platform.config.responsibilities;
+        originalFeatureFlags = platform.config.featureFlags;
+
+        platform.config.featureFlags = [...originalFeatureFlags, judicialRecordFeatureFlag];
+        await platform.save();
+        await Platform.clearCache();
 
         responsibility = await new PlatformResponsibilityFactory({
             name: 'Judicial record needed',
@@ -115,6 +122,7 @@ describe('JudicialRecordService.deliver', () => {
     afterAll(async () => {
         const platform = await Platform.getForEditing();
         platform.config.responsibilities = originalResponsibilities;
+        platform.config.featureFlags = originalFeatureFlags;
         await platform.save();
         await Platform.clearCache();
     });
@@ -127,6 +135,13 @@ describe('JudicialRecordService.deliver', () => {
 
     function deliver(options: { member?: Member } = {}) {
         return JudicialRecordService.deliver(options.member ?? member, PDF);
+    }
+
+    async function setPlatformFeatureFlags(featureFlags: string[]) {
+        const platform = await Platform.getForEditing();
+        platform.config.featureFlags = featureFlags;
+        await platform.save();
+        await Platform.clearCache();
     }
 
     test('refuses a member no responsibility asks an extract of, without reading the document', async () => {
@@ -142,6 +157,48 @@ describe('JudicialRecordService.deliver', () => {
 
         expect(isSimpleError(error) && error.code).toBe('judicial_record_not_required');
         expect(checkJudicialRecordMock).not.toHaveBeenCalled();
+    });
+
+    test('refuses a delivery while the feature flag is off, without reading the document', async () => {
+        checkJudicialRecordMock.mockResolvedValue({
+            report: report(),
+            certificatePath: CERTIFICATE_PATH,
+        });
+
+        await setPlatformFeatureFlags([]);
+
+        try {
+            const error = await deliver().then(
+                () => null,
+                (error: unknown) => error,
+            );
+
+            expect(isSimpleError(error) && error.code).toBe('judicial_record_feature_disabled');
+            expect(checkJudicialRecordMock).not.toHaveBeenCalled();
+        } finally {
+            await setPlatformFeatureFlags([...originalFeatureFlags, judicialRecordFeatureFlag]);
+        }
+    });
+
+    test('accepts a delivery an organization turned the feature on for, with the platform flag off', async () => {
+        checkJudicialRecordMock.mockResolvedValue({
+            report: report(),
+            certificatePath: CERTIFICATE_PATH,
+        });
+
+        await setPlatformFeatureFlags([]);
+        organization.privateMeta.featureFlags.push(judicialRecordFeatureFlag);
+        await organization.save();
+
+        try {
+            expect(await deliver()).toBe(JudicialRecordStatus.Ok);
+        } finally {
+            organization.privateMeta.featureFlags = organization.privateMeta.featureFlags.filter(
+                (flag) => flag !== judicialRecordFeatureFlag,
+            );
+            await organization.save();
+            await setPlatformFeatureFlags([...originalFeatureFlags, judicialRecordFeatureFlag]);
+        }
     });
 
     test('answers Ok when every check passed', async () => {

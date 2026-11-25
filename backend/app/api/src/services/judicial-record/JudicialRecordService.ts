@@ -3,7 +3,12 @@ import { assertChainNotRevoked } from '@stamhoofd/certificate-revocation';
 import { checkJudicialRecord } from '@stamhoofd/judicial-record-check';
 import type { Member } from '@stamhoofd/models';
 import { MemberResponsibilityRecord, Organization, Platform } from '@stamhoofd/models';
-import { JudicialRecordHelper, JudicialRecordStatus } from '@stamhoofd/structures';
+import type { Platform as PlatformStruct } from '@stamhoofd/structures';
+import {
+    hasJudicialRecordFeature,
+    JudicialRecordHelper,
+    JudicialRecordStatus,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 /**
@@ -36,7 +41,12 @@ export class JudicialRecordService {
 
     private static async assertExtractRequired(member: Member): Promise<void> {
         const records = await MemberResponsibilityRecord.where({ memberId: member.id });
-        const minimumAges = await this.getMinimumAges(records);
+        const platform = await Platform.getSharedStruct();
+        const organizations = await this.getOrganizations(records);
+
+        this.assertFeatureEnabled(platform, organizations);
+
+        const minimumAges = this.getMinimumAges(platform, organizations);
 
         const { status, description } = JudicialRecordHelper.getForMember({
             firstName: member.details.firstName,
@@ -65,27 +75,63 @@ export class JudicialRecordService {
     }
 
     /**
+     * The flag is asked of the platform and of every organization the member holds a responsibility
+     * in, because an extract is delivered from the member portal, which is in no organization at all.
+     * `JudicialRecordHelper.asksForExtract` is the wrong question here: whether any responsibility
+     * asks for an extract is already answered per record, against the member's own responsibilities.
+     */
+    private static assertFeatureEnabled(
+        platform: PlatformStruct,
+        organizations: Organization[],
+    ): void {
+        const hasFeature =
+            hasJudicialRecordFeature({ platform }) ||
+            organizations.some((organization) =>
+                hasJudicialRecordFeature({
+                    platform,
+                    organization: organization.getBaseStructureWithPrivateMeta(),
+                }),
+            );
+
+        if (!hasFeature) {
+            throw new SimpleError({
+                code: 'judicial_record_feature_disabled',
+                message: 'The judicial record feature is not enabled',
+                human: $t('Uittreksels uit het strafregister kunnen nog niet bezorgd worden.'),
+                statusCode: 400,
+            });
+        }
+    }
+
+    /**
      * Each record is resolved against its own organization instead of against one organization in
      * scope, because an extract is delivered from the member portal, which on a platform is in no
      * organization at all. Organizations define responsibilities with a `judicialRecordMinimumAge`
      * of their own, so a null scope would read one of those as no requirement and refuse a member
      * who does have to deliver.
      */
-    private static async getMinimumAges(
+    private static async getOrganizations(
         records: MemberResponsibilityRecord[],
-    ): Promise<Map<string, number | null>> {
-        const platform = await Platform.getSharedStruct();
-        const responsibilities = [...platform.config.responsibilities];
-
+    ): Promise<Organization[]> {
         const organizationIds = Formatter.uniqueArray(
             records.map((record) => record.organizationId),
         );
 
-        if (organizationIds.length > 0) {
-            for (const organization of await Organization.getByIDs(...organizationIds)) {
-                responsibilities.push(...organization.privateMeta.responsibilities);
-            }
+        if (organizationIds.length === 0) {
+            return [];
         }
+
+        return await Organization.getByIDs(...organizationIds);
+    }
+
+    private static getMinimumAges(
+        platform: PlatformStruct,
+        organizations: Organization[],
+    ): Map<string, number | null> {
+        const responsibilities = [
+            ...platform.config.responsibilities,
+            ...organizations.flatMap((organization) => organization.privateMeta.responsibilities),
+        ];
 
         return new Map(
             responsibilities.map((responsibility) => [
