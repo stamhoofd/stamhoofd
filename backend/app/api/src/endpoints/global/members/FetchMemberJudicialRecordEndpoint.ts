@@ -138,7 +138,7 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
             throw new SimpleError({
                 code: 'too_many_requests',
                 message: 'Too many judicial record fetches',
-                human: $t('Je hebt te veel uittreksels opgehaald. Probeer het later opnieuw.'),
+                human: $t('Er werden te veel uittreksels opgehaald. Probeer het later opnieuw.'),
                 statusCode: 429,
             });
         }
