@@ -346,6 +346,15 @@
                         {{ $t('%ZzT') }}
                     </h3>
                 </STListItem>
+
+                <STListItem v-if="!platform.config.featureFlags.includes(judicialRecordFeatureFlag)" :selectable="true" element-name="label" data-testid="judicial-record-checkbox">
+                    <template #left>
+                        <Checkbox :model-value="getFeatureFlag(judicialRecordFeatureFlag)" @update:model-value="setFeatureFlag(judicialRecordFeatureFlag, !!$event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('Uittreksel uit het strafregister') }}
+                    </h3>
+                </STListItem>
             </STList>
         </div>
     </SaveView>
@@ -375,7 +384,7 @@ import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.
 import { useTwoFactorEnabled } from '@stamhoofd/components/hooks/useTwoFactorEnabled.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
-import { Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
+import { judicialRecordFeatureFlag, Organization, OrganizationMetaData, OrganizationPrivateMetaData, PrivatePaymentConfiguration, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, ref, shallowRef } from 'vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
