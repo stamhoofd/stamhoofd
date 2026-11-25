@@ -8,14 +8,16 @@ import { hasJudicialRecordFeature } from './judicialRecordFeature.js';
  *
  * Every status the feature will ever have is here from the start, so a call site that switches on one does
  * not have to be found again later. Only `NotRequired` and `Required` are reached until a member can
- * actually deliver an extract; the three delivered outcomes follow further down the stack.
+ * actually deliver an extract; the delivered outcomes follow further down the stack.
  *
  * The delivered outcomes live here rather than in an enum of their own so that a member has one judicial
- * record status, not two that have to be combined at every call site.
+ * record status, not two that have to be combined at every call site. Each outcome a reviewer can give keeps
+ * its own value: a rejection for good is not a rejection for now, and an acceptance under conditions is not
+ * an unconditional one, so neither is collapsed into the other.
  *
- * A member may act when the status is `NotRequired` or `Ok`. `Required`, `UnderReview` and `Rejected` all
- * block. Ask it that way round: "is it `Ok` or `NotRequired`", never "is it `Required`", or a fourth blocking
- * value would silently start permitting the thing it was added to prevent.
+ * A member may act when the status is `NotRequired`, `Ok` or `ConditionallyAccepted`; the rest block. Ask it
+ * that way round: "is it one of the three", never "is it `Required`", or a fifth blocking value would
+ * silently start permitting the thing it was added to prevent.
  */
 export enum JudicialRecordStatus {
     /** The member doesn't have to have a judicial record extract checked. */
@@ -27,10 +29,16 @@ export enum JudicialRecordStatus {
     /** An extract was delivered and a reviewer has to look at it. */
     UnderReview = 'UnderReview',
 
-    /** A reviewer refused the extract, for now or for good. */
-    Rejected = 'Rejected',
+    /** A reviewer refused the extract for now: the member has to deliver another one. */
+    TemporarilyRejected = 'TemporarilyRejected',
 
-    /** An extract was accepted, with or without conditions. */
+    /** A reviewer refused the extract for good. */
+    PermanentlyRejected = 'PermanentlyRejected',
+
+    /** An extract was accepted, under conditions a reviewer wrote down. */
+    ConditionallyAccepted = 'ConditionallyAccepted',
+
+    /** An extract was accepted. */
     Ok = 'Ok',
 }
 
@@ -90,8 +98,12 @@ export class JudicialRecordHelper {
                 return $t(`Niet vereist`);
             case JudicialRecordStatus.UnderReview:
                 return $t(`Wordt beoordeeld`);
-            case JudicialRecordStatus.Rejected:
-                return $t(`Afgekeurd`);
+            case JudicialRecordStatus.TemporarilyRejected:
+                return $t(`Tijdelijk afgekeurd`);
+            case JudicialRecordStatus.PermanentlyRejected:
+                return $t(`Definitief afgekeurd`);
+            case JudicialRecordStatus.ConditionallyAccepted:
+                return $t(`Goedgekeurd onder voorwaarden`);
             case JudicialRecordStatus.Ok:
                 return $t(`OK`);
         }
