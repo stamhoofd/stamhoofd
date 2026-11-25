@@ -854,14 +854,20 @@ export class PlatformMember implements ObjectWithRecords {
      * the platform ones, so the record's organization is checked too.
      */
     getResponsibility(record: MemberResponsibilityRecordBase): MemberResponsibility | null {
-        const platformResponsibility = this.platform.config.responsibilities.find(r => r.id === record.responsibilityId);
+        const platformResponsibility = this.platform.config.responsibilities.find(
+            (r) => r.id === record.responsibilityId,
+        );
         if (platformResponsibility) {
             return platformResponsibility;
         }
 
         if (record.organizationId) {
             const organization = this.family.getOrganization(record.organizationId);
-            return organization?.privateMeta?.responsibilities.find(r => r.id === record.responsibilityId) ?? null;
+            return (
+                organization?.privateMeta?.responsibilities.find(
+                    (r) => r.id === record.responsibilityId,
+                ) ?? null
+            );
         }
 
         return null;
@@ -871,7 +877,7 @@ export class PlatformMember implements ObjectWithRecords {
         return JudicialRecordHelper.getForMember({
             firstName: this.patchedMember.details.firstName,
             birthDay: this.patchedMember.details.birthDay,
-            responsibilities: this.patchedMember.responsibilities.map(record => ({
+            responsibilities: this.patchedMember.responsibilities.map((record) => ({
                 startDate: record.startDate,
                 endDate: record.endDate,
                 minimumAge: this.getResponsibility(record)?.judicialRecordMinimumAge ?? null,

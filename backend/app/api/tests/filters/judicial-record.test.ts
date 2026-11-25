@@ -1,5 +1,12 @@
 import type { Organization } from '@stamhoofd/models';
-import { Member, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, PlatformResponsibilityFactory } from '@stamhoofd/models';
+import {
+    Member,
+    MemberFactory,
+    MemberResponsibilityRecordFactory,
+    OrganizationFactory,
+    Platform,
+    PlatformResponsibilityFactory,
+} from '@stamhoofd/models';
 import { SQL, SQLAlias, SQLSelectAs, compileToSQLFilter } from '@stamhoofd/sql';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
 import type { JudicialRecordResponsibility, MemberResponsibility } from '@stamhoofd/structures';
@@ -36,8 +43,13 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
         const platform = await Platform.getForEditing();
         originalResponsibilities = platform.config.responsibilities;
 
-        withAge = await new PlatformResponsibilityFactory({ name: 'Judicial record needed', judicialRecordMinimumAge: 20 }).create();
-        withoutAge = await new PlatformResponsibilityFactory({ name: 'No judicial record needed' }).create();
+        withAge = await new PlatformResponsibilityFactory({
+            name: 'Judicial record needed',
+            judicialRecordMinimumAge: 20,
+        }).create();
+        withoutAge = await new PlatformResponsibilityFactory({
+            name: 'No judicial record needed',
+        }).create();
 
         minimumAges = new Map([[withAge.id, 20]]);
     });
@@ -49,7 +61,10 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
     });
 
     /** The birth day of a member that turns `age` in `inDays` days (negative = turned it that many days ago). */
-    function birthDayOfSomeoneTurning(age: number, inDays: number): { year: number; month: number; day: number } {
+    function birthDayOfSomeoneTurning(
+        age: number,
+        inDays: number,
+    ): { year: number; month: number; day: number } {
         const date = new Date();
         date.setDate(date.getDate() + inDays);
 
@@ -65,7 +80,11 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
     type Scenario = {
         name: string;
         birthDay: { year: number; month: number; day: number } | null;
-        responsibilities: { responsibility: MemberResponsibility; startDate?: Date; endDate?: Date | null }[];
+        responsibilities: {
+            responsibility: MemberResponsibility;
+            startDate?: Date;
+            endDate?: Date | null;
+        }[];
     };
 
     /**
@@ -119,12 +138,16 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
             {
                 name: 'responsibility that ended yesterday',
                 birthDay: { year: 1990, month: 3, day: 10 },
-                responsibilities: [{ responsibility: withAge, startDate: longAgo, endDate: daysFromNow(-1) }],
+                responsibilities: [
+                    { responsibility: withAge, startDate: longAgo, endDate: daysFromNow(-1) },
+                ],
             },
             {
                 name: 'responsibility that ends tomorrow',
                 birthDay: { year: 1990, month: 3, day: 10 },
-                responsibilities: [{ responsibility: withAge, startDate: longAgo, endDate: daysFromNow(1) }],
+                responsibilities: [
+                    { responsibility: withAge, startDate: longAgo, endDate: daysFromNow(1) },
+                ],
             },
             {
                 name: 'responsibility that only starts tomorrow',
@@ -158,8 +181,16 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
     /** Creates the member of a scenario and returns what both engines need to judge it */
     async function createScenarioMember(scenario: Scenario) {
         const member = scenario.birthDay
-            ? await new MemberFactory({ organization, firstName: scenario.name, birthDay: scenario.birthDay }).create()
-            : await new MemberFactory({ organization, firstName: scenario.name, generateData: false }).create();
+            ? await new MemberFactory({
+                  organization,
+                  firstName: scenario.name,
+                  birthDay: scenario.birthDay,
+              }).create()
+            : await new MemberFactory({
+                  organization,
+                  firstName: scenario.name,
+                  generateData: false,
+              }).create();
 
         const responsibilities: JudicialRecordResponsibility[] = [];
 
@@ -193,11 +224,13 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
 
     /** The status the database derives for every member, by the expression the sorter and the filter use */
     async function selectSQLStatuses(): Promise<Map<string, string>> {
-        const rows = await SQL
-            .select(
-                SQL.column('members', 'id'),
-                new SQLSelectAs(judicialRecordStatusExpression(minimumAges), new SQLAlias('data__status')),
-            )
+        const rows = await SQL.select(
+            SQL.column('members', 'id'),
+            new SQLSelectAs(
+                judicialRecordStatusExpression(minimumAges),
+                new SQLAlias('data__status'),
+            ),
+        )
             .from(SQL.table(Member.table))
             .fetch();
 
@@ -212,17 +245,24 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
 
     /** The member ids the SQL filter returns, the same way GetMembersEndpoint compiles it */
     async function runSQLFilter(filter: StamhoofdFilter): Promise<string[]> {
-        const rows = await SQL
-            .select(SQL.column('members', 'id'))
+        const rows = await SQL.select(SQL.column('members', 'id'))
             .from(SQL.table(Member.table))
-            .where(await compileToSQLFilter(filter, memberFilterCompilers(organization.id, { judicialRecordMinimumAges: minimumAges })))
+            .where(
+                await compileToSQLFilter(
+                    filter,
+                    memberFilterCompilers(organization.id, {
+                        judicialRecordMinimumAges: minimumAges,
+                    }),
+                ),
+            )
             .fetch();
 
-        return rows.map(row => row['members']['id'] as string).sort();
+        return rows.map((row) => row['members']['id'] as string).sort();
     }
 
     test('the helper and the SQL expression agree on every member', async () => {
-        const members: { scenario: Scenario; id: string; helperStatus: JudicialRecordStatus }[] = [];
+        const members: { scenario: Scenario; id: string; helperStatus: JudicialRecordStatus }[] =
+            [];
 
         for (const scenario of buildScenarios()) {
             members.push(await createScenarioMember(scenario));
@@ -231,25 +271,40 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
         const sqlStatuses = await selectSQLStatuses();
 
         for (const member of members) {
-            expect(sqlStatuses.get(member.id), `SQL and helper disagree about "${member.scenario.name}"`).toBe(member.helperStatus);
+            expect(
+                sqlStatuses.get(member.id),
+                `SQL and helper disagree about "${member.scenario.name}"`,
+            ).toBe(member.helperStatus);
         }
 
         // Both engines decide more than one status here, otherwise agreeing would prove nothing
-        expect(new Set(members.map(m => m.helperStatus))).toEqual(new Set([JudicialRecordStatus.Required, JudicialRecordStatus.NotRequired]));
+        expect(new Set(members.map((m) => m.helperStatus))).toEqual(
+            new Set([JudicialRecordStatus.Required, JudicialRecordStatus.NotRequired]),
+        );
     });
 
     test('filtering on a status returns exactly the members the helper puts in it', async () => {
-        const members: { scenario: Scenario; id: string; helperStatus: JudicialRecordStatus }[] = [];
+        const members: { scenario: Scenario; id: string; helperStatus: JudicialRecordStatus }[] =
+            [];
 
         for (const scenario of buildScenarios()) {
             members.push(await createScenarioMember(scenario));
         }
 
         for (const status of Object.values(JudicialRecordStatus)) {
-            const expected = members.filter(m => m.helperStatus === status).map(m => m.id).sort();
-            const found = await runSQLFilter({ id: { $in: members.map(m => m.id) }, judicialRecordStatus: { $in: [status] } });
+            const expected = members
+                .filter((m) => m.helperStatus === status)
+                .map((m) => m.id)
+                .sort();
+            const found = await runSQLFilter({
+                id: { $in: members.map((m) => m.id) },
+                judicialRecordStatus: { $in: [status] },
+            });
 
-            expect(found, `the ${status} filter should return what the helper calls ${status}`).toEqual(expected);
+            expect(
+                found,
+                `the ${status} filter should return what the helper calls ${status}`,
+            ).toEqual(expected);
         }
     });
 });

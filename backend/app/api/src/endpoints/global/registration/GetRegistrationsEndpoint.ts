@@ -307,7 +307,9 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
         const registrationsBlob = await AuthenticatedStructures.registrationsBlob(data, members);
 
         // Sorters that order on a derived value read it back from the row the registration was selected with
-        const rawSelectedRows = new Map(data.map(registration => [registration.id, registration.rawSelectedRow]));
+        const rawSelectedRows = new Map(
+            data.map((registration) => [registration.id, registration.rawSelectedRow]),
+        );
 
         const next = LimitedFilteredRequestHelper.fixInfiniteLoadingLoopWithTransform<
             RegistrationWithMemberBlob,
@@ -319,7 +321,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                 new RegistrationSortData({
                     registration,
                     organizations: registrationsBlob.organizations,
-                rawSelectedRow: rawSelectedRows.get(registration.id) ?? null,
+                    rawSelectedRow: rawSelectedRows.get(registration.id) ?? null,
                 }),
             sorters: registrationSorters({ judicialRecordMinimumAges }),
         });

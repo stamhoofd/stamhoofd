@@ -132,7 +132,9 @@ export const memberSorters = (
             getValue(a) {
                 const row = a.rawSelectedRow?.['data'];
                 if (!row || !('judicialRecordStatus' in row)) {
-                    throw new Error('judicialRecordStatus was not selected when selecting this member');
+                    throw new Error(
+                        'judicialRecordStatus was not selected when selecting this member',
+                    );
                 }
                 return row['judicialRecordStatus'] as string;
             },
