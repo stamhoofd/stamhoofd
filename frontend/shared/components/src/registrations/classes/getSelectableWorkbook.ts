@@ -158,7 +158,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         ...(JudicialRecordHelper.asksForExtract({ platform, organization })
             ? [new SelectableColumn({
                     id: 'member.judicialRecordStatus',
-                    name: $t(`Uittreksel uit het strafregister`),
+                    name: $t('Uittreksel uit het strafregister'),
                     enabled: false,
                 })]
             : []),

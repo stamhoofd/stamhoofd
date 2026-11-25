@@ -135,7 +135,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
             ? [new SelectablePdfData<PlatformMember>({
                     id: 'judicialRecordStatus',
                     enabled: false,
-                    name: $t(`Uittreksel uit het strafregister`),
+                    name: $t('Uittreksel uit het strafregister'),
                     getValue: (member: PlatformMember) => JudicialRecordHelper.getStatusName(member.judicialRecord.status),
                 })]
             : []),
