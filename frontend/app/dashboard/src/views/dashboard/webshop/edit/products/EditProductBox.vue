@@ -251,7 +251,7 @@
         <template v-if="images.length > 0">
             <hr>
             <h2 class="style-with-button">
-                <div>{{ $t('Foto\'s') }}</div>
+                <div>{{ $t("Foto's") }}</div>
                 <div>
                     <button type="button" class="button text only-icon-smartphone" @click="images = []">
                         <span class="icon trash" />
