@@ -149,6 +149,7 @@ export function getMemberColumns({ platform, organization, dateRange, group, gro
         ...(asksForJudicialRecord
             ? [new Column<ObjectType, JudicialRecordStatus>({
                     id: 'judicialRecordStatus',
+                    allowSorting: false,
                     name: $t('Uittreksel uit het strafregister'),
                     enabled: false,
                     getValue: member => member.judicialRecord.status,

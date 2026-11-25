@@ -10,14 +10,16 @@ import {
     EventFactory,
     GroupFactory,
     MemberFactory,
+    MemberResponsibilityRecordFactory,
     OrganizationFactory,
     OrganizationRegistrationPeriodFactory,
     Platform,
+    PlatformResponsibilityFactory,
     RegistrationFactory,
     RegistrationPeriodFactory,
     UserFactory,
 } from '@stamhoofd/models';
-import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import type { MemberResponsibility, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
@@ -29,7 +31,9 @@ import {
     GroupPrice,
     GroupStatus,
     GroupType,
+    JudicialRecordStatus,
     LimitedFilteredRequest,
+    MemberDetails,
     NamedObject,
     OrganizationTag,
     PermissionRoleDetailed,
@@ -2056,6 +2060,221 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                     ),
                 ).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
             }
+        });
+    });
+
+    describe('Judicial record extracts', () => {
+        /** A member only needs an extract once they hold a responsibility that asks for one and reach its age. */
+        let withAge: MemberResponsibility;
+        let withoutAge: MemberResponsibility;
+        let originalResponsibilities: MemberResponsibility[];
+
+        beforeAll(async () => {
+            const platform = await Platform.getForEditing();
+            originalResponsibilities = platform.config.responsibilities;
+
+            withAge = await new PlatformResponsibilityFactory({
+                name: 'Judicial record needed',
+                judicialRecordMinimumAge: 20,
+            }).create();
+            withoutAge = await new PlatformResponsibilityFactory({
+                name: 'No judicial record needed',
+            }).create();
+        });
+
+        afterAll(async () => {
+            const platform = await Platform.getForEditing();
+            platform.config.responsibilities = originalResponsibilities;
+            await platform.save();
+        });
+
+        const responsibilityStart = new Date(2024, 0, 1);
+
+        /** The birth day of a member that turns `age` in `inDays` days. */
+        function birthDayOfSomeoneTurning(
+            age: number,
+            inDays: number,
+        ): { year: number; month: number; day: number } {
+            const date = new Date();
+            date.setDate(date.getDate() + inDays);
+
+            return {
+                year: date.getFullYear() - age,
+                month: date.getMonth() + 1,
+                day: date.getDate(),
+            };
+        }
+
+        /**
+         * Creates one registration per scenario in the same group, all for members with a responsibility in that
+         * organization, and returns a platform admin to fetch them with.
+         */
+        async function setupRegistrations() {
+            const organization = await new OrganizationFactory({ period }).create();
+            const group = await new GroupFactory({ organization, period }).create();
+
+            async function createRegistration(options: {
+                birthDay?: { year: number; month: number; day: number };
+                responsibility: MemberResponsibility;
+                endDate?: Date | null;
+            }) {
+                const member = options.birthDay
+                    ? await new MemberFactory({ birthDay: options.birthDay }).create()
+                    : await new MemberFactory({
+                          details: MemberDetails.create({ firstName: 'No birth day' }),
+                          generateData: false,
+                      }).create();
+
+                await new MemberResponsibilityRecordFactory({
+                    member,
+                    organizationId: organization.id,
+                    responsibility: options.responsibility,
+                    startDate: responsibilityStart,
+                    endDate: options.endDate ?? null,
+                }).create();
+
+                return await new RegistrationFactory({ member, group }).create();
+            }
+
+            const registrations = {
+                // Turned 20 long before the responsibility started
+                adult: await createRegistration({
+                    birthDay: { year: 1990, month: 3, day: 10 },
+                    responsibility: withAge,
+                }),
+                // Turns 20 on 2035-06-15, well after the responsibility started
+                child: await createRegistration({
+                    birthDay: { year: 2015, month: 6, day: 15 },
+                    responsibility: withAge,
+                }),
+                // Turns 20 today, which is the first day an extract is required
+                turnsTwentyToday: await createRegistration({
+                    birthDay: birthDayOfSomeoneTurning(20, 0),
+                    responsibility: withAge,
+                }),
+                // Turns 20 tomorrow, so not required yet
+                turnsTwentyTomorrow: await createRegistration({
+                    birthDay: birthDayOfSomeoneTurning(20, 1),
+                    responsibility: withAge,
+                }),
+                // Treated as an adult, just like MemberDetails.defaultAge does
+                withoutBirthDay: await createRegistration({ responsibility: withAge }),
+                // Their only responsibility never asks for an extract
+                otherResponsibility: await createRegistration({
+                    birthDay: { year: 1990, month: 3, day: 10 },
+                    responsibility: withoutAge,
+                }),
+                // No longer holds the responsibility
+                former: await createRegistration({
+                    birthDay: { year: 1990, month: 3, day: 10 },
+                    responsibility: withAge,
+                    endDate: new Date(2025, 0, 1),
+                }),
+            };
+
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await SessionService.createSession(user);
+
+            return {
+                token,
+                organization,
+                registrations,
+                registrationIds: Object.values(registrations).map((r) => r.id),
+            };
+        }
+
+        function judicialRecordStatusFilter(
+            registrationIds: string[],
+            statuses: JudicialRecordStatus[],
+        ): StamhoofdFilter {
+            return {
+                id: { $in: registrationIds },
+                member: { $elemMatch: { judicialRecordStatus: { $in: statuses } } },
+            };
+        }
+
+        async function fetchRegistrationIds({
+            token,
+            organization,
+            filter,
+            limit = 100,
+        }: {
+            token: Token;
+            organization: Organization;
+            filter?: StamhoofdFilter;
+            limit?: number;
+        }) {
+            const response = await testServer.test(
+                endpoint,
+                Request.get({
+                    path: baseUrl,
+                    host: organization.getApiHost(),
+                    query: new LimitedFilteredRequest({
+                        filter,
+                        sort: [{ key: 'id', order: SortItemDirection.ASC }],
+                        limit,
+                    }),
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                }),
+            );
+            expect(response.status).toBe(200);
+            return response.body.results.registrations.map((r) => r.id);
+        }
+
+        test('Lists the registrations of members that need an extract', async () => {
+            const { token, organization, registrations, registrationIds } =
+                await setupRegistrations();
+
+            const ids = await fetchRegistrationIds({
+                token,
+                organization,
+                filter: judicialRecordStatusFilter(registrationIds, [
+                    JudicialRecordStatus.Required,
+                ]),
+            });
+
+            expect(ids).toIncludeSameMembers([
+                registrations.adult.id,
+                registrations.withoutBirthDay.id,
+                registrations.turnsTwentyToday.id,
+            ]);
+        });
+
+        test('Lists the registrations of members that do not need an extract', async () => {
+            const { token, organization, registrations, registrationIds } =
+                await setupRegistrations();
+
+            const ids = await fetchRegistrationIds({
+                token,
+                organization,
+                filter: judicialRecordStatusFilter(registrationIds, [
+                    JudicialRecordStatus.NotRequired,
+                ]),
+            });
+
+            expect(ids).toIncludeSameMembers([
+                registrations.child.id,
+                registrations.turnsTwentyTomorrow.id,
+                registrations.otherResponsibility.id,
+                registrations.former.id,
+            ]);
+        });
+
+        test('Lists the registrations of several statuses at once', async () => {
+            const { token, organization, registrationIds } = await setupRegistrations();
+
+            const ids = await fetchRegistrationIds({
+                token,
+                organization,
+                filter: judicialRecordStatusFilter(registrationIds, [
+                    JudicialRecordStatus.Required,
+                    JudicialRecordStatus.NotRequired,
+                ]),
+            });
+
+            expect(ids).toIncludeSameMembers(registrationIds);
         });
     });
 });

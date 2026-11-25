@@ -24,6 +24,7 @@ import {
 import type { SQLResultNamespacedRow } from '@node/database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
+import { getJudicialRecordMinimumAges } from '../../../helpers/judicialRecordStatus.js';
 import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRequestHelper.js';
 import { groupJoin, registrationFilterCompilers } from '../../../sql-filters/registrations.js';
 import { RegistrationSortData, registrationSorters } from '../../../sql-sorters/registrations.js';
@@ -36,7 +37,6 @@ type Body = undefined;
 type ResponseBody = PaginatedResponse<RegistrationsBlob, LimitedFilteredRequest>;
 
 const sorters: SQLSortDefinitions<RegistrationSortData> = registrationSorters;
-const filterCompilers = registrationFilterCompilers;
 
 export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
@@ -99,6 +99,9 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
         permissionLevel: PermissionLevel = PermissionLevel.Read,
     ) {
         const organization = Context.organization;
+        const filterCompilers = registrationFilterCompilers({
+            judicialRecordMinimumAges: await getJudicialRecordMinimumAges(organization ?? null),
+        });
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         // First do a quick validation of the groups, so that prevents the backend from having to add a scope filter
