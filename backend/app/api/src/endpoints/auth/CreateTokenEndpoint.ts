@@ -87,19 +87,29 @@ export const passwordLoginUsernameLimiter = new RateLimiter({
  * compared case and accent insensitively (and, where the column is still
  * utf8mb4_unicode_ci, ignoring trailing spaces), so endlessly many distinct usernames
  * resolve to the same row and would each get their own budget. Guesses against an account
- * that does not exist fall back to the normalised address, scoped per organization because
- * the same address can belong to a different user in each one.
+ * that does not exist fall back to the normalised address.
+ *
+ * Both halves are scoped to the organization the request was made for, never to the one the
+ * resolved user belongs to. getForAuthentication falls back to the platform level row when an
+ * organization has no row of its own, so a platform level account answers on every
+ * organization's host: keying it on the user alone would share one budget across all of them,
+ * and an exhausted budget on one host would then tell an attacker that the address is a
+ * platform level account rather than no account at all. The cost is that such an account gets a
+ * budget per organization in organization mode; in platform mode organizationId is always null,
+ * so there is a single budget as before.
  */
 function getPasswordLoginAccountKey(
     user: User | undefined,
     organizationId: string | null,
     username: string,
 ) {
+    const scope = (organizationId ?? '') + '/';
+
     if (user) {
-        return user.id;
+        return scope + user.id;
     }
 
-    return (organizationId ?? '') + '/' + username.trim().toLowerCase();
+    return scope + username.trim().toLowerCase();
 }
 
 export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {

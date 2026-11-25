@@ -6,6 +6,8 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions, SessionClientType, Token as TokenStruct } from '@stamhoofd/structures';
 import { SessionService } from '../../services/SessionService.js';
 
+import { TestUtils } from '@stamhoofd/test-utils';
+
 import { testServer } from '../../../tests/helpers/TestServer.js';
 import {
     CreateTokenEndpoint,
@@ -470,6 +472,37 @@ describe('Endpoint.CreateToken', () => {
                 testServer.test(endpoint, attempt(organization, user.email, '5.6.7.8')),
             ).rejects.toMatchObject({ code: 'rate_limit' });
 
+            await expect(
+                testServer.test(endpoint, attempt(other, user.email, '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+        });
+
+        test('a blocked platform level account does not reveal itself on another organization', async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+
+            const organization = await new OrganizationFactory({}).create();
+            const other = await new OrganizationFactory({}).create();
+
+            // A platform level account has no organization of its own, and
+            // getForAuthentication answers with it on every organization's host.
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+                password,
+            }).create();
+            expect(user.organizationId).toBeNull();
+
+            for (let i = 0; i < 10; i++) {
+                await expect(
+                    testServer.test(endpoint, attempt(organization, user.email, '1.2.3.4')),
+                ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+            }
+
+            await expect(
+                testServer.test(endpoint, attempt(organization, user.email, '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'rate_limit' });
+
+            // Answering rate_limit here would tell an attacker that this address is a
+            // platform level account rather than no account at all.
             await expect(
                 testServer.test(endpoint, attempt(other, user.email, '5.6.7.8')),
             ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
