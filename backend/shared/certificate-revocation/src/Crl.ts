@@ -1,5 +1,6 @@
 import * as pkijs from 'pkijs';
 import type { CrlCache, FetchedCrl } from './CrlCache.js';
+import { coversCertificate } from './CrlScope.js';
 import { isCurrent } from './Freshness.js';
 import type { RevocationHttpClient } from './RevocationHttpClient.js';
 import type { RevocationStatus } from './Revocation.js';
@@ -16,7 +17,13 @@ export async function checkCrl(certificate: pkijs.Certificate, issuer: pkijs.Cer
         return 'unknown';
     }
 
-    return list.isCertificateRevoked(certificate) ? 'revoked' : 'good';
+    if (list.isCertificateRevoked(certificate)) {
+        return 'revoked';
+    }
+
+    // Being on a list is an answer whatever its scope; being absent from one only says good when the
+    // list is the whole of what its issuer revoked for this certificate.
+    return coversCertificate(list, certificate, url) ? 'good' : 'unknown';
 }
 
 async function readCrl(url: string, issuer: pkijs.Certificate, { client, cache }: CrlOptions): Promise<pkijs.CertificateRevocationList | null> {
