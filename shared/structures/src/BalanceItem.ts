@@ -817,8 +817,13 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 394 })
     orderId: string | null = null;
 
+    /**
+     * Items are added to the outstanding balance this many days before their due date
+     */
+    static readonly dueOffsetDays = 7;
+
     static getDueOffset(from: Date = new Date()) {
-        const d = new Date(from.getTime() + 1000 * 60 * 60 * 24 * 7); // Added to outstanding balance 7 days before due date
+        const d = new Date(from.getTime() + 1000 * 60 * 60 * 24 * BalanceItem.dueOffsetDays);
 
         // Set time to midnight in Brussels timezone
         const l = Formatter.luxon(d);

@@ -48,6 +48,7 @@
                 <STInputBox :title="$t('%Cj')" error-fields="dueAt" :error-box="errors.errorBox">
                     <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`%gr`)" />
                 </STInputBox>
+                <DueAtDescription :due-at="dueAt" />
             </div>
         </div>
 
@@ -67,6 +68,7 @@ import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import DateSelection from '#inputs/DateSelection.vue';
+import DueAtDescription from '#payments/components/DueAtDescription.vue';
 import PriceInput from '#inputs/PriceInput.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
@@ -125,7 +127,7 @@ const invoicesEnabled = computed(() => selectedOrganization.value?.meta.invoices
 const hasChanges = computed(() => name.value !== '' || description.value !== '' || price.value !== 0);
 
 const createdAt = ref(new Date());
-const dueAt = ref(null);
+const dueAt = ref<Date | null>(null);
 
 const balanceItem = computed(() => BalanceItem.create({
     unitPrice: price.value,
