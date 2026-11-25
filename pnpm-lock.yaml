@@ -3328,6 +3328,9 @@ importers:
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../test-utils
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../types
       eslint-plugin-stamhoofd:
         specifier: workspace:*
         version: link:../eslint

@@ -37,6 +37,7 @@
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.12"
     },
