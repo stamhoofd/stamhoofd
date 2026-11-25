@@ -85,7 +85,7 @@ if (props.autoFix) {
     updateModelValue();
 }
 
-watch(() => numberInput.multipier, () => {
+watch(numberInput.multipier, () => {
     updateModelValue();
 });
 

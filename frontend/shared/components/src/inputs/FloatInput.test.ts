@@ -589,6 +589,21 @@ describe('FloatInput', () => {
             });
         });
     });
+
+    test('Should revalidate the model value when the fraction digits change', async () => {
+        const result = await renderComponent(5, {
+            min: null,
+            max: null,
+            required: true,
+            fractionDigits: 0,
+        });
+
+        expect(lastEmittedModelValue(result)).toBeUndefined();
+
+        await result.rerender({ fractionDigits: 2 });
+
+        expect(lastEmittedModelValue(result)).toBe(500);
+    });
 });
 
 function lastEmittedModelValue(result: RenderResult<any>): number | null | undefined {
