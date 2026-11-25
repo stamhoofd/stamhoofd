@@ -18,12 +18,12 @@
     },
     "dependencies": {
         "@opentelemetry/api": "1.10.0",
-        "@opentelemetry/sdk-node": "0.300.0",
-        "@opentelemetry/sdk-trace": "3.0.0",
-        "@opentelemetry/sdk-logs": "3.0.0",
-        "@opentelemetry/resources": "3.0.0",
-        "@opentelemetry/exporter-trace-otlp-proto": "0.300.0",
-        "@opentelemetry/exporter-logs-otlp-proto": "0.300.0"
+        "@opentelemetry/sdk-node": "0.301.2",
+        "@opentelemetry/sdk-trace": "3.1.1",
+        "@opentelemetry/sdk-logs": "3.1.1",
+        "@opentelemetry/resources": "3.1.1",
+        "@opentelemetry/exporter-trace-otlp-proto": "0.301.2",
+        "@opentelemetry/exporter-logs-otlp-proto": "0.301.2"
     },
     "devDependencies": {
         "oxlint-plugin-stamhoofd": "workspace:*",
