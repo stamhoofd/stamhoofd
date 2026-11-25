@@ -131,4 +131,31 @@ for (const [name, component] of [['TInput', TInput], ['TTextarea', TTextarea]] a
         expect(fields().map(f => f.value)).toEqual(['']);
         expect(languageLabels()).toEqual([]);
     });
+
+    test(`${name} keeps a language that was added but never typed in`, async () => {
+        const result = renderInput(component, new TranslatedString({
+            [Language.Dutch]: 'Hallo',
+            [Language.English]: '',
+        }));
+
+        await vi.waitFor(() => expect(fields().map(f => f.value)).toEqual(['Hallo', '']));
+        fields()[1].focus();
+        fields()[1].blur();
+
+        expect(lastModelValue(result)).toBeUndefined();
+        expect(languageLabels()).toEqual(['NL', 'EN']);
+    });
+
+    test(`${name} keeps the only language when it was added but never typed in`, async () => {
+        const result = renderInput(component, new TranslatedString({
+            [Language.Dutch]: '',
+        }));
+
+        await vi.waitFor(() => expect(languageLabels()).toEqual(['NL']));
+        fields()[0].focus();
+        fields()[0].blur();
+
+        expect(lastModelValue(result)).toBeUndefined();
+        expect(languageLabels()).toEqual(['NL']);
+    });
 }

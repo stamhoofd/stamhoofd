@@ -40,6 +40,8 @@ if (typeof value.value === 'string') {
 const { hasLanguages } = useSwitchLanguage();
 registerTranslateableComponent(value);
 
+const editedLanguages = new Set<Language>();
+
 withDefaults(
     defineProps<{
         title: string;
@@ -77,13 +79,20 @@ function setForLanguage(val: string, lang: Language | null) {
     }
 
     // An emptied language is only dropped on blur, so its field stays while retyping
+    editedLanguages.add(lang);
     value.value = value.value.patch({
         [lang]: val,
     });
 }
 
 function dropEmptyLanguage(lang: Language | null) {
-    if (lang === null || !hasLanguages || value.value.getIfExists(lang)) {
+    if (lang === null || !hasLanguages) {
+        return;
+    }
+
+    // Only a language the user emptied themselves is dropped, not one TInputButton just added
+    const wasEdited = editedLanguages.delete(lang);
+    if (!wasEdited || value.value.getIfExists(lang)) {
         return;
     }
 
