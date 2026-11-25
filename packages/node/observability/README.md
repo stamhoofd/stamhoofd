@@ -108,13 +108,17 @@ only `service.version` and `deployment.environment.name` are retained. Instance
 identity is generated per process. Exporters use 1.5-second request deadlines;
 SDK shutdown is idempotent and bounded to two seconds.
 
-The initial pilot exports only this package's named lifecycle/server spans and
+The docs pilot exports only this package's named lifecycle/server spans and
 fixed lifecycle/error log identifiers. Export adapters strip unapproved attributes,
 span events, links, and status messages. Route attributes must come from registered
 framework route templates, never request URLs. No automatic console, HTTP, SQL,
 host, or process capture is enabled. This is not a sanitizer for arbitrary existing
 application logging; broader instrumentation requires extending and testing the
 explicit export contract.
+
+The five backend services do not register an OTLP log exporter. See the
+[backend log privacy and forwarding gate](../../../contributing/backend/log-privacy.md)
+for their separate local record sink. Metrics and trace opt-ins are independent.
 
 Run `pnpm stam test observability`, `pnpm stam check lint --filter @node/observability`, and
 `pnpm stam check typecheck --filter @node/observability` from the repository root.

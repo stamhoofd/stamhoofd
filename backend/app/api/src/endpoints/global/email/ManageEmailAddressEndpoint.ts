@@ -2,7 +2,7 @@ import type { Decoder } from '@common/encoding';
 import { AutoEncoder, BooleanDecoder, field, StringDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import { Email, EmailAddress } from '@stamhoofd/email';
 import { Context } from '../../../helpers/Context.js';
 import { SESv2Client, DeleteSuppressedDestinationCommand } from '@aws-sdk/client-sesv2'; // ES Modules import
@@ -200,7 +200,6 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                 }
             }
 
-            console.log('Updated email address settings', request.body);
             const client = new SESv2Client({});
 
             if (request.body.hardBounce === false || request.body.markedAsSpam === false) {
@@ -211,14 +210,9 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                         EmailAddress: request.body.email,
                     };
                     const command = new DeleteSuppressedDestinationCommand(input);
-                    const response = await client.send(command);
-                    console.log('Removed from AWS suppression list', request.body.email, response);
+                    await client.send(command);
                 } catch (error) {
-                    console.error(
-                        'Error removing from suppression list',
-                        request.body.email,
-                        error,
-                    );
+                    console.error('Error removing from suppression list', errorDiagnostics(error));
                 }
             }
 

@@ -1,4 +1,4 @@
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
+import { errorDiagnostics, isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import type { Member, User } from '@stamhoofd/models';
 import {
     BalanceItem,
@@ -106,7 +106,7 @@ export class PaymentService {
             },
             async () => {
                 if (status === PaymentStatus.Succeeded) {
-                    console.log('Marking as succeeded', payment.id);
+                    console.log('Marking payment as succeeded', payment.id);
                     payment.status = PaymentStatus.Succeeded;
                     payment.paidAt = paidAt ?? new Date();
                     await payment.save();
@@ -154,7 +154,7 @@ export class PaymentService {
                         // We spend some money
                         const code = await UsedRegisterCode.getFor(payment.payingOrganizationId);
                         if (code && !code.balanceItemId) {
-                            console.log('Rewarding code ' + code.id + ' for payment');
+                            console.log('Rewarding register code for payment');
 
                             // Deze code werd nog niet beloond
                             await ReferralService.reward(code);
@@ -224,7 +224,7 @@ export class PaymentService {
 
                 // Moved to failed
                 if (status === PaymentStatus.Failed) {
-                    console.log('Marking as failed', payment.id);
+                    console.log('Marking payment as failed', payment.id);
                     await QueueHandler.schedule(
                         'balance-item-update/' + organization.id,
                         async () => {
@@ -375,10 +375,11 @@ export class PaymentService {
                     payingOrganizationId: payment.payingOrganizationId,
                     date: payment.paidAt ?? new Date(),
                 });
-            } catch (e) {
+            } catch (error) {
                 console.error(
-                    'Failed to register chargeback count for mandate ' + payment.mandateId,
-                    e,
+                    'Failed to register mandate chargeback count',
+                    payment.id,
+                    errorDiagnostics(error),
                 );
             }
 
@@ -390,13 +391,11 @@ export class PaymentService {
                     payingOrganizationId: payment.payingOrganizationId,
                     paymentId: payment.id,
                 });
-            } catch (e) {
+            } catch (error) {
                 console.error(
-                    'Failed to block mandate ' +
-                        payment.mandateId +
-                        ' after chargeback ' +
-                        payment.id,
-                    e,
+                    'Failed to block mandate after chargeback',
+                    payment.id,
+                    errorDiagnostics(error),
                 );
             }
         }
@@ -512,10 +511,11 @@ export class PaymentService {
                 sellingOrganization,
                 payingOrganizationId: payment.payingOrganizationId,
             });
-        } catch (e) {
+        } catch (error) {
             console.error(
-                'Failed to unblock mandate ' + payment.mandateId + ' after payment ' + payment.id,
-                e,
+                'Failed to unblock mandate after payment',
+                payment.id,
+                errorDiagnostics(error),
             );
         }
     }
@@ -537,9 +537,13 @@ export class PaymentService {
                         sellingOrganizationId,
                         payingUserId: payment.payingUserId,
                     });
-                } catch (e) {
+                } catch (error) {
                     // Ignore as setting the payment status is more important
-                    console.error(e);
+                    console.error(
+                        'Failed to set default mandate',
+                        payment.id,
+                        errorDiagnostics(error),
+                    );
                 }
             }
         }
@@ -566,12 +570,10 @@ export class PaymentService {
                 payment.organizationId !== org.id &&
                 org.id !== payment.payingOrganizationId
             ) {
-                console.error(
-                    'Non-matching organization found for payment',
-                    payment.id,
-                    'org',
-                    org.id,
-                );
+                console.error('Non-matching organization found for payment', {
+                    paymentId: payment.id,
+                    organizationId: org.id,
+                });
                 return;
             }
 
@@ -597,12 +599,10 @@ export class PaymentService {
                         org.id !== payment.organizationId &&
                         org.id !== payment.payingOrganizationId
                     ) {
-                        console.error(
-                            'Non-matching organization found for payment',
-                            payment.id,
-                            'org',
-                            org.id,
-                        );
+                        console.error('Non-matching organization found for payment', {
+                            paymentId: payment.id,
+                            organizationId: org.id,
+                        });
                         return;
                     }
 
@@ -637,8 +637,12 @@ export class PaymentService {
                                         payment.id,
                                     );
                                 }
-                            } catch (e) {
-                                console.error('Refund check failed Mollie', payment.id, e);
+                            } catch (error) {
+                                console.error(
+                                    'Refund check failed Mollie',
+                                    payment.id,
+                                    errorDiagnostics(error),
+                                );
                             }
                         }
                     } else if (
@@ -665,8 +669,12 @@ export class PaymentService {
 
                                 console.log('Stripe setting status to', status);
                                 await this.handlePaymentStatusUpdate(payment, organization, status);
-                            } catch (e) {
-                                console.error('Payment check failed Stripe', payment.id, e);
+                            } catch (error) {
+                                console.error(
+                                    'Payment check failed Stripe',
+                                    payment.id,
+                                    errorDiagnostics(error),
+                                );
                                 if (this.isManualExpired(payment.status, payment)) {
                                     console.error(
                                         'Manually marking Stripe payment as expired',
@@ -721,8 +729,12 @@ export class PaymentService {
                                         );
                                     }
                                 }
-                            } catch (e) {
-                                console.error('Payment check failed Mollie', payment.id, e);
+                            } catch (error) {
+                                console.error(
+                                    'Payment check failed Mollie',
+                                    payment.id,
+                                    errorDiagnostics(error),
+                                );
                                 if (this.isManualExpired(payment.status, payment)) {
                                     console.error(
                                         'Manually marking Mollie payment as expired',
@@ -754,8 +766,12 @@ export class PaymentService {
 
                                 console.log('Buckaroo setting status to', status);
                                 await this.handlePaymentStatusUpdate(payment, organization, status);
-                            } catch (e) {
-                                console.error('Payment check failed Buckaroo', payment.id, e);
+                            } catch (error) {
+                                console.error(
+                                    'Payment check failed Buckaroo',
+                                    payment.id,
+                                    errorDiagnostics(error),
+                                );
                                 if (this.isManualExpired(payment.status, payment)) {
                                     console.error(
                                         'Manually marking Buckaroo payment as expired',
@@ -811,9 +827,7 @@ export class PaymentService {
                                 await this.handlePaymentStatusUpdate(payment, organization, status);
                             } else {
                                 console.warn(
-                                    'Payconiq payment is missing for organization ' +
-                                        organization.id +
-                                        ' while checking payment status...',
+                                    'Payconiq payment is missing while checking payment status',
                                 );
 
                                 if (this.isManualExpired(payment.status, payment)) {
@@ -829,12 +843,7 @@ export class PaymentService {
                                 }
                             }
                         } else {
-                            console.error(
-                                'Invalid payment provider',
-                                payment.provider,
-                                'for payment',
-                                payment.id,
-                            );
+                            console.error('Invalid payment provider', payment.id);
                             if (this.isManualExpired(payment.status, payment)) {
                                 console.error(
                                     'Manually marking unknown payment as expired',
@@ -1272,7 +1281,11 @@ export class PaymentService {
                 date,
             );
         } catch (e) {
-            console.error('Failed to mark chargeback as succeeded', e);
+            console.error(
+                'Failed to mark chargeback as succeeded',
+                chargeback.id,
+                errorDiagnostics(e),
+            );
             await this.deleteReversalPayment(chargeback);
             throw e;
         }
@@ -1303,7 +1316,7 @@ export class PaymentService {
         try {
             await this.handlePaymentStatusUpdate(refund, organization, status, date);
         } catch (e) {
-            console.error('Failed to register refund', e);
+            console.error('Failed to register refund', refund.id, errorDiagnostics(e));
             // Nothing is linked to the provider yet: safe to delete, the cron will retry later
             await this.deleteReversalPayment(refund);
             throw e;
@@ -1336,10 +1349,7 @@ export class PaymentService {
 
         const mollieService = await MollieService.create({ sellingOrganization: organization });
         if (!mollieService) {
-            console.error(
-                'Missing Mollie credentials while checking pending refunds of payment',
-                payment.id,
-            );
+            console.error('Missing Mollie credentials while checking pending refunds', payment.id);
             return;
         }
 
@@ -1347,8 +1357,8 @@ export class PaymentService {
             try {
                 const { status } = await mollieService.getRefundStatus(refund);
                 await this.handlePaymentStatusUpdate(refund, organization, status);
-            } catch (e) {
-                console.error('Failed to check pending refund', refund.id, e);
+            } catch (error) {
+                console.error('Failed to check pending refund', refund.id, errorDiagnostics(error));
             }
         }
     }
@@ -1716,8 +1726,12 @@ export class PaymentService {
 
             // Update the (pending) refund amount of the reversed payment
             await this.updateReversedPaymentsFor(reversal);
-        } catch (e) {
-            console.error('Failed to clean up reversal payment ' + reversal.id, e);
+        } catch (error) {
+            console.error(
+                'Failed to clean up reversal payment',
+                reversal.id,
+                errorDiagnostics(error),
+            );
         }
     }
 
@@ -1939,9 +1953,8 @@ export class PaymentService {
                 // Send a small reminder email
                 try {
                     await this.sendTransferEmail(customer, user?.id ?? null, organization, payment);
-                } catch (e) {
+                } catch {
                     console.error('Failed to send transfer email');
-                    console.error(e);
                 }
             } else if (
                 payment.method !== PaymentMethod.PointOfSale &&
@@ -2140,10 +2153,7 @@ export class PaymentService {
     ) {
         const email = customer.dynamicEmail;
         if (!email) {
-            console.warn(
-                'Skipped sending transfer email because of missing email address',
-                payment.id,
-            );
+            console.warn('Skipped transfer email because of missing email address');
             return;
         }
         const paymentGeneral = await payment.getGeneralStructure();

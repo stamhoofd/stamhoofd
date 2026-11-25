@@ -1,6 +1,6 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 
 import type { Decoder } from '@common/encoding';
 import { AutoEncoder, field, URLDecoder } from '@common/encoding';
@@ -52,13 +52,13 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         // a separate copy of the same page for every unique tracking value.
         const url = PrerenderEndpoint.stripTrackingParams(request.query.url.href);
 
-        console.log('Prerendering ' + url);
+        console.log('Prerendering page');
 
         let data: Data | null = null;
         try {
             data = await PrerenderEndpoint.getUrlHtml(url, { retryCount: 2, startDate: new Date() });
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            console.error('Prerender failed', errorDiagnostics(error));
         }
         if (!data) {
             throw new SimpleError({
@@ -184,10 +184,10 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 if (typeof d === 'object' && d !== null && 'html' in d && 'statusCode' in d && 'headers' in d) {
                     return d;
                 } else {
-                    console.error('Invalid cached data point for ' + url);
+                    console.error('Invalid cached prerender data');
                 }
-            } catch (e) {
-                console.error(e);
+            } catch (error) {
+                console.error('Prerender cache read failed', errorDiagnostics(error));
             }
         }
 
@@ -212,9 +212,9 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 ]);
                 page.on('request', (req) => {
                     if (BLOCKED_RESOURCE_TYPES.has(req.resourceType())) {
-                        req.abort().catch(console.error);
+                        req.abort().catch(error => console.error('Browser request abort failed', errorDiagnostics(error)));
                     } else {
-                        req.continue().catch(console.error);
+                        req.continue().catch(error => console.error('Browser request continuation failed', errorDiagnostics(error)));
                     }
                 });
 
@@ -297,8 +297,8 @@ export class PrerenderEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     statusCode: effectiveStatus,
                     headers: cleanedHeaders,
                 };
-            } catch (e) {
-                console.error('Failed to render url', e);
+            } catch (error) {
+                console.error('Failed to render URL', errorDiagnostics(error));
                 return null;
             }
         });

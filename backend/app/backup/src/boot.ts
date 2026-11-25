@@ -1,3 +1,4 @@
+import { fatalBackendException } from '@stamhoofd/backend-env';
 import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
 import { initializeMetrics, observeHttpServer } from '@node/observability';
 import { CORSMiddleware, LogMiddleware } from '@stamhoofd/backend-middleware';
@@ -5,11 +6,7 @@ import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { loadLogger } from '@stamhoofd/logging';
 import { cleanBackups } from './helpers/backup.js';
 
-process.on('unhandledRejection', (error: Error) => {
-    console.error('unhandledRejection');
-    console.error(error.message, error.stack);
-    process.exit(1);
-});
+process.on('unhandledRejection', (error) => fatalBackendException('rejection', error));
 
 // Set timezone!
 process.env.TZ = 'UTC';
@@ -110,7 +107,4 @@ const start = async () => {
     await cleanBackups();
 };
 
-start().catch((error) => {
-    console.error('unhandledRejection', error);
-    process.exit(1);
-});
+start().catch((error) => fatalBackendException('startup', error));

@@ -1,3 +1,4 @@
+import { fatalBackendException } from '@stamhoofd/backend-env';
 import { Column, Database } from '@node/database';
 import { ApplicationLifecycle } from '@node/observability';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
@@ -6,11 +7,7 @@ import { Version } from '@stamhoofd/structures';
 import { endStatisticsConnection } from './database.js';
 import { statisticsLanguage } from './rows.js';
 
-process.on('unhandledRejection', (error: Error) => {
-    console.error('unhandledRejection');
-    console.error(error.message, error.stack);
-    process.exit(1);
-});
+process.on('unhandledRejection', (error) => fatalBackendException('rejection', error));
 
 // Set version of saved structures
 Column.setJSONVersion(Version);

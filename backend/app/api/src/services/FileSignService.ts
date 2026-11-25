@@ -1,7 +1,7 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { DecodedRequest, Request, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import { File, supportedFileTypes } from '@stamhoofd/structures';
 import chalk from 'chalk';
 import * as jose from 'jose';
@@ -61,15 +61,6 @@ export class FileSignService {
                 ),
             );
 
-            const { publicKey, privateKey } = await jose.generateKeyPair(alg);
-
-            const exportedPublicKey = await jose.exportJWK(publicKey);
-            const exportedPrivateKey = await jose.exportJWK(privateKey);
-
-            console.log('Example keys you can use in your development environment:');
-            console.log('FILE_SIGNING_PUBLIC_KEY:', JSON.stringify(exportedPublicKey));
-            console.log('FILE_SIGNING_ALG:', JSON.stringify(exportedPrivateKey));
-
             return;
         }
 
@@ -91,7 +82,7 @@ export class FileSignService {
                 // Check if payload matches the file
                 const decoded = new TextDecoder().decode(payload);
                 if (decoded !== file.signPayload) {
-                    console.error('Invalid payload:', decoded);
+                    console.error('Signed file payload does not match');
                     return false;
                 }
 
@@ -101,7 +92,7 @@ export class FileSignService {
                     return false;
                 }
                 if (STAMHOOFD.environment !== 'test') {
-                    console.error('Failed to verify file signature:', e);
+                    console.error('Failed to verify file signature', errorDiagnostics(e));
                 }
                 return false;
             }
@@ -164,8 +155,8 @@ export class FileSignService {
                 ...file,
                 signedUrl: url,
             });
-        } catch (e) {
-            console.error('Failed to generate signedUrl for file:', e);
+        } catch (error) {
+            console.error('Failed to generate signed URL for file', errorDiagnostics(error));
             return null;
         }
     }

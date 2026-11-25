@@ -20,7 +20,7 @@ import {
 import type { Language } from '@stamhoofd/types/Language';
 import { Formatter } from '@stamhoofd/utility';
 
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { Group, Organization, Webshop } from '@stamhoofd/models';
 import {
@@ -522,8 +522,8 @@ export async function getEmailBuilder(
                 ['List-Unsubscribe-Post', 'List-Unsubscribe=One-Click'],
             ]);
             cleaned.push(recipient);
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            console.error('Failed to prepare email recipient', errorDiagnostics(error));
         }
     }
     email.recipients = cleaned;
@@ -1061,7 +1061,6 @@ export async function fillRecipientReplacements(
                 } else {
                     if (recipient.email) {
                         const emailEscaped = `<strong>${Formatter.escapeHtml(recipient.email)}</strong>`;
-                        console.log('No user found for email', recipient.email);
                         recipient.replacements.push(
                             Replacement.create({
                                 token: 'loginDetails',

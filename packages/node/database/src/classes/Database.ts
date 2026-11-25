@@ -1,3 +1,4 @@
+import { errorDiagnostics } from '@common/errors';
 import fs from 'fs';
 import { AsyncLocalStorage } from 'async_hooks';
 import { channel } from 'node:diagnostics_channel';
@@ -192,8 +193,11 @@ export class DatabaseInstance {
             } catch (error) {
                 try {
                     await connection.rollback();
-                } catch (e) {
-                    console.error('Failed to rollback transaction', e);
+                } catch (rollbackError) {
+                    console.error(
+                        'Failed to rollback transaction',
+                        errorDiagnostics(rollbackError),
+                    );
                 }
                 throw error;
             }
@@ -217,23 +221,20 @@ export class DatabaseInstance {
         return process.hrtime();
     }
 
-    logQuery(q, hrstart: [number, number]) {
+    logQuery(_q, hrstart: [number, number]) {
         if (this.debug) {
             const hrend = process.hrtime(hrstart);
             console.warn(
-                q.sql.replace(/\n+ +/g, '\n'),
+                'SQL query',
                 'started at ' + (hrend[0] * 1000 + hrend[1] / 1000000) + 'ms',
             );
         }
     }
 
-    finishQuery(q, hrstart: [number, number]) {
+    finishQuery(_q, hrstart: [number, number]) {
         if (this.debug) {
             const hrend = process.hrtime(hrstart);
-            console.log(
-                q.sql.replace(/\s+/g, ' '),
-                'in ' + (hrend[0] * 1000 + hrend[1] / 1000000) + 'ms',
-            );
+            console.log('SQL query', 'in ' + (hrend[0] * 1000 + hrend[1] / 1000000) + 'ms');
         }
     }
 

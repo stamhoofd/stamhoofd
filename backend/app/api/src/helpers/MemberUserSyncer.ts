@@ -168,8 +168,7 @@ export class MemberUserSyncerStatic {
 
                 // Generate security code (only for userMode platform)
                 if (member.details.securityCode === null) {
-                    console.log('Generating security code for member ' + member.id);
-
+                    console.log('Generating security code for member', member.id);
                     member.details.securityCode = await Member.generateSecurityCode();
                     await member.save();
                 }
@@ -211,7 +210,6 @@ export class MemberUserSyncerStatic {
     async onDeleteMember(member: MemberWithUsers) {
         await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
             for (const u of member.users) {
-                console.log('Unlinking user ' + u.email + ' from deleted member ' + member.id);
                 await this.unlinkUser(u, member);
             }
         });
@@ -353,7 +351,7 @@ export class MemberUserSyncerStatic {
     }
 
     async unlinkUser(user: User, member: MemberWithUsers) {
-        console.log('Removing access for ' + user.id + ' to member ' + member.id);
+        console.log('Removing member access', { userId: user.id, memberId: member.id });
         await Member.users.reverse('members').unlink(user, member);
 
         // Update balance of this user, as it could have changed
@@ -533,10 +531,6 @@ export class MemberUserSyncerStatic {
 
                     await user.save();
                 }
-
-                console.log(
-                    'Created new (placeholder) user that has access to a member: ' + user.id,
-                );
             }
 
             // Update model relation to correct response

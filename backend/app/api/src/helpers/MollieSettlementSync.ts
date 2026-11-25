@@ -1,3 +1,4 @@
+import { errorDiagnostics } from '@common/errors';
 import type { MollieToken } from '@stamhoofd/models';
 import { MolliePayment, Payment } from '@stamhoofd/models';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
@@ -169,8 +170,7 @@ export class MollieSettlementSync {
 
             if (request.status !== 200) {
                 if (summary) summary.failed++;
-                console.error('Failed to fetch settlements');
-                console.error(request.data);
+                console.error('Failed to fetch settlements', request.status);
                 return null;
             }
 
@@ -200,12 +200,7 @@ export class MollieSettlementSync {
 
                 if (isNaN(settledAt.getTime())) {
                     if (summary) summary.failed++;
-                    console.error(
-                        'Received an invalid settledAt from Mollie',
-                        settlement,
-                        'for organization',
-                        this.token.organizationId,
-                    );
+                    console.error('Invalid Mollie settlement date', this.token.organizationId);
                     continue;
                 }
 
@@ -235,11 +230,15 @@ export class MollieSettlementSync {
                     if (summary) {
                         summary.synced += 1;
                     }
-                } catch (e) {
+                } catch (error) {
                     // An interrupted settlement is not a failing settlement
                     abort?.throwIfAborted();
 
-                    console.error('Sync of Mollie settlement ' + settlement.id + ' failed', e);
+                    console.error(
+                        'Mollie settlement sync failed',
+                        this.token.organizationId,
+                        errorDiagnostics(error),
+                    );
                     if (summary) {
                         summary.failed += 1;
                     }
@@ -328,8 +327,11 @@ export class MollieSettlementSync {
             await this.#walkTransactionFees({ range, abort, summary }, touchedSettlementIds);
         } catch (e) {
             // Recount what was stored before the walk broke, without hiding what broke it
-            await SettlementService.refreshTotalsForIds([...touchedSettlementIds]).catch(
-                console.error,
+            await SettlementService.refreshTotalsForIds([...touchedSettlementIds]).catch((error) =>
+                console.error(
+                    'Failed to refresh Mollie settlement totals',
+                    errorDiagnostics(error),
+                ),
             );
             throw e;
         }
@@ -363,11 +365,7 @@ export class MollieSettlementSync {
 
             if (request.status !== 200) {
                 if (summary) summary.failed++;
-                console.error(
-                    'Failed to fetch balance transactions for organization',
-                    this.token.organizationId,
-                );
-                console.error(request.data);
+                console.error('Failed to fetch Mollie balance transactions', request.status);
                 return;
             }
 
@@ -392,9 +390,7 @@ export class MollieSettlementSync {
                 if (isNaN(createdAt.getTime())) {
                     if (summary) summary.failed++;
                     console.error(
-                        'Received an invalid balance transaction createdAt from Mollie',
-                        transaction,
-                        'for organization',
+                        'Invalid Mollie balance transaction date',
                         this.token.organizationId,
                     );
                     continue;
@@ -554,10 +550,8 @@ export class MollieSettlementSync {
                 // token, and those may not be linked here
                 if (payment.organizationId !== state.settlementRow.organizationId) {
                     console.log(
-                        'Skipped payment ' +
-                            payment.id +
-                            ' of another organization in Mollie settlement ' +
-                            settlement.id,
+                        'Skipped Mollie settlement payment from another organization',
+                        payment.id,
                     );
                     return;
                 }
@@ -573,7 +567,7 @@ export class MollieSettlementSync {
                 // re-syncs and keeps its scoping rules in one place
                 await SettlementService.updateLegacySettlementReference(payment);
             } else {
-                console.log('Missing payment ' + mp.paymentId);
+                console.log('Missing Mollie settlement payment', mp.paymentId);
             }
         } else {
             // Probably a payment in a different system/platform

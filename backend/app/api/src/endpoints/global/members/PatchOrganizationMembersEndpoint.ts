@@ -1549,10 +1549,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Check for duplicates and prevent creating a duplicate member by a user
         const duplicate = await this.findExistingMember(member);
         if (duplicate) {
-            console.error('duplicate detection');
-            console.error(member.details.parents);
-            console.error(duplicate.details.parents);
-
             await this.checkCanAccessMember(duplicate, securityCode, type);
 
             // checkCanAccessMember skips the security code for admins with write access, so it cannot be trusted as proof here

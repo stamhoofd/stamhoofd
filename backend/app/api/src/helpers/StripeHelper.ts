@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import type { I18n } from '@stamhoofd/backend-i18n';
 import type { Organization, StripeAccount } from '@stamhoofd/models';
 import { Payment, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
@@ -88,8 +88,8 @@ export class StripeHelper {
                 }
             }
             await payment.save();
-        } catch (e) {
-            console.error('Failed processing charge', e);
+        } catch (error) {
+            console.error('Failed processing charge', errorDiagnostics(error));
         }
     }
 
@@ -103,7 +103,6 @@ export class StripeHelper {
             expand: ['latest_charge.balance_transaction'],
         });
 
-        console.log(intent);
         if (intent.status === 'succeeded') {
             if (intent.latest_charge !== null && typeof intent.latest_charge !== 'string') {
                 const payment = await Payment.getByID(model.paymentId);
@@ -135,7 +134,6 @@ export class StripeHelper {
         let intent = await stripe.paymentIntents.retrieve(model.stripeIntentId, {
             expand: ['latest_charge.balance_transaction'],
         });
-        console.log(intent);
         if (intent.status === 'succeeded') {
             if (intent.latest_charge !== null && typeof intent.latest_charge !== 'string') {
                 await this.saveChargeInfo(model, intent.latest_charge, payment);
@@ -153,7 +151,7 @@ export class StripeHelper {
                 // Cancel the intent
                 console.log('Cancelling payment intent');
                 intent = await stripe.paymentIntents.cancel(model.stripeIntentId);
-                console.log('Cancelled payment intent', intent);
+                console.log('Cancelled payment intent');
 
                 if (intent.status === 'succeeded') {
                     return PaymentStatus.Succeeded;
@@ -161,8 +159,8 @@ export class StripeHelper {
                 if (intent.status === 'canceled' || intent.status === 'requires_payment_method') {
                     return PaymentStatus.Failed;
                 }
-            } catch (e) {
-                console.error('Error cancelling payment intent', e);
+            } catch (error) {
+                console.error('Error cancelling payment intent', errorDiagnostics(error));
             }
         }
 
@@ -190,8 +188,6 @@ export class StripeHelper {
         const session = await stripe.checkout.sessions.retrieve(model.stripeSessionId, {
             expand: ['payment_intent.latest_charge.balance_transaction'],
         });
-
-        console.log('session', session);
 
         if (session.payment_status === 'paid') {
             // This is a direct charge
@@ -333,11 +329,10 @@ export class StripeHelper {
                 },
             });
 
-            console.log('Stripe payment intent', paymentIntent);
             const url = paymentIntent.next_action?.redirect_to_url?.url;
 
             if (paymentIntent.status !== 'requires_action' || !url) {
-                console.error('Stripe payment intent status is not requires_action', paymentIntent);
+                console.error('Stripe payment intent status is not requires_action');
                 throw new SimpleError({
                     code: 'invalid_status',
                     message:
@@ -406,12 +401,10 @@ export class StripeHelper {
                     },
                 },
             };
-            console.log('Creating Stripe session', data);
             const session = await stripe.checkout.sessions.create(data);
-            console.log('Stripe session', session);
 
             if (!session.url) {
-                console.error('Stripe session has no url', session);
+                console.error('Stripe session has no url');
                 throw new SimpleError({
                     code: 'invalid_status',
                     message:

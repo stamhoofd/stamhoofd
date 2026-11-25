@@ -17,7 +17,7 @@ function assertIsUitpasTokenResponse(json: unknown): asserts json is UitpasToken
         typeof json.expires_in !== 'number' ||
         json.expires_in <= 0
     ) {
-        console.error('Invalid response when fetching UiTPAS token:', json);
+        console.error('Invalid response when fetching UiTPAS token');
         throw new SimpleError({
             code: 'invalid_response_fetching_uitpas_token',
             message: 'Invalid response when fetching UiTPAS token',
@@ -154,10 +154,10 @@ export class UitpasTokenRepository {
                     human: $t('%1BK'),
                 });
             }
-            console.error(
-                `Unsuccessful response when fetching UiTPAS token for organization with id ${this.uitpasClientCredential.organizationId}:`,
-                response.statusText,
-            );
+            console.error('UiTPAS token request failed', {
+                status: response.status,
+                organizationId: this.uitpasClientCredential.organizationId,
+            });
             throw new SimpleError({
                 statusCode: this.uitpasClientCredential.organizationId === null ? 500 : 400, // Internal, non visible error in case it is a built in credential
                 code: 'unsuccessful_response_fetching_uitpas_token',

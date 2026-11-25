@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import type { Payment } from '@stamhoofd/models';
 import { BuckarooPayment } from '@stamhoofd/models';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
@@ -57,14 +57,6 @@ export class BuckarooHelper {
             (!this.testMode ? 'https://checkout.buckaroo.nl' : 'https://testcheckout.buckaroo.nl') +
             uri;
 
-        console.log(
-            '[BUCKAROO REQUEST]',
-            method,
-            url,
-            content ? '\n [BUCKAROO REQUEST] ' : undefined,
-            json,
-        );
-
         const response = await axios.request({
             method,
             url,
@@ -74,13 +66,6 @@ export class BuckarooHelper {
             },
             data: json,
         });
-        console.log(
-            '[BUCKAROO RESPONSE]',
-            method,
-            url,
-            '\n[BUCKAROO RESPONSE]',
-            JSON.stringify(response.data),
-        );
         return response.data;
     }
 
@@ -132,8 +117,8 @@ export class BuckarooHelper {
                 status === PaymentStatus.Created ||
                 status === PaymentStatus.Succeeded
             );
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            console.error('Buckaroo test payment failed', errorDiagnostics(error));
         }
         return false;
     }
@@ -225,8 +210,8 @@ export class BuckarooHelper {
             await dbPayment.save();
 
             return response['RequiredAction']?.['RedirectURL'] ?? null;
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            console.error('Failed to create Buckaroo payment', errorDiagnostics(error));
             throw new SimpleError({
                 code: 'buckaroo_error',
                 message: 'Failed to create payment',
@@ -255,7 +240,10 @@ export class BuckarooHelper {
             return PaymentStatus.Pending;
         }
 
-        console.warn('Unknown buckaroo status: ' + status + ' for ', data);
+        console.warn(
+            'Unknown Buckaroo payment status',
+            /^\d{3}$/.test(status) ? status : 'invalid',
+        );
         return PaymentStatus.Pending;
     }
 

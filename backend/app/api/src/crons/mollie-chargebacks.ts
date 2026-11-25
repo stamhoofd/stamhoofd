@@ -1,3 +1,4 @@
+import { errorDiagnostics } from '@common/errors';
 import { registerCron } from '@stamhoofd/crons';
 import { MolliePayment, MollieToken, Organization, Payment } from '@stamhoofd/models';
 import { MollieService } from '../services/MollieService.js';
@@ -36,7 +37,7 @@ export async function doCheckMollieChargebacks(checkAll = false) {
 
 export async function checkMollieChargebacksFor(service: MollieService, checkAll = false) {
     if (STAMHOOFD.environment !== 'development') {
-        console.log('Checking Mollie chargebacks for ' + service.sellingOrganization.name);
+        console.log('Checking organization chargebacks', service.sellingOrganization.id);
     }
 
     // Check last 3 days
@@ -80,20 +81,22 @@ export async function checkMollieChargebacksFor(service: MollieService, checkAll
                             molliePayment.paymentId = createdPayment.id;
                             molliePayment.mollieId = chargeback.id;
                             await molliePayment.save();
-                        } catch (e) {
-                            console.error('Failed to register chargeback ' + chargeback.id, e);
+                        } catch (error) {
+                            console.error(
+                                'Failed to register Mollie chargeback',
+                                payment.id,
+                                errorDiagnostics(error),
+                            );
                         }
                     }
                 } else {
-                    console.error(
-                        'Invalid chargeback payment id ' + chargeback.paymentId + ', not found',
-                    );
+                    console.error('Mollie chargeback payment not found');
                 }
             }
         }
     }
 
     if (STAMHOOFD.environment !== 'development') {
-        console.log('Done checking Mollie chargebacks for ' + service.sellingOrganization.name);
+        console.log('Finished checking organization chargebacks', service.sellingOrganization.id);
     }
 }

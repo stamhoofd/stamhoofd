@@ -102,7 +102,7 @@ export class VerificationCodeService {
         );
 
         if (verificationCodes.length == 0) {
-            console.log("Can't resend code, no coded found for token", token);
+            console.log('Verification resend skipped: unknown token');
             // TODO: maybe send a note via email
             return;
         }
@@ -110,8 +110,8 @@ export class VerificationCodeService {
         const verificationCode = verificationCodes[0];
 
         if (verificationCode.expiresAt < new Date()) {
+            console.log('Verification resend skipped: expired token');
             // Don't report error, could be brute forced
-            console.log("Can't resend code, token is expired", token);
             return;
         }
 

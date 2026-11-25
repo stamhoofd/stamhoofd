@@ -13,3 +13,7 @@ and declarations in `dist-types`.
 Errors accepts the structural `ErrorData` decoding contract without depending on
 the encoding package. Encoding owns cross-package round-trip tests. All consumers
 use the same workspace error implementation.
+
+Use `errorDiagnostics(error)` when logging a caught exception locally. It extracts
+the exception class, recognized error codes, numeric HTTP status and application
+source locations without serializing the exception or its message.

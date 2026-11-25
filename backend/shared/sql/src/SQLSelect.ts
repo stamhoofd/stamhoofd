@@ -1,5 +1,7 @@
+import { errorDiagnostics } from '@common/errors';
 import type { SQLResultNamespacedRow } from '@node/database';
 import { Database } from '@node/database';
+import { backendRecord } from '@node/logging';
 import { Formatter } from '@stamhoofd/utility';
 import type {
     SQLExpression,
@@ -264,7 +266,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow>
         const { query, params } = normalizeSQLQuery(this.getSQL());
 
         if (this._log) {
-            console.log(query, params);
+            console.log('Executing SQL select');
         }
 
         // when debugging: log all queries
@@ -278,7 +280,8 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow>
             );
             rows = _rows;
         } catch (e) {
-            console.error('Error executing SQL query', query, params, e);
+            console.error('SQL select failed', errorDiagnostics(e));
+            backendRecord('database.query.failed');
             throw e;
         }
 
@@ -288,7 +291,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow>
                 for (const column in row['']) {
                     const splitted = column.split('__');
                     if (splitted.length <= 1) {
-                        console.warn('Aggregated column without namespace', column);
+                        console.warn('Aggregated column without namespace');
                         continue;
                     }
                     const namespace = splitted[0];
@@ -352,7 +355,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow>
                 }
             }
         }
-        console.warn('Invalid count SQL response', rows);
+        console.warn('Invalid count SQL response');
         return 0;
     }
 
@@ -387,7 +390,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow>
                 }
             }
         }
-        console.warn('Invalid sum SQL response', rows);
+        console.warn('Invalid sum SQL response');
         return 0;
     }
 

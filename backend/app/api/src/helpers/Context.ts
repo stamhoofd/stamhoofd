@@ -47,7 +47,8 @@ export const apiUserRateLimiter = new RateLimiter({
 
 export class ContextInstance {
     request: Request;
-    queries: { query: string; time?: number }[] = [];
+    queryCount = 0;
+    queryTimeMs = 0;
     timers: Map<string, number> = new Map();
 
     #user?: User;
@@ -363,9 +364,6 @@ export class ContextInstance {
                 token.user.organizationId &&
                 (!allowUnscoped || !token.user.isApiUser))
         ) {
-            if (token?.user) {
-                console.log('Failed auth: ' + token?.user.email + ' (' + token?.user.id + ')');
-            }
             throw new SimpleError({
                 code: 'invalid_access_token',
                 message: 'The access token is invalid',
@@ -382,9 +380,7 @@ export class ContextInstance {
         }
 
         if (token.isAccessTokenExpired()) {
-            if (token?.user) {
-                console.log('Failed auth: ' + token?.user.email + ' (' + token?.user.id + ')');
-            }
+            console.log('Expired access token for user', token.user.id);
             throw new SimpleError({
                 code: 'expired_access_token',
                 message: 'The access token is expired',
@@ -403,9 +399,7 @@ export class ContextInstance {
         }
 
         if (!token.user.hasAccount() && !allowWithoutAccount) {
-            if (token?.user) {
-                console.log('Failed auth: ' + token?.user.email + ' (' + token?.user.id + ')');
-            }
+            console.log('Inactive user account', token.user.id);
             throw new SimpleError({
                 code: 'not_activated',
                 message: 'This user is not yet activated',
@@ -428,25 +422,13 @@ export class ContextInstance {
             ? await this.resolveImpersonation(token.session.impersonatedUserId, user)
             : null;
 
-        if (impersonatedUser) {
-            console.log(
-                'Auth: ' +
-                    user.email +
-                    ' (' +
-                    user.id +
-                    ') impersonating ' +
-                    impersonatedUser.email +
-                    ' (' +
-                    impersonatedUser.id +
-                    ')',
-            );
-        } else {
-            console.log('Auth: ' + user.email + ' (' + user.id + ')');
-        }
-
         // Load member of user
         await this.insecurelyAuthenticateAs(user, impersonatedUser);
 
+        console.log('Authenticated user', {
+            userId: user.id,
+            impersonatedUserId: impersonatedUser?.id,
+        });
         return { user, token };
     }
 
@@ -487,17 +469,10 @@ export class ContextInstance {
         );
 
         if (!(await auth.canImpersonate(impersonatedUser))) {
-            console.log(
-                'Failed impersonation: ' +
-                    actor.email +
-                    ' (' +
-                    actor.id +
-                    ') as ' +
-                    impersonatedUser.email +
-                    ' (' +
-                    impersonatedUser.id +
-                    ')',
-            );
+            console.warn('Impersonation denied', {
+                actorId: actor.id,
+                userId: impersonatedUser.id,
+            });
             throw invalid;
         }
 

@@ -1,14 +1,11 @@
+import { fatalBackendException } from '@stamhoofd/backend-env';
 import { Router, RouterServer } from '@node/endpoints';
 import { initializeMetrics, observeHttpServer } from '@node/observability';
 import { LogMiddleware } from '@stamhoofd/backend-middleware';
 import { Country } from '@stamhoofd/types/Country';
 import { Geolocator } from './classes/Geolocator.js';
 
-process.on('unhandledRejection', (error: Error) => {
-    console.error('unhandledRejection');
-    console.error(error.message, error.stack);
-    process.exit(1);
-});
+process.on('unhandledRejection', (error) => fatalBackendException('rejection', error));
 
 // Set timezone!
 process.env.TZ = 'UTC';
@@ -82,7 +79,4 @@ const start = async () => {
     });
 };
 
-start().catch((error) => {
-    console.error('unhandledRejection', error);
-    process.exit(1);
-});
+start().catch((error) => fatalBackendException('startup', error));

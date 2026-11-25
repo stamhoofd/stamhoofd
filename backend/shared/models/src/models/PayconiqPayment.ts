@@ -1,5 +1,5 @@
 import { column } from '@node/database';
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { PayconiqAccount } from '@stamhoofd/structures';
 import { PaymentStatus, Version } from '@stamhoofd/structures';
@@ -113,9 +113,8 @@ export class PayconiqPayment extends QueryableModel {
                     }
                 }
                 await payment.save();
-            } catch (e) {
+            } catch {
                 console.error('Failed to save iban in Payconiq payment');
-                console.error(e);
             }
         }
 
@@ -125,7 +124,6 @@ export class PayconiqPayment extends QueryableModel {
             if (amount < payment.price) {
                 // We do NOT allow lower prices
                 console.error('Manual price change detected by Payconiq user. Failing the payment');
-                console.error('Expected: ' + payment.price + '; Received: ' + amount);
                 return PaymentStatus.Failed;
             }
         }
@@ -152,14 +150,8 @@ export class PayconiqPayment extends QueryableModel {
                 organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
             );
             return true;
-        } catch (e) {
-            console.error(
-                'Failed to cancel Payconiq payment',
-                this.id,
-                this.payconiqId,
-                this.payconiqId,
-                e,
-            );
+        } catch (error) {
+            console.error('Failed to cancel Payconiq payment', errorDiagnostics(error));
             return false;
         }
     }
@@ -240,7 +232,7 @@ export class PayconiqPayment extends QueryableModel {
         let paymentQRCode = response._links.qrcode.href as string;
 
         if (typeof paymentUrl !== 'string' || typeof paymentQRCode !== 'string') {
-            console.error('Unsupported Payconiq response', response);
+            console.error('Unsupported Payconiq response');
             throw new SimpleError({
                 code: '',
                 message: $t('%GP'),
@@ -252,9 +244,8 @@ export class PayconiqPayment extends QueryableModel {
             const u = new URL(paymentQRCode);
             u.searchParams.set('s', 'L');
             paymentQRCode = u.toString();
-        } catch (e) {
+        } catch {
             console.error('Found unreadable payment QR Code');
-            console.error(e);
         }
 
         await payconiqPayment.save();
@@ -286,11 +277,6 @@ export class PayconiqPayment extends QueryableModel {
                     ? 'merchant.api.bancontact.net'
                     : 'merchant.api.preprod.bancontact.net';
             }
-            const base = 'https://' + hostname;
-
-            // Log all communication
-            console.log(method + ' ' + base + path + '\n' + jsonData);
-            console.log(jsonData);
 
             const headers = {
                 'Content-Type': 'application/json; charset=utf-8',
@@ -310,9 +296,6 @@ export class PayconiqPayment extends QueryableModel {
                     timeout: 10000,
                 },
                 (response: IncomingMessage) => {
-                    console.log(`statusCode: ${response.statusCode ?? '/'}`);
-                    console.log(`HEADERS: ${JSON.stringify(response.headers)}`);
-
                     const chunks: any[] = [];
 
                     response.on('data', (chunk) => {
@@ -326,7 +309,6 @@ export class PayconiqPayment extends QueryableModel {
                                 return;
                             }
                             const body = Buffer.concat(chunks).toString();
-                            console.log(body);
 
                             if (response.statusCode == 204) {
                                 resolve(undefined);
@@ -337,16 +319,19 @@ export class PayconiqPayment extends QueryableModel {
                             try {
                                 json = JSON.parse(body);
                             } catch (error) {
-                                console.error(error);
+                                console.error(
+                                    'Invalid JSON from Payconiq',
+                                    method,
+                                    response.statusCode,
+                                    errorDiagnostics(error),
+                                );
 
                                 // invalid json
                                 if (response.statusCode < 200 || response.statusCode >= 300) {
                                     if (body.length == 0) {
-                                        console.error(response.statusCode);
                                         reject(new Error('Status ' + response.statusCode));
                                         return;
                                     }
-                                    console.error(response.statusCode + ' ' + body);
                                     reject(new Error(body));
                                     return;
                                 } else {
@@ -357,7 +342,7 @@ export class PayconiqPayment extends QueryableModel {
                             }
 
                             if (response.statusCode < 200 || response.statusCode >= 300) {
-                                console.error(body);
+                                console.error('Payconiq request failed', response.statusCode);
                                 reject(
                                     new Error(response.statusCode + ' ' + response.statusMessage),
                                 );
@@ -366,7 +351,6 @@ export class PayconiqPayment extends QueryableModel {
 
                             resolve(json);
                         } catch (error) {
-                            console.error(error);
                             reject(error);
                         }
                     });
@@ -379,7 +363,7 @@ export class PayconiqPayment extends QueryableModel {
             });
 
             req.on('error', (error) => {
-                console.error(error);
+                console.error('Payconiq connection failed', method, errorDiagnostics(error));
                 reject(error);
             });
 

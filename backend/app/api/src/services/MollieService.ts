@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import type { Payment, User } from '@stamhoofd/models';
 import type { Organization } from '@stamhoofd/models';
 import { MolliePayment, MollieToken, Platform } from '@stamhoofd/models';
@@ -128,8 +128,8 @@ export class MollieService {
                         },
                     },
                 });
-            } catch (e) {
-                console.error('Failed to submit onboarding data', e);
+            } catch (error) {
+                console.error('Failed to submit Mollie onboarding data', errorDiagnostics(error));
             }
         }
     }
@@ -177,8 +177,8 @@ export class MollieService {
                     this.#verifiedCustomerIds.add(customerId);
                     return customerId;
                 }
-            } catch (e) {
-                console.error('Error getting customer', e);
+            } catch (error) {
+                console.error('Failed to get Mollie customer', errorDiagnostics(error));
                 // Customer is not valid anymore, we need to create a new one
             }
         }
@@ -204,12 +204,6 @@ export class MollieService {
         this.#verifiedCustomerIds.add(customerId);
 
         payingOrganization.serverMeta.mollieCustomerId = mollieCustomer.id;
-        console.log(
-            'Saving new mollie customer',
-            mollieCustomer,
-            'for organization',
-            payingOrganization.id,
-        );
         await payingOrganization.save();
 
         return customerId;
@@ -256,8 +250,8 @@ export class MollieService {
                     }
                 }
             }
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            console.error('Failed to load Mollie mandates', errorDiagnostics(error));
         }
 
         // todo: remove duplicate mandates?
@@ -409,8 +403,8 @@ export class MollieService {
                 }
             }
             return profiles;
-        } catch (e) {
-            console.error('Failed to parse mollie profiles', e);
+        } catch (error) {
+            console.error('Failed to parse Mollie profiles', errorDiagnostics(error));
             return [];
         }
     }
@@ -429,9 +423,8 @@ export class MollieService {
                           : MollieStatus.Completed,
                 missingScopes: this.missingScopes,
             });
-        } catch (e) {
-            console.error('Error when requesting Mollie onboarding status:');
-            console.error(e);
+        } catch (error) {
+            console.error('Failed to request Mollie onboarding status', errorDiagnostics(error));
             return null;
         }
     }
@@ -460,9 +453,8 @@ export class MollieService {
             }
 
             return stamhoofdProfileId ?? firstProfileId;
-        } catch (e) {
-            console.error('Error when requesting Mollie profile id:');
-            console.error(e);
+        } catch (error) {
+            console.error('Failed to request Mollie profile ID', errorDiagnostics(error));
             return undefined;
         }
     }
@@ -569,9 +561,7 @@ export class MollieService {
                 locale: mollieService.locale,
             },
         };
-        console.log('Creating payment', data);
         const molliePayment = await mollieService.client.payments.create(data);
-        console.log('Payment response', molliePayment);
 
         const paymentUrl = MollieService.getCheckoutUrl(molliePayment);
 
@@ -613,8 +603,8 @@ export class MollieService {
                 payment.mandateId = mollieData.mandateId ?? null;
                 await payment.save();
             }
-        } catch (e) {
-            console.error('Failed processing charge', e);
+        } catch (error) {
+            console.error('Failed processing Mollie charge', errorDiagnostics(error));
         }
     }
 
@@ -645,20 +635,17 @@ export class MollieService {
 
         // Pending payments should be cancellable
         if (cancel && mollieData.isCancelable) {
-            console.log('Cancelling Mollie Payment ' + payment.id);
-
             // Try to cancel
             try {
                 const newData = await this.client.payments.cancel({
                     paymentId: mollieData.id,
                 });
-                console.log('Cancelled Mollie Payment ' + payment.id);
                 return await this.getStatusFor(newData, payment, false);
-            } catch (e) {
-                console.error('Failed to cancel Mollie Payment ' + payment.id, { cause: e });
+            } catch (error) {
+                console.error('Failed to cancel Mollie payment', errorDiagnostics(error));
             }
         } else if (cancel) {
-            console.log('Cannot cancel Mollie Payment ' + payment.id);
+            console.log('Cannot cancel Mollie payment');
         }
 
         if (mollieData.status === 'open') {
@@ -732,11 +719,8 @@ export class MollieService {
             },
         };
 
-        console.log('Creating Mollie refund', data);
-
         try {
             const refund = await this.client.refunds.create(data);
-            console.log('Mollie refund response', refund);
 
             return {
                 mollieRefundId: refund.id,
@@ -744,7 +728,7 @@ export class MollieService {
                 status: MollieService.refundStatusToPaymentStatus(refund.status),
             };
         } catch (e) {
-            console.error('Failed to create Mollie refund for payment ' + payment.id, e);
+            console.error('Failed to create Mollie refund', errorDiagnostics(e));
 
             const detail = MollieService.getApiErrorDetail(e);
             if (detail !== null) {
@@ -799,8 +783,6 @@ export class MollieService {
         const mollieData = await this.client.payments.get({
             paymentId: molliePayment.mollieId,
         });
-
-        console.log(mollieData);
 
         return this.getStatusFor(mollieData, payment, cancel);
     }

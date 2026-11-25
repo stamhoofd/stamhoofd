@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -133,7 +133,7 @@ class EmailStatic {
         // verify connection configuration
         this.transporter.verify((error) => {
             if (error) {
-                console.error('SMTP server not working', error);
+                console.error('SMTP server not working');
             } else {
                 console.log('SMTP server is ready to take our messages');
             }
@@ -142,7 +142,7 @@ class EmailStatic {
         // verify connection configuration
         this.transactionalTransporter.verify((error) => {
             if (error) {
-                console.error('Transactional SMTP server not working', error);
+                console.error('Transactional SMTP server not working');
             } else {
                 console.log('Transactional SMTP server is ready to take our messages');
             }
@@ -169,7 +169,7 @@ class EmailStatic {
             this.sending = true;
             this.doSend(next)
                 .catch((e: unknown) => {
-                    console.error(e);
+                    console.error('Failed to process queued email', errorDiagnostics(e));
                     if (next.callback) {
                         next.callback(e);
                     }
@@ -290,7 +290,7 @@ class EmailStatic {
             }
 
             if (STAMHOOFD.environment === 'production') {
-                console.warn('Filtered email ' + l + ': not whitelisted');
+                console.warn('Email recipient filtered by whitelist');
             }
             return false;
         }
@@ -325,8 +325,8 @@ class EmailStatic {
                         human: $t('%1Mi'),
                     }),
                 );
-            } catch (e) {
-                console.error('Error in email callback', e);
+            } catch (error) {
+                console.error('Error in email callback', errorDiagnostics(error));
             }
             return;
         }
@@ -336,11 +336,7 @@ class EmailStatic {
 
         if (recipients.length === 0) {
             // Invalid string
-            console.warn(
-                "Filtered all emails due hard bounce or spam '" +
-                    data.to.map((t) => t.email).join(',') +
-                    "'. E-mail skipped",
-            );
+            console.warn('All email recipients filtered due to hard bounce or spam');
 
             try {
                 data.callback?.(
@@ -350,8 +346,8 @@ class EmailStatic {
                         human: data.to.length > 1 ? $t('%G4') : $t('%1E7'),
                     }),
                 );
-            } catch (e) {
-                console.error('Error in email callback', e);
+            } catch (error) {
+                console.error('Error in email callback', errorDiagnostics(error));
             }
             return;
         }
@@ -378,8 +374,8 @@ class EmailStatic {
                         human: data.to.length > 1 ? $t('%G5') : $t('%1E8'),
                     }),
                 );
-            } catch (e) {
-                console.error('Error in email callback', e);
+            } catch (error) {
+                console.error('Error in email callback', errorDiagnostics(error));
             }
             return;
         }
@@ -463,9 +459,8 @@ class EmailStatic {
                 };
             }
 
-            console.log('Sending email', to, data.subject, data.type);
-            const info = await transporter.sendMail(mail);
-            console.log('Message sent:', to, data.subject, info.messageId, data.type);
+            await transporter.sendMail(mail);
+            console.log('Email sent', data.type ?? 'transactional');
 
             if (STAMHOOFD.environment === 'development') {
                 await sleep(100);
@@ -473,14 +468,12 @@ class EmailStatic {
 
             try {
                 data.callback?.(null);
-            } catch (e) {
-                console.error('Error in email callback', e);
+            } catch (error) {
+                console.error('Error in email callback', errorDiagnostics(error));
             }
         } catch (e: unknown) {
             if (STAMHOOFD.environment !== 'test') {
-                console.error('Failed to send e-mail:');
-                console.error(e);
-                console.error(mail);
+                console.error('Failed to send email', errorDiagnostics(e));
 
                 // Sleep 1 second to give servers some time to fix possible rate limits
                 await sleep(1000);
@@ -499,8 +492,8 @@ class EmailStatic {
                     if (data.callback) {
                         data.callback(e);
                     }
-                } catch (e2) {
-                    console.error('Error in email failure callback', e2, 'for original error', e);
+                } catch (error) {
+                    console.error('Error in email failure callback', errorDiagnostics(error));
                 }
 
                 // Email address is not verified.

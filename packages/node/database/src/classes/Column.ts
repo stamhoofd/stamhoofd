@@ -108,9 +108,9 @@ export class Column {
                 let parsed: unknown;
                 try {
                     parsed = JSON.parse(data);
-                } catch (e) {
+                } catch {
                     // Syntax error. Mark this in the future.
-                    console.error(e);
+                    console.error('Unreadable JSON column', this.name);
                     parsed = {};
                 }
 

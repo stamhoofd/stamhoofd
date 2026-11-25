@@ -1,3 +1,4 @@
+import { fatalBackendException } from '@stamhoofd/backend-env';
 import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
 import { type ApplicationLifecycle, observeHttpServer } from '@node/observability';
 import { I18n } from '@stamhoofd/backend-i18n';
@@ -7,11 +8,7 @@ import { CpuService } from '@stamhoofd/logging/CpuService';
 import { MemoryService } from '@stamhoofd/logging/MemoryService';
 import { TrustedIPWhitelist } from './classes/TrustedIPWhitelist.js';
 
-process.on('unhandledRejection', (error: Error) => {
-    console.error('unhandledRejection');
-    console.error(error.message, error.stack);
-    process.exit(1);
-});
+process.on('unhandledRejection', error => fatalBackendException('rejection', error));
 
 // Set timezone!
 process.env.TZ = 'UTC';

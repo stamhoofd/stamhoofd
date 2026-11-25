@@ -25,10 +25,11 @@ export function loadDebugFunctions({ routerServer }: { routerServer: RouterServe
 }
 
 export function loadRequestQueries({ routerServer }: { routerServer: RouterServer }) {
-    SQLLogger.customLoggers.push((query, params, elapsedTimeMs) => {
+    SQLLogger.customLoggers.push((_query, _params, elapsedTimeMs) => {
         const context = ContextInstance.optional;
         if (context) {
-            context.queries.push({ query, time: elapsedTimeMs });
+            context.queryCount++;
+            context.queryTimeMs += elapsedTimeMs;
         }
     });
     const LogQueriesMiddleware: ResponseMiddleware = {
@@ -39,10 +40,10 @@ export function loadRequestQueries({ routerServer }: { routerServer: RouterServe
             if (context && request.method !== 'OPTIONS') {
                 logger.log(
                     ...prefix,
-                    ' - Queries ' +
-                        context.queries
-                            .map((q) => `\n- ${q.query} (${q.time?.toFixed(2) ?? '-'}ms)`)
-                            .join(''),
+                    'Queries executed:',
+                    context.queryCount,
+                    'total ms:',
+                    context.queryTimeMs.toFixed(2),
                 );
             }
         },

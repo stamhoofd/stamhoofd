@@ -1,3 +1,4 @@
+import { errorDiagnostics } from '@common/errors';
 import { registerCron } from '@stamhoofd/crons';
 import { MolliePayment, MollieToken, Organization, Payment } from '@stamhoofd/models';
 import { PaymentStatus, PaymentType } from '@stamhoofd/structures';
@@ -43,7 +44,7 @@ export async function doCheckMollieRefunds(checkAll = false) {
 
 export async function checkMollieRefundsFor(service: MollieService, checkAll = false) {
     if (STAMHOOFD.environment !== 'development') {
-        console.log('Checking Mollie refunds for ' + service.sellingOrganization.name);
+        console.log('Checking organization refunds', service.sellingOrganization.id);
     }
 
     // Check last 7 days
@@ -91,12 +92,7 @@ export async function checkMollieRefundsFor(service: MollieService, checkAll = f
                     localRefund.type === PaymentType.Refund &&
                     localRefund.organizationId === service.sellingOrganization.id
                 ) {
-                    console.error(
-                        'Restoring missing link for Mollie refund ' +
-                            refund.id +
-                            ' to payment ' +
-                            localRefund.id,
-                    );
+                    console.error('Restoring missing Mollie refund link', localRefund.id);
                     try {
                         const link = new MolliePayment();
                         link.paymentId = localRefund.id;
@@ -104,8 +100,12 @@ export async function checkMollieRefundsFor(service: MollieService, checkAll = f
                         await link.save();
 
                         await reconcileRefundStatus(localRefund.id, refund.status, createdAt);
-                    } catch (e) {
-                        console.error('Failed to restore link for Mollie refund ' + refund.id, e);
+                    } catch (error) {
+                        console.error(
+                            'Failed to restore Mollie refund link',
+                            localRefund.id,
+                            errorDiagnostics(error),
+                        );
                     }
                     continue;
                 }
@@ -137,19 +137,23 @@ export async function checkMollieRefundsFor(service: MollieService, checkAll = f
                             molliePayment.paymentId = createdPayment.id;
                             molliePayment.mollieId = refund.id;
                             await molliePayment.save();
-                        } catch (e) {
-                            console.error('Failed to register refund ' + refund.id, e);
+                        } catch (error) {
+                            console.error(
+                                'Failed to register Mollie refund',
+                                payment.id,
+                                errorDiagnostics(error),
+                            );
                         }
                     }
                 } else {
-                    console.error('Invalid refund payment id ' + refund.paymentId + ', not found');
+                    console.error('Mollie refund payment not found');
                 }
             }
         }
     }
 
     if (STAMHOOFD.environment !== 'development') {
-        console.log('Done checking Mollie refunds for ' + service.sellingOrganization.name);
+        console.log('Finished checking organization refunds', service.sellingOrganization.id);
     }
 }
 
@@ -183,7 +187,7 @@ async function reconcileRefundStatus(
 
     try {
         await PaymentService.handlePaymentStatusUpdate(payment, organization, status, createdAt);
-    } catch (e) {
-        console.error('Failed to reconcile refund status for payment ' + payment.id, e);
+    } catch (error) {
+        console.error('Failed to reconcile refund status', payment.id, errorDiagnostics(error));
     }
 }

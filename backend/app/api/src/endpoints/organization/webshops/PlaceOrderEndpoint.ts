@@ -424,7 +424,6 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                 locale: mollieService.locale,
                             },
                         });
-                        console.log(molliePayment);
                         paymentUrl = MollieService.getCheckoutUrl(molliePayment);
 
                         // Save payment

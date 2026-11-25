@@ -48,10 +48,12 @@ it
                 OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: '',
                 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: '',
             },
-            stdio: ['ignore', 'ignore', 'pipe'],
+            stdio: ['ignore', 'pipe', 'pipe'],
         });
         const exited = once(child, 'close');
         let errors = '';
+        let output = '';
+        child.stdout.on('data', (chunk) => (output += chunk.toString()));
         child.stderr.on('data', (chunk) => (errors += chunk.toString()));
         nock.enableNetConnect('127.0.0.1');
         try {
@@ -68,9 +70,13 @@ it
                     throw new Error(`Entry stopped: ${errors}`);
                 }),
             ]);
-            const response = await fetch(`http://127.0.0.1:${app}/private-smoke`, {
-                redirect: 'manual',
-            });
+            const response = await fetch(
+                `http://127.0.0.1:${app}/private-smoke?key=canary-health-key`,
+                {
+                    redirect: 'manual',
+                    headers: { cookie: 'canary-member-cookie' },
+                },
+            );
             await response.text();
             const text = await scrape();
             expect(text).toMatch(/stamhoofd_http_request_duration_milliseconds_count\{.*\} 1/);
@@ -131,6 +137,9 @@ it
             child.kill('SIGKILL');
             await exited;
             await rm(dir, { recursive: true, force: true });
+            expect(output + errors).not.toMatch(
+                /private-smoke|canary-health-key|canary-member-cookie|invalid-before-any-io/,
+            );
         }
     },
     30000,
