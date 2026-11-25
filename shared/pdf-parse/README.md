@@ -6,14 +6,22 @@ is the whole setup - no worker file to copy, no bundler configuration, no asset 
 [pdf.js](#pdfjs) for which build that is and what it costs.
 
 ```ts
-import { extractPdfText, parsePrintedDate, readDatedLabelledValue, readInlineLabelledValue, readLabelledValue, readMarkerDate, readValueOnNextLine } from '@stamhoofd/pdf-parse';
+import {
+    extractPdfText,
+    parsePrintedDate,
+    readDatedLabelledValue,
+    readInlineLabelledValue,
+    readLabelledValue,
+    readMarkerDate,
+    readValueOnNextLine,
+} from '@stamhoofd/pdf-parse';
 
 const { pageCount, lines } = await extractPdfText(bytes);
 
 // Where each line was printed and how big, for a caller that knows the layout it expects
 lines[0]; // { text: 'Ref. doc : ...', page: 1, x: 38, y: 796, fontSize: 8 }
 
-const text = lines.map(line => line.text);
+const text = lines.map((line) => line.text);
 
 // Naam :            JANSSENS
 const name = readLabelledValue(text, ['Naam', 'Familienaam']);
@@ -32,7 +40,9 @@ const blancoOn = readMarkerDate(text, ['BLANCO STRAFREGISTER']);
 // De authenticiteit van dit uittreksel kan tot 01/02/2027 gecontroleerd worden via :
 // https://...
 // -> { date: 01/02/2027, value: 'https://...' }, or null: the pair, never half of it
-const verifiable = readDatedLabelledValue(text, ['De authenticiteit van dit uittreksel kan tot {date} gecontroleerd worden via']);
+const verifiable = readDatedLabelledValue(text, [
+    'De authenticiteit van dit uittreksel kan tot {date} gecontroleerd worden via',
+]);
 ```
 
 - pdf.js emits text items in generator order, not in reading order, so a label and its value can
@@ -110,7 +120,7 @@ an origin, a public path or a bundler plugin. Reading a one-page extract takes a
 not work worth a thread, and in Node pdf.js stays on the calling thread regardless.
 
 The important part is that it is a worker **per document**. Loading `pdf.worker.mjs` announces its
-handler on `globalThis`, and pdf.js consults that global for every document *anyone* opens - so
+handler on `globalThis`, and pdf.js consults that global for every document _anyone_ opens - so
 simply importing this package would have taken a pdf viewer in the same bundle off its worker and
 put its rendering on the main thread, silently. `src/pdfjs.ts` therefore puts the global back down
 after the import and passes a worker to `getDocument` instead. A consumer that renders pdfs keeps
