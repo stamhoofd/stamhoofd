@@ -11,7 +11,7 @@ export const JUDICIAL_RECORD_MAX_PDF_SIZE = 5 * 1024 * 1024;
  * The month the member is told about when they request an extract. The same number the upload
  * endpoint uses, so the browser cannot approve of an age the backend is about to refuse.
  */
-export const JUDICIAL_RECORD_MAX_AGE_IN_DAYS = 30;
+export const JUDICIAL_RECORD_MAX_AGE_IN_DAYS = 31;
 
 /**
  * Nothing about the dropped file is decided here, not even whether it is a pdf: that is the control
