@@ -1,8 +1,6 @@
 {
     "extends": "../../tsconfig.test.json",
-    "references": [
-        { "path": "./tsconfig.types.json" }
-    ],
+    "references": [{ "path": "./tsconfig.types.json" }],
     "include": [
         "../stamhoofd.d.ts",
         "../../jest-extended.d.ts",

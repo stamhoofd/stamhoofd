@@ -4,7 +4,11 @@ Verifies that a PDF was digitally signed by a pinned signer and has not been mod
 WebCrypto only, so the same code can run in the browser and the backend.
 
 ```ts
-import { verifyPdfFromFodJustitie, verifyPdfSignature, FOD_JUSTITIE_SIGNATURE_POLICY } from '@stamhoofd/signed-pdf';
+import {
+    verifyPdfFromFodJustitie,
+    verifyPdfSignature,
+    FOD_JUSTITIE_SIGNATURE_POLICY,
+} from '@stamhoofd/signed-pdf';
 
 // Resolves when the signature is valid, throws a SimpleError otherwise.
 const { signedAt, certificatePath } = await verifyPdfFromFodJustitie(bytes);
@@ -15,11 +19,11 @@ const verified = await verifyPdfSignature(bytes, FOD_JUSTITIE_SIGNATURE_POLICY);
 
 - `bytes`: the PDF as a `Uint8Array`.
 - `policy`: the signer to accept, its pinned trust anchor and intermediates, and a file size cap. See
-  `PdfSignaturePolicy`. `FOD_JUSTITIE_SIGNATURE_POLICY` (Belgian *uittreksel uit het strafregister*)
+  `PdfSignaturePolicy`. `FOD_JUSTITIE_SIGNATURE_POLICY` (Belgian _uittreksel uit het strafregister_)
   is the only one so far, and `verifyPdfFromFodJustitie` is the shorthand that pins it.
-It answers with `signedAt`, the signing time the signature itself carries — signed along with the
-document, so it is not a date read off the pdf — and `certificatePath`, the chain that validated,
-from the signer up to the pinned anchor.
+  It answers with `signedAt`, the signing time the signature itself carries — signed along with the
+  document, so it is not a date read off the pdf — and `certificatePath`, the chain that validated,
+  from the signer up to the pinned anchor.
 
 **How old a document may be is not checked here.** That limit differs per caller — a delivery and a
 later review do not want the same number — so this package hands back `signedAt` and the caller
