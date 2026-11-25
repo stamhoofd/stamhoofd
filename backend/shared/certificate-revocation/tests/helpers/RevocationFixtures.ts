@@ -17,6 +17,7 @@ const KEY_ALGORITHM = {
 const BASIC_CONSTRAINTS_OID = '2.5.29.19';
 const AUTHORITY_INFO_ACCESS_OID = '1.3.6.1.5.5.7.1.1';
 const CRL_DISTRIBUTION_POINTS_OID = '2.5.29.31';
+const EXTENDED_KEY_USAGE_OID = '2.5.29.37';
 const DELTA_CRL_INDICATOR_OID = '2.5.29.27';
 const ISSUING_DISTRIBUTION_POINT_OID = '2.5.29.28';
 const OCSP_ACCESS_METHOD_OID = '1.3.6.1.5.5.7.48.1';
@@ -35,6 +36,8 @@ export async function issueCertificate(options: {
     isCertificateAuthority?: boolean;
     ocspUrl?: string;
     crlUrl?: string;
+    /** `1.3.6.1.5.5.7.3.9` is what makes a certificate a responder its issuer delegated to. */
+    extendedKeyUsage?: string[];
 }): Promise<TestCertificate> {
     const crypto = pkijs.getCrypto(true);
     const keys = await crypto.generateKey(KEY_ALGORITHM, true, ['sign', 'verify']);
@@ -53,6 +56,14 @@ export async function issueCertificate(options: {
             extnValue: new pkijs.BasicConstraints({ cA: options.isCertificateAuthority ?? false }).toSchema().toBER(false),
         }),
     ];
+
+    if (options.extendedKeyUsage !== undefined) {
+        certificate.extensions.push(new pkijs.Extension({
+            extnID: EXTENDED_KEY_USAGE_OID,
+            critical: false,
+            extnValue: new pkijs.ExtKeyUsage({ keyPurposes: options.extendedKeyUsage }).toSchema().toBER(false),
+        }));
+    }
 
     if (options.ocspUrl !== undefined) {
         certificate.extensions.push(new pkijs.Extension({

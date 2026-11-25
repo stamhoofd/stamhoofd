@@ -8,6 +8,7 @@ import { assertChainNotRevoked, assertLinksNotRevoked, checkCertificateRevocatio
 import type { TestCertificate } from './helpers/RevocationFixtures.js';
 import { createCrl, createOcspResponse, issueCertificate, StubRevocationHttpClient } from './helpers/RevocationFixtures.js';
 
+const OCSP_SIGNING_OID = '1.3.6.1.5.5.7.3.9';
 const OCSP_URL = 'http://ocsp.example.com/signing';
 const CRL_URL = 'http://crl.example.com/signing.crl';
 const NOW = new Date('2026-11-04T12:00:00Z');
@@ -158,6 +159,32 @@ describe('checkCertificateRevocation', () => {
 
     test('does not believe a response that echoes a nonce we did not send', async () => {
         client.answer(OCSP_URL, await createOcspResponse({ certificate: signer.certificate, issuer, status: 'good', echoNonce: new Uint8Array(16).fill(7) }));
+        client.answer(CRL_URL, new Error('connect timeout'));
+
+        expect(await checkCertificateRevocation(signer.certificate, issuer.certificate, options())).toBe('unknown');
+    });
+
+    test('believes a response signed by a responder the issuer delegated', async () => {
+        const responder = await issueCertificate({ commonName: 'Test Document CA Responder', issuer, extendedKeyUsage: [OCSP_SIGNING_OID] });
+        client.answer(OCSP_URL, await createOcspResponse({ certificate: signer.certificate, issuer, status: 'good', signedBy: responder }));
+
+        expect(await checkCertificateRevocation(signer.certificate, issuer.certificate, options())).toBe('good');
+    });
+
+    test('does not believe a response signed by a sibling certificate that was never delegated', async () => {
+        // The one thing between a network attacker holding any certificate of this authority and a
+        // forged good: a responder has to carry the OCSP signing purpose, and this sibling does not.
+        const sibling = await issueCertificate({ commonName: 'Test Other Signer', issuer });
+        client.answer(OCSP_URL, await createOcspResponse({ certificate: signer.certificate, issuer, status: 'good', signedBy: sibling }));
+        client.answer(CRL_URL, new Error('connect timeout'));
+
+        expect(await checkCertificateRevocation(signer.certificate, issuer.certificate, options())).toBe('unknown');
+    });
+
+    test('does not believe a response signed by a delegated responder of another authority', async () => {
+        const stranger = await issueCertificate({ commonName: 'Stranger CA', isCertificateAuthority: true });
+        const responder = await issueCertificate({ commonName: 'Stranger CA Responder', issuer: stranger, extendedKeyUsage: [OCSP_SIGNING_OID] });
+        client.answer(OCSP_URL, await createOcspResponse({ certificate: signer.certificate, issuer, status: 'good', signedBy: responder }));
         client.answer(CRL_URL, new Error('connect timeout'));
 
         expect(await checkCertificateRevocation(signer.certificate, issuer.certificate, options())).toBe('unknown');
