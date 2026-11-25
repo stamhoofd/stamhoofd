@@ -15,20 +15,20 @@
         "@eslint/js": "10.0.1",
         "@stylistic/eslint-plugin": "5.10.0",
         "@vitest/eslint-plugin": "1.6.28",
-        "eslint": "10.13.0",
+        "eslint": "10.15.0",
         "eslint-import-resolver-typescript": "4.4.5",
         "eslint-plugin-import": "2.32.0",
         "eslint-plugin-n": "18.5.0",
         "eslint-plugin-no-unsanitized": "4.1.5",
         "eslint-plugin-node-security": "5.8.0",
-        "eslint-plugin-regexp": "3.3.2",
+        "eslint-plugin-regexp": "3.3.3",
         "eslint-plugin-secure-coding": "5.5.0",
-        "eslint-plugin-security": "4.2.0",
+        "eslint-plugin-security": "4.2.1",
         "eslint-plugin-unicorn": "78.0.0",
-        "eslint-plugin-vue": "10.12.0",
+        "eslint-plugin-vue": "10.12.1",
         "globals": "15.15.0",
-        "typescript-eslint": "8.72.1",
-        "vue-eslint-parser": "10.4.1"
+        "typescript-eslint": "8.73.0",
+        "vue-eslint-parser": "10.4.2"
     },
     "devDependencies": {
         "vitest": "4.1.12"

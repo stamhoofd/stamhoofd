@@ -14,7 +14,7 @@
     "dependencies": {
         "@node/nuxt-observability": "workspace:*",
         "@node/observability": "workspace:*",
-        "@nuxt/content": "3.16.2",
+        "@nuxt/content": "3.17.0",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/scss": "workspace:*",
         "docus": "5.15.0",
@@ -24,7 +24,7 @@
     "devDependencies": {
         "@node/dev-tools": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
-        "sass": "1.107.0",
+        "sass": "1.108.2",
         "vite-svg-2-webfont": "8.5.0"
     }
 }
