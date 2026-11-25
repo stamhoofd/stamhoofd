@@ -75,14 +75,28 @@ describe('Registrations excel export', () => {
     });
 
     it('shows the judicial record status of the member', () => {
-        const period = RegistrationPeriod.create({ startDate: new Date('2025-09-01T00:00:00Z'), endDate: new Date('2026-08-31T00:00:00Z') });
+        const period = RegistrationPeriod.create({
+            startDate: new Date('2025-09-01T00:00:00Z'),
+            endDate: new Date('2026-08-31T00:00:00Z'),
+        });
         const organization = Organization.create({ name: 'Group A', uri: 'A' });
-        const responsibility = MemberResponsibility.create({ name: 'Leiding', judicialRecordMinimumAge: 18 });
-        const platform = Platform.create({ period, config: PlatformConfig.create({ responsibilities: [responsibility] }) });
+        const responsibility = MemberResponsibility.create({
+            name: 'Leiding',
+            judicialRecordMinimumAge: 18,
+        });
+        const platform = Platform.create({
+            period,
+            config: PlatformConfig.create({ responsibilities: [responsibility] }),
+        });
 
         const registration = Registration.create({
             organizationId: organization.id,
-            group: Group.create({ organizationId: organization.id, periodId: period.id, type: GroupType.Membership, settings: GroupSettings.create({ period }) }),
+            group: Group.create({
+                organizationId: organization.id,
+                periodId: period.id,
+                type: GroupType.Membership,
+                settings: GroupSettings.create({ period }),
+            }),
             groupPrice: GroupPrice.create({}),
             registeredAt: new Date('2025-09-15T00:00:00Z'),
         });
@@ -91,20 +105,29 @@ describe('Registrations excel export', () => {
             details: MemberDetails.create({ birthDay: new Date('1990-01-01T00:00:00Z') }),
             registrations: [registration],
         });
-        member.responsibilities = [MemberResponsibilityRecord.create({
-            memberId: member.id,
-            organizationId: organization.id,
-            responsibilityId: responsibility.id,
-            startDate: new Date('2025-09-01T00:00:00Z'),
-        })];
+        member.responsibilities = [
+            MemberResponsibilityRecord.create({
+                memberId: member.id,
+                organizationId: organization.id,
+                responsibilityId: responsibility.id,
+                startDate: new Date('2025-09-01T00:00:00Z'),
+            }),
+        ];
 
-        const [platformRegistration] = PlatformRegistration.createSingles(RegistrationsBlob.create({
-            registrations: [RegistrationWithMemberBlob.create({ ...registration, member })],
-            organizations: [organization],
-        }), { platform });
+        const [platformRegistration] = PlatformRegistration.createSingles(
+            RegistrationsBlob.create({
+                registrations: [RegistrationWithMemberBlob.create({ ...registration, member })],
+                organizations: [organization],
+            }),
+            { platform },
+        );
 
-        const columns = getSheet(platform).columns.filter(c => isXlsxTransformerConcreteColumn(c) && c.id === 'member.judicialRecordStatus') as XlsxTransformerConcreteColumn<PlatformRegistration>[];
+        const columns = getSheet(platform).columns.filter(
+            (c) => isXlsxTransformerConcreteColumn(c) && c.id === 'member.judicialRecordStatus',
+        ) as XlsxTransformerConcreteColumn<PlatformRegistration>[];
         expect(columns).toHaveLength(1);
-        expect(columns[0].getValue(platformRegistration).value).toBe(JudicialRecordHelper.getStatusName(JudicialRecordStatus.Required));
+        expect(columns[0].getValue(platformRegistration).value).toBe(
+            JudicialRecordHelper.getStatusName(JudicialRecordStatus.Required),
+        );
     });
 });

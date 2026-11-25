@@ -151,28 +151,38 @@ describe('Member excel export', () => {
     });
 
     describe('judicialRecordStatus column', () => {
-        const responsibility = MemberResponsibility.create({ name: 'Leiding', judicialRecordMinimumAge: 18 });
-        const platform = Platform.create({ config: PlatformConfig.create({ responsibilities: [responsibility] }) });
+        const responsibility = MemberResponsibility.create({
+            name: 'Leiding',
+            judicialRecordMinimumAge: 18,
+        });
+        const platform = Platform.create({
+            config: PlatformConfig.create({ responsibilities: [responsibility] }),
+        });
 
         function createMember({ birthDay, startDate }: { birthDay: Date | null; startDate: Date }) {
             const organization = Organization.create({});
             const member = MemberWithRegistrationsBlob.create({
                 details: MemberDetails.create({ firstName: 'John', lastName: 'Doe', birthDay }),
             });
-            member.responsibilities = [MemberResponsibilityRecord.create({
-                memberId: member.id,
-                organizationId: organization.id,
-                responsibilityId: responsibility.id,
-                startDate,
-            })];
+            member.responsibilities = [
+                MemberResponsibilityRecord.create({
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    responsibilityId: responsibility.id,
+                    startDate,
+                }),
+            ];
 
             const blob = MembersBlob.create({ organizations: [organization], members: [member] });
 
-            return PlatformFamily.create(blob, { platform, contextOrganization: organization }).members[0];
+            return PlatformFamily.create(blob, { platform, contextOrganization: organization })
+                .members[0];
         }
 
         function getValue(member: PlatformMember) {
-            const column = getBaseMemberColumns(platform).find(c => 'id' in c && c.id === 'judicialRecordStatus') as XlsxTransformerConcreteColumn<PlatformMember> | undefined;
+            const column = getBaseMemberColumns(platform).find(
+                (c) => 'id' in c && c.id === 'judicialRecordStatus',
+            ) as XlsxTransformerConcreteColumn<PlatformMember> | undefined;
 
             if (!column) {
                 throw new Error('Column judicialRecordStatus not found');
@@ -182,15 +192,25 @@ describe('Member excel export', () => {
         }
 
         it('exports the name of the status', () => {
-            const member = createMember({ birthDay: new Date('1990-01-01T00:00:00Z'), startDate: new Date('2025-09-01T00:00:00Z') });
+            const member = createMember({
+                birthDay: new Date('1990-01-01T00:00:00Z'),
+                startDate: new Date('2025-09-01T00:00:00Z'),
+            });
 
-            expect(getValue(member)).toBe(JudicialRecordHelper.getStatusName(JudicialRecordStatus.Required));
+            expect(getValue(member)).toBe(
+                JudicialRecordHelper.getStatusName(JudicialRecordStatus.Required),
+            );
         });
 
         it('exports the status of a member that does not need an extract yet', () => {
-            const member = createMember({ birthDay: new Date('1990-01-01T00:00:00Z'), startDate: new Date('2090-09-01T00:00:00Z') });
+            const member = createMember({
+                birthDay: new Date('1990-01-01T00:00:00Z'),
+                startDate: new Date('2090-09-01T00:00:00Z'),
+            });
 
-            expect(getValue(member)).toBe(JudicialRecordHelper.getStatusName(JudicialRecordStatus.NotRequired));
+            expect(getValue(member)).toBe(
+                JudicialRecordHelper.getStatusName(JudicialRecordStatus.NotRequired),
+            );
         });
     });
 

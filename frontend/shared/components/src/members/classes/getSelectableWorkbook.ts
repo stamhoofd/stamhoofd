@@ -106,7 +106,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         ...(JudicialRecordHelper.asksForExtract({ platform, organization })
             ? [new SelectableColumn({
                     id: 'judicialRecordStatus',
-                    name: $t(`Uittreksel uit het strafregister`),
+                    name: $t('Uittreksel uit het strafregister'),
                     enabled: false,
                 })]
             : []),
