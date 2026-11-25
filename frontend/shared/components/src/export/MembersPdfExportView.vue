@@ -45,6 +45,7 @@ const props = defineProps<{
     groups: Group[];
     configurationId: string; // How to store the filters for easy reuse
     items: PlatformMember[];
+    fileName: string;
 }>();
 
 const exporting = ref(false);
@@ -148,7 +149,7 @@ async function doExport() {
     const document = new MembersPdfDocument(props.items,
         memberDetailsSheet,
         membersSummarySheet,
-        documentTitle, logoImage);
+        documentTitle, props.fileName, logoImage);
 
     try {
         await document.download();

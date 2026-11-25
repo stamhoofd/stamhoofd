@@ -136,7 +136,7 @@ export class AsyncTableAction<T extends { id: string }> extends TableAction<T> {
 }
 
 export class InMemoryTableAction<T extends { id: string }> extends TableAction<T> {
-    handler: (item: T[], wereItemsFetched: boolean) => Promise<void> | void;
+    handler: (item: T[], wereItemsFetched: boolean, selection: TableActionSelection<T>) => Promise<void> | void;
     fetchLimitSettings?: FetchLimitSettings;
 
     /**
@@ -145,7 +145,7 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
      */
     disableIfAll?: (item: T) => boolean;
 
-    constructor(settings: Partial<TableAction<T>> & { handler: (item: T[], wereItemsFetched: boolean) => Promise<void> | void; fetchLimitSettings?: FetchLimitSettings; disableIfAll?: (item: T) => boolean }) {
+    constructor(settings: Partial<TableAction<T>> & { handler: (item: T[], wereItemsFetched: boolean, selection: TableActionSelection<T>) => Promise<void> | void; fetchLimitSettings?: FetchLimitSettings; disableIfAll?: (item: T) => boolean }) {
         super(settings);
         this.handler = settings.handler ?? (() => {
             throw new Error('No handler defined');
@@ -218,7 +218,7 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
                 : { items: [], wereItemsFetched: false };
             toast.setProgress(1);
             toast.message = $t('%jg');
-            await this.handler(items, wereItemsFetched);
+            await this.handler(items, wereItemsFetched, data);
         } finally {
             clearTimeout(timer);
             toast.hide();
