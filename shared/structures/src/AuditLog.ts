@@ -709,22 +709,22 @@ function getAuditLogTypeDescriptionTemplate(type: AuditLogType): string | undefi
 
         case AuditLogType.EmailAddressMarkedAsSpam:
             return $t(
-                `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response '\n'}}Soms doen mensen dit per ongeluk. Vraag hen dan de e-mail terug als 'geen spam' te markeren.`,
+                `Verzonden door {{sender}} {{if org " (" org ")"}}{{newline}}{{if subType 'Reden: ' subType newline}}{{if response 'Volledig antwoord: ' response newline}}Soms doen mensen dit per ongeluk. Vraag hen dan de e-mail terug als 'geen spam' te markeren.`,
             );
 
         case AuditLogType.EmailAddressHardBounced:
             return $t(
-                `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response '\n'}}De e-mailprovider gaat ervanuit dat dit een permanent probleem is, dus toekomstige e-mails zullen niet meer verzonden worden naar dit adres. Meestal komt dit voor bij een ongeldig e-mailadres.`,
+                `Verzonden door {{sender}} {{if org " (" org ")"}}{{newline}}{{if subType 'Reden: ' subType newline}}{{if response 'Volledig antwoord: ' response newline}}De e-mailprovider gaat ervanuit dat dit een permanent probleem is, dus toekomstige e-mails zullen niet meer verzonden worden naar dit adres. Meestal komt dit voor bij een ongeldig e-mailadres.`,
             );
 
         case AuditLogType.EmailAddressSoftBounced:
             return $t(
-                `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response '\n'}}Wellicht gaat het om een tijdelijk probleem (bv. volle inbox).`,
+                `Verzonden door {{sender}} {{if org " (" org ")"}}{{newline}}{{if subType 'Reden: ' subType newline}}{{if response 'Volledig antwoord: ' response newline}}Wellicht gaat het om een tijdelijk probleem (bv. volle inbox).`,
             );
 
         case AuditLogType.EmailAddressFraudComplaint:
             return $t(
-                `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response}}`,
+                `Verzonden door {{sender}} {{if org " (" org ")"}}{{newline}}{{if subType 'Reden: ' subType newline}}{{if response 'Volledig antwoord: ' response}}`,
             );
     }
 }
@@ -965,11 +965,19 @@ export class AuditLog extends AutoEncoder {
     @field({ decoder: DateDecoder })
     createdAt: Date;
 
+    /**
+     * `newline` is a template variable instead of a `\n` escape because the translation extractor
+     * stores the literal source text of a `$t()` argument as the translation value.
+     */
+    private get renderContext(): ReadonlyMap<string, any> {
+        return new Map<string, any>(this.replacements).set('newline', '\n');
+    }
+
     get renderableTitle() {
         try {
             return renderTemplate(getAuditLogTypeTitleTemplate(this.type), {
                 type: 'text',
-                context: this.replacements,
+                context: this.renderContext,
                 helpers,
             });
         } catch (e) {
@@ -987,7 +995,7 @@ export class AuditLog extends AutoEncoder {
         try {
             return renderTemplate(template, {
                 type: 'text',
-                context: this.replacements,
+                context: this.renderContext,
                 helpers,
             });
         } catch (e) {

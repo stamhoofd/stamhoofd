@@ -57,6 +57,18 @@ describe('AuditLog', () => {
         expect(log.title).toBe('De herstelcodes van admin@example.com werden opnieuw gegenereerd');
     });
 
+    test('It renders the bounce description with real line breaks', () => {
+        const log = twoFactorLog(AuditLogType.EmailAddressSoftBounced, {
+            sender: AuditLogReplacement.string('info@example.com'),
+            subType: AuditLogReplacement.string('Mailbox full'),
+        });
+        const description = log.renderableDescription.map((v) => v.toString()).join('');
+
+        expect(description).toBe(
+            'Verzonden door info@example.com \nReden: Mailbox full\nWellicht gaat het om een tijdelijk probleem (bv. volle inbox).',
+        );
+    });
+
     test('Every type has a name and an icon', () => {
         for (const type of Object.values(AuditLogType)) {
             expect(getAuditLogTypeName(type), type).toBeTruthy();
