@@ -416,11 +416,15 @@ describe('JudicialRecordHelper.getEarliestReviewedAtStillStanding', () => {
     });
 
     test('the time of day a decision was taken does not move the boundary', () => {
-        const atDate = new Date(2029, 0, 5, 9, 0);
+        // Both ends are written as instants, because the window is counted in Belgian days:
+        // new Date(y, m, d, h) is that clock time wherever the test runs, which lands on a different
+        // Brussels day in a zone far enough from ours.
+        const atDate = new Date(Date.UTC(2029, 0, 5, 8, 0)); // 09:00 in Brussels
         const boundary = JudicialRecordHelper.getEarliestReviewedAtStillStanding(atDate);
 
-        // The same day, reviewed at 14:00: expired on this date whatever the clock said back then
-        const reviewedAt = new Date(2026, 0, 5, 14, 0);
+        // The same day of the year, JUDICIAL_RECORD_VALIDITY_YEARS earlier, reviewed at 14:00 Brussels:
+        // expired on this date whatever the clock said back then
+        const reviewedAt = new Date(Date.UTC(2029 - JUDICIAL_RECORD_VALIDITY_YEARS, 0, 5, 13, 0));
 
         expect(JudicialRecordHelper.hasExpired(reviewedAt, atDate)).toBe(true);
         expect(reviewedAt.getTime()).toBeLessThan(boundary.getTime());
