@@ -381,3 +381,37 @@ describe('JudicialRecordHelper.getStoredStatus', () => {
         expect(Object.values(JudicialRecordStatus)).toHaveLength(7);
     });
 });
+
+describe('JudicialRecordHelper.getEarliestReviewedAtStillStanding', () => {
+    test('is the boundary hasExpired draws, to the millisecond', () => {
+        const atDate = new Date(2029, 0, 5, 9, 0);
+        const boundary = JudicialRecordHelper.getEarliestReviewedAtStillStanding(atDate);
+
+        expect(JudicialRecordHelper.hasExpired(boundary, atDate)).toBe(false);
+        expect(JudicialRecordHelper.hasExpired(new Date(boundary.getTime() - 1), atDate)).toBe(
+            true,
+        );
+    });
+
+    test('the time of day a decision was taken does not move the boundary', () => {
+        const atDate = new Date(2029, 0, 5, 9, 0);
+        const boundary = JudicialRecordHelper.getEarliestReviewedAtStillStanding(atDate);
+
+        // The same day, reviewed at 14:00: expired on this date whatever the clock said back then
+        const reviewedAt = new Date(2026, 0, 5, 14, 0);
+
+        expect(JudicialRecordHelper.hasExpired(reviewedAt, atDate)).toBe(true);
+        expect(reviewedAt.getTime()).toBeLessThan(boundary.getTime());
+    });
+
+    test('holds on a leap day, where the window does not shift by whole years at both ends', () => {
+        for (const atDate of [new Date(2027, 1, 28, 9, 0), new Date(2028, 1, 29, 9, 0)]) {
+            const boundary = JudicialRecordHelper.getEarliestReviewedAtStillStanding(atDate);
+
+            expect(JudicialRecordHelper.hasExpired(boundary, atDate)).toBe(false);
+            expect(JudicialRecordHelper.hasExpired(new Date(boundary.getTime() - 1), atDate)).toBe(
+                true,
+            );
+        }
+    });
+});

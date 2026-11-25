@@ -174,6 +174,27 @@ export class JudicialRecordHelper {
     }
 
     /**
+     * The earliest `reviewedAt` whose decision still stands on `atDate`.
+     *
+     * `hasExpired` reads nothing but the day a decision was taken, so every decision of a day expires at the
+     * same instant and the boundary is one date. The SQL mirror in
+     * `backend/app/api/src/helpers/judicialRecordStatus.ts` compares against this instead of repeating the
+     * arithmetic, which is what keeps the two from drifting apart over a time zone or a leap day.
+     */
+    static getEarliestReviewedAtStillStanding(atDate: Date = new Date()): Date {
+        let day = Formatter.luxon(atDate)
+            .startOf('day')
+            .minus({ years: JUDICIAL_RECORD_VALIDITY_YEARS });
+
+        // A leap day moves one end of the window and not the other, so the first candidate is not always it
+        while (this.hasExpired(day.toJSDate(), atDate)) {
+            day = day.plus({ days: 1 });
+        }
+
+        return day.toJSDate();
+    }
+
+    /**
      * The date from which a member is at least `minimumAge` years old. Null when their birth day is unknown.
      */
     static getMinimumAgeDate(birthDay: Date | null, minimumAge: number): Date | null {

@@ -12,7 +12,7 @@ import {
     SQLWhereSign,
 } from '@stamhoofd/sql';
 import {
-    JUDICIAL_RECORD_VALIDITY_YEARS,
+    JudicialRecordHelper,
     JudicialRecordReviewDecision,
     JudicialRecordStatus,
 } from '@stamhoofd/structures';
@@ -78,16 +78,19 @@ function reviewDecisionIs(...statuses: JudicialRecordReviewDecision[]): SQLWhere
 /**
  * A decision this old no longer stands, so the member is back to having to deliver one.
  *
- * The mirror of `JudicialRecordHelper.hasExpired`. Validity runs from the review and not from the document,
- * because the document is deleted as soon as a decision is made and nothing can be recomputed from it.
+ * The boundary comes from `JudicialRecordHelper.getEarliestReviewedAtStillStanding` rather than being computed
+ * here: `hasExpired` reads the Brussels day a decision was taken, which the database cannot work out on its own
+ * (its time zone is whatever it is, and its time zone tables need not even be loaded). Validity runs from the
+ * review and not from the document, because the document is deleted as soon as a decision is made and nothing
+ * can be recomputed from it.
  */
 function decisionStillStands(): SQLWhere {
     const reviewedAt = SQL.column(JudicialRecord.table, 'reviewedAt');
 
     return SQL.where(reviewedAt, null).or(
-        new SQLDateAddYears(reviewedAt, new SQLScalar(JUDICIAL_RECORD_VALIDITY_YEARS)),
-        SQLWhereSign.Greater,
-        new SQLNow(),
+        reviewedAt,
+        SQLWhereSign.GreaterEqual,
+        JudicialRecordHelper.getEarliestReviewedAtStillStanding(),
     );
 }
 

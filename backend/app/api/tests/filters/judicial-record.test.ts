@@ -21,6 +21,7 @@ import {
     JudicialRecordReviewDecision,
     JudicialRecordStatus,
 } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 import { judicialRecordStatusExpression } from '../../src/helpers/judicialRecordStatus.js';
 import { memberFilterCompilers } from '../../src/sql-filters/members.js';
@@ -220,6 +221,21 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
         return date;
     }
 
+    /**
+     * The same, but late in the Brussels day, which `yearsAgo` never is.
+     *
+     * The window runs from midnight of the day a decision was taken, so a scenario a whole day away from the
+     * boundary cannot tell a mirror that keeps the time of day from one that drops it.
+     */
+    function yearsAgoLateInTheDay(years: number, plusDays = 0): Date {
+        return Formatter.luxon(new Date())
+            .startOf('day')
+            .minus({ years })
+            .plus({ days: plusDays })
+            .set({ hour: 23 })
+            .toJSDate();
+    }
+
     /** One scenario per path through the stored half of the rule, including every review outcome. */
     function storedScenarios(): Scenario[] {
         const justReviewed = daysFromNow(-1);
@@ -263,6 +279,22 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
                 name: 'approved just outside the validity window',
                 ...requiredAdult(),
                 record: { reviewDecision: JudicialRecordReviewDecision.Ok, reviewedAt: expired },
+            },
+            {
+                name: 'approved late on the day the validity window runs out',
+                ...requiredAdult(),
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.Ok,
+                    reviewedAt: yearsAgoLateInTheDay(JUDICIAL_RECORD_VALIDITY_YEARS),
+                },
+            },
+            {
+                name: 'approved late on the last day inside the validity window',
+                ...requiredAdult(),
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.Ok,
+                    reviewedAt: yearsAgoLateInTheDay(JUDICIAL_RECORD_VALIDITY_YEARS, 1),
+                },
             },
             {
                 name: 'temporarily rejected',
