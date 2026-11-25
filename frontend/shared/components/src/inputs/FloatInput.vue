@@ -13,7 +13,6 @@
                     v-model="text"
                     type="text"
                     inputmode="decimal"
-                    step="any"
                     :disabled="disabled"
                     @keydown.up.prevent="step(1)"
                     @keydown.down.prevent="step(-1)"

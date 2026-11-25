@@ -13,7 +13,6 @@
                 :disabled="disabled"
                 type="text"
                 :inputmode="floatingPoint ? 'decimal' : 'numeric'"
-                step="any"
                 @keydown.up.prevent="stepModelValue(1)"
                 @keydown.down.prevent="stepModelValue(-1)"
                 @change="updateModelValue()"
