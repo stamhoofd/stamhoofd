@@ -28,8 +28,7 @@ const membersTable = SQL.table(Member.table);
 
 /**
  * Defines how to filter members in the database from StamhoofdFilter objects
- */
-/**
+ *
  * `judicialRecordMinimumAges` is only needed to support the `judicialRecordStatus` key. The member list resolves them;
  * nested member filters of other lists leave them out, so the derived status is `NotRequired` there.
  */
