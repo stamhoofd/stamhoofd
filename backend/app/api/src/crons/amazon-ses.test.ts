@@ -1,4 +1,7 @@
-import { readHeaders } from './amazon-ses.js';
+import { EmailAddress } from '@stamhoofd/email';
+import { AuditLog } from '@stamhoofd/models';
+import { randomUUID } from 'crypto';
+import { handleBounce, handleComplaint, readHeaders } from './amazon-ses.js';
 
 describe('SES header dictionary isolation', () => {
     test('retains special names as literal string headers', () => {
@@ -57,5 +60,70 @@ describe('SES header normalization', () => {
         expect(readHeaders({ mail: { headers: 'invalid' } })).toEqual(new Map());
         expect(readHeaders(null)).toEqual(new Map());
         expect(readHeaders({})).not.toBe(first);
+    });
+});
+
+describe('SES recipient email addresses', () => {
+    function bounce(emailAddress: string) {
+        const feedbackId = randomUUID();
+        return {
+            feedbackId,
+            message: {
+                notificationType: 'Bounce',
+                bounce: {
+                    feedbackId,
+                    bounceType: 'Permanent',
+                    bounceSubType: 'General',
+                    bouncedRecipients: [{ emailAddress }],
+                },
+                mail: {},
+            },
+        };
+    }
+
+    test.each([
+        ['a plain name', 'John Doe <', '>'],
+        ['an encoded name', '=?UTF-8?Q?Zo=C3=AB_Janssens?= <', '>'],
+        ['no name', '', ''],
+    ])('a bounce with %s blocks and logs the plain email address', async (_, prefix, suffix) => {
+        const email = 'bounce-' + randomUUID() + '@example.com';
+        const { feedbackId, message } = bounce(prefix + email + suffix);
+
+        await handleBounce(message);
+
+        const emailAddress = await EmailAddress.getWhereHardBounceOrSpam(email);
+        expect(emailAddress?.email).toBe(email);
+
+        const log = await AuditLog.select()
+            .where('externalId', 'aws-ses-message-' + feedbackId)
+            .first(true);
+        expect(log.objectId).toBe(email);
+    });
+
+    test('a bounce with multiple email addresses keeps the reported value', async () => {
+        const reported =
+            'first-' + randomUUID() + '@example.com, second-' + randomUUID() + '@example.com';
+
+        await handleBounce(bounce(reported).message);
+
+        const emailAddress = await EmailAddress.getWhereHardBounceOrSpam(reported);
+        expect(emailAddress?.email).toBe(reported);
+    });
+
+    test('a complaint with a name marks the plain email address as spam', async () => {
+        const email = 'complaint-' + randomUUID() + '@example.com';
+
+        await handleComplaint({
+            notificationType: 'Complaint',
+            complaint: {
+                feedbackId: randomUUID(),
+                complaintFeedbackType: 'abuse',
+                complainedRecipients: [{ emailAddress: 'John Doe <' + email + '>' }],
+            },
+            mail: {},
+        });
+
+        const emailAddress = await EmailAddress.getWhereHardBounceOrSpam(email);
+        expect(emailAddress?.markedAsSpam).toBe(true);
     });
 });

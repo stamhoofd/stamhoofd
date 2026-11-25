@@ -170,7 +170,18 @@ export function readHeaders(message: any): Map<string, string> {
     }
 }
 
-async function handleBounce(message: any) {
+/** SES can report a recipient as "Name <email>"; returns only the email address. */
+function readRecipientEmail(recipient: { emailAddress: string }): string {
+    const addresses = Email.parseEmailStr(recipient.emailAddress);
+    if (addresses.length !== 1) {
+        // Ambiguous or unparseable: keep the reported value
+        console.warn('[AWS] Could not read recipient email address', recipient.emailAddress);
+        return recipient.emailAddress;
+    }
+    return addresses[0];
+}
+
+export async function handleBounce(message: any) {
     if (message.bounce) {
         console.log('[AWS BOUNCES] Handling bounce message', message);
         const headers = readHeaders(message);
@@ -184,7 +195,7 @@ async function handleBounce(message: any) {
         // try to find organization that is responsible for this e-mail address
 
         for (const recipient of b.bouncedRecipients) {
-            const email = recipient.emailAddress;
+            const email = readRecipientEmail(recipient);
 
             if (
                 type === 'Permanent' ||
@@ -251,7 +262,7 @@ async function handleBounce(message: any) {
     }
 }
 
-async function handleComplaint(message: any) {
+export async function handleComplaint(message: any) {
     if (message.complaint) {
         const headers = readHeaders(message);
         const b = message.complaint;
@@ -264,7 +275,7 @@ async function handleComplaint(message: any) {
             b.complaintFeedbackType;
 
         for (const recipient of b.complainedRecipients) {
-            const email = recipient.emailAddress;
+            const email = readRecipientEmail(recipient);
             const emailAddress = await EmailAddress.getOrCreate(email, organization?.id ?? null);
             emailAddress.markedAsSpam = type !== 'not-spam';
             await emailAddress.save();
