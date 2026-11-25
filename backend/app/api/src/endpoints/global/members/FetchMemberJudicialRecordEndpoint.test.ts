@@ -31,6 +31,10 @@ function resetLimiter(limiter: RateLimiter) {
     }
 }
 
+function countTracked(limiter: RateLimiter, key: string) {
+    return limiter.windows.map((window) => window.windows.get(key) ?? 0);
+}
+
 describe('Endpoint.FetchMemberJudicialRecord', () => {
     /** Nothing here reaches FOD Justitie: fetch is replaced for every test, answering a pdf unless one says otherwise. */
     let fetchMock: MockedFunction<typeof fetch>;
@@ -423,6 +427,29 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
         ).rejects.toThrow(STExpect.simpleError({ code: 'too_many_requests' }));
 
         expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    test('A refused fetch spends nothing of the account and platform budgets', async () => {
+        const { organization, token, member, user } = await setup();
+
+        judicialRecordFetchMemberLimiter.track(member.id, 10);
+
+        await expect(
+            testServer.test(
+                endpoint,
+                buildRequest({
+                    token: token.accessToken,
+                    organizationHost: organization.getApiHost(),
+                    memberId: member.id,
+                    url: EXPIRED_URL,
+                }),
+            ),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'too_many_requests' }));
+
+        expect(countTracked(judicialRecordFetchUserLimiter, user.id)).toEqual([0, 0]);
+        expect(countTracked(judicialRecordFetchGlobalLimiter, 'judicial-record-fetch')).toEqual([
+            0, 0,
+        ]);
     });
 
     test('It limits the number of fetches for one account', async () => {

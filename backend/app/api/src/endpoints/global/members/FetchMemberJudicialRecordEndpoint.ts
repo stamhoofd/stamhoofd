@@ -130,10 +130,12 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
     }
 
     private trackLimits(userId: string, memberId: string) {
+        // Narrowest limit first: a request the member's own limit already refuses must not spend
+        // the budget of the account or of the platform.
         try {
-            judicialRecordFetchGlobalLimiter.track(globalLimiterKey, 1);
-            judicialRecordFetchUserLimiter.track(userId, 1);
             judicialRecordFetchMemberLimiter.track(memberId, 1);
+            judicialRecordFetchUserLimiter.track(userId, 1);
+            judicialRecordFetchGlobalLimiter.track(globalLimiterKey, 1);
         } catch (error) {
             throw new SimpleError({
                 code: 'too_many_requests',
