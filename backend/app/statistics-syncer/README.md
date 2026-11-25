@@ -44,7 +44,26 @@ pnpm run migrations   # migrate the statistics database (part of `pnpm stam db m
 
 Wherever this service runs, it syncs: there is nothing to switch off in configuration, so deploy it
 only for a platform that has statistics to report on. In development it runs on every cron tick;
-elsewhere once a night between 03:00 and 05:00 (see `src/crons.ts`).
+elsewhere on startup, then on an eligible tick during the 03:00–05:59 UTC window
+(at least 12 hours since the last successful run).
+
+### Statistics completion heartbeat
+
+`STATISTICS_SYNC_HEARTBEAT_URL` is an optional secret in the syncer's server-only
+configuration. Provision a separate daily Better Stack heartbeat for each production
+syncer (Keeo and Ravot), store each HTTPS URL in that deployment's 1Password vault
+and inject it only into the corresponding service. Leave it unset elsewhere.
+Stamhoofd and Jamboree have no statistics syncer.
+
+Only a completed incremental, delete-reconciliation **and** settlement pass sends
+a bodyless GET. Startup success counts; failed and skipped ticks do not. Delivery
+has a two-second deadline and no retry; failure does not invalidate the sync.
+Configure a 24-hour period with grace covering startup rescheduling, the nightly
+window and the longest expected cycle. For example, an 18:00 UTC startup success
+can put the entire next window inside the 12-hour exclusion: the next run starts
+around 33 hours later. Allow at least that nine-hour overrun plus cycle duration.
+Route each missing heartbeat to that deployment's responders. Verify the first receipt and a
+controlled missed-deadline alert when the monitor is commissioned.
 
 `STAMHOOFD.IMPORTED_UNTIL` marks how far back the numbers come from an external import instead of from
 this administration; periods ending before it are frozen and left to that import.
