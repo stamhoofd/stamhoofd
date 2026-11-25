@@ -32,7 +32,6 @@ import { Language } from '@stamhoofd/types/Language';
 import { computed } from 'vue';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
 import { registerTranslateableComponent } from './hooks/useEditorContext';
-import { useEditorLanguage } from './hooks/useEditorLanguage';
 import TInputButton from './TInputButton.vue';
 
 const value = defineModel<TranslatedString>({ required: true });
@@ -41,7 +40,6 @@ if (typeof value.value === 'string') {
     throw new Error('TInput must be used with a TranslatedString');
 }
 
-const editorLanguage = useEditorLanguage();
 const { hasLanguages } = useSwitchLanguage();
 registerTranslateableComponent(value);
 
@@ -79,21 +77,11 @@ function setForLanguage(val: string, lang: Language | null) {
         return;
     }
 
-    if (!val && value.value.languages.length <= 1) {
-        // Nothing left to translate, so drop back to an untranslated value like TInputButton does
-        value.value = value.value.patch('');
-        return;
-    }
-
-    value.value = value.value.patch({
+    const patched = value.value.patch({
         [lang]: val || null,
     });
-}
 
-const textValue = computed({
-    get: () => getForLanguage(editorLanguage.value ?? Language.English),
-    set: (val: string) => {
-        setForLanguage(val, editorLanguage.value ?? Language.English);
-    },
-});
+    // Nothing left to translate, so drop back to an untranslated value like TInputButton does
+    value.value = patched.languages.length === 0 ? value.value.patch('') : patched;
+}
 </script>
