@@ -150,9 +150,12 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             // Only the new mailbox saw this change coming: it asked for the link and it got
             // it. Tell the address that is left behind too, so a takeover of the account
             // cannot pass unnoticed by the person who still reads the old mailbox.
-            this.sendEmailChangedNotification(user, previousEmail, organization).catch(
-                console.error,
-            );
+            this.sendEmailChangedNotification(user, previousEmail, organization).catch((e) => {
+                console.error(
+                    `Failed to notify the previous address of user ${user.id} of its email change`,
+                    e,
+                );
+            });
         }
 
         // Verifying an email is a single primary credential: if this user already has a
