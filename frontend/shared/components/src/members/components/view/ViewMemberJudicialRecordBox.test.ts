@@ -53,7 +53,7 @@ function renderBox(options: MemberOptions & { canAccessPlatformMember?: (member:
     const canAccessPlatformMember = options.canAccessPlatformMember ?? (() => true);
     const present = vi.fn().mockResolvedValue(undefined);
 
-    const screen = render(ViewMemberJudicialRecordBox, {
+    render(ViewMemberJudicialRecordBox, {
         props: { member },
         global: {
             components: { STList, STListItem },
@@ -77,7 +77,7 @@ function renderBox(options: MemberOptions & { canAccessPlatformMember?: (member:
         },
     });
 
-    return { screen, member, present };
+    return { member, present };
 }
 
 function uploadButton(): HTMLButtonElement | null {
