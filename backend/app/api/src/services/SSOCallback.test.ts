@@ -203,23 +203,30 @@ describe('SSO callback email verification', () => {
     /**
      * The provider asserts the address but states it is unverified. The callback must not
      * hand over the account: no token, and no link, verification or profile written to it
-     * that would make a later attempt succeed.
+     * that would make a later attempt succeed. Providers that send the boolean claim as a
+     * string must be read the same way.
      */
-    it('does not authenticate a placeholder account on an unverified email claim', async () => {
-        const service = await createService();
-        const user = await createPlaceholderAccount();
-        const before = await User.getByID(user.id);
+    it.each([
+        ['a boolean', false],
+        ['a string', 'false'],
+    ])(
+        'does not authenticate a placeholder account on %s unverified email claim',
+        async (_, emailVerified) => {
+            const service = await createService();
+            const user = await createPlaceholderAccount();
+            const before = await User.getByID(user.id);
 
-        const redirect = await callback(service, user, { email_verified: false });
+            const redirect = await callback(service, user, { email_verified: emailVerified });
 
-        expect(redirect.searchParams.has('oid_rt')).toBe(false);
-        expect(redirect.searchParams.has('error')).toBe(true);
-        expect(await Token.where({ userId: user.id })).toHaveLength(0);
-        const after = await User.getByID(user.id);
-        expect(after?.verified).toBe(before?.verified);
-        expect(after?.firstName).toBe(before?.firstName);
-        expect(after?.meta).toEqual(before?.meta);
-    });
+            expect(redirect.searchParams.has('oid_rt')).toBe(false);
+            expect(redirect.searchParams.has('error')).toBe(true);
+            expect(await Token.where({ userId: user.id })).toHaveLength(0);
+            const after = await User.getByID(user.id);
+            expect(after?.verified).toBe(before?.verified);
+            expect(after?.firstName).toBe(before?.firstName);
+            expect(after?.meta).toEqual(before?.meta);
+        },
+    );
 
     /**
      * A provider that states the address is verified activates the account, and so does

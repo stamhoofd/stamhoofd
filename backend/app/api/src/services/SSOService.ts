@@ -679,8 +679,10 @@ export class SSOServiceWithSession {
 
             this.service.validateEmail(claims.email);
 
-            // a provider that explicitly states the email is unverified, is blocked here
-            if (claims.email_verified !== undefined && !claims.email_verified) {
+            // Some providers send the boolean claim as a string.
+            const emailVerified = claims.email_verified as boolean | string | undefined;
+
+            if (emailVerified === false || emailVerified === 'false') {
                 throw new SimpleError({
                     code: 'invalid_user',
                     message: 'Email address not verified by the identity provider',
