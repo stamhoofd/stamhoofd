@@ -70,7 +70,7 @@ function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Verplaats omhoog',
+                name: $t('Verplaats omhoog'),
                 icon: 'arrow-up',
                 action: () => {
                     moveUp();
@@ -78,7 +78,7 @@ function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Verplaats omlaag',
+                name: $t('Verplaats omlaag'),
                 icon: 'arrow-down',
                 action: () => {
                     moveDown();
@@ -88,7 +88,7 @@ function showContextMenu(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: 'Verwijderen',
+                name: $t('Verwijderen'),
                 destructive: true,
                 icon: 'trash',
                 action: () => {

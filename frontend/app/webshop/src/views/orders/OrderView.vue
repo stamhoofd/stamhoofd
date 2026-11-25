@@ -494,13 +494,13 @@ const title = computed(() => {
 });
 
 // Make sure the url is overriden
-setUrl(new ReactiveUrl({ url: 'order/' + (order.value?.id ?? props.orderId) }), 'Bestelling ' + (order.value?.number ?? ''));
+setUrl(new ReactiveUrl({ url: 'order/' + (order.value?.id ?? props.orderId) }), $t('Bestelling {number}', { number: (order.value?.number ?? '').toString() }));
 
 const urlHelpers = useUrl();
 
 watch(() => order.value, () => {
     // Change if we loaded the order id or number
-    urlHelpers.overrideUrl(new ReactiveUrl({ url: 'order/' + (order.value?.id ?? props.orderId) }), 'Bestelling ' + (order.value?.number ?? ''));
+    urlHelpers.overrideUrl(new ReactiveUrl({ url: 'order/' + (order.value?.id ?? props.orderId) }), $t('Bestelling {number}', { number: (order.value?.number ?? '').toString() }));
 });
 
 function isPaymentTransfer(payment: Payment) {
@@ -518,7 +518,7 @@ const hasTickets = computed(() => {
 const hasSingleTicket = computed(() => webshop.value.meta.ticketType === WebshopTicketType.SingleTicket);
 const statusName = computed(() => {
     if (isFailed.value) {
-        return 'Mislukt';
+        return $t('Mislukt');
     }
     return order.value ? OrderStatusHelper.getName(order.value.status) : '';
 });
@@ -545,8 +545,8 @@ const customerAnswers = computed(() => {
 
 function share() {
     navigator.share({
-        title: 'Bestelling ' + webshopManager.webshop.meta.name,
-        text: 'Bekijk mijn bestelling bij ' + webshopManager.webshop.meta.name + ' via deze link.',
+        title: $t('Bestelling {webshop}', { webshop: webshopManager.webshop.meta.name }),
+        text: $t('Bekijk mijn bestelling bij {webshop} via deze link.', { webshop: webshopManager.webshop.meta.name }),
         url: 'https://' + webshopManager.webshop.getUrl(organization.value) + '/order/' + order.value!.id,
     }).catch(e => console.error(e));
 }
@@ -629,7 +629,7 @@ onMounted(() => {
             }).catch((e) => {
                 // too: handle this
                 console.error(e);
-                new CenteredMessage('Ongeldige bestelling', 'De bestelling die je opvraagt bestaat niet (meer)', 'error').addCloseButton().show();
+                new CenteredMessage($t('Ongeldige bestelling'), $t('De bestelling die je opvraagt bestaat niet (meer)'), 'error').addCloseButton().show();
                 pop({ force: true })?.catch(console.error);
             });
     } else {
@@ -648,7 +648,7 @@ onMounted(() => {
             }).catch((e) => {
                 // too: handle this
                 console.error(e);
-                new CenteredMessage('Ongeldige bestelling', 'De bestelling die je opvraagt bestaat niet (meer)', 'error').addCloseButton().show();
+                new CenteredMessage($t('Ongeldige bestelling'), $t('De bestelling die je opvraagt bestaat niet (meer)'), 'error').addCloseButton().show();
                 pop({ force: true })?.catch(console.error);
             });
     }

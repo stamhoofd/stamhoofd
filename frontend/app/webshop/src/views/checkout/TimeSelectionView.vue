@@ -62,15 +62,15 @@ const navigationActions = useNavigationActions();
 
 const title = computed(() => {
     if (checkoutMethod.value.type === CheckoutMethodType.Takeout) {
-        return 'Kies je afhaaltijdstip';
+        return $t('Kies je afhaaltijdstip');
     }
     if (checkoutMethod.value.type === CheckoutMethodType.Delivery) {
-        return 'Kies je leveringstijdstip';
+        return $t('Kies je leveringstijdstip');
     }
     if (checkoutMethod.value.type === CheckoutMethodType.OnSite) {
-        return 'Kies wanneer je komt';
+        return $t('Kies wanneer je komt');
     }
-    return 'Kies je tijdstip';
+    return $t('Kies je tijdstip');
 });
 
 const checkoutMethod = computed(() => checkoutManager.checkout.checkoutMethod!);

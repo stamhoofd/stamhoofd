@@ -250,7 +250,7 @@ function validate() {
         throw new SimpleError({
             code: 'required_field',
             field: 'code',
-            message: 'Vul een code in',
+            message: $t('Vul een code in'),
         });
     }
 
@@ -258,7 +258,7 @@ function validate() {
         throw new SimpleError({
             code: 'required_field',
             field: 'discounts',
-            message: 'Voeg minstens één korting toe',
+            message: $t('Voeg minstens één korting toe'),
         });
     }
 }
@@ -334,7 +334,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
 }
 
 defineExpose({

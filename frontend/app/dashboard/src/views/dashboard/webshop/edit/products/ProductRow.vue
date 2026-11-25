@@ -105,7 +105,7 @@ function duplicate() {
 async function doDelete() {
     if (!(await CenteredMessage.confirm({
         title: props.product.name ? $t('%Zn2', { name: props.product.name }) : $t('Dit artikel verwijderen?'),
-        confirmText: 'Verwijderen',
+        confirmText: $t('Verwijderen'),
         description: $t('%Zm6'),
         availabilityDelay: 2_000,
     }))) {
@@ -132,7 +132,7 @@ function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Verplaats omhoog',
+                name: $t('Verplaats omhoog'),
                 icon: 'arrow-up',
                 action: () => {
                     moveUp();
@@ -140,7 +140,7 @@ function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Verplaats omlaag',
+                name: $t('Verplaats omlaag'),
                 icon: 'arrow-down',
                 action: () => {
                     moveDown();
@@ -150,7 +150,7 @@ function showContextMenu(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: 'Dupliceren',
+                name: $t('Dupliceren'),
                 icon: 'copy',
                 action: () => {
                     duplicate();
@@ -160,7 +160,7 @@ function showContextMenu(event: MouseEvent) {
             ...(props.category && props.webshop.categories.length >= 2
                 ? [
                         new ContextMenuItem({
-                            name: 'Verplaatsen naar',
+                            name: $t('Verplaatsen naar'),
                             childMenu: new ContextMenu([
                                 props.webshop.categories.flatMap((c) => {
                                     if (!props.category || c.id === props.category.id) {
@@ -196,7 +196,7 @@ function showContextMenu(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: 'Verwijderen',
+                name: $t('Verwijderen'),
                 destructive: true,
                 icon: 'trash',
                 action: () => {

@@ -169,7 +169,7 @@ async function deleteSeatingPlan(id: string) {
             continue;
         }
         if (product.seatingPlanId === id) {
-            new Toast('Dit zaalplan wordt nog gebruikt door een ander ticket in deze webshop. Verwijder het eerst daar.', 'error red').show();
+            new Toast($t('Dit zaalplan wordt nog gebruikt door een ander ticket in deze webshop. Verwijder het eerst daar.'), 'error red').show();
             return;
         }
     }
@@ -178,7 +178,7 @@ async function deleteSeatingPlan(id: string) {
 
     if (!await CenteredMessage.confirm({
         title: planName ? $t('%Zn2', { name: planName }) : $t('Dit zaalplan verwijderen?'),
-        confirmText: 'Ja, verwijderen',
+        confirmText: $t('Ja, verwijderen'),
         description: $t('%ZnO'),
         availabilityDelay: 2_000,
     })) {
@@ -188,8 +188,8 @@ async function deleteSeatingPlan(id: string) {
     await sleep(1000);
 
     if (!await CenteredMessage.confirm({
-        title: 'Ben je helemaal zeker?',
-        confirmText: 'Ja, verwijderen',
+        title: $t('Ben je helemaal zeker?'),
+        confirmText: $t('Ja, verwijderen'),
         description: $t('%ZnO'),
         availabilityDelay: 2_000,
     })) {
@@ -259,7 +259,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
 }
 
 function addSeatingPlan() {
@@ -268,7 +268,7 @@ function addSeatingPlan() {
         categories: [
             SeatingPlanCategory.create({
                 id: '0',
-                name: 'Standaard',
+                name: $t('Standaard'),
                 price: 0,
             }),
         ],
@@ -302,7 +302,7 @@ function addSeatingPlan() {
                     SeatingPlanRow.create({
                         seats: [
                             SeatingPlanSeat.create({
-                                label: 'Podium',
+                                label: $t('Podium'),
                                 grow: 1,
                                 type: SeatType.Space,
                             }),

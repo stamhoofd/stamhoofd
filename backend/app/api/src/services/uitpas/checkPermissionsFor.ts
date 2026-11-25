@@ -86,7 +86,7 @@ export async function checkPermissionsFor(
     const neededPermissions = [
         {
             permission: 'PASSES_READ',
-            human: 'Basis UiTPAS informatie ophalen met UiTPAS nummer',
+            human: $t('Basis UiTPAS informatie ophalen met UiTPAS nummer'),
         },
     ];
     if (organizationId) {
@@ -94,15 +94,15 @@ export async function checkPermissionsFor(
             ...[
                 {
                     permission: 'TARIFFS_READ',
-                    human: 'Tarieven opvragen',
+                    human: $t('Tarieven opvragen'),
                 },
                 {
                     permission: 'TICKETSALES_REGISTER',
-                    human: 'Ticketsales registreren',
+                    human: $t('Ticketsales registreren'),
                 },
                 {
                     permission: 'TICKETSALES_SEARCH',
-                    human: 'Ticketsales zoeken',
+                    human: $t('Ticketsales zoeken'),
                 },
             ],
         );

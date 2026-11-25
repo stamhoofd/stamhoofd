@@ -290,7 +290,7 @@ async function save() {
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
         title: $t('%ZnS'),
-        confirmText: 'Verwijderen',
+        confirmText: $t('Verwijderen'),
         description: $t('%ZmP'),
         availabilityDelay: 2_000,
     })) {
@@ -307,7 +307,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
 }
 
 defineExpose({

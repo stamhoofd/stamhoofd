@@ -73,9 +73,9 @@ const selectedMethod = computed({
 
 function getTypeName(type: CheckoutMethodType) {
     switch (type) {
-        case CheckoutMethodType.Takeout: return 'Afhalen';
-        case CheckoutMethodType.Delivery: return 'Levering';
-        case CheckoutMethodType.OnSite: return 'Ter plaatse consumeren';
+        case CheckoutMethodType.Takeout: return $t('Afhalen');
+        case CheckoutMethodType.Delivery: return $t('Levering');
+        case CheckoutMethodType.OnSite: return $t('Ter plaatse consumeren');
     }
 }
 

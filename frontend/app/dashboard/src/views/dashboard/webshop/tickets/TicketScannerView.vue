@@ -177,26 +177,26 @@ const lastUpdatedText = computed(() => {
 
     if (days > 0) {
         if (days === 1) {
-            return 'één dag geleden';
+            return $t('één dag geleden');
         }
-        return days + ' dagen geleden';
+        return $t('{days} dagen geleden', { days: days.toString() });
     }
 
     if (hours > 0) {
         if (hours === 1) {
-            return 'één uur geleden';
+            return $t('één uur geleden');
         }
-        return hours + ' uur geleden';
+        return $t('{hours} uur geleden', { hours: hours.toString() });
     }
 
     if (minutes > 0) {
         if (minutes === 1) {
-            return 'één minuut geleden';
+            return $t('één minuut geleden');
         }
-        return minutes + ' minuten geleden';
+        return $t('{minutes} minuten geleden', { minutes: minutes.toString() });
     }
 
-    return 'zojuist';
+    return $t('zojuist');
 });
 
 function switchCamera() {
@@ -585,13 +585,13 @@ function validTicket(ticket: TicketPrivate, order: PrivateOrder) {
 }
 
 function canceledTicket() {
-    new Toast('Oeps! Dit ticket werd geannuleerd of verwijderd en is dus niet geldig.', 'error red').show();
+    new Toast($t('Oeps! Dit ticket werd geannuleerd of verwijderd en is dus niet geldig.'), 'error red').show();
     AppManager.shared.hapticError();
 }
 
 function disabledTicket(product: Product, scannedAt: Date | null) {
     // TODO: show invalid ticket
-    new Toast('Dit is een ticket voor: ' + product.name + (scannedAt ? ', en werd bovendien al eens gescand.' : ''), 'error red').show();
+    new Toast(scannedAt ? $t('Dit is een ticket voor: {product}, en werd bovendien al eens gescand.', { product: product.name }) : $t('Dit is een ticket voor: {product}', { product: product.name }), 'error red').show();
     AppManager.shared.hapticError();
 }
 
@@ -624,7 +624,7 @@ async function startScanning() {
             await AppManager.shared.QRScanner.startScanning();
         } catch (e: any) {
             if (e.message && typeof e.message === 'string' && e.message.includes('Permission')) {
-                new Toast('Geen toegang tot jouw camera. Ga naar de instellingen app om terug toegang te geven.', 'error red').show();
+                new Toast($t('Geen toegang tot jouw camera. Ga naar de instellingen app om terug toegang te geven.'), 'error red').show();
                 return;
             }
             Toast.fromError(e).show();

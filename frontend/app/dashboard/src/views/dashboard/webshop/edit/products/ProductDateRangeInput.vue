@@ -126,7 +126,7 @@ async function isValid(): Promise<boolean> {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_field',
             field: 'endDate',
-            message: 'De einddatum en tijdstip die je hebt ingevuld ligt voor de startdatum en tijdstip',
+            message: $t('De einddatum en tijdstip die je hebt ingevuld ligt voor de startdatum en tijdstip'),
         }));
         return false;
     }

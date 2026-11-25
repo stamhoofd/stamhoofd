@@ -166,7 +166,7 @@ export class InvoicesExcelExport {
         if (covered === invoice.totalPaymentsAmount) {
             return '✓';
         }
-        return onlyRecentIncomplete ? 'Nog niet (volledig) uitbetaald' : 'Klopt niet!';
+        return onlyRecentIncomplete ? $t('Nog niet (volledig) uitbetaald') : $t('Klopt niet!');
     }
 
     private static getCoveredAmount(payment: PaymentGeneral): number {
