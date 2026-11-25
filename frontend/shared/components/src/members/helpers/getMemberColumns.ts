@@ -148,15 +148,15 @@ export function getMemberColumns({ platform, organization, dateRange, group, gro
             : null,
         ...(asksForJudicialRecord
             ? [new Column<ObjectType, JudicialRecordStatus>({
-                id: 'judicialRecordStatus',
-                name: $t(`Uittreksel uit het strafregister`),
-                enabled: false,
-                getValue: member => member.judicialRecord.status,
-                format: status => JudicialRecordHelper.getStatusName(status),
-                getStyle: status => status === JudicialRecordStatus.Required ? '' : 'gray',
-                minimumWidth: 100,
-                recommendedWidth: 180,
-            })]
+                    id: 'judicialRecordStatus',
+                    name: $t('Uittreksel uit het strafregister'),
+                    enabled: false,
+                    getValue: member => member.judicialRecord.status,
+                    format: status => JudicialRecordHelper.getStatusName(status),
+                    getStyle: status => status === JudicialRecordStatus.Required ? '' : 'gray',
+                    minimumWidth: 100,
+                    recommendedWidth: 180,
+                })]
             : []),
         new Column<ObjectType, string[]>({
             name: $t('%7D'),

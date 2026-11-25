@@ -1,6 +1,7 @@
 <template>
     <div v-if="isConfigured" class="container">
-        <hr><h2>{{ $t('Uittreksel uit het strafregister') }}</h2>
+        <hr>
+        <h2>{{ $t('Uittreksel uit het strafregister') }}</h2>
 
         <STList>
             <STListItem>
