@@ -64,6 +64,29 @@ test('OrganizationLogo uses the organization identity unless the webshop opts in
     expect(document.querySelector('.organization-logo-text')?.textContent).toBe('Weekendwinkel');
 });
 
+test('OrganizationLogo show a longer version when enabled', async () => {
+    const organization = Organization.create({ name: 'Stamhoofd' });
+    const webshop = Webshop.create({});
+    webshop.meta.name = 'Stamhoofd: Een veel te lange naam';
+    webshop.meta.useLogo = true;
+
+    renderComponent(OrganizationLogo, {
+        organization,
+        webshop,
+        long: true,
+    });
+    expect(document.querySelector('.organization-logo-text')?.clientWidth).toBeGreaterThan(200);
+});
+test('OrganizationLogo is 200px when longer name is disabled', async () => {
+    const organization = Organization.create({ name: 'Stamhoofd maar dan als langere naam' });
+
+    renderComponent(OrganizationLogo, {
+        organization,
+    });
+
+    expect(document.querySelector('.organization-logo-text')?.clientWidth).toBeLessThanOrEqual(200);
+});
+
 test('LoadingButton keeps the spinner briefly after loading finishes', async () => {
     const result = renderComponent(LoadingButton, { loading: false }, { default: '<button>Opslaan</button>' });
     expect(document.querySelector('.spinner-container')).toBeNull();

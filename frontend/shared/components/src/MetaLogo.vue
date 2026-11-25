@@ -1,5 +1,5 @@
 <template>
-    <div class="meta-logo" :class="{expand: metaData.expandLogo}">
+    <div class="meta-logo" :class="{expand: metaData.expandLogo, long: long && !logo}">
         <ImageComponent v-if="logo" :image="logo" :image-dark="logoDark" />
         <template v-else>
             <span class="organization-logo-text">{{ name }}</span>
@@ -16,6 +16,7 @@ import { computed, onMounted } from 'vue';
 const props = defineProps<{
     metaData: OrganizationMetaData | WebshopMetaData;
     name: string;
+    long?: boolean;
 }>();
 
 const width = useDeviceWidth();
@@ -44,17 +45,6 @@ onMounted(() => {
 <style lang="scss">
 @use '@stamhoofd/scss/base/variables' as *;
 
-.organization-logo-text {
-    color: $color-dark;
-    font-weight: 600;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    max-width: 40vw;
-    display: block;
-    font-size: 16px;
-}
-
 .meta-logo {
     height: 40px;
     width: 100%;
@@ -79,6 +69,25 @@ onMounted(() => {
         img {
             object-position: left center;
         }
+    }
+
+    &.long {
+        max-width: none;
+
+        .organization-logo-text {
+            max-width: none;
+        }
+    }
+
+    .organization-logo-text {
+        color: $color-dark;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        max-width: 40vw;
+        display: block;
+        font-size: 16px;
     }
 }
 </style>
