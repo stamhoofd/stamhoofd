@@ -1,4 +1,8 @@
 import { MembersBlob, MemberWithRegistrationsBlob } from './MemberWithRegistrationsBlob.js';
+import { MemberResponsibility } from '../MemberResponsibility.js';
+import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
+import { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
+import { JudicialRecordStatus } from '../helpers/JudicialRecordHelper.js';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
 import { Platform, PlatformConfig, PlatformMembershipType } from '../Platform.js';
 import { Organization } from '../Organization.js';
@@ -573,6 +577,106 @@ describe('PlatformMember', () => {
             expect(family.members[0].getPrimaryOrganization({ periodId: current.id })?.uri).toBe(
                 'A',
             );
+        });
+    });
+    describe('judicialRecord', () => {
+        const platformResponsibility = MemberResponsibility.create({
+            name: 'Leader',
+            judicialRecordMinimumAge: 18,
+        });
+        const organizationResponsibility = MemberResponsibility.create({
+            name: 'Local leader',
+            judicialRecordMinimumAge: 18,
+        });
+
+        function build({
+            responsibilityId,
+            privateMeta = true,
+            loadOrganization = true,
+        }: {
+            responsibilityId: string;
+            privateMeta?: boolean;
+            loadOrganization?: boolean;
+        }) {
+            const organization = Organization.create({
+                privateMeta: privateMeta
+                    ? OrganizationPrivateMetaData.create({
+                          responsibilities: [organizationResponsibility],
+                      })
+                    : null,
+            });
+
+            const blob = MembersBlob.create({
+                organizations: loadOrganization ? [organization] : [],
+                members: [
+                    MemberWithRegistrationsBlob.create({
+                        details: MemberDetails.create({
+                            firstName: 'Tom',
+                            birthDay: new Date(1990, 0, 1),
+                        }),
+                        responsibilities: [
+                            MemberResponsibilityRecord.create({
+                                responsibilityId,
+                                organizationId: organization.id,
+                                startDate: new Date(2024, 0, 1),
+                            }),
+                        ],
+                    }),
+                ],
+            });
+
+            const family = PlatformFamily.create(blob, {
+                platform: Platform.create({
+                    config: PlatformConfig.create({ responsibilities: [platformResponsibility] }),
+                }),
+            });
+
+            return family.members[0];
+        }
+
+        test('throws when the organization of the responsibility is not loaded', () => {
+            expect(
+                () =>
+                    build({
+                        responsibilityId: organizationResponsibility.id,
+                        loadOrganization: false,
+                    }).judicialRecord,
+            ).toThrow('is not loaded on this member');
+        });
+
+        test('throws when the organization is loaded without its privateMeta', () => {
+            expect(
+                () =>
+                    build({ responsibilityId: organizationResponsibility.id, privateMeta: false })
+                        .judicialRecord,
+            ).toThrow('is loaded without its privateMeta');
+        });
+
+        test('reads a responsibility the organization defined itself', () => {
+            expect(
+                build({ responsibilityId: organizationResponsibility.id }).judicialRecord.status,
+            ).toBe(JudicialRecordStatus.Required);
+        });
+
+        test('reads a platform responsibility without needing the organization', () => {
+            expect(
+                build({ responsibilityId: platformResponsibility.id, loadOrganization: false })
+                    .judicialRecord.status,
+            ).toBe(JudicialRecordStatus.Required);
+        });
+
+        test('a deleted responsibility asks for nothing, it does not throw', () => {
+            expect(build({ responsibilityId: 'deleted' }).judicialRecord.status).toBe(
+                JudicialRecordStatus.NotRequired,
+            );
+        });
+
+        test('getName still names a record whose organization is not loaded', () => {
+            const member = build({
+                responsibilityId: organizationResponsibility.id,
+                loadOrganization: false,
+            });
+            expect(() => member.patchedMember.responsibilities[0].getName(member)).not.toThrow();
         });
     });
 });

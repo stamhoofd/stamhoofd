@@ -850,10 +850,17 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     /**
-     * The responsibility a responsibility record points to. Organizations can define their own responsibilities next to
-     * the platform ones, so the record's organization is checked too.
+     * The responsibility a responsibility record points to, or null when it was deleted.
+     *
+     * Organizations can define their own responsibilities next to the platform ones, so the record's organization is
+     * checked too. That organization, or the `privateMeta` its responsibilities live in, is not always loaded: pass
+     * `requireLoaded` where a null would be read as a responsibility that configures nothing, instead of as the
+     * deleted one it is supposed to mean.
      */
-    getResponsibility(record: MemberResponsibilityRecordBase): MemberResponsibility | null {
+    getResponsibility(
+        record: MemberResponsibilityRecordBase,
+        { requireLoaded = false }: { requireLoaded?: boolean } = {},
+    ): MemberResponsibility | null {
         const platformResponsibility = this.platform.config.responsibilities.find(
             (r) => r.id === record.responsibilityId,
         );
@@ -863,6 +870,19 @@ export class PlatformMember implements ObjectWithRecords {
 
         if (record.organizationId) {
             const organization = this.family.getOrganization(record.organizationId);
+
+            if (requireLoaded && !organization?.privateMeta) {
+                throw new Error(
+                    'Cannot read the responsibility of responsibility record ' +
+                        record.id +
+                        ': organization ' +
+                        record.organizationId +
+                        ' is ' +
+                        (organization ? 'loaded without its privateMeta' : 'not loaded') +
+                        ' on this member, so the responsibilities it defines itself are unknown. Load that organization with its privateMeta before reading anything that is derived from a responsibility.',
+                );
+            }
+
             return (
                 organization?.privateMeta?.responsibilities.find(
                     (r) => r.id === record.responsibilityId,
@@ -873,6 +893,12 @@ export class PlatformMember implements ObjectWithRecords {
         return null;
     }
 
+    /**
+     * Derived from the responsibilities the member holds, the same way the backend derives it for the member list.
+     *
+     * A responsibility that cannot be read is an error rather than one that asks for nothing: a member whose
+     * organization was not loaded would otherwise read as `NotRequired` on a row the backend matched as `Required`.
+     */
     get judicialRecord(): JudicialRecordForMember {
         return JudicialRecordHelper.getForMember({
             firstName: this.patchedMember.details.firstName,
@@ -880,7 +906,9 @@ export class PlatformMember implements ObjectWithRecords {
             responsibilities: this.patchedMember.responsibilities.map((record) => ({
                 startDate: record.startDate,
                 endDate: record.endDate,
-                minimumAge: this.getResponsibility(record)?.judicialRecordMinimumAge ?? null,
+                minimumAge:
+                    this.getResponsibility(record, { requireLoaded: true })
+                        ?.judicialRecordMinimumAge ?? null,
             })),
         });
     }
