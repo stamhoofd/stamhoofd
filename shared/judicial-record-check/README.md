@@ -39,7 +39,7 @@ costs no safety.
    moment the signature says it was made, which the dates below are judged against. A refusal
    because an authority did not answer us is pending rather than failed: nothing is wrong with the
    document, and trying again later can still give it a verdict.
-2. **Model** — the purpose has to *start* with `596.2`, the model for activities with minors. Not
+2. **Model** — the purpose has to _start_ with `596.2`, the model for activities with minors. Not
    merely mention it: the number turns up in the boilerplate of other models, so a 596.1 extract can
    name it while being another document. The **layout** is this check's too: one page, and every
    value a check reads printed where and as large as an extract prints it. See

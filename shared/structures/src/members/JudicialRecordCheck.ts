@@ -73,20 +73,20 @@ export class JudicialRecordCheckReport extends AutoEncoder {
     checks: JudicialRecordCheckResult[] = [];
 
     get(check: JudicialRecordCheck): JudicialRecordCheckResult | null {
-        return this.checks.find(result => result.check === check) ?? null;
+        return this.checks.find((result) => result.check === check) ?? null;
     }
 
     /** In display order, leaving out the checks there is no result for. */
     getChecks(): JudicialRecordCheckResult[] {
-        return judicialRecordChecksInOrder.flatMap(check => this.get(check) ?? []);
+        return judicialRecordChecksInOrder.flatMap((check) => this.get(check) ?? []);
     }
 
     /** Every check has a result and that result passed, so a missing result is not a pass. */
     get isPassed(): boolean {
-        return judicialRecordChecksInOrder.every(check => this.get(check)?.isPassed === true);
+        return judicialRecordChecksInOrder.every((check) => this.get(check)?.isPassed === true);
     }
 
     get failedChecks(): JudicialRecordCheckResult[] {
-        return this.getChecks().filter(result => result.isFailed);
+        return this.getChecks().filter((result) => result.isFailed);
     }
 }
