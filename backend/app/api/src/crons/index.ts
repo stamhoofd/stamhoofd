@@ -29,3 +29,4 @@ import './stripe-invoices.js';
 import './transfer-fees.js';
 import './drip-emails.js';
 import './update-organization-future-events.js';
+import './judicial-record-expiry-emails.js';

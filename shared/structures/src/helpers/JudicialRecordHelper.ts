@@ -190,18 +190,61 @@ export class JudicialRecordHelper {
         }
     }
 
-    /** Whether a decision taken on `reviewedAt` no longer stands. A record nobody decided cannot expire. */
-    static hasExpired(reviewedAt: Date | null, atDate: Date = new Date()): boolean {
+    /** The date a decision taken on `reviewedAt` stops standing. Null for a record nobody decided. */
+    static getExpiryDate(reviewedAt: Date | null): Date | null {
         if (reviewedAt === null) {
-            return false;
+            return null;
         }
 
-        return (
-            Formatter.luxon(reviewedAt)
-                .startOf('day')
-                .plus({ years: JUDICIAL_RECORD_VALIDITY_YEARS })
-                .toJSDate() <= atDate
-        );
+        return Formatter.luxon(reviewedAt)
+            .startOf('day')
+            .plus({ years: JUDICIAL_RECORD_VALIDITY_YEARS })
+            .toJSDate();
+    }
+
+    /** Whether a decision taken on `reviewedAt` no longer stands. A record nobody decided cannot expire. */
+    static hasExpired(reviewedAt: Date | null, atDate: Date = new Date()): boolean {
+        const expiryDate = this.getExpiryDate(reviewedAt);
+
+        return expiryDate !== null && expiryDate <= atDate;
+    }
+
+    /**
+     * Why the member has to deliver again even though they delivered before, or null when they don't.
+     *
+     * This is the half of `Required` that the responsibilities cannot explain: a record exists and was
+     * decided, but `getStoredStatus` stopped accepting it. Without this the member reads the start date of
+     * their responsibility, which says nothing about a renewal they did nothing to cause.
+     */
+    static getRenewalReason(
+        record: JudicialRecordCurrentRecord | null,
+        firstName: string,
+        atDate: Date = new Date(),
+    ): string | null {
+        if (record === null || this.getStoredStatus(record, atDate) !== null) {
+            return null;
+        }
+
+        // Checked in the same order as getStoredStatus, so one record never gives two different answers.
+        if (!record.identityMatches) {
+            return $t(
+                `De naam of geboortedatum van {name} is gewijzigd na de goedkeuring, waardoor die niet meer geldt. Er is een nieuw uittreksel nodig.`,
+                { name: firstName },
+            );
+        }
+
+        const expiryDate = this.getExpiryDate(record.reviewedAt);
+
+        if (expiryDate !== null) {
+            // "Beoordeling" rather than "goedkeuring": an expired PermanentlyRejected lands here too, and
+            // telling that member their approval expired would be plainly wrong.
+            return $t(
+                `De vorige beoordeling is verlopen op {date}. Er is een nieuw uittreksel nodig.`,
+                { date: Formatter.date(expiryDate, true) },
+            );
+        }
+
+        return null;
     }
 
     /**
@@ -302,6 +345,14 @@ export class JudicialRecordHelper {
         const status =
             stored ??
             (requiresExtract ? JudicialRecordStatus.Required : JudicialRecordStatus.NotRequired);
+
+        if (status === JudicialRecordStatus.Required) {
+            const renewalReason = this.getRenewalReason(record, firstName, atDate);
+
+            if (renewalReason !== null) {
+                return { status, description: renewalReason };
+            }
+        }
 
         /** The earliest date an extract is required from, over the responsibilities the member holds on `atDate`. */
         let requiredFrom: Date | null = null;

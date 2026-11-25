@@ -144,6 +144,20 @@ export enum EmailTemplateType {
     EventNotificationPartiallyAccepted = 'EventNotificationPartiallyAccepted',
 
     /**
+     * Judicial records
+     *
+     * One type per review outcome, because what the member has to do next differs for each of them and
+     * that cannot be a replacement an administrator writes conditional prose around.
+     */
+    JudicialRecordAwaitingReview = 'JudicialRecordAwaitingReview',
+    JudicialRecordApproved = 'JudicialRecordApproved',
+    JudicialRecordConditionallyAccepted = 'JudicialRecordConditionallyAccepted',
+    JudicialRecordTemporarilyRejected = 'JudicialRecordTemporarilyRejected',
+    JudicialRecordPermanentlyRejected = 'JudicialRecordPermanentlyRejected',
+    JudicialRecordExpiringSoon = 'JudicialRecordExpiringSoon',
+    JudicialRecordIdentityChanged = 'JudicialRecordIdentityChanged',
+
+    /**
      * Invoices
      */
     InvoiceGenerationErrors = 'InvoiceGenerationErrors',
@@ -307,20 +321,20 @@ export class EmailTemplate extends AutoEncoder {
     static getTypeTitle(type: EmailTemplateType): string {
         switch (type) {
             case EmailTemplateType.SavedMembersEmail:
-                return $t('%p9');
+                return $t(`%p9`);
             case EmailTemplateType.SavedReceivableBalancesEmail:
-                return $t('%pA');
+                return $t(`%pA`);
             case EmailTemplateType.SavedDocumentsEmail:
                 return $t('%1KM');
             case EmailTemplateType.SavedPaymentsEmail:
                 return $t('%1N3');
 
             case EmailTemplateType.DefaultMembersEmail:
-                return $t('%pB');
+                return $t(`%pB`);
             case EmailTemplateType.DefaultReceivableBalancesEmail:
-                return $t('%pC');
+                return $t(`%pC`);
             case EmailTemplateType.DefaultOrdersEmail:
-                return $t('%pD');
+                return $t(`%pD`);
             case EmailTemplateType.DefaultDocumentsEmail:
                 return $t('%1KN');
             case EmailTemplateType.DefaultPaymentsEmail:
@@ -329,103 +343,103 @@ export class EmailTemplate extends AutoEncoder {
                 return $t('%ZuU');
 
             case EmailTemplateType.MembersExpirationReminder:
-                return $t('%pE');
+                return $t(`%pE`);
             case EmailTemplateType.WebshopsExpirationReminder:
-                return $t('%pF');
+                return $t(`%pF`);
             case EmailTemplateType.SingleWebshopExpirationReminder:
-                return $t('%pG');
+                return $t(`%pG`);
             case EmailTemplateType.TrialWebshopsExpirationReminder:
-                return $t('%pH');
+                return $t(`%pH`);
             case EmailTemplateType.TrialMembersExpirationReminder:
-                return $t('%pI');
+                return $t(`%pI`);
             case EmailTemplateType.OrderNotification:
-                return $t('%pJ');
+                return $t(`%pJ`);
 
             case EmailTemplateType.RegistrationConfirmation:
-                return $t('%pK');
+                return $t(`%pK`);
             case EmailTemplateType.RegistrationTransferDetails:
-                return $t('%pL');
+                return $t(`%pL`);
 
             case EmailTemplateType.OrderConfirmationOnline:
-                return $t('%pM');
+                return $t(`%pM`);
             case EmailTemplateType.OrderConfirmationTransfer:
-                return $t('%pN');
+                return $t(`%pN`);
             case EmailTemplateType.OrderConfirmationPOS:
-                return $t('%pO');
+                return $t(`%pO`);
             case EmailTemplateType.OrderReceivedTransfer:
-                return $t('%pP');
+                return $t(`%pP`);
             case EmailTemplateType.OrderOnlinePaymentFailed:
-                return $t('%pQ');
+                return $t(`%pQ`);
             case EmailTemplateType.TicketsConfirmation:
-                return $t('%pR');
+                return $t(`%pR`);
             case EmailTemplateType.TicketsConfirmationTransfer:
-                return $t('%pS');
+                return $t(`%pS`);
             case EmailTemplateType.TicketsConfirmationPOS:
-                return $t('%pT');
+                return $t(`%pT`);
             case EmailTemplateType.TicketsReceivedTransfer:
-                return $t('%pU');
+                return $t(`%pU`);
 
             case EmailTemplateType.OrganizationUnstableDNS:
-                return $t('%pV');
+                return $t(`%pV`);
             case EmailTemplateType.OrganizationInvalidDNS:
-                return $t('%pW');
+                return $t(`%pW`);
             case EmailTemplateType.OrganizationValidDNS:
-                return $t('%pX');
+                return $t(`%pX`);
             case EmailTemplateType.OrganizationStableDNS:
-                return $t('%pY');
+                return $t(`%pY`);
             case EmailTemplateType.OrganizationDNSSetupComplete:
-                return $t('%pZ');
+                return $t(`%pZ`);
 
             case EmailTemplateType.OrganizationDripWelcome:
-                return $t('%pa');
+                return $t(`%pa`);
             case EmailTemplateType.OrganizationDripWebshopTrialCheckin:
-                return $t('%pb');
+                return $t(`%pb`);
             case EmailTemplateType.OrganizationDripMembersTrialCheckin:
-                return $t('%pc');
+                return $t(`%pc`);
             case EmailTemplateType.OrganizationDripWebshopTrialExpired:
-                return $t('%pd');
+                return $t(`%pd`);
             case EmailTemplateType.OrganizationDripMembersTrialExpired:
-                return $t('%pe');
+                return $t(`%pe`);
             case EmailTemplateType.OrganizationDripTrialExpiredReminder:
-                return $t('%pf');
+                return $t(`%pf`);
             case EmailTemplateType.OrganizationDripWebshopNotRenewed:
-                return $t('%pg');
+                return $t(`%pg`);
             case EmailTemplateType.OrganizationDripMembersNotRenewed:
-                return $t('%ph');
+                return $t(`%ph`);
 
             case EmailTemplateType.ExcelExportSucceeded:
-                return $t('%pi');
+                return $t(`%pi`);
             case EmailTemplateType.ExcelExportFailed:
-                return $t('%pj');
+                return $t(`%pj`);
 
             case EmailTemplateType.SignupAlreadyHasAccount:
-                return $t('%pk');
+                return $t(`%pk`);
             case EmailTemplateType.ForgotPasswordButNoAccount:
-                return $t('%pl');
+                return $t(`%pl`);
             case EmailTemplateType.ForgotPassword:
-                return $t('%uz');
+                return $t(`%uz`);
             case EmailTemplateType.DeleteAccountConfirmation:
-                return $t('%pm');
+                return $t(`%pm`);
             case EmailTemplateType.VerifyEmail:
-                return $t('%pn');
+                return $t(`%pn`);
             case EmailTemplateType.VerifyEmailWithoutCode:
-                return $t('%po');
+                return $t(`%po`);
             case EmailTemplateType.AdminInvitation:
-                return $t('%pp');
+                return $t(`%pp`);
             case EmailTemplateType.AdminInvitationNewUser:
-                return $t('%pq');
+                return $t(`%pq`);
             case EmailTemplateType.MemberSecurityCode:
-                return $t('%ZbB');
+                return $t(`%ZbB`);
 
             case EmailTemplateType.UserBalanceIncreaseNotification:
-                return $t('%pr');
+                return $t(`%pr`);
             case EmailTemplateType.UserBalanceReminder:
-                return $t('%ps');
+                return $t(`%ps`);
 
             case EmailTemplateType.OrganizationBalanceIncreaseNotification:
-                return $t('%pr');
+                return $t(`%pr`);
             case EmailTemplateType.OrganizationBalanceReminder:
-                return $t('%ps');
+                return $t(`%ps`);
 
             case EmailTemplateType.EventNotificationSubmittedCopy:
                 return $t('%Ai');
@@ -437,6 +451,21 @@ export class EmailTemplate extends AutoEncoder {
                 return $t('%Al');
             case EmailTemplateType.EventNotificationPartiallyAccepted:
                 return $t('%Cl');
+
+            case EmailTemplateType.JudicialRecordAwaitingReview:
+                return $t(`Uittreksel wacht op beoordeling`);
+            case EmailTemplateType.JudicialRecordApproved:
+                return $t(`Uittreksel goedgekeurd`);
+            case EmailTemplateType.JudicialRecordConditionallyAccepted:
+                return $t(`Uittreksel goedgekeurd onder voorwaarden`);
+            case EmailTemplateType.JudicialRecordTemporarilyRejected:
+                return $t(`Uittreksel afgekeurd, nieuw uittreksel nodig`);
+            case EmailTemplateType.JudicialRecordPermanentlyRejected:
+                return $t(`Uittreksel definitief afgekeurd`);
+            case EmailTemplateType.JudicialRecordExpiringSoon:
+                return $t(`Goedkeuring verloopt binnenkort`);
+            case EmailTemplateType.JudicialRecordIdentityChanged:
+                return $t(`Goedkeuring geldt niet meer na naamswijziging`);
 
             case EmailTemplateType.InvoiceGenerationErrors:
                 return $t('%1Sm');
@@ -463,7 +492,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.SavedReceivableBalancesEmail:
             case EmailTemplateType.SavedPaymentsEmail:
             case EmailTemplateType.SavedDocumentsEmail:
-                return $t('%pt');
+                return $t(`%pt`);
 
             case EmailTemplateType.DefaultMembersEmail:
             case EmailTemplateType.DefaultReceivableBalancesEmail:
@@ -471,39 +500,39 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DefaultPaymentsEmail:
             case EmailTemplateType.DefaultDocumentsEmail:
             case EmailTemplateType.DefaultWebshopDiscountCodesEmail:
-                return $t('%Q');
+                return $t(`%Q`);
 
             case EmailTemplateType.MembersExpirationReminder:
             case EmailTemplateType.WebshopsExpirationReminder:
             case EmailTemplateType.SingleWebshopExpirationReminder:
             case EmailTemplateType.TrialWebshopsExpirationReminder:
             case EmailTemplateType.TrialMembersExpirationReminder:
-                return $t('%1v');
+                return $t(`%1v`);
 
             case EmailTemplateType.RegistrationConfirmation:
             case EmailTemplateType.RegistrationTransferDetails:
-                return $t('%1EI');
+                return $t(`%1EI`);
 
             case EmailTemplateType.OrderNotification:
-                return $t('%2N');
+                return $t(`%2N`);
             case EmailTemplateType.OrderConfirmationOnline:
             case EmailTemplateType.OrderConfirmationTransfer:
             case EmailTemplateType.OrderConfirmationPOS:
             case EmailTemplateType.OrderReceivedTransfer:
             case EmailTemplateType.OrderOnlinePaymentFailed:
-                return $t('%pu');
+                return $t(`%pu`);
             case EmailTemplateType.TicketsConfirmation:
             case EmailTemplateType.TicketsConfirmationTransfer:
             case EmailTemplateType.TicketsConfirmationPOS:
             case EmailTemplateType.TicketsReceivedTransfer:
-                return $t('%pv');
+                return $t(`%pv`);
 
             case EmailTemplateType.OrganizationUnstableDNS:
             case EmailTemplateType.OrganizationInvalidDNS:
             case EmailTemplateType.OrganizationValidDNS:
             case EmailTemplateType.OrganizationStableDNS:
             case EmailTemplateType.OrganizationDNSSetupComplete:
-                return $t('%26');
+                return $t(`%26`);
 
             case EmailTemplateType.OrganizationDripWelcome:
             case EmailTemplateType.OrganizationDripWebshopTrialCheckin:
@@ -513,11 +542,11 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.OrganizationDripTrialExpiredReminder:
             case EmailTemplateType.OrganizationDripWebshopNotRenewed:
             case EmailTemplateType.OrganizationDripMembersNotRenewed:
-                return $t('%25');
+                return $t(`%25`);
 
             case EmailTemplateType.ExcelExportSucceeded:
             case EmailTemplateType.ExcelExportFailed:
-                return $t('%1u');
+                return $t(`%1u`);
 
             case EmailTemplateType.SignupAlreadyHasAccount:
             case EmailTemplateType.ForgotPasswordButNoAccount:
@@ -526,19 +555,19 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.VerifyEmail:
             case EmailTemplateType.VerifyEmailWithoutCode:
             case EmailTemplateType.MemberSecurityCode:
-                return $t('%pw');
+                return $t(`%pw`);
 
             case EmailTemplateType.AdminInvitation:
             case EmailTemplateType.AdminInvitationNewUser:
-                return $t('%px');
+                return $t(`%px`);
 
             case EmailTemplateType.UserBalanceIncreaseNotification:
             case EmailTemplateType.UserBalanceReminder:
-                return $t('%py');
+                return $t(`%py`);
 
             case EmailTemplateType.OrganizationBalanceIncreaseNotification:
             case EmailTemplateType.OrganizationBalanceReminder:
-                return $t('%pz');
+                return $t(`%pz`);
 
             case EmailTemplateType.EventNotificationSubmittedCopy:
             case EmailTemplateType.EventNotificationSubmittedReviewer:
@@ -546,6 +575,15 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationRejected:
             case EmailTemplateType.EventNotificationPartiallyAccepted:
                 return $t('%CV');
+
+            case EmailTemplateType.JudicialRecordAwaitingReview:
+            case EmailTemplateType.JudicialRecordApproved:
+            case EmailTemplateType.JudicialRecordConditionallyAccepted:
+            case EmailTemplateType.JudicialRecordTemporarilyRejected:
+            case EmailTemplateType.JudicialRecordPermanentlyRejected:
+            case EmailTemplateType.JudicialRecordExpiringSoon:
+            case EmailTemplateType.JudicialRecordIdentityChanged:
+                return $t(`Uittreksel uit het strafregister`);
 
             case EmailTemplateType.InvoiceGenerationErrors:
             case EmailTemplateType.InvoicePaid:
@@ -631,6 +669,21 @@ export class EmailTemplate extends AutoEncoder {
                 return true;
             case EmailTemplateType.OrganizationBalanceReminder:
                 return true;
+
+            /**
+             * A decision on an extract binds every organization the member is registered with, so on a
+             * platform the wording announcing it is the platform's and an organization may not restate it in
+             * its own terms. In organization mode there is no other organization bound by it, and the one
+             * that takes the decision owns the words that announce it.
+             */
+            case EmailTemplateType.JudicialRecordAwaitingReview:
+            case EmailTemplateType.JudicialRecordApproved:
+            case EmailTemplateType.JudicialRecordConditionallyAccepted:
+            case EmailTemplateType.JudicialRecordTemporarilyRejected:
+            case EmailTemplateType.JudicialRecordPermanentlyRejected:
+            case EmailTemplateType.JudicialRecordExpiringSoon:
+            case EmailTemplateType.JudicialRecordIdentityChanged:
+                return STAMHOOFD.userMode === 'organization';
         }
 
         return false;
@@ -670,43 +723,43 @@ export class EmailTemplate extends AutoEncoder {
     static getPlatformTypeDescription(type: EmailTemplateType): string | null {
         switch (type) {
             case EmailTemplateType.OrganizationUnstableDNS:
-                return $t('%q0');
+                return $t(`%q0`);
             case EmailTemplateType.OrganizationInvalidDNS:
-                return $t('%q1');
+                return $t(`%q1`);
             case EmailTemplateType.OrganizationValidDNS:
-                return $t('%q2');
+                return $t(`%q2`);
             case EmailTemplateType.OrganizationStableDNS:
-                return $t('%q3');
+                return $t(`%q3`);
             case EmailTemplateType.OrganizationDNSSetupComplete:
-                return $t('%q4');
+                return $t(`%q4`);
 
             case EmailTemplateType.OrderOnlinePaymentFailed:
-                return $t('%q5');
+                return $t(`%q5`);
 
             case EmailTemplateType.ExcelExportSucceeded:
-                return $t('%q6');
+                return $t(`%q6`);
             case EmailTemplateType.ExcelExportFailed:
-                return $t('%q7');
+                return $t(`%q7`);
 
             case EmailTemplateType.ForgotPasswordButNoAccount:
-                return $t('%q8');
+                return $t(`%q8`);
             case EmailTemplateType.ForgotPassword:
-                return $t('%q9');
+                return $t(`%q9`);
             case EmailTemplateType.DeleteAccountConfirmation:
-                return $t('%qA');
+                return $t(`%qA`);
             case EmailTemplateType.VerifyEmail:
-                return $t('%qB');
+                return $t(`%qB`);
             case EmailTemplateType.VerifyEmailWithoutCode:
-                return $t('%qC');
+                return $t(`%qC`);
             case EmailTemplateType.AdminInvitation:
-                return $t('%qD');
+                return $t(`%qD`);
             case EmailTemplateType.AdminInvitationNewUser:
-                return $t('%qE');
+                return $t(`%qE`);
             case EmailTemplateType.MemberSecurityCode:
-                return $t('%Zb5');
+                return $t(`%Zb5`);
 
             case EmailTemplateType.SignupAlreadyHasAccount:
-                return $t('%qF');
+                return $t(`%qF`);
 
             case EmailTemplateType.EventNotificationSubmittedCopy:
                 return $t('%Am');
@@ -718,6 +771,33 @@ export class EmailTemplate extends AutoEncoder {
                 return $t('%Ap');
             case EmailTemplateType.EventNotificationPartiallyAccepted:
                 return $t('%Cm');
+
+            case EmailTemplateType.JudicialRecordAwaitingReview:
+                return $t(
+                    `Naar wie een afgeleverd uittreksel mag beoordelen, zodra een lid er een aflevert dat niet automatisch goedgekeurd is.`,
+                );
+            case EmailTemplateType.JudicialRecordApproved:
+                return $t(`Naar het lid nadat iemand hun uittreksel heeft goedgekeurd.`);
+            case EmailTemplateType.JudicialRecordConditionallyAccepted:
+                return $t(
+                    `Naar het lid nadat iemand hun uittreksel heeft goedgekeurd onder voorwaarden. Vermeld de voorwaarden met de variabele.`,
+                );
+            case EmailTemplateType.JudicialRecordTemporarilyRejected:
+                return $t(
+                    `Naar het lid nadat iemand hun uittreksel heeft afgekeurd. Zij moeten een nieuw uittreksel afleveren.`,
+                );
+            case EmailTemplateType.JudicialRecordPermanentlyRejected:
+                return $t(
+                    `Naar het lid nadat iemand hun uittreksel definitief heeft afgekeurd. Een nieuw uittreksel afleveren heeft geen zin.`,
+                );
+            case EmailTemplateType.JudicialRecordExpiringSoon:
+                return $t(
+                    `Naar het lid een maand voordat de goedkeuring van hun uittreksel verloopt, zodat ze tijd hebben om een nieuw uittreksel aan te vragen.`,
+                );
+            case EmailTemplateType.JudicialRecordIdentityChanged:
+                return $t(
+                    `Naar het lid wanneer de naam of geboortedatum van het lid gewijzigd is na de goedkeuring, waardoor die niet meer geldt. Meestal is dit een correctie door een beheerder.`,
+                );
         }
 
         return null;
@@ -751,11 +831,11 @@ export class EmailTemplate extends AutoEncoder {
     static getTypeDescription(type: EmailTemplateType): string {
         switch (type) {
             case EmailTemplateType.DefaultMembersEmail:
-                return $t('%qG');
+                return $t(`%qG`);
             case EmailTemplateType.DefaultReceivableBalancesEmail:
-                return $t('%qH');
+                return $t(`%qH`);
             case EmailTemplateType.DefaultOrdersEmail:
-                return $t('%qI');
+                return $t(`%qI`);
             case EmailTemplateType.DefaultDocumentsEmail:
                 return $t('%1KO');
             case EmailTemplateType.DefaultPaymentsEmail:
@@ -764,37 +844,37 @@ export class EmailTemplate extends AutoEncoder {
                 return $t('%Zx6');
 
             case EmailTemplateType.OrderNotification:
-                return $t('%qJ');
+                return $t(`%qJ`);
             case EmailTemplateType.RegistrationConfirmation:
-                return $t('%qK');
+                return $t(`%qK`);
 
             case EmailTemplateType.OrderConfirmationOnline:
-                return $t('%qL');
+                return $t(`%qL`);
             case EmailTemplateType.OrderConfirmationTransfer:
-                return $t('%qM');
+                return $t(`%qM`);
             case EmailTemplateType.OrderConfirmationPOS:
-                return $t('%qN');
+                return $t(`%qN`);
             case EmailTemplateType.OrderReceivedTransfer:
-                return $t('%qO');
+                return $t(`%qO`);
 
             case EmailTemplateType.TicketsConfirmation:
-                return $t('%qL');
+                return $t(`%qL`);
             case EmailTemplateType.TicketsConfirmationTransfer:
-                return $t('%qM');
+                return $t(`%qM`);
             case EmailTemplateType.TicketsConfirmationPOS:
-                return $t('%qN');
+                return $t(`%qN`);
             case EmailTemplateType.TicketsReceivedTransfer:
-                return $t('%qO');
+                return $t(`%qO`);
 
             case EmailTemplateType.UserBalanceIncreaseNotification:
-                return $t('%1UV');
+                return $t(`%1UV`);
             case EmailTemplateType.UserBalanceReminder:
-                return $t('%1bx');
+                return $t(`%1bx`);
 
             case EmailTemplateType.OrganizationBalanceIncreaseNotification:
-                return $t('%1cY');
+                return $t(`%1cY`);
             case EmailTemplateType.OrganizationBalanceReminder:
-                return $t('%1aM');
+                return $t(`%1aM`);
 
             case EmailTemplateType.ChargebackPayingOrganization:
                 return $t('%1VU');
@@ -825,6 +905,40 @@ export class EmailTemplate extends AutoEncoder {
                 ...(type === EmailTemplateType.EventNotificationRejected ||
                 type === EmailTemplateType.EventNotificationPartiallyAccepted
                     ? [ExampleReplacements.all.feedbackText]
+                    : []),
+            ];
+        }
+
+        if (
+            [
+                EmailTemplateType.JudicialRecordAwaitingReview,
+                EmailTemplateType.JudicialRecordApproved,
+                EmailTemplateType.JudicialRecordConditionallyAccepted,
+                EmailTemplateType.JudicialRecordTemporarilyRejected,
+                EmailTemplateType.JudicialRecordPermanentlyRejected,
+                EmailTemplateType.JudicialRecordExpiringSoon,
+                EmailTemplateType.JudicialRecordIdentityChanged,
+            ].includes(type)
+        ) {
+            return [
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.firstNameMember,
+                ExampleReplacements.all.lastNameMember,
+                ExampleReplacements.all.platformOrOrganizationName,
+
+                // A reviewer opens the member, a member opens the delivery flow: never both in one template.
+                ...(type === EmailTemplateType.JudicialRecordAwaitingReview
+                    ? [ExampleReplacements.all.reviewUrl]
+                    : [ExampleReplacements.all.judicialRecordUrl]),
+
+                ...(type === EmailTemplateType.JudicialRecordConditionallyAccepted ||
+                type === EmailTemplateType.JudicialRecordTemporarilyRejected ||
+                type === EmailTemplateType.JudicialRecordPermanentlyRejected
+                    ? [ExampleReplacements.all.feedbackText]
+                    : []),
+
+                ...(type === EmailTemplateType.JudicialRecordExpiringSoon
+                    ? [ExampleReplacements.all.validUntilDate]
                     : []),
             ];
         }

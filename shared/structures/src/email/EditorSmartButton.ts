@@ -36,9 +36,9 @@ export class EditorSmartButton extends AutoEncoder {
         buttons.push(
             EditorSmartButton.create({
                 id: 'paymentUrl',
-                name: $t('%oH'),
-                text: $t('%eX'),
-                hint: $t('%oI'),
+                name: $t(`%oH`),
+                text: $t(`%eX`),
+                hint: $t(`%oI`),
             }),
         );
 
@@ -53,28 +53,39 @@ export class EditorSmartButton extends AutoEncoder {
 
         buttons.push(
             EditorSmartButton.create({
+                id: 'judicialRecordUrl',
+                name: $t(`Uittreksel afleveren`),
+                text: $t(`Uittreksel afleveren`),
+                hint: $t(
+                    `Een knop waarmee het lid het uittreksel uit het strafregister meteen kan afleveren.`,
+                ),
+            }),
+        );
+
+        buttons.push(
+            EditorSmartButton.create({
                 id: 'downloadUrl',
-                name: $t('%oJ'),
-                text: $t('%2E'),
-                hint: $t('%oK'),
+                name: $t(`%oJ`),
+                text: $t(`%2E`),
+                hint: $t(`%oK`),
             }),
         );
 
         buttons.push(
             EditorSmartButton.create({
                 id: 'resetUrl',
-                name: $t('%oL'),
-                text: $t('%oM'),
-                hint: $t('%oN'),
+                name: $t(`%oL`),
+                text: $t(`%oM`),
+                hint: $t(`%oN`),
             }),
         );
 
         buttons.push(
             EditorSmartButton.create({
                 id: 'signInUrl',
-                name: $t('%oO'),
-                text: $t('%oP'),
-                hint: $t('%oQ'),
+                name: $t(`%oO`),
+                text: $t(`%oP`),
+                hint: $t(`%oQ`),
             }),
         );
 
@@ -82,27 +93,27 @@ export class EditorSmartButton extends AutoEncoder {
         buttons.push(
             EditorSmartButton.create({
                 id: 'orderUrl',
-                name: $t('%oR'),
-                text: $t('%oS'),
-                hint: $t('%oT'),
+                name: $t(`%oR`),
+                text: $t(`%oS`),
+                hint: $t(`%oT`),
             }),
         );
 
         buttons.push(
             EditorSmartButton.create({
                 id: 'discountUrl',
-                name: $t('%Zwi'),
-                text: $t('%ZxY'),
-                hint: $t('%ZwM'),
+                name: $t(`%Zwi`),
+                text: $t(`%ZxY`),
+                hint: $t(`%ZwM`),
             }),
         );
 
         buttons.push(
             EditorSmartButton.create({
                 id: 'unsubscribeUrl',
-                name: $t('%oU'),
-                text: $t('%zu'),
-                hint: $t('%oV'),
+                name: $t(`%oU`),
+                text: $t(`%zu`),
+                hint: $t(`%oV`),
                 type: 'inline',
             }),
         );
@@ -110,9 +121,9 @@ export class EditorSmartButton extends AutoEncoder {
         buttons.push(
             EditorSmartButton.create({
                 id: 'confirmEmailUrl',
-                name: $t('%oW'),
-                text: $t('%oX'),
-                hint: $t('%oY'),
+                name: $t(`%oW`),
+                text: $t(`%oX`),
+                hint: $t(`%oY`),
             }),
         );
 
