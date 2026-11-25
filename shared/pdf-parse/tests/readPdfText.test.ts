@@ -1,3 +1,4 @@
+import { SimpleError } from '@common/errors';
 import { describe, expect, test } from 'vitest';
 
 import { extractPdfText } from '../src/extractPdfText.js';
@@ -191,11 +192,17 @@ describe('readDatedLabelledValue', () => {
     });
 
     test('throws on a template carrying a second date placeholder', () => {
-        expect(() => readDatedLabelledValue([sentence, url], ['Geldig van {date} tot {date} via'])).toThrow('exactly one {date}');
+        const read = () => readDatedLabelledValue([sentence, url], ['Geldig van {date} tot {date} via']);
+
+        expect(read).toThrow(SimpleError);
+        expect(read).toThrow(expect.objectContaining({ code: 'invalid_label_template' }));
     });
 
     test('throws on a template carrying no date placeholder', () => {
-        expect(() => readDatedLabelledValue([sentence, url], ['De authenticiteit van dit uittreksel kan tot 01/02/2027 gecontroleerd worden via'])).toThrow('exactly one {date}');
+        const read = () => readDatedLabelledValue([sentence, url], ['De authenticiteit van dit uittreksel kan tot 01/02/2027 gecontroleerd worden via']);
+
+        expect(read).toThrow(SimpleError);
+        expect(read).toThrow(expect.objectContaining({ code: 'invalid_label_template' }));
     });
 });
 

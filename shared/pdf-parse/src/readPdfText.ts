@@ -3,6 +3,7 @@
  * spellings, so another wording - or the same field in French or German - is appended to the list
  * rather than handled in the matching. Matching ignores case and spacing, but not accents.
  */
+import { SimpleError } from '@common/errors';
 
 /** A field written as `Label: value`, trying every accepted spelling. */
 export function readLabelledValue(lines: string[], labels: readonly string[]): string | null {
@@ -137,7 +138,13 @@ export function readDatedLabelledValue(lines: string[], labels: readonly string[
     for (const label of labels) {
         const [before, after, ...rest] = collapseSpaces(label).split(DATE_PLACEHOLDER);
         if (after === undefined || rest.length > 0) {
-            throw new Error(`Label template "${label}" has to carry exactly one ${DATE_PLACEHOLDER}.`);
+            throw new SimpleError({
+                code: 'invalid_label_template',
+                message: `Label template "${label}" has to carry exactly one ${DATE_PLACEHOLDER}.`,
+                human: $t('We konden dit document niet lezen. Probeer het later opnieuw.'),
+                // Nothing is wrong with what was uploaded: the template we read it with is.
+                statusCode: 500,
+            });
         }
 
         // ` ?` rather than `\s*`, as in `readMarkerDate`
