@@ -321,6 +321,39 @@ describe('Endpoint.VerifyEmail', () => {
                 `at ${platformName}: moved to platform.moved@example.com, was platform.owner@example.com`,
             );
         });
+
+        test('a signup verification of the current address notifies nobody', async () => {
+            // Most verifications confirm the address the account already has. Telling those
+            // people their address 'has been changed' would alarm every new signup.
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                email: 'signup@example.com',
+                verified: false,
+            }).create();
+
+            await verifyEmail(organization, user, user.email, { signedIn: false });
+
+            // A real change afterwards gives the background send something to arrive for: once
+            // its notification is there, one for the signup would have been there too.
+            await verifyEmail(organization, user, 'moved@example.com');
+
+            const notifications = await vi.waitFor(
+                async () => {
+                    const sent = (await EmailMocker.transactional.getSucceededEmails()).filter(
+                        (e) => e.html?.includes('moved to'),
+                    );
+                    expect(
+                        sent.some((e) =>
+                            e.html?.includes('moved to moved@example.com, was signup@example.com'),
+                        ),
+                    ).toBe(true);
+                    return sent;
+                },
+                { timeout: 5000 },
+            );
+            expect(notifications).toHaveLength(1);
+        });
     });
 
     test('parallel wrong guesses cannot exceed the maximum number of tries', async () => {
