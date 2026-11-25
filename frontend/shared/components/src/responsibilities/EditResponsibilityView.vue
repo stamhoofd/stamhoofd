@@ -349,7 +349,6 @@ const judicialRecordMinimumAge = computed({
     set: judicialRecordMinimumAge => addPatch({ judicialRecordMinimumAge }),
 });
 
-/** The inline input sits in a sentence, so it always has a value: it is only shown when the toggle is on. */
 const judicialRecordAge = computed({
     get: () => judicialRecordMinimumAge.value ?? DEFAULT_JUDICIAL_RECORD_MINIMUM_AGE,
     set: age => judicialRecordMinimumAge.value = age,
