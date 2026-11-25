@@ -36,6 +36,7 @@ import {
     GroupStatus,
     GroupType,
     JudicialRecordReviewDecision,
+    JudicialRecordReviewDetails,
     JudicialRecordStatus,
     LimitedFilteredRequest,
     MemberDetails,
@@ -4265,6 +4266,11 @@ describe('Endpoint.GetMembersEndpoint', () => {
             record.memberId = member.id;
             record.reviewDecision = reviewDecision;
             record.reviewedAt = new Date();
+            record.reviewDetails = JudicialRecordReviewDetails.create({
+                name: 'Mieke Janssens',
+                email: 'mieke@example.com',
+                comment: 'Enkel onder begeleiding van een tweede leiding.',
+            });
             await record.save();
             return record;
         }
@@ -4290,6 +4296,9 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const approved = response.body.results.members.find((m) => m.id === members.adult.id);
             expect(approved?.judicialRecord?.reviewDecision).toBe(JudicialRecordReviewDecision.Ok);
+
+            // The comment is for the member themselves; an administrator reads it through the review endpoint
+            expect(approved?.judicialRecord?.comment).toBeNull();
 
             // A member who delivered nothing carries no record, rather than an empty one
             const other = response.body.results.members.find(

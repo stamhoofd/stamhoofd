@@ -80,7 +80,14 @@ export class JudicialRecordReviewDetails extends AutoEncoder {
     comment: string | null = null;
 }
 
-/** A member's current judicial record, as much of it as deciding their status needs. */
+/**
+ * A member's current judicial record, as much of it as deciding their status needs.
+ *
+ * This is on the member blob, which a member reads about themselves as well as an administrator, so it carries
+ * nothing a member may not see. The reviewer's name and organization stay out of it; the comment does not,
+ * because it is the condition or the reason behind a decision about them - it is only filled in for the member
+ * themselves.
+ */
 export class MemberJudicialRecord extends AutoEncoder {
     @field({ decoder: new EnumDecoder(JudicialRecordReviewDecision) })
     reviewDecision: JudicialRecordReviewDecision;
@@ -97,6 +104,15 @@ export class MemberJudicialRecord extends AutoEncoder {
      */
     @field({ decoder: BooleanDecoder })
     hasDocument = false;
+
+    /**
+     * What the reviewer wrote down, for the member themselves only.
+     *
+     * Null for anyone else, which is not the same as a decision without a comment: a reader who may not see it
+     * cannot tell the two apart, and does not have to.
+     */
+    @field({ decoder: StringDecoder, nullable: true })
+    comment: string | null = null;
 }
 
 /** The stored extract, and why it is gone once it is. */

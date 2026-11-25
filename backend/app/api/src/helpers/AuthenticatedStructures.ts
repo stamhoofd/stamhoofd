@@ -731,6 +731,12 @@ export class AuthenticatedStructures {
                       )
                       .fetch()
                 : [];
+
+        // The reviewer's comment is the condition or the reason behind the decision, so the member it is about
+        // reads it. For everyone else it stays with the review endpoint.
+        const ownMemberIds = new Set(
+            members.filter((m) => Context.auth.isUserManager(m)).map((m) => m.id),
+        );
         const registrationInvitations =
             members.length > 0
                 ? await RegistrationInvitation.select()
@@ -1009,6 +1015,9 @@ export class AuthenticatedStructures {
                       reviewDecision: record.reviewDecision,
                       reviewedAt: record.reviewedAt,
                       hasDocument: (record.file?.reference ?? null) !== null,
+                      comment: ownMemberIds.has(blob.id)
+                          ? (record.reviewDetails?.comment ?? null)
+                          : null,
                   })
                 : null;
         }
