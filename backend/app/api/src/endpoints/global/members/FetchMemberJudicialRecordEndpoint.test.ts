@@ -8,12 +8,18 @@ import type { MockedFunction } from 'vitest';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { SessionService } from '../../../services/SessionService.js';
 import { MAXIMUM_UPLOAD_SIZE } from './DeliverMemberJudicialRecordEndpoint.js';
-import { FetchMemberJudicialRecordEndpoint, judicialRecordFetchGlobalLimiter, judicialRecordFetchMemberLimiter, judicialRecordFetchUserLimiter } from './FetchMemberJudicialRecordEndpoint.js';
+import {
+    FetchMemberJudicialRecordEndpoint,
+    judicialRecordFetchGlobalLimiter,
+    judicialRecordFetchMemberLimiter,
+    judicialRecordFetchUserLimiter,
+} from './FetchMemberJudicialRecordEndpoint.js';
 
 const endpoint = new FetchMemberJudicialRecordEndpoint();
 
 /** A url of the accepted shape that FOD Justitie answers without a pdf, so it is safe to write down. */
-const EXPIRED_URL = 'https://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS';
+const EXPIRED_URL =
+    'https://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS';
 
 /** The shortest thing that passes for a pdf: what is in it is the delivery's business, not this endpoint's. */
 const PDF = Buffer.from('%PDF-1.5\n%%EOF\n');
@@ -33,14 +39,25 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
     /** Nothing here reaches FOD Justitie: fetch is replaced for every test, answering a pdf unless one says otherwise. */
     let fetchMock: MockedFunction<typeof fetch>;
 
-    function respondWith(body: Buffer | string, { status = 200, contentType = 'application/pdf' }: { status?: number; contentType?: string } = {}) {
+    function respondWith(
+        body: Buffer | string,
+        {
+            status = 200,
+            contentType = 'application/pdf',
+        }: { status?: number; contentType?: string } = {},
+    ) {
         // Copied out of the buffer pool a Buffer lives in, so the response holds these bytes and nothing around them
-        const content = typeof body === 'string' ? body : (new Uint8Array(body).buffer as ArrayBuffer);
+        const content =
+            typeof body === 'string' ? body : (new Uint8Array(body).buffer as ArrayBuffer);
 
-        fetchMock.mockImplementation(() => Promise.resolve(new globalThis.Response(content, {
-            status,
-            headers: { 'content-type': contentType },
-        })));
+        fetchMock.mockImplementation(() =>
+            Promise.resolve(
+                new globalThis.Response(content, {
+                    status,
+                    headers: { 'content-type': contentType },
+                }),
+            ),
+        );
     }
 
     beforeEach(() => {
@@ -78,13 +95,23 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
         return { organization, user, token, member };
     }
 
-    function buildRequest({ token, organizationHost, memberId, url }: {
+    function buildRequest({
+        token,
+        organizationHost,
+        memberId,
+        url,
+    }: {
         token: string;
         organizationHost: string;
         memberId: string;
         url: string;
     }) {
-        const request = Request.buildJson('POST', `/v1/members/${memberId}/judicial-record/fetch`, organizationHost, { url });
+        const request = Request.buildJson(
+            'POST',
+            `/v1/members/${memberId}/judicial-record/fetch`,
+            organizationHost,
+            { url },
+        );
         request.headers.authorization = 'Bearer ' + token;
 
         return request;
@@ -93,30 +120,38 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
     test('It answers with the pdf FOD Justitie returned', async () => {
         const { organization, token, member } = await setup();
 
-        const response = await testServer.test(endpoint, buildRequest({
-            token: token.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            url: EXPIRED_URL,
-        }));
+        const response = await testServer.test(
+            endpoint,
+            buildRequest({
+                token: token.accessToken,
+                organizationHost: organization.getApiHost(),
+                memberId: member.id,
+                url: EXPIRED_URL,
+            }),
+        );
 
         expect(Buffer.from(response.body!)).toEqual(PDF);
 
         // Bytes from outside are never rendered on the api origin
         expect(response.headers['content-type']).toBe('application/octet-stream');
-        expect(response.headers['content-disposition']).toBe('attachment; filename="uittreksel.pdf"');
+        expect(response.headers['content-disposition']).toBe(
+            'attachment; filename="uittreksel.pdf"',
+        );
         expect(response.headers['x-content-type-options']).toBe('nosniff');
     });
 
     test('It calls FOD Justitie without following a redirect and with a timeout', async () => {
         const { organization, token, member } = await setup();
 
-        await testServer.test(endpoint, buildRequest({
-            token: token.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            url: EXPIRED_URL,
-        }));
+        await testServer.test(
+            endpoint,
+            buildRequest({
+                token: token.accessToken,
+                organizationHost: organization.getApiHost(),
+                memberId: member.id,
+                url: EXPIRED_URL,
+            }),
+        );
 
         expect(fetchMock).toHaveBeenCalledTimes(1);
         const [url, init] = fetchMock.mock.calls[0];
@@ -131,26 +166,39 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
 
     describe('It accepts no other url than the one FOD Justitie prints', () => {
         const rejected = {
-            'another host': 'https://just-crimeviewer-ctz.just.fgov.be.evil.example/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
-            'a subdomain of the host': 'https://evil.just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
-            'another host of FOD Justitie': 'https://just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
-            'http': 'http://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
-            'no scheme': 'just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
+            'another host':
+                'https://just-crimeviewer-ctz.just.fgov.be.evil.example/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
+            'a subdomain of the host':
+                'https://evil.just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
+            'another host of FOD Justitie':
+                'https://just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
+            http: 'http://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
+            'no scheme':
+                'just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
             'a file url': 'file:///etc/passwd',
             'an ip host': 'https://127.0.0.1/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
             'the metadata service': 'http://169.254.169.254/latest/meta-data/',
-            'a port': 'https://just-crimeviewer-ctz.just.fgov.be:8080/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
-            'credentials': 'https://user:password@just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
-            'an uppercase uuid': 'https://just-crimeviewer-ctz.just.fgov.be/record/2331F637-9F30-46BD-9A3F-BE62FF76D7DC-CJCS',
-            'an uppercase host': 'https://JUST-CRIMEVIEWER-CTZ.JUST.FGOV.BE/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
+            'a port':
+                'https://just-crimeviewer-ctz.just.fgov.be:8080/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
+            credentials:
+                'https://user:password@just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
+            'an uppercase uuid':
+                'https://just-crimeviewer-ctz.just.fgov.be/record/2331F637-9F30-46BD-9A3F-BE62FF76D7DC-CJCS',
+            'an uppercase host':
+                'https://JUST-CRIMEVIEWER-CTZ.JUST.FGOV.BE/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
             'a suffix on the path': `${EXPIRED_URL}/download`,
-            'a prefix on the path': 'https://just-crimeviewer-ctz.just.fgov.be/api/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
-            'a traversal in the path': 'https://just-crimeviewer-ctz.just.fgov.be/record/../../2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
+            'a prefix on the path':
+                'https://just-crimeviewer-ctz.just.fgov.be/api/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
+            'a traversal in the path':
+                'https://just-crimeviewer-ctz.just.fgov.be/record/../../2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS',
             'a query string': `${EXPIRED_URL}?download=1`,
             'a fragment': `${EXPIRED_URL}#page=1`,
-            'another document type': 'https://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-OTHER',
-            'no document type': 'https://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc',
-            'a uuid that is not one': 'https://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7d-CJCS',
+            'another document type':
+                'https://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-OTHER',
+            'no document type':
+                'https://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc',
+            'a uuid that is not one':
+                'https://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7d-CJCS',
             'a newline and a second url': `${EXPIRED_URL}\nhttps://evil.example/`,
             'nothing at all': '',
         };
@@ -158,12 +206,17 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
         test.each(Object.entries(rejected))('%s', async (_name, url) => {
             const { organization, token, member } = await setup();
 
-            await expect(testServer.test(endpoint, buildRequest({
-                token: token.accessToken,
-                organizationHost: organization.getApiHost(),
-                memberId: member.id,
-                url,
-            }))).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'url' }));
+            await expect(
+                testServer.test(
+                    endpoint,
+                    buildRequest({
+                        token: token.accessToken,
+                        organizationHost: organization.getApiHost(),
+                        memberId: member.id,
+                        url,
+                    }),
+                ),
+            ).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'url' }));
 
             expect(fetchMock).not.toHaveBeenCalled();
         });
@@ -180,12 +233,15 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
         ])('it trims %s and calls the canonical url', async (_name, url) => {
             const { organization, token, member } = await setup();
 
-            await testServer.test(endpoint, buildRequest({
-                token: token.accessToken,
-                organizationHost: organization.getApiHost(),
-                memberId: member.id,
-                url,
-            }));
+            await testServer.test(
+                endpoint,
+                buildRequest({
+                    token: token.accessToken,
+                    organizationHost: organization.getApiHost(),
+                    memberId: member.id,
+                    url,
+                }),
+            );
 
             expect(fetchMock).toHaveBeenCalledTimes(1);
             expect(fetchMock.mock.calls[0][0]).toBe(EXPIRED_URL);
@@ -196,14 +252,22 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
         const { organization, token, member } = await setup();
 
         // What the expired link really answers: the viewer page, with a 200
-        respondWith('<!DOCTYPE html><html lang="en"><head><title>Criminal Record</title></head></html>', { contentType: 'text/html;charset=utf-8' });
+        respondWith(
+            '<!DOCTYPE html><html lang="en"><head><title>Criminal Record</title></head></html>',
+            { contentType: 'text/html;charset=utf-8' },
+        );
 
-        await expect(testServer.test(endpoint, buildRequest({
-            token: token.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            url: EXPIRED_URL,
-        }))).rejects.toThrow(STExpect.simpleError({ code: 'judicial_record_not_available' }));
+        await expect(
+            testServer.test(
+                endpoint,
+                buildRequest({
+                    token: token.accessToken,
+                    organizationHost: organization.getApiHost(),
+                    memberId: member.id,
+                    url: EXPIRED_URL,
+                }),
+            ),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'judicial_record_not_available' }));
     });
 
     test('It refuses a response that announces a pdf but is not one', async () => {
@@ -211,12 +275,17 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
 
         respondWith('<html><script>alert(1)</script></html>', { contentType: 'application/pdf' });
 
-        await expect(testServer.test(endpoint, buildRequest({
-            token: token.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            url: EXPIRED_URL,
-        }))).rejects.toThrow(STExpect.simpleError({ code: 'judicial_record_not_available' }));
+        await expect(
+            testServer.test(
+                endpoint,
+                buildRequest({
+                    token: token.accessToken,
+                    organizationHost: organization.getApiHost(),
+                    memberId: member.id,
+                    url: EXPIRED_URL,
+                }),
+            ),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'judicial_record_not_available' }));
     });
 
     test('It refuses a response larger than it is willing to read', async () => {
@@ -225,12 +294,17 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
         const tooLarge = Buffer.concat([PDF, Buffer.alloc(MAXIMUM_UPLOAD_SIZE)]);
         respondWith(tooLarge);
 
-        await expect(testServer.test(endpoint, buildRequest({
-            token: token.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            url: EXPIRED_URL,
-        }))).rejects.toThrow(STExpect.simpleError({ code: 'judicial_record_not_available' }));
+        await expect(
+            testServer.test(
+                endpoint,
+                buildRequest({
+                    token: token.accessToken,
+                    organizationHost: organization.getApiHost(),
+                    memberId: member.id,
+                    url: EXPIRED_URL,
+                }),
+            ),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'judicial_record_not_available' }));
     });
 
     test('It refuses a response FOD Justitie answered with an error status', async () => {
@@ -238,12 +312,17 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
 
         respondWith(PDF, { status: 404 });
 
-        await expect(testServer.test(endpoint, buildRequest({
-            token: token.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            url: EXPIRED_URL,
-        }))).rejects.toThrow(STExpect.simpleError({ code: 'judicial_record_not_available' }));
+        await expect(
+            testServer.test(
+                endpoint,
+                buildRequest({
+                    token: token.accessToken,
+                    organizationHost: organization.getApiHost(),
+                    memberId: member.id,
+                    url: EXPIRED_URL,
+                }),
+            ),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'judicial_record_not_available' }));
     });
 
     test('It refuses when FOD Justitie does not answer at all', async () => {
@@ -251,12 +330,17 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
 
         fetchMock.mockImplementation(() => Promise.reject(new Error('fetch failed')));
 
-        await expect(testServer.test(endpoint, buildRequest({
-            token: token.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            url: EXPIRED_URL,
-        }))).rejects.toThrow(STExpect.simpleError({ code: 'judicial_record_not_available' }));
+        await expect(
+            testServer.test(
+                endpoint,
+                buildRequest({
+                    token: token.accessToken,
+                    organizationHost: organization.getApiHost(),
+                    memberId: member.id,
+                    url: EXPIRED_URL,
+                }),
+            ),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'judicial_record_not_available' }));
     });
 
     test('It does not fetch for an account the member is not linked to', async () => {
@@ -264,12 +348,17 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
         const other = await new UserFactory({ organization }).create();
         const otherToken = await SessionService.createSession(other);
 
-        await expect(testServer.test(endpoint, buildRequest({
-            token: otherToken.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            url: EXPIRED_URL,
-        }))).rejects.toThrow(STExpect.errorWithCode('not_found'));
+        await expect(
+            testServer.test(
+                endpoint,
+                buildRequest({
+                    token: otherToken.accessToken,
+                    organizationHost: organization.getApiHost(),
+                    memberId: member.id,
+                    url: EXPIRED_URL,
+                }),
+            ),
+        ).rejects.toThrow(STExpect.errorWithCode('not_found'));
 
         expect(fetchMock).not.toHaveBeenCalled();
     });
@@ -282,12 +371,17 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
         }).create();
         const adminToken = await SessionService.createSession(admin);
 
-        await expect(testServer.test(endpoint, buildRequest({
-            token: adminToken.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            url: EXPIRED_URL,
-        }))).rejects.toThrow(STExpect.errorWithCode('not_found'));
+        await expect(
+            testServer.test(
+                endpoint,
+                buildRequest({
+                    token: adminToken.accessToken,
+                    organizationHost: organization.getApiHost(),
+                    memberId: member.id,
+                    url: EXPIRED_URL,
+                }),
+            ),
+        ).rejects.toThrow(STExpect.errorWithCode('not_found'));
 
         expect(fetchMock).not.toHaveBeenCalled();
     });
@@ -301,12 +395,15 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
         const adminToken = await SessionService.createSession(admin);
 
         // Same audience as delivering: an administrator uploading on someone's behalf scans the same code
-        const response = await testServer.test(endpoint, buildRequest({
-            token: adminToken.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            url: EXPIRED_URL,
-        }));
+        const response = await testServer.test(
+            endpoint,
+            buildRequest({
+                token: adminToken.accessToken,
+                organizationHost: organization.getApiHost(),
+                memberId: member.id,
+                url: EXPIRED_URL,
+            }),
+        );
 
         expect(response.status).toBe(200);
         expect(fetchMock).toHaveBeenCalled();
@@ -317,12 +414,17 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
 
         judicialRecordFetchMemberLimiter.track(member.id, 10);
 
-        await expect(testServer.test(endpoint, buildRequest({
-            token: token.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            url: EXPIRED_URL,
-        }))).rejects.toThrow(STExpect.simpleError({ code: 'too_many_requests' }));
+        await expect(
+            testServer.test(
+                endpoint,
+                buildRequest({
+                    token: token.accessToken,
+                    organizationHost: organization.getApiHost(),
+                    memberId: member.id,
+                    url: EXPIRED_URL,
+                }),
+            ),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'too_many_requests' }));
 
         expect(fetchMock).not.toHaveBeenCalled();
     });
@@ -355,12 +457,17 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
 
         judicialRecordFetchUserLimiter.track(user.id, 30);
 
-        await expect(testServer.test(endpoint, buildRequest({
-            token: token.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            url: EXPIRED_URL,
-        }))).rejects.toThrow(STExpect.simpleError({ code: 'too_many_requests' }));
+        await expect(
+            testServer.test(
+                endpoint,
+                buildRequest({
+                    token: token.accessToken,
+                    organizationHost: organization.getApiHost(),
+                    memberId: member.id,
+                    url: EXPIRED_URL,
+                }),
+            ),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'too_many_requests' }));
 
         expect(fetchMock).not.toHaveBeenCalled();
     });
@@ -370,12 +477,17 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
 
         judicialRecordFetchGlobalLimiter.track('judicial-record-fetch', 500);
 
-        await expect(testServer.test(endpoint, buildRequest({
-            token: token.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            url: EXPIRED_URL,
-        }))).rejects.toThrow(STExpect.simpleError({ code: 'too_many_requests' }));
+        await expect(
+            testServer.test(
+                endpoint,
+                buildRequest({
+                    token: token.accessToken,
+                    organizationHost: organization.getApiHost(),
+                    memberId: member.id,
+                    url: EXPIRED_URL,
+                }),
+            ),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'too_many_requests' }));
 
         expect(fetchMock).not.toHaveBeenCalled();
     });
