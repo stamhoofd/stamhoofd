@@ -604,6 +604,21 @@ describe('NumberInput', () => {
             expect(inputEl).toHaveValue('2');
         });
     });
+
+    test('Should revalidate the model value when the floating point setting changes', async () => {
+        const wrapper = await createWrapper({
+            min: null,
+            max: null,
+            required: true,
+            floatingPoint: false,
+            modelValue: 5,
+        });
+
+        await wrapper.setProps({ floatingPoint: true });
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.props('modelValue')).toBe(500);
+    });
 });
 
 /**

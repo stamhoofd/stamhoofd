@@ -11,7 +11,6 @@
             v-model="valueString"
             type="text"
             inputmode="numeric"
-            step="any"
             @blur="clean"
             @keydown.up.prevent="step(1)"
             @keydown.down.prevent="step(-1)"

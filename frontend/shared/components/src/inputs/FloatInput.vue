@@ -13,7 +13,6 @@
                     v-model="text"
                     type="text"
                     inputmode="decimal"
-                    step="any"
                     :disabled="disabled"
                     @keydown.up.prevent="step(1)"
                     @keydown.down.prevent="step(-1)"
@@ -36,8 +35,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, useTemplateRef, watch } from 'vue';
-import { useNumberInput } from './useNumberInput';
+import { computed, useTemplateRef } from 'vue';
+import { useNumberInputText } from './useNumberInput';
 
 const props = withDefaults(defineProps<{
     min?: number | null;
@@ -74,89 +73,14 @@ const props = withDefaults(defineProps<{
     autoFix: true,
 });
 
-const numberInput = useNumberInput(computed(() => props));
 const model = defineModel<number | null>({ default: null });
-const text = ref<string>(numberInput.numberToString(model.value, { valueIfNaN: '' }));
 const inputElement = useTemplateRef<HTMLInputElement>('input');
-
-const isValid = computed(() => props.autoFix ? numberInput.validateText(text.value, { valueIfNaN: null }).isValid : true);
-
-if (props.autoFix) {
-    updateModelValue();
-}
-
-watch(() => numberInput.multipier, () => {
-    updateModelValue();
-});
-
-watch(() => model.value, (value) => {
-    // do not update text while focused
-    if (isInputFocused()) {
-        return;
-    }
-    const valueAsString = numberInput.numberToString(value, { valueIfNaN: text.value });
-    if (valueAsString !== text.value) {
-        text.value = valueAsString;
-    }
-});
-
-function setModelValue(value: number | null, { final }: { final: boolean } = { final: true }) {
-    if (value !== model.value) {
-        model.value = value;
-    }
-    if (final) {
-        updateText(value);
-    }
-}
-
-function updateText(value: number | null) {
-    text.value = numberInput.numberToString(value, { valueIfNaN:
-            props.autoFix ? '' : text.value,
-    });
-}
+const { text, isValid, multipier, stepModelValue, updateModelValue } = useNumberInputText(computed(() => props), model, inputElement);
 
 function step(add: number) {
-    const newValue = numberInput.step(model.value, add * numberInput.multipier.value);
-    setModelValue(newValue);
-
-    // necesary because input is in focus
-    updateText(newValue);
+    // One step is one displayed unit, so ArrowUp on a price adds 1 euro and not 1 cent
+    stepModelValue(add * multipier.value);
 }
-
-function updateModelValue(options: { final: boolean } = { final: true }) {
-    validate(text.value, options);
-}
-
-function validate(value: string, { final }: { final: boolean } = { final: true }) {
-    let number = numberInput.stringToNumber(value, { valueIfNaN: props.autoFix ? null : NaN });
-
-    if (final) {
-        if (props.autoFix) {
-            number = numberInput.constrain(number);
-        } else if (props.required && number === null) {
-            // If required the model value should never be null because a patch will not be able to set null as a value on the structure.
-            number = props.min ?? 0;
-        }
-
-        setModelValue(number);
-        return;
-    }
-
-    const { isValid } = numberInput.validateNumber(number);
-    if (isValid) {
-        setModelValue(number, { final });
-    }
-}
-
-function isInputFocused(): boolean {
-    if (!inputElement.value) {
-        return false;
-    }
-    const inputEl = inputElement.value;
-    const activeElement = (('getRootNode' in inputEl ? (inputEl.getRootNode() ?? document) : document) as any).activeElement as HTMLElement;
-    return activeElement === inputEl;
-}
-
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
