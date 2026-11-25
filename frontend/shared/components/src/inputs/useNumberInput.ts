@@ -292,6 +292,11 @@ export function useNumberInputText(options: ComputedRef<UseNumberInputTextOption
         updateModelValue();
     }
 
+    // The multiplier changes what the same text means, so the model has to be derived from it again
+    watch(numberInput.multipier, () => {
+        updateModelValue();
+    });
+
     watch(model, (value) => {
         // do not update text while focused
         if (isInputFocused()) {

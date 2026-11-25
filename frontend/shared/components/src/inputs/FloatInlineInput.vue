@@ -90,10 +90,6 @@ watch(text, (value, previous) => {
 
 const suffixText = computed(() => (model.value === multipier.value && props.suffixSingular !== null ? props.suffixSingular : props.suffix));
 
-watch(multipier, () => {
-    updateModelValue();
-});
-
 function focusInput() {
     if (props.disabled) {
         return;

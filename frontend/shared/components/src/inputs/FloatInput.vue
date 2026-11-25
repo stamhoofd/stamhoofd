@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, useTemplateRef, watch } from 'vue';
+import { computed, useTemplateRef } from 'vue';
 import { useNumberInputText } from './useNumberInput';
 
 const props = withDefaults(defineProps<{
@@ -77,10 +77,6 @@ const props = withDefaults(defineProps<{
 const model = defineModel<number | null>({ default: null });
 const inputElement = useTemplateRef<HTMLInputElement>('input');
 const { text, isValid, multipier, stepModelValue, updateModelValue } = useNumberInputText(computed(() => props), model, inputElement);
-
-watch(multipier, () => {
-    updateModelValue();
-});
 
 function step(add: number) {
     // One step is one displayed unit, so ArrowUp on a price adds 1 euro and not 1 cent
