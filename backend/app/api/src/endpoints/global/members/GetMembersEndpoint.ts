@@ -54,7 +54,9 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     ) {
         const organization = Context.organization;
         const judicialRecordMinimumAges = await getJudicialRecordMinimumAges(organization ?? null);
-        const scopedFilterCompilers = filterCompilers(organization?.id ?? null, { judicialRecordMinimumAges });
+        const scopedFilterCompilers = filterCompilers(organization?.id ?? null, {
+            judicialRecordMinimumAges,
+        });
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         if (
@@ -103,7 +105,11 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            await applySQLSorter(query, q.sort, sorters(organization?.id ?? null, { judicialRecordMinimumAges }));
+            await applySQLSorter(
+                query,
+                q.sort,
+                sorters(organization?.id ?? null, { judicialRecordMinimumAges }),
+            );
             query.limit(q.limit);
         }
 

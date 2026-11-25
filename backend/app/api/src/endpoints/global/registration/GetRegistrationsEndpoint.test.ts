@@ -19,20 +19,10 @@ import {
     RegistrationPeriodFactory,
     UserFactory,
 } from '@stamhoofd/models';
-import type {
-    MemberResponsibility,
-    SortList,
-    StamhoofdFilter,
-} from '@stamhoofd/structures';
-import {
-    AccessRight,
-} from '@stamhoofd/types/AccessRight';
-import {
-    PermissionLevel,
-} from '@stamhoofd/types/PermissionLevel';
-import {
-    PermissionsResourceType,
-} from '@stamhoofd/types/PermissionsResourceType';
+import type { MemberResponsibility, SortList, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import {
     CountFilteredRequest,
     EventMeta,
@@ -2083,8 +2073,13 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             const platform = await Platform.getForEditing();
             originalResponsibilities = platform.config.responsibilities;
 
-            withAge = await new PlatformResponsibilityFactory({ name: 'Judicial record needed', judicialRecordMinimumAge: 20 }).create();
-            withoutAge = await new PlatformResponsibilityFactory({ name: 'No judicial record needed' }).create();
+            withAge = await new PlatformResponsibilityFactory({
+                name: 'Judicial record needed',
+                judicialRecordMinimumAge: 20,
+            }).create();
+            withoutAge = await new PlatformResponsibilityFactory({
+                name: 'No judicial record needed',
+            }).create();
         });
 
         afterAll(async () => {
@@ -2096,11 +2091,18 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
         const responsibilityStart = new Date(2024, 0, 1);
 
         /** The birth day of a member that turns `age` in `inDays` days. */
-        function birthDayOfSomeoneTurning(age: number, inDays: number): { year: number; month: number; day: number } {
+        function birthDayOfSomeoneTurning(
+            age: number,
+            inDays: number,
+        ): { year: number; month: number; day: number } {
             const date = new Date();
             date.setDate(date.getDate() + inDays);
 
-            return { year: date.getFullYear() - age, month: date.getMonth() + 1, day: date.getDate() };
+            return {
+                year: date.getFullYear() - age,
+                month: date.getMonth() + 1,
+                day: date.getDate(),
+            };
         }
 
         /**
@@ -2111,10 +2113,17 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             const organization = await new OrganizationFactory({ period }).create();
             const group = await new GroupFactory({ organization, period }).create();
 
-            async function createRegistration(options: { birthDay?: { year: number; month: number; day: number }; responsibility: MemberResponsibility; endDate?: Date | null }) {
+            async function createRegistration(options: {
+                birthDay?: { year: number; month: number; day: number };
+                responsibility: MemberResponsibility;
+                endDate?: Date | null;
+            }) {
                 const member = options.birthDay
                     ? await new MemberFactory({ birthDay: options.birthDay }).create()
-                    : await new MemberFactory({ details: MemberDetails.create({ firstName: 'No birth day' }), generateData: false }).create();
+                    : await new MemberFactory({
+                          details: MemberDetails.create({ firstName: 'No birth day' }),
+                          generateData: false,
+                      }).create();
 
                 await new MemberResponsibilityRecordFactory({
                     member,
@@ -2129,58 +2138,128 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const registrations = {
                 // Turned 20 long before the responsibility started
-                adult: await createRegistration({ birthDay: { year: 1990, month: 3, day: 10 }, responsibility: withAge }),
+                adult: await createRegistration({
+                    birthDay: { year: 1990, month: 3, day: 10 },
+                    responsibility: withAge,
+                }),
                 // Turns 20 on 2035-06-15, well after the responsibility started
-                child: await createRegistration({ birthDay: { year: 2015, month: 6, day: 15 }, responsibility: withAge }),
+                child: await createRegistration({
+                    birthDay: { year: 2015, month: 6, day: 15 },
+                    responsibility: withAge,
+                }),
                 // Turns 20 today, which is the first day an extract is required
-                turnsTwentyToday: await createRegistration({ birthDay: birthDayOfSomeoneTurning(20, 0), responsibility: withAge }),
+                turnsTwentyToday: await createRegistration({
+                    birthDay: birthDayOfSomeoneTurning(20, 0),
+                    responsibility: withAge,
+                }),
                 // Turns 20 tomorrow, so not required yet
-                turnsTwentyTomorrow: await createRegistration({ birthDay: birthDayOfSomeoneTurning(20, 1), responsibility: withAge }),
+                turnsTwentyTomorrow: await createRegistration({
+                    birthDay: birthDayOfSomeoneTurning(20, 1),
+                    responsibility: withAge,
+                }),
                 // Treated as an adult, just like MemberDetails.defaultAge does
                 withoutBirthDay: await createRegistration({ responsibility: withAge }),
                 // Their only responsibility never asks for an extract
-                otherResponsibility: await createRegistration({ birthDay: { year: 1990, month: 3, day: 10 }, responsibility: withoutAge }),
+                otherResponsibility: await createRegistration({
+                    birthDay: { year: 1990, month: 3, day: 10 },
+                    responsibility: withoutAge,
+                }),
                 // No longer holds the responsibility
-                former: await createRegistration({ birthDay: { year: 1990, month: 3, day: 10 }, responsibility: withAge, endDate: new Date(2025, 0, 1) }),
+                former: await createRegistration({
+                    birthDay: { year: 1990, month: 3, day: 10 },
+                    responsibility: withAge,
+                    endDate: new Date(2025, 0, 1),
+                }),
             };
 
-            const user = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const token = await SessionService.createSession(user);
 
-            return { token, organization, registrations, registrationIds: Object.values(registrations).map(r => r.id) };
+            return {
+                token,
+                organization,
+                registrations,
+                registrationIds: Object.values(registrations).map((r) => r.id),
+            };
         }
 
-        function judicialRecordStatusFilter(registrationIds: string[], statuses: JudicialRecordStatus[]): StamhoofdFilter {
-            return { id: { $in: registrationIds }, member: { $elemMatch: { judicialRecordStatus: { $in: statuses } } } };
+        function judicialRecordStatusFilter(
+            registrationIds: string[],
+            statuses: JudicialRecordStatus[],
+        ): StamhoofdFilter {
+            return {
+                id: { $in: registrationIds },
+                member: { $elemMatch: { judicialRecordStatus: { $in: statuses } } },
+            };
         }
 
-        async function fetchRegistrationIds({ token, organization, filter, sort, limit = 100 }: { token: Token; organization: Organization; filter?: StamhoofdFilter; sort?: SortList; limit?: number }) {
-            const response = await testServer.test(endpoint, Request.get({
-                path: baseUrl,
-                host: organization.getApiHost(),
-                query: new LimitedFilteredRequest({ filter, sort: sort ?? [{ key: 'id', order: SortItemDirection.ASC }], limit }),
-                headers: { authorization: 'Bearer ' + token.accessToken },
-            }));
+        async function fetchRegistrationIds({
+            token,
+            organization,
+            filter,
+            sort,
+            limit = 100,
+        }: {
+            token: Token;
+            organization: Organization;
+            filter?: StamhoofdFilter;
+            sort?: SortList;
+            limit?: number;
+        }) {
+            const response = await testServer.test(
+                endpoint,
+                Request.get({
+                    path: baseUrl,
+                    host: organization.getApiHost(),
+                    query: new LimitedFilteredRequest({
+                        filter,
+                        sort: sort ?? [{ key: 'id', order: SortItemDirection.ASC }],
+                        limit,
+                    }),
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                }),
+            );
             expect(response.status).toBe(200);
-            return response.body.results.registrations.map(r => r.id);
+            return response.body.results.registrations.map((r) => r.id);
         }
 
         /** Follows the endpoint's own `next` request, so this covers the full sort + pagination flow. */
-        async function fetchAllPages({ token, organization, sort, limit, filter }: { token: Token; organization: Organization; sort: SortList; limit: number; filter?: StamhoofdFilter }) {
+        async function fetchAllPages({
+            token,
+            organization,
+            sort,
+            limit,
+            filter,
+        }: {
+            token: Token;
+            organization: Organization;
+            sort: SortList;
+            limit: number;
+            filter?: StamhoofdFilter;
+        }) {
             const ids: string[] = [];
-            let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({ sort, limit, filter });
+            let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({
+                sort,
+                limit,
+                filter,
+            });
             let pages = 0;
 
             while (query) {
-                const response = await testServer.test(endpoint, Request.get({
-                    path: baseUrl,
-                    host: organization.getApiHost(),
-                    query,
-                    headers: { authorization: 'Bearer ' + token.accessToken },
-                }));
+                const response = await testServer.test(
+                    endpoint,
+                    Request.get({
+                        path: baseUrl,
+                        host: organization.getApiHost(),
+                        query,
+                        headers: { authorization: 'Bearer ' + token.accessToken },
+                    }),
+                );
                 expect(response.status).toBe(200);
 
-                ids.push(...response.body.results.registrations.map(r => r.id));
+                ids.push(...response.body.results.registrations.map((r) => r.id));
                 query = response.body.next;
                 pages += 1;
 
@@ -2193,27 +2272,42 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
         }
 
         test('Lists the registrations of members that need an extract', async () => {
-            const { token, organization, registrations, registrationIds } = await setupRegistrations();
+            const { token, organization, registrations, registrationIds } =
+                await setupRegistrations();
 
             const ids = await fetchRegistrationIds({
                 token,
                 organization,
-                filter: judicialRecordStatusFilter(registrationIds, [JudicialRecordStatus.Required]),
+                filter: judicialRecordStatusFilter(registrationIds, [
+                    JudicialRecordStatus.Required,
+                ]),
             });
 
-            expect(ids).toIncludeSameMembers([registrations.adult.id, registrations.withoutBirthDay.id, registrations.turnsTwentyToday.id]);
+            expect(ids).toIncludeSameMembers([
+                registrations.adult.id,
+                registrations.withoutBirthDay.id,
+                registrations.turnsTwentyToday.id,
+            ]);
         });
 
         test('Lists the registrations of members that do not need an extract', async () => {
-            const { token, organization, registrations, registrationIds } = await setupRegistrations();
+            const { token, organization, registrations, registrationIds } =
+                await setupRegistrations();
 
             const ids = await fetchRegistrationIds({
                 token,
                 organization,
-                filter: judicialRecordStatusFilter(registrationIds, [JudicialRecordStatus.NotRequired]),
+                filter: judicialRecordStatusFilter(registrationIds, [
+                    JudicialRecordStatus.NotRequired,
+                ]),
             });
 
-            expect(ids).toIncludeSameMembers([registrations.child.id, registrations.turnsTwentyTomorrow.id, registrations.otherResponsibility.id, registrations.former.id]);
+            expect(ids).toIncludeSameMembers([
+                registrations.child.id,
+                registrations.turnsTwentyTomorrow.id,
+                registrations.otherResponsibility.id,
+                registrations.former.id,
+            ]);
         });
 
         test('Lists the registrations of several statuses at once', async () => {
@@ -2222,33 +2316,52 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             const ids = await fetchRegistrationIds({
                 token,
                 organization,
-                filter: judicialRecordStatusFilter(registrationIds, [JudicialRecordStatus.Required, JudicialRecordStatus.NotRequired]),
+                filter: judicialRecordStatusFilter(registrationIds, [
+                    JudicialRecordStatus.Required,
+                    JudicialRecordStatus.NotRequired,
+                ]),
             });
 
             expect(ids).toIncludeSameMembers(registrationIds);
         });
 
         test('Sorts registrations by the status of their member, across all pages', async () => {
-            const { token, organization, registrations, registrationIds } = await setupRegistrations();
+            const { token, organization, registrations, registrationIds } =
+                await setupRegistrations();
             const filter = { id: { $in: registrationIds } };
 
             // A limit lower than the total forces the endpoint to build a next page filter from getValue
             const ascending = await fetchAllPages({
                 token,
                 organization,
-                sort: [{ key: 'member.judicialRecordStatus', order: SortItemDirection.ASC }, { key: 'id', order: SortItemDirection.ASC }],
+                sort: [
+                    { key: 'member.judicialRecordStatus', order: SortItemDirection.ASC },
+                    { key: 'id', order: SortItemDirection.ASC },
+                ],
                 limit: 2,
                 filter,
             });
 
             expect(ascending).toHaveLength(7);
-            expect(ascending.slice(0, 4)).toIncludeSameMembers([registrations.child.id, registrations.turnsTwentyTomorrow.id, registrations.otherResponsibility.id, registrations.former.id]);
-            expect(ascending.slice(4)).toIncludeSameMembers([registrations.adult.id, registrations.withoutBirthDay.id, registrations.turnsTwentyToday.id]);
+            expect(ascending.slice(0, 4)).toIncludeSameMembers([
+                registrations.child.id,
+                registrations.turnsTwentyTomorrow.id,
+                registrations.otherResponsibility.id,
+                registrations.former.id,
+            ]);
+            expect(ascending.slice(4)).toIncludeSameMembers([
+                registrations.adult.id,
+                registrations.withoutBirthDay.id,
+                registrations.turnsTwentyToday.id,
+            ]);
 
             const descending = await fetchAllPages({
                 token,
                 organization,
-                sort: [{ key: 'member.judicialRecordStatus', order: SortItemDirection.DESC }, { key: 'id', order: SortItemDirection.DESC }],
+                sort: [
+                    { key: 'member.judicialRecordStatus', order: SortItemDirection.DESC },
+                    { key: 'id', order: SortItemDirection.DESC },
+                ],
                 limit: 2,
                 filter,
             });

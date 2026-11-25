@@ -888,10 +888,15 @@ export const memberFilterCompilers = (
         ],
     ]);
 
-    filters.set('judicialRecordStatus', createColumnFilter({
-        expression: judicialRecordStatusExpression(judicialRecordMinimumAges ?? new Map<string, number>()),
-        type: SQLValueType.String,
-    }));
+    filters.set(
+        'judicialRecordStatus',
+        createColumnFilter({
+            expression: judicialRecordStatusExpression(
+                judicialRecordMinimumAges ?? new Map<string, number>(),
+            ),
+            type: SQLValueType.String,
+        }),
+    );
 
     if (organizationId) {
         filters.set(

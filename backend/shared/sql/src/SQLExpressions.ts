@@ -277,8 +277,10 @@ export class SQLAge implements SQLExpression {
  * DATE_ADD(date, INTERVAL years YEAR), cast to a DATETIME so it can be compared with datetime columns.
  */
 export class SQLDateAddYears implements SQLExpression {
-    constructor(readonly date: SQLExpression, readonly years: SQLExpression) {
-    }
+    constructor(
+        readonly date: SQLExpression,
+        readonly years: SQLExpression,
+    ) {}
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([

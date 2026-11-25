@@ -1,21 +1,13 @@
 import type { SQLResultNamespacedRow } from '@node/database';
 import { Group, Member, Organization } from '@stamhoofd/models';
 import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
-import {
-    SQL,
-    SQLAlias,
-    SQLIfNull,
-    SQLOrderBy,
-    SQLSelectAs,
-} from '@stamhoofd/sql';
+import { SQL, SQLAlias, SQLIfNull, SQLOrderBy, SQLSelectAs } from '@stamhoofd/sql';
 import type {
     MemberWithRegistrationsBlob,
     Organization as OrganizationStruct,
     RegistrationWithMemberBlob,
 } from '@stamhoofd/structures';
-import {
-    Formatter,
-} from '@stamhoofd/utility';
+import { Formatter } from '@stamhoofd/utility';
 import { judicialRecordStatusExpression } from '../helpers/judicialRecordStatus.js';
 import {
     memberCachedBalanceForOrganizationJoin,
@@ -74,268 +66,268 @@ export const registrationSorters = ({
         string,
         SQLSortDefinition<RegistrationSortData>
     >([
-    // WARNING! TEST NEW SORTERS THOROUGHLY!
-    // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
-    // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
-    // You might be tempted to use ORDER BY firstName, lastName, but that will not work as expected and it needs to be ORDER BY CONCAT(firstName, ' ', lastName)
-    // Why? Because ORDER BY firstName, lastName produces a different order dan ORDER BY CONCAT(firstName, ' ', lastName) if there are multiple people with spaces in the first name
-    // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
-    // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
+        // WARNING! TEST NEW SORTERS THOROUGHLY!
+        // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
+        // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
+        // You might be tempted to use ORDER BY firstName, lastName, but that will not work as expected and it needs to be ORDER BY CONCAT(firstName, ' ', lastName)
+        // Why? Because ORDER BY firstName, lastName produces a different order dan ORDER BY CONCAT(firstName, ' ', lastName) if there are multiple people with spaces in the first name
+        // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
+        // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    [
-        'id',
-        {
-            getValue({ registration }) {
-                return registration.id;
+        [
+            'id',
+            {
+                getValue({ registration }) {
+                    return registration.id;
+                },
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: SQL.column('id'),
+                        direction,
+                    });
+                },
             },
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: SQL.column('id'),
-                    direction,
-                });
+        ],
+        [
+            'registeredAt',
+            {
+                getValue({ registration }) {
+                    return registration.registeredAt;
+                },
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: SQL.column('registeredAt'),
+                        direction,
+                    });
+                },
             },
-        },
-    ],
-    [
-        'registeredAt',
-        {
-            getValue({ registration }) {
-                return registration.registeredAt;
+        ],
+        [
+            'groupPrice',
+            {
+                getValue: ({ registration }) => registration.groupPrice.name.toString(),
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: new SQLTranslatedString(SQL.column('groupPrice'), '$.value.name'),
+                        direction,
+                    });
+                },
             },
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: SQL.column('registeredAt'),
-                    direction,
-                });
+        ],
+        [
+            'trialUntil',
+            {
+                getValue({ registration }) {
+                    return registration.trialUntil;
+                },
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: SQL.column('trialUntil'),
+                        direction,
+                    });
+                },
             },
-        },
-    ],
-    [
-        'groupPrice',
-        {
-            getValue: ({ registration }) => registration.groupPrice.name.toString(),
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: new SQLTranslatedString(SQL.column('groupPrice'), '$.value.name'),
-                    direction,
-                });
+        ],
+        [
+            'startDate',
+            {
+                getValue({ registration }) {
+                    return registration.startDate;
+                },
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: SQL.column('startDate'),
+                        direction,
+                    });
+                },
             },
-        },
-    ],
-    [
-        'trialUntil',
-        {
-            getValue({ registration }) {
-                return registration.trialUntil;
+        ],
+        [
+            'endDate',
+            {
+                getValue({ registration }) {
+                    return registration.endDate;
+                },
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: SQL.column('endDate'),
+                        direction,
+                    });
+                },
             },
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: SQL.column('trialUntil'),
-                    direction,
-                });
+        ],
+        [
+            'memberCachedBalance.amountOpen',
+            {
+                getValue({ registration }) {
+                    return registration.member.balances.reduce((sum, r) => sum + r.amountOpen, 0);
+                },
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: new SQLIfNull(SQL.column('memberCachedBalance', 'amountOpen'), 0),
+                        direction,
+                    });
+                },
+                join: memberCachedBalanceForOrganizationJoin,
+                select: [SQL.column('memberCachedBalance', 'amountOpen')],
             },
-        },
-    ],
-    [
-        'startDate',
-        {
-            getValue({ registration }) {
-                return registration.startDate;
+        ],
+        [
+            'registrationCachedBalance.toPay',
+            {
+                getValue({ registration }) {
+                    return registration.balances.reduce(
+                        (sum, r) => sum + (r.amountOpen + r.amountPending),
+                        0,
+                    );
+                },
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: new SQLIfNull(SQL.column('registrationCachedBalance', 'toPay'), 0),
+                        direction,
+                    });
+                },
+                join: registrationCachedBalanceJoin,
+                select: [SQL.column('registrationCachedBalance', 'toPay')],
             },
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: SQL.column('startDate'),
-                    direction,
-                });
+        ],
+        [
+            'registrationCachedBalance.price',
+            {
+                getValue({ registration }) {
+                    return registration.balances.reduce(
+                        (sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending),
+                        0,
+                    );
+                },
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: new SQLIfNull(SQL.column('registrationCachedBalance', 'price'), 0),
+                        direction,
+                    });
+                },
+                join: registrationCachedBalanceJoin,
+                select: [SQL.column('registrationCachedBalance', 'price')],
             },
-        },
-    ],
-    [
-        'endDate',
-        {
-            getValue({ registration }) {
-                return registration.endDate;
+        ],
+        [
+            'member.memberNumber',
+            createMemberColumnSorter({
+                columnName: 'memberNumber',
+                getValue: (member) => member.details.memberNumber ?? '',
+            }),
+        ],
+        [
+            'member.firstName',
+            {
+                getValue({ registration }) {
+                    return registration.member.firstName;
+                },
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: SQL.column(Member.table, 'firstName'),
+                        direction,
+                    });
+                },
+                join: memberJoin,
+                select: [SQL.column(Member.table, 'firstName')],
             },
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: SQL.column('endDate'),
-                    direction,
-                });
+        ],
+        [
+            'member.lastName',
+            {
+                getValue({ registration }) {
+                    return registration.member.lastName;
+                },
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: SQL.column(Member.table, 'lastName'),
+                        direction,
+                    });
+                },
+                join: memberJoin,
+                select: [SQL.column(Member.table, 'lastName')],
             },
-        },
-    ],
-    [
-        'memberCachedBalance.amountOpen',
-        {
-            getValue({ registration }) {
-                return registration.member.balances.reduce((sum, r) => sum + r.amountOpen, 0);
+        ],
+        [
+            'member.birthDay',
+            {
+                getValue({ registration }) {
+                    return registration.member.details.birthDay === null
+                        ? null
+                        : Formatter.dateIso(registration.member.details.birthDay);
+                },
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: SQL.column(Member.table, 'birthDay'),
+                        direction,
+                    });
+                },
+                join: memberJoin,
+                select: [SQL.column(Member.table, 'birthDay')],
             },
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: new SQLIfNull(SQL.column('memberCachedBalance', 'amountOpen'), 0),
-                    direction,
-                });
+        ],
+        [
+            'member.createdAt',
+            {
+                getValue({ registration }) {
+                    return registration.member.createdAt;
+                },
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: SQL.column(Member.table, 'createdAt'),
+                        direction,
+                    });
+                },
+                join: memberJoin,
+                select: [SQL.column(Member.table, 'createdAt')],
             },
-            join: memberCachedBalanceForOrganizationJoin,
-            select: [SQL.column('memberCachedBalance', 'amountOpen')],
-        },
-    ],
-    [
-        'registrationCachedBalance.toPay',
-        {
-            getValue({ registration }) {
-                return registration.balances.reduce(
-                    (sum, r) => sum + (r.amountOpen + r.amountPending),
-                    0,
-                );
+        ],
+        [
+            'organization.name',
+            {
+                getValue: ({ organization }) => organization.name,
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: SQL.column(Organization.table, 'name'),
+                        direction,
+                    });
+                },
+                join: organizationJoin,
+                select: [SQL.column(Organization.table, 'name')],
             },
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: new SQLIfNull(SQL.column('registrationCachedBalance', 'toPay'), 0),
-                    direction,
-                });
+        ],
+        [
+            'organization.uri',
+            {
+                getValue: ({ organization }) => organization.uri,
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: SQL.column(Organization.table, 'uri'),
+                        direction,
+                    });
+                },
+                join: organizationJoin,
+                select: [SQL.column(Organization.table, 'uri')],
             },
-            join: registrationCachedBalanceJoin,
-            select: [SQL.column('registrationCachedBalance', 'toPay')],
-        },
-    ],
-    [
-        'registrationCachedBalance.price',
-        {
-            getValue({ registration }) {
-                return registration.balances.reduce(
-                    (sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending),
-                    0,
-                );
+        ],
+        [
+            'group.name',
+            {
+                getValue: ({ registration }) => registration.group.settings.name.toString(),
+                toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                    return new SQLOrderBy({
+                        column: new SQLTranslatedString(
+                            SQL.column(Group.table, 'settings'),
+                            '$.value.name',
+                        ),
+                        direction,
+                    });
+                },
+                join: groupJoin,
             },
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: new SQLIfNull(SQL.column('registrationCachedBalance', 'price'), 0),
-                    direction,
-                });
-            },
-            join: registrationCachedBalanceJoin,
-            select: [SQL.column('registrationCachedBalance', 'price')],
-        },
-    ],
-    [
-        'member.memberNumber',
-        createMemberColumnSorter({
-            columnName: 'memberNumber',
-            getValue: (member) => member.details.memberNumber ?? '',
-        }),
-    ],
-    [
-        'member.firstName',
-        {
-            getValue({ registration }) {
-                return registration.member.firstName;
-            },
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: SQL.column(Member.table, 'firstName'),
-                    direction,
-                });
-            },
-            join: memberJoin,
-            select: [SQL.column(Member.table, 'firstName')],
-        },
-    ],
-    [
-        'member.lastName',
-        {
-            getValue({ registration }) {
-                return registration.member.lastName;
-            },
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: SQL.column(Member.table, 'lastName'),
-                    direction,
-                });
-            },
-            join: memberJoin,
-            select: [SQL.column(Member.table, 'lastName')],
-        },
-    ],
-    [
-        'member.birthDay',
-        {
-            getValue({ registration }) {
-                return registration.member.details.birthDay === null
-                    ? null
-                    : Formatter.dateIso(registration.member.details.birthDay);
-            },
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: SQL.column(Member.table, 'birthDay'),
-                    direction,
-                });
-            },
-            join: memberJoin,
-            select: [SQL.column(Member.table, 'birthDay')],
-        },
-    ],
-    [
-        'member.createdAt',
-        {
-            getValue({ registration }) {
-                return registration.member.createdAt;
-            },
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: SQL.column(Member.table, 'createdAt'),
-                    direction,
-                });
-            },
-            join: memberJoin,
-            select: [SQL.column(Member.table, 'createdAt')],
-        },
-    ],
-    [
-        'organization.name',
-        {
-            getValue: ({ organization }) => organization.name,
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: SQL.column(Organization.table, 'name'),
-                    direction,
-                });
-            },
-            join: organizationJoin,
-            select: [SQL.column(Organization.table, 'name')],
-        },
-    ],
-    [
-        'organization.uri',
-        {
-            getValue: ({ organization }) => organization.uri,
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: SQL.column(Organization.table, 'uri'),
-                    direction,
-                });
-            },
-            join: organizationJoin,
-            select: [SQL.column(Organization.table, 'uri')],
-        },
-    ],
-    [
-        'group.name',
-        {
-            getValue: ({ registration }) => registration.group.settings.name.toString(),
-            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-                return new SQLOrderBy({
-                    column: new SQLTranslatedString(
-                        SQL.column(Group.table, 'settings'),
-                        '$.value.name',
-                    ),
-                    direction,
-                });
-            },
-            join: groupJoin,
-        },
-    ],
-]);
+        ],
+    ]);
 
     if (judicialRecordMinimumAges?.size) {
         // The status is derived from the member's responsibilities, so it is selected along with the registration to
@@ -346,7 +338,9 @@ export const registrationSorters = ({
             getValue({ rawSelectedRow }) {
                 const row = rawSelectedRow?.['data'];
                 if (!row || !('judicialRecordStatus' in row)) {
-                    throw new Error('judicialRecordStatus was not selected when selecting this registration');
+                    throw new Error(
+                        'judicialRecordStatus was not selected when selecting this registration',
+                    );
                 }
                 return row['judicialRecordStatus'] as string;
             },
