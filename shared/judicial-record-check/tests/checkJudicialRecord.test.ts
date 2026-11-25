@@ -149,6 +149,16 @@ describe('checkJudicialRecordContent', () => {
             expect(check({ date: '01/11/2026' }).get(JudicialRecordCheck.Age)!.isFailed).toBe(true);
         });
 
+        test('refuses a document drawn up after today', () => {
+            // A document of tomorrow is not a fresh document: nothing says what it will hold then
+            const signedAt = new Date('2026-11-20T17:02:46.000Z');
+            const results = checkJudicialRecordContent(readJudicialRecordExtract(lines({ date: '20/11/2026', emptyRecord: '20/11/2026' })), MEMBER, signedAt, NOW, LAID_OUT_AS_AN_EXTRACT);
+            const result = results.find(result => result.check === JudicialRecordCheck.Age)!;
+
+            expect(result.isFailed).toBe(true);
+            expect(result.reason).toContain('toekomst');
+        });
+
         test('fails when the document carries no date', () => {
             expect(check({ date: 'onbekend' }).get(JudicialRecordCheck.Age)!.isFailed).toBe(true);
         });
