@@ -17,7 +17,7 @@
                 </p>
             </template>
 
-            <template v-else>
+            <template v-else-if="!loadFailed">
                 <hr>
                 <h2>{{ $t('Automatische controle') }}</h2>
 
@@ -117,7 +117,10 @@ const deliveredAt = ref<Date | null>(null);
 const documentMissing = ref(false);
 const viewerFailed = ref(false);
 
-const canSave = computed(() => reviewDecision.value !== null && !documentMissing.value);
+/** Set when the screen could not load what there is to judge, which is not the same as there being nothing. */
+const loadFailed = ref(false);
+
+const canSave = computed(() => reviewDecision.value !== null && !documentMissing.value && !loadFailed.value);
 
 /** A condition is the point of a conditional acceptance, so it is asked for rather than offered. */
 const isConditional = computed(() => reviewDecision.value === JudicialRecordReviewDecision.ConditionallyAccepted);
@@ -198,14 +201,18 @@ onMounted(() => {
  * which turns the short stalls of a handful of documents into one long block of the main thread.
  */
 async function load() {
-    let view: Awaited<ReturnType<typeof fetchReviewView>>;
-
     try {
-        view = await fetchReviewView(props.member.id);
+        await fetchAndCheck();
     } catch (error) {
+        // Saving a decision deletes the extract, so a reviewer may not record one for a document they never
+        // saw: until this screen is reopened there is nothing to decide with.
+        loadFailed.value = true;
         errors.errorBox = new ErrorBox(error);
-        return;
     }
+}
+
+async function fetchAndCheck() {
+    const view = await fetchReviewView(props.member.id);
 
     deliveredAt.value = view.deliveredAt;
     reviewDecision.value = view.reviewDecision === JudicialRecordReviewDecision.UnderReview ? null : view.reviewDecision;
@@ -222,11 +229,11 @@ async function load() {
         data = await fetchDocument(props.member.id);
     } catch (error) {
         if ((isSimpleError(error) || isSimpleErrors(error)) && error.hasCode('judicial_record_document_removed')) {
+            // Retention got there first: nothing left to judge, which the reviewer is told rather than shown
             documentMissing.value = true;
             return;
         }
-        errors.errorBox = new ErrorBox(error);
-        return;
+        throw error;
     }
 
     pdfData.value = data;

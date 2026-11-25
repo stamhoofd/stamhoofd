@@ -1,4 +1,5 @@
 import { JudicialRecordCheck, JudicialRecordCheckReport, JudicialRecordCheckResult, JudicialRecordCheckStatus, JudicialRecordReviewDetails, JudicialRecordReviewDecision, JudicialRecordReviewView as JudicialRecordReviewViewStruct, MemberDetails, MemberJudicialRecord, MemberWithRegistrationsBlob, MembersBlob, Organization, Platform, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
+import { SimpleError } from '@common/errors';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
 import { reactive } from 'vue';
@@ -91,10 +92,12 @@ function createMember({ hasDocument = true }: { hasDocument?: boolean } = {}) {
  * One request handler for the three calls the view makes, told apart by path: what was decided before, the
  * bytes, and the decision going back.
  */
-function createRequest({ reviewView, document = DOCUMENT }: { reviewView: JudicialRecordReviewViewStruct; document?: Uint8Array | Error }) {
+function createRequest({ reviewView, document = DOCUMENT }: { reviewView: JudicialRecordReviewViewStruct | Error; document?: Uint8Array | Error }) {
     return vi.fn().mockImplementation(({ path, method }: { path: string; method: string }) => {
         if (path.endsWith('/judicial-record/review') && method === 'GET') {
-            return Promise.resolve({ data: reviewView });
+            return reviewView instanceof Error
+                ? Promise.reject(reviewView)
+                : Promise.resolve({ data: reviewView });
         }
 
         if (path.endsWith('/judicial-record/document')) {
@@ -125,7 +128,7 @@ function waiting(options: Partial<{ reviewDecision: JudicialRecordReviewDecision
 
 function renderView({ member = createMember(), reviewView = waiting(), document = DOCUMENT }: {
     member?: PlatformMember;
-    reviewView?: JudicialRecordReviewViewStruct;
+    reviewView?: JudicialRecordReviewViewStruct | Error;
     document?: Uint8Array | Error;
 } = {}) {
     const request = createRequest({ reviewView, document });
@@ -254,4 +257,39 @@ test('shows what a previous reviewer wrote down, so a second look starts from it
     await expect.element(view.getByTestId('judicial-record-outcome')).toBeVisible();
 
     expect((byTestId('judicial-record-comment') as HTMLTextAreaElement).value).toBe('Nooit alleen met een groep.');
+});
+
+test('offers nothing to decide when the document could not be fetched', async () => {
+    const { view } = renderView({
+        document: new SimpleError({ code: 'judicial_record_document_not_available', message: 'Niet beschikbaar.' }),
+    });
+
+    await expect.element(view.getByText('Niet beschikbaar.', { exact: false })).toBeVisible();
+
+    // Saving deletes the extract, so a reviewer who never saw it may not record an outcome
+    expect(document.querySelector('input[name="judicial-record-outcome"]')).toBeNull();
+    expect(byTestId('judicial-record-comment')).toBeNull();
+    expect(saveButton().disabled).toBe(true);
+});
+
+test('offers nothing to decide when the review itself could not be fetched', async () => {
+    const { view } = renderView({
+        reviewView: new SimpleError({ code: 'not_available', message: 'De beoordeling is niet beschikbaar.' }),
+    });
+
+    await expect.element(view.getByText('De beoordeling is niet beschikbaar.', { exact: false })).toBeVisible();
+
+    expect(document.querySelector('input[name="judicial-record-outcome"]')).toBeNull();
+    expect(saveButton().disabled).toBe(true);
+});
+
+test('still lets the reviewer decide when the automatic check crashed, which is not a failed load', async () => {
+    check.mockRejectedValue(new Error('pdfjs gave up'));
+
+    const { view } = renderView();
+
+    await expect.element(view.getByText('automatische controle niet uitvoeren', { exact: false })).toBeVisible();
+
+    pick(JudicialRecordReviewDecision.Ok);
+    await expect.poll(() => saveButton().disabled).toBe(false);
 });
