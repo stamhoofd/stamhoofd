@@ -262,7 +262,7 @@ defineRoute({
     paramsToProps: async (params) => {
         const member = members.value.find(m => m.id === params.id);
         if (!member) {
-            Toast.error($t(`%EO`)).show();
+            Toast.error($t('%EO')).show();
             throw new Error('member not found');
         }
 

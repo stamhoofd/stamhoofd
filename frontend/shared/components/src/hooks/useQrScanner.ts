@@ -183,8 +183,7 @@ export function useQrScanner({ video, root, onCode }: {
         try {
             isFlashOn.value = (await plugin.getTorch()).status;
             hasFlash.value = true;
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
@@ -209,8 +208,7 @@ export function useQrScanner({ video, root, onCode }: {
                     : { facingMode: 'environment' },
                 audio: false,
             });
-        }
-        catch (error) {
+        } catch (error) {
             console.error(error);
             stop();
             cameraFailed.value = true;

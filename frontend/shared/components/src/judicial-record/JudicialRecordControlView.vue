@@ -140,8 +140,8 @@ const fileIcon = isPdf ? 'file-pdf color-pdf' : (file?.type.startsWith('image/')
  *    not when the checks themselves broke, since then there is no verdict to disagree with.
  * 3. `backend`: it has the last word, and is the only one that can look up a revocation.
  */
-type Failure =
-    | { layer: 'basic' }
+type Failure
+    = | { layer: 'basic' }
     | { layer: 'checks'; crashed: boolean }
     | { layer: 'backend'; reason: 'offline' | 'too-many-requests' | 'revoked' | 'other' };
 
@@ -557,9 +557,9 @@ const isUnsent = computed(() => {
 
 usePreventLeave(() => isUnsent.value
     ? voice(
-        $t('Je uittreksel is nog niet ingezonden.'),
-        $t('Het uittreksel van {member} is nog niet ingezonden.', { member: memberName }),
-    )
+            $t('Je uittreksel is nog niet ingezonden.'),
+            $t('Het uittreksel van {member} is nog niet ingezonden.', { member: memberName }),
+        )
     : null);
 
 async function shouldNavigateAway() {

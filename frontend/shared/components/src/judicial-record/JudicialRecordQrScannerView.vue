@@ -145,7 +145,7 @@ async function deliver(url: string) {
     } catch (error) {
         AppManager.shared.hapticError();
         if (Request.isNetworkError(error)) {
-            errorMessage.value = $t(`%ge`);
+            errorMessage.value = $t('%ge');
         } else if (isSimpleError(error) || isSimpleErrors(error)) {
             errorMessage.value = error.getHuman();
         } else {

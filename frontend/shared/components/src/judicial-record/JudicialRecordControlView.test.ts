@@ -45,8 +45,7 @@ vi.mock('@stamhoofd/frontend-pdf-viewer/PdfViewer.vue', () => ({
         mounted(this: { $emit: (event: string, ...args: unknown[]) => void }) {
             if (viewerFails) {
                 this.$emit('error', new Error('Cannot render'));
-            }
-            else {
+            } else {
                 this.$emit('loaded', { pageCount: viewerPageCount });
             }
         },
@@ -239,7 +238,6 @@ function pending<T>() {
     });
     return { promise, resolve, reject };
 }
-
 
 test('Checks the pdf against the member as soon as the step opens', async () => {
     const pdf = createPdf();

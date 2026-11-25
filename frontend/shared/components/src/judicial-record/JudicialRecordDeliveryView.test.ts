@@ -63,8 +63,8 @@ function renderView(member = createMember(), { isMobile = false, shown, onBehalf
 
     const component = shown
         ? defineComponent({
-            setup: () => () => h(KeepAlive, null, [shown.value ? h(JudicialRecordDeliveryView, { ...props, key: 'delivery' }) : h('div', { key: 'next' })]),
-        })
+                setup: () => () => h(KeepAlive, null, [shown.value ? h(JudicialRecordDeliveryView, { ...props, key: 'delivery' }) : h('div', { key: 'next' })]),
+            })
         : JudicialRecordDeliveryView;
 
     return render(component as typeof JudicialRecordDeliveryView, {
