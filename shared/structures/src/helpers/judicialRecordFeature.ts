@@ -7,7 +7,13 @@ import type { Platform } from '../Platform.js';
  */
 export const judicialRecordFeatureFlag = 'judicial-record';
 
-export function hasJudicialRecordFeature({ platform, organization }: { platform: Platform; organization?: Organization | null }): boolean {
+export function hasJudicialRecordFeature({
+    platform,
+    organization,
+}: {
+    platform: Platform;
+    organization?: Organization | null;
+}): boolean {
     if (platform.config.featureFlags.includes(judicialRecordFeatureFlag)) {
         return true;
     }
