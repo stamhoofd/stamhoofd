@@ -9,7 +9,7 @@ import PdfJsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?worker';
 export interface LoadedPdf {
     document: PDFDocumentProxy;
 
-    /** Closes the document and terminates the worker it was given. */
+    /** Closes the document and terminates the worker thread it runs on. */
     destroy(): Promise<void>;
 }
 
@@ -21,8 +21,11 @@ export async function loadPdfDocument(data: Uint8Array): Promise<LoadedPdf> {
     // bundle. Setting workerSrc here reads as the tidier way to do it and would bring back a
     // silent fallback to pdf.js's fake worker, where nothing renders and nothing throws.
     //
-    // A worker passed in belongs to the caller: pdf.js only terminates the one it creates itself.
-    const worker = PDFWorker.create({ port: new PdfJsWorker() });
+    // A worker passed in belongs to the caller: a port-initialized PDFWorker never records the
+    // thread, so neither its destroy() nor the loading task's terminates it. Without the
+    // terminate() calls below every load leaves an idle worker thread behind.
+    const thread: Worker = new PdfJsWorker();
+    const worker = PDFWorker.create({ port: thread });
 
     // pdf.js transfers the buffer it receives to its worker, which leaves the caller holding an
     // empty array. The app still needs its own bytes (to download or upload the same pdf), so the
@@ -37,10 +40,12 @@ export async function loadPdfDocument(data: Uint8Array): Promise<LoadedPdf> {
             async destroy() {
                 await task.destroy();
                 worker.destroy();
+                thread.terminate();
             },
         };
     } catch (error) {
         worker.destroy();
+        thread.terminate();
         throw error;
     }
 }
