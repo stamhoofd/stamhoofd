@@ -12,6 +12,7 @@
                     :placeholder="placeholder"
                     :value="getForLanguage(language)"
                     @input="setForLanguage(($event.currentTarget as HTMLTextAreaElement).value, language)"
+                    @blur="dropEmptyLanguage(language)"
                 />
                 <span v-if="language">
                     {{ language.toUpperCase() }}
@@ -42,6 +43,8 @@ if (typeof value.value === 'string') {
 
 const { hasLanguages } = useSwitchLanguage();
 registerTranslateableComponent(value);
+
+const editedLanguages = new Set<Language>();
 
 withDefaults(
     defineProps<{
@@ -77,8 +80,26 @@ function setForLanguage(val: string, lang: Language | null) {
         return;
     }
 
+    // An emptied language is only dropped on blur, so its field stays while retyping
+    editedLanguages.add(lang);
+    value.value = value.value.patch({
+        [lang]: val,
+    });
+}
+
+function dropEmptyLanguage(lang: Language | null) {
+    if (lang === null || !hasLanguages) {
+        return;
+    }
+
+    // Only a language the user emptied themselves is dropped, not one TInputButton just added
+    const wasEdited = editedLanguages.delete(lang);
+    if (!wasEdited || value.value.getIfExists(lang)) {
+        return;
+    }
+
     const patched = value.value.patch({
-        [lang]: val || null,
+        [lang]: null,
     });
 
     // Nothing left to translate, so drop back to an untranslated value like TInputButton does
