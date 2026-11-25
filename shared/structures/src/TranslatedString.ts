@@ -203,6 +203,24 @@ export class TranslatedString
         return new TranslatedStringPatch(patch);
     }
 
+    /**
+     * All the translations that have been filled in. Empty when nothing has been filled in at all.
+     */
+    get values(): string[] {
+        if (typeof this.translations === 'string') {
+            return [this.translations];
+        }
+        return Object.values(this.translations) as string[];
+    }
+
+    /**
+     * Whether every filled in translation is at least the given amount of characters long.
+     */
+    hasMinimumLength(minimumLength: number): boolean {
+        const values = this.values;
+        return values.length > 0 && values.every(value => value.trim().length >= minimumLength);
+    }
+
     get languages(): Language[] {
         if (typeof this.translations === 'string') {
             return [];

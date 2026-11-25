@@ -229,7 +229,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 event.meta.organizationCache = null;
             }
 
-            event.name = patch.name ?? event.name;
+            event.name = patchObject(event.name, patch.name);
             event.startDate = patch.startDate ?? event.startDate;
             event.endDate = patch.endDate ?? event.endDate;
 
@@ -450,7 +450,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
     static async checkEventLimits(event: Event) {
         const type = await this.getEventType(event.typeId);
 
-        if (event.name.length < 2) {
+        if (!event.name.hasMinimumLength(2)) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Name is too short',

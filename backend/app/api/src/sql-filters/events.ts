@@ -1,4 +1,5 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
@@ -20,7 +21,7 @@ export const eventFilterCompilers: SQLFilterDefinitions = new Map([
     [
         'name',
         createColumnFilter({
-            expression: SQL.column('name'),
+            expression: new SQLTranslatedString(SQL.column('name'), '$.value'),
             type: SQLValueType.String,
             nullable: false,
         }),

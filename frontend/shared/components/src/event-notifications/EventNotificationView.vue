@@ -20,7 +20,7 @@
                         {{ notification.events.length === 1 ? $t('%B9') : $t('%uB') }}
                     </h3>
                     <p v-for="event of notification.events" :key="event.id" class="style-definition-text" @click="isReviewer && notification.events.length !== 1 && openEvent(event)">
-                        <span>{{ notification.events.map(e => e.name).join(', ') }}</span>
+                        <span>{{ notification.events.map(e => e.name.toString()).join(', ') }}</span>
                     </p>
                     <p v-if="notification.events.length === 0" class="style-definition-text style-em">
                         {{ $t('%1FW') }}

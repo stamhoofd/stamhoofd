@@ -265,7 +265,7 @@ export function useRegistrationQuickActions(): QuickActions {
                         leftComponent: RegistrationInvitationIcon,
                         leftProps: { event, group: event.group },
                         prefix: $t('%1S3'),
-                        title: $t('%1Mp', { event: event.name }),
+                        title: $t('%1Mp', { event: event.name.toString() }),
                         description,
                         action: () => openEvent({ event, show }),
                     });
@@ -286,7 +286,7 @@ export function useRegistrationQuickActions(): QuickActions {
                         leftComponent: EventIcon,
                         leftProps: { event },
                         prefix: $t('%1SL'),
-                        title: event.webshopId ? event.name : $t('%1Mp', { event: event.name }),
+                        title: event.webshopId ? event.name.toString() : $t('%1Mp', { event: event.name.toString() }),
                         description: Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate)),
                         action: () => openEvent({ event, show }),
                     });

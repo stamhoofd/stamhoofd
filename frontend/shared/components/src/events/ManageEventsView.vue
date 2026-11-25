@@ -63,7 +63,7 @@ import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
 import { useEventTypes } from '#hooks/useEventTypes.ts';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePresent } from '@browser/navigation';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { Event, isEmptyFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
+import { Event, isEmptyFilter, LimitedFilteredRequest, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref, watch, watchEffect } from 'vue';
@@ -216,7 +216,7 @@ const eventSuggestions = computed(() => {
             suggestions.push(
                 Event.create({
                     id: '',
-                    name: $t('%yd'),
+                    name: TranslatedString.create($t('%yd')),
                     startDate: pointer.toJSDate(),
                     endDate: pointer.toJSDate(),
                 }),

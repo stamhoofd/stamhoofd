@@ -15,7 +15,7 @@ export const EventLogger = new ModelLogger(Event, {
                 'e',
                 AuditLogReplacement.create({
                     id: model.id,
-                    value: model.name,
+                    value: model.name.toString(),
                     type: AuditLogReplacementType.Event,
                 }),
             ],

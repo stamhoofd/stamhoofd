@@ -5,6 +5,7 @@ import {
     Event as EventStruct,
     GroupType,
     TranslatedString,
+    TranslatedStringDecoder,
 } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { Group } from './Group.js';
@@ -21,8 +22,8 @@ export class Event extends QueryableModel {
     })
     id!: string;
 
-    @column({ type: 'string' })
-    name: string;
+    @column({ type: 'json', decoder: TranslatedStringDecoder })
+    name: TranslatedString = new TranslatedString();
 
     @column({ type: 'string' })
     typeId: string;
@@ -108,7 +109,7 @@ export class Event extends QueryableModel {
 
         if (group.type === GroupType.EventRegistration) {
             // Don't change the name of the waiting list
-            group.settings.name = new TranslatedString(this.name);
+            group.settings.name = this.name;
             group.settings.eventId = this.id;
         }
 
