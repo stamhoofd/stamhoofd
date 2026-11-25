@@ -67,7 +67,7 @@ export const passwordLoginIPLimiter = new RateLimiter({
 
 /**
  * A botnet has a fresh IP budget per address, so cap guesses per account too. Only failed
- * attempts count.
+ * attempts count. Keyed with {@link getPasswordLoginAccountKey}.
  */
 export const passwordLoginUsernameLimiter = new RateLimiter({
     limits: [
@@ -81,6 +81,26 @@ export const passwordLoginUsernameLimiter = new RateLimiter({
         },
     ],
 });
+
+/**
+ * The key has to identify the account, not the string that was typed: users.email is
+ * compared case and accent insensitively (and, where the column is still
+ * utf8mb4_unicode_ci, ignoring trailing spaces), so endlessly many distinct usernames
+ * resolve to the same row and would each get their own budget. Guesses against an account
+ * that does not exist fall back to the normalised address, scoped per organization because
+ * the same address can belong to a different user in each one.
+ */
+function getPasswordLoginAccountKey(
+    user: User | undefined,
+    organizationId: string | null,
+    username: string,
+) {
+    if (user) {
+        return user.id;
+    }
+
+    return (organizationId ?? '') + '/' + username.trim().toLowerCase();
+}
 
 export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected bodyDecoder = CreateTokenStruct;
@@ -150,9 +170,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             case 'password': {
-                const username = request.body.username.toLowerCase();
                 passwordLoginIPLimiter.track(request.request.getIP());
-                passwordLoginUsernameLimiter.check(username);
 
                 if (STAMHOOFD.userMode === 'platform') {
                     const platform = await Platform.getSharedPrivateStruct();
@@ -176,11 +194,15 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     }
                 }
 
-                const user = await User.login(
-                    organization?.id ?? null,
+                const organizationId =
+                    STAMHOOFD.userMode === 'platform' ? null : (organization?.id ?? null);
+                const user = await User.getForAuthentication(organizationId, request.body.username);
+                const accountKey = getPasswordLoginAccountKey(
+                    user,
+                    organizationId,
                     request.body.username,
-                    request.body.password,
                 );
+                passwordLoginUsernameLimiter.check(accountKey);
 
                 const errBody = {
                     code: 'invalid_username_or_password',
@@ -189,8 +211,8 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     statusCode: 400,
                 };
 
-                if (!user) {
-                    passwordLoginUsernameLimiter.track(username);
+                if (!user || !(await user.verifyPassword(request.body.password))) {
+                    passwordLoginUsernameLimiter.track(accountKey);
                     throw new SimpleError(errBody);
                 }
 

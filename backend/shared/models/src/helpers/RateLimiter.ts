@@ -39,7 +39,8 @@ export class RateLimitWindow {
     }
 
     /**
-     * Throw if a request would go over the limit, without counting it.
+     * Throw if a request would go over the limit, without counting it. Not pure: an expired
+     * window is still reset here, same as in {@link track}.
      */
     check(key: string, amount = 1, category?: string) {
         this.clearIfExpired();

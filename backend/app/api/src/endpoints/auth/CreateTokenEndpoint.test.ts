@@ -422,6 +422,59 @@ describe('Endpoint.CreateToken', () => {
             ).rejects.toMatchObject({ code: 'rate_limit' });
         });
 
+        test('spelling the username differently does not create a new budget', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                email: 'victim@example.com',
+                password,
+            }).create();
+
+            // users.email is compared case and accent insensitively, so each of these
+            // resolves to the same account
+            const variants = [
+                user.email,
+                'victím@example.com',
+                'vïctim@example.com',
+                'victim@éxample.com',
+                'VICTIM@example.com',
+            ];
+
+            for (let i = 0; i < 10; i++) {
+                await expect(
+                    testServer.test(
+                        endpoint,
+                        attempt(organization, variants[i % variants.length]!, '1.2.3.4'),
+                    ),
+                ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+            }
+
+            await expect(
+                testServer.test(endpoint, attempt(organization, 'vìctim@example.com', '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'rate_limit' });
+        });
+
+        test('a blocked account does not block the same address in another organization', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const other = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, password }).create();
+            await new UserFactory({ organization: other, email: user.email, password }).create();
+
+            for (let i = 0; i < 10; i++) {
+                await expect(
+                    testServer.test(endpoint, attempt(organization, user.email, '1.2.3.4')),
+                ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+            }
+
+            await expect(
+                testServer.test(endpoint, attempt(organization, user.email, '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'rate_limit' });
+
+            await expect(
+                testServer.test(endpoint, attempt(other, user.email, '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+        });
+
         test('a successful login does not count towards the account limit', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
