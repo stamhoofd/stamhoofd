@@ -72,6 +72,9 @@ export interface JudicialRecordCurrentRecord {
 
     /** When a reviewer decided, null while nobody has looked. */
     reviewedAt: Date | null;
+
+    /** Whether the document is still there to be looked at. */
+    hasDocument: boolean;
 }
 
 export class JudicialRecordHelper {
@@ -136,8 +139,10 @@ export class JudicialRecordHelper {
 
         switch (record.reviewDecision) {
             case JudicialRecordReviewDecision.UnderReview:
-                // Nobody has looked yet, so there is no decision to expire.
-                return JudicialRecordStatus.UnderReview;
+                // Nobody has looked yet, so there is no decision to expire. Once retention has taken the
+                // document there is nothing left to look at either, so the member delivers again instead of
+                // waiting on a review that can no longer be carried out.
+                return record.hasDocument ? JudicialRecordStatus.UnderReview : null;
 
             case JudicialRecordReviewDecision.TemporarilyRejected:
                 // The member has to deliver another extract, which is what this status already asks of them,

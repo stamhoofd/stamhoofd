@@ -94,6 +94,15 @@ function decisionStillStands(): SQLWhere {
     );
 }
 
+/** The extract is still stored, so a review can still be carried out. The mirror of `MemberJudicialRecord.hasDocument`. */
+function hasDocument(): SQLWhere {
+    return SQL.where(
+        SQL.jsonValue(SQL.column(JudicialRecord.table, 'file'), '$.value.reference', 'CHAR'),
+        SQLWhereSign.NotEqual,
+        null,
+    );
+}
+
 /**
  * At least one responsibility requires the member to have an extract checked today.
  *
@@ -164,8 +173,10 @@ export function judicialRecordStatusExpression(minimumAges: Map<string, number>)
     // One entry per status: a new JudicialRecordStatus does not compile until SQL decides it too. The first
     // matching condition wins; the status marked `otherwise` is the one left over.
     const conditions: Record<JudicialRecordStatus, SQLWhere | typeof otherwise> = {
+        // Retention takes the document from a record nobody got to, which leaves a review that can no longer
+        // be carried out, so the member falls back to Required and delivers again.
         [JudicialRecordStatus.UnderReview]: currentRecordMatches(
-            reviewDecisionIs(JudicialRecordReviewDecision.UnderReview),
+            reviewDecisionIs(JudicialRecordReviewDecision.UnderReview).and(hasDocument()),
         ).and(required),
 
         // A temporary rejection already asks the member to deliver again, so there is nothing for an expiry

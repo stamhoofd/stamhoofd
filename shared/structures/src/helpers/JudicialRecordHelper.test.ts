@@ -300,12 +300,13 @@ describe('JudicialRecordHelper.getStoredStatus', () => {
 
     function record(
         reviewDecision: JudicialRecordReviewDecision,
-        options: { reviewedAt?: Date | null } = {},
+        options: { reviewedAt?: Date | null; hasDocument?: boolean } = {},
     ): JudicialRecordCurrentRecord {
         return {
             reviewDecision,
             reviewedAt:
                 options.reviewedAt === undefined ? new Date(2026, 0, 1) : options.reviewedAt,
+            hasDocument: options.hasDocument ?? true,
         };
     }
 
@@ -367,6 +368,27 @@ describe('JudicialRecordHelper.getStoredStatus', () => {
 
     test('an unreviewed record cannot expire', () => {
         expect(JudicialRecordHelper.hasExpired(null, atDate)).toBe(false);
+    });
+
+    test('a review nobody got to before retention took the document decides nothing', () => {
+        expect(
+            JudicialRecordHelper.getStoredStatus(
+                record(JudicialRecordReviewDecision.UnderReview, {
+                    reviewedAt: null,
+                    hasDocument: false,
+                }),
+                atDate,
+            ),
+        ).toBeNull();
+    });
+
+    test('a decision stands without the document, which is removed as soon as one is taken', () => {
+        expect(
+            JudicialRecordHelper.getStoredStatus(
+                record(JudicialRecordReviewDecision.Ok, { hasDocument: false }),
+                atDate,
+            ),
+        ).toBe(JudicialRecordStatus.Ok);
     });
 
     test('only NotRequired, Ok and ConditionallyAccepted let a member act', () => {

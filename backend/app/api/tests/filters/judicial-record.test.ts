@@ -17,6 +17,7 @@ import type {
 } from '@stamhoofd/structures';
 import {
     JUDICIAL_RECORD_VALIDITY_YEARS,
+    JudicialRecordFile,
     JudicialRecordHelper,
     JudicialRecordReviewDecision,
     JudicialRecordStatus,
@@ -103,6 +104,9 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
 
             /** Null leaves it unreviewed, which is what UnderReview means. */
             reviewedAt?: Date | null;
+
+            /** Whether the document is still stored. Removed once a reviewer decided, or by retention. */
+            hasDocument?: boolean;
         };
     };
 
@@ -249,6 +253,16 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
                 record: {
                     reviewDecision: JudicialRecordReviewDecision.UnderReview,
                     reviewedAt: null,
+                    hasDocument: true,
+                },
+            },
+            {
+                name: 'delivered, but retention took the document before anyone looked',
+                ...requiredAdult(),
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.UnderReview,
+                    reviewedAt: null,
+                    hasDocument: false,
                 },
             },
             {
@@ -369,15 +383,21 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
         let record: JudicialRecordCurrentRecord | null = null;
 
         if (scenario.record) {
+            const hasDocument = scenario.record.hasDocument ?? false;
+
             const current = new JudicialRecord();
             current.memberId = member.id;
             current.reviewDecision = scenario.record.reviewDecision;
             current.reviewedAt = scenario.record.reviewedAt ?? null;
+            current.file = JudicialRecordFile.create({
+                reference: hasDocument ? `judicial-records/${member.id}.pdf` : null,
+            });
             await current.save();
 
             record = {
                 reviewDecision: scenario.record.reviewDecision,
                 reviewedAt: scenario.record.reviewedAt ?? null,
+                hasDocument,
             };
         }
 
