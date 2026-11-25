@@ -156,6 +156,37 @@ describe('Endpoint.DeliverMemberJudicialRecord', () => {
         });
     }
 
+    const filePart =
+        'Content-Disposition: form-data; name="file"; filename="uittreksel.pdf"\r\nContent-Type: application/pdf\r\n\r\nDit is geen pdf.';
+
+    const textPart = 'Content-Disposition: form-data; name="opmerking"\r\n\r\nEen opmerking.';
+
+    /** A multipart body assembled from raw parts, for the bodies a browser never sends. */
+    function buildParts({
+        token,
+        organizationHost,
+        memberId,
+        parts,
+    }: {
+        token: string;
+        organizationHost: string;
+        memberId: string;
+        parts: string[];
+    }) {
+        const boundary = 'StamhoofdTest';
+        const body = Buffer.from(
+            parts.map((part) => `--${boundary}\r\n${part}\r\n`).join('') + `--${boundary}--\r\n`,
+        );
+
+        return buildUpload({
+            token,
+            organizationHost,
+            memberId,
+            contentType: `multipart/form-data; boundary=${boundary}`,
+            body,
+        });
+    }
+
     test('It answers Ok when the automatic checks settled the delivery', async () => {
         const { organization, token, member } = await setup();
 
@@ -390,6 +421,82 @@ describe('Endpoint.DeliverMemberJudicialRecord', () => {
                         memberId: member.id,
                         contentType: 'multipart/form-data',
                         body: Buffer.from('anything'),
+                    }),
+                ),
+            ).rejects.toThrow(missingFile);
+
+            expect(deliver).not.toHaveBeenCalled();
+        });
+
+        test('It reads the document from a body that also holds a part it did not ask for', async () => {
+            const { organization, token, member } = await setup();
+
+            const response = await testServer.test(
+                endpoint,
+                buildParts({
+                    token: token.accessToken,
+                    organizationHost: organization.getApiHost(),
+                    memberId: member.id,
+                    parts: [filePart, textPart],
+                }),
+            );
+
+            expect(response.body.status).toBe(JudicialRecordStatus.Ok);
+        });
+
+        test('It refuses a body with more parts than it reads', async () => {
+            const { organization, token, member } = await setup();
+
+            await expect(
+                testServer.test(
+                    endpoint,
+                    buildParts({
+                        token: token.accessToken,
+                        organizationHost: organization.getApiHost(),
+                        memberId: member.id,
+                        parts: [filePart, textPart, textPart],
+                    }),
+                ),
+            ).rejects.toThrow(
+                STExpect.simpleError({ code: 'invalid_field', field: 'file', statusCode: 400 }),
+            );
+
+            expect(deliver).not.toHaveBeenCalled();
+        });
+
+        test('It refuses a body with a second document', async () => {
+            const { organization, token, member } = await setup();
+
+            await expect(
+                testServer.test(
+                    endpoint,
+                    buildParts({
+                        token: token.accessToken,
+                        organizationHost: organization.getApiHost(),
+                        memberId: member.id,
+                        parts: [filePart, filePart],
+                    }),
+                ),
+            ).rejects.toThrow(
+                STExpect.simpleError({ code: 'invalid_field', field: 'file', statusCode: 400 }),
+            );
+
+            expect(deliver).not.toHaveBeenCalled();
+        });
+
+        test('It refuses a transfer encoding it cannot read the document through', async () => {
+            const { organization, token, member } = await setup();
+
+            await expect(
+                testServer.test(
+                    endpoint,
+                    buildParts({
+                        token: token.accessToken,
+                        organizationHost: organization.getApiHost(),
+                        memberId: member.id,
+                        parts: [
+                            `Content-Disposition: form-data; name="file"; filename="uittreksel.pdf"\r\nContent-Type: application/pdf\r\nContent-Transfer-Encoding: x-gzip\r\n\r\nDit is geen pdf.`,
+                        ],
                     }),
                 ),
             ).rejects.toThrow(missingFile);

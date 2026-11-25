@@ -138,7 +138,7 @@ export class DeliverMemberJudicialRecordEndpoint extends Endpoint<
         const form = formidable({
             uploadDir: uploadDirectory,
             maxFileSize: MAXIMUM_UPLOAD_SIZE,
-            maxFields: 0,
+            maxFields: 1,
             maxFiles: 1,
             keepExtensions: true,
         });
@@ -193,8 +193,23 @@ export class DeliverMemberJudicialRecordEndpoint extends Endpoint<
         }
 
         if (
+            code === formidableErrors.maxFieldsExceeded ||
+            code === formidableErrors.maxFieldsSizeExceeded ||
+            code === formidableErrors.maxFilesExceeded
+        ) {
+            return new SimpleError({
+                code: 'invalid_field',
+                message: 'The request holds more than the one document that was asked for',
+                human: $t('Laad enkel het pdf-bestand van je uittreksel op.'),
+                field: 'file',
+                statusCode: 400,
+            });
+        }
+
+        if (
             code === formidableErrors.missingMultipartBoundary ||
             code === formidableErrors.malformedMultipart ||
+            code === formidableErrors.unknownTransferEncoding ||
             code === formidableErrors.noEmptyFiles
         ) {
             return this.missingFile();
