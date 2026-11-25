@@ -17,13 +17,22 @@ type ResponseBody = JudicialRecordReviewView;
  * the reviewer's name, email and comment are not theirs to read - a rejection is discussed with them, not
  * handed to them as a line of internal text.
  */
-export class GetMemberJudicialRecordReviewEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetMemberJudicialRecordReviewEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/members/@id/judicial-record/review', { id: String });
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/members/@id/judicial-record/review',
+            { id: String },
+        );
 
         if (params) {
             return [true, params as Params];
@@ -43,12 +52,15 @@ export class GetMemberJudicialRecordReviewEndpoint extends Endpoint<Params, Quer
 
         const record = await JudicialRecordService.getCurrentRecord(member.id);
 
-        return new Response(JudicialRecordReviewView.create({
-            reviewDecision: record.reviewDecision,
-            reviewDetails: record.reviewDetails,
-            reviewedAt: record.reviewedAt,
-            hasDocument: record.file?.reference !== null && record.file?.reference !== undefined,
-            deliveredAt: record.createdAt,
-        }));
+        return new Response(
+            JudicialRecordReviewView.create({
+                reviewDecision: record.reviewDecision,
+                reviewDetails: record.reviewDetails,
+                reviewedAt: record.reviewedAt,
+                hasDocument:
+                    record.file?.reference !== null && record.file?.reference !== undefined,
+                deliveredAt: record.createdAt,
+            }),
+        );
     }
 }

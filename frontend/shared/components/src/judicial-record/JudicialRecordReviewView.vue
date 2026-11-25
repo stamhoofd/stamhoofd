@@ -18,7 +18,8 @@
             </template>
 
             <template v-else>
-                <hr><h2>{{ $t('Automatische controle') }}</h2>
+                <hr>
+                <h2>{{ $t('Automatische controle') }}</h2>
 
                 <JudicialRecordCheckList :report="report" audience="reviewer" />
 
@@ -32,7 +33,8 @@
                     {{ $t('We konden dit document niet weergeven. Download het om het te bekijken.') }}
                 </p>
 
-                <hr><h2>{{ $t('Beoordeling') }}</h2>
+                <hr>
+                <h2>{{ $t('Beoordeling') }}</h2>
 
                 <STList>
                     <STListItem v-for="outcome of judicialRecordReviewOutcomes" :key="outcome" :selectable="true" element-name="label">

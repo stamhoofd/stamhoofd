@@ -1,5 +1,11 @@
 import { Request } from '@node/endpoints';
-import { Image, JudicialRecord, MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
+import {
+    Image,
+    JudicialRecord,
+    MemberFactory,
+    OrganizationFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { JudicialRecordReviewDecision, MemberDetails, Permissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
@@ -27,7 +33,10 @@ describe('Endpoint.ReviewMemberJudicialRecord', () => {
         objects = new Map();
 
         Image.s3Client = {
-            send: (command: { constructor: { name: string }; input: { Key: string; Body?: Uint8Array } }) => {
+            send: (command: {
+                constructor: { name: string };
+                input: { Key: string; Body?: Uint8Array };
+            }) => {
                 const key = command.input.Key;
 
                 switch (command.constructor.name) {
@@ -39,7 +48,9 @@ describe('Endpoint.ReviewMemberJudicialRecord', () => {
                         const body = objects.get(key);
                         return body === undefined
                             ? Promise.reject(new Error('NoSuchKey'))
-                            : Promise.resolve({ Body: { transformToByteArray: () => Promise.resolve(body) } });
+                            : Promise.resolve({
+                                  Body: { transformToByteArray: () => Promise.resolve(body) },
+                              });
                     }
 
                     case 'DeleteObjectCommand':
@@ -94,8 +105,23 @@ describe('Endpoint.ReviewMemberJudicialRecord', () => {
         return { user, token: (await SessionService.createSession(user)).accessToken };
     }
 
-    function reviewRequest({ token, host, memberId, body }: { token: string; host: string; memberId: string; body: unknown }) {
-        const request = Request.buildJson('POST', `/v1/members/${memberId}/judicial-record/review`, host, body);
+    function reviewRequest({
+        token,
+        host,
+        memberId,
+        body,
+    }: {
+        token: string;
+        host: string;
+        memberId: string;
+        body: unknown;
+    }) {
+        const request = Request.buildJson(
+            'POST',
+            `/v1/members/${memberId}/judicial-record/review`,
+            host,
+            body,
+        );
         request.headers.authorization = 'Bearer ' + token;
         return request;
     }
@@ -104,12 +130,18 @@ describe('Endpoint.ReviewMemberJudicialRecord', () => {
         const { organization, member, key } = await setup();
         const { token, user } = await createReviewer(organization);
 
-        await testServer.test(reviewEndpoint, reviewRequest({
-            token,
-            host: organization.getApiHost(),
-            memberId: member.id,
-            body: { reviewDecision: JudicialRecordReviewDecision.PermanentlyRejected, comment: 'Niet in orde.' },
-        }));
+        await testServer.test(
+            reviewEndpoint,
+            reviewRequest({
+                token,
+                host: organization.getApiHost(),
+                memberId: member.id,
+                body: {
+                    reviewDecision: JudicialRecordReviewDecision.PermanentlyRejected,
+                    comment: 'Niet in orde.',
+                },
+            }),
+        );
 
         const records = await JudicialRecord.select().where('memberId', member.id).fetch();
 
@@ -128,12 +160,17 @@ describe('Endpoint.ReviewMemberJudicialRecord', () => {
         }).create();
         const token = (await SessionService.createSession(user)).accessToken;
 
-        await expect(testServer.test(reviewEndpoint, reviewRequest({
-            token,
-            host: organization.getApiHost(),
-            memberId: member.id,
-            body: { reviewDecision: JudicialRecordReviewDecision.Ok, comment: null },
-        }))).rejects.toThrow(STExpect.errorWithCode('not_found'));
+        await expect(
+            testServer.test(
+                reviewEndpoint,
+                reviewRequest({
+                    token,
+                    host: organization.getApiHost(),
+                    memberId: member.id,
+                    body: { reviewDecision: JudicialRecordReviewDecision.Ok, comment: null },
+                }),
+            ),
+        ).rejects.toThrow(STExpect.errorWithCode('not_found'));
     });
 
     test('a member manager cannot read the document either', async () => {
@@ -145,17 +182,29 @@ describe('Endpoint.ReviewMemberJudicialRecord', () => {
         }).create();
         const token = (await SessionService.createSession(user)).accessToken;
 
-        const request = Request.buildJson('GET', `/v1/members/${member.id}/judicial-record/document`, organization.getApiHost(), undefined);
+        const request = Request.buildJson(
+            'GET',
+            `/v1/members/${member.id}/judicial-record/document`,
+            organization.getApiHost(),
+            undefined,
+        );
         request.headers.authorization = 'Bearer ' + token;
 
-        await expect(testServer.test(documentEndpoint, request)).rejects.toThrow(STExpect.errorWithCode('not_found'));
+        await expect(testServer.test(documentEndpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('not_found'),
+        );
     });
 
     test('a reviewer reads the document, and it is not served as a pdf', async () => {
         const { organization, member } = await setup();
         const { token } = await createReviewer(organization);
 
-        const request = Request.buildJson('GET', `/v1/members/${member.id}/judicial-record/document`, organization.getApiHost(), undefined);
+        const request = Request.buildJson(
+            'GET',
+            `/v1/members/${member.id}/judicial-record/document`,
+            organization.getApiHost(),
+            undefined,
+        );
         request.headers.authorization = 'Bearer ' + token;
 
         const response = await testServer.test(documentEndpoint, request);
@@ -171,16 +220,26 @@ describe('Endpoint.ReviewMemberJudicialRecord', () => {
         const { organization, member } = await setup();
         const { token } = await createReviewer(organization);
 
-        await testServer.test(reviewEndpoint, reviewRequest({
-            token,
-            host: organization.getApiHost(),
-            memberId: member.id,
-            body: { reviewDecision: JudicialRecordReviewDecision.Ok, comment: null },
-        }));
+        await testServer.test(
+            reviewEndpoint,
+            reviewRequest({
+                token,
+                host: organization.getApiHost(),
+                memberId: member.id,
+                body: { reviewDecision: JudicialRecordReviewDecision.Ok, comment: null },
+            }),
+        );
 
-        const request = Request.buildJson('GET', `/v1/members/${member.id}/judicial-record/document`, organization.getApiHost(), undefined);
+        const request = Request.buildJson(
+            'GET',
+            `/v1/members/${member.id}/judicial-record/document`,
+            organization.getApiHost(),
+            undefined,
+        );
         request.headers.authorization = 'Bearer ' + token;
 
-        await expect(testServer.test(documentEndpoint, request)).rejects.toThrow(STExpect.errorWithCode('judicial_record_document_removed'));
+        await expect(testServer.test(documentEndpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('judicial_record_document_removed'),
+        );
     });
 });

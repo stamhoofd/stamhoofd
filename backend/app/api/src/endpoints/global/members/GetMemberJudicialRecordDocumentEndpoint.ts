@@ -19,13 +19,22 @@ type ResponseBody = Buffer;
  * logs and referrers, and no authorisation decision can take it back while it is valid. Going through the api
  * keeps the session the only way in, and the document is in the reviewer's browser either way.
  */
-export class GetMemberJudicialRecordDocumentEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetMemberJudicialRecordDocumentEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/members/@id/judicial-record/document', { id: String });
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/members/@id/judicial-record/document',
+            { id: String },
+        );
 
         if (params) {
             return [true, params as Params];

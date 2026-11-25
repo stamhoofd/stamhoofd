@@ -1,6 +1,16 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, StringDecoder, field } from '@common/encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    StringDecoder,
+    field,
+} from '@common/encoding';
 
-import { JudicialRecordReviewDetails, JudicialRecordReviewDecision } from '../members/JudicialRecordReview.js';
+import {
+    JudicialRecordReviewDetails,
+    JudicialRecordReviewDecision,
+} from '../members/JudicialRecordReview.js';
 
 /**
  * The outcome a reviewer recorded for a delivered extract.

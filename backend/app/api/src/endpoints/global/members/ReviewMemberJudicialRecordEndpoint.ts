@@ -21,7 +21,12 @@ type ResponseBody = MembersBlob;
  * only the outcome would have to work out the status it implies, which is exactly the duplication
  * `JudicialRecordStatus` exists to avoid.
  */
-export class ReviewMemberJudicialRecordEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class ReviewMemberJudicialRecordEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     bodyDecoder = JudicialRecordReviewRequest as Decoder<JudicialRecordReviewRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -29,7 +34,11 @@ export class ReviewMemberJudicialRecordEndpoint extends Endpoint<Params, Query, 
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/members/@id/judicial-record/review', { id: String });
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/members/@id/judicial-record/review',
+            { id: String },
+        );
 
         if (params) {
             return [true, params as Params];
