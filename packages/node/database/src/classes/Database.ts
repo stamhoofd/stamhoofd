@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { AsyncLocalStorage } from 'async_hooks';
+import { channel } from 'node:diagnostics_channel';
 import mysql from 'mysql2/promise';
 import net from 'node:net';
 import type { DatabaseStoredValue } from './DatabaseStoredValue.js';
@@ -7,6 +8,25 @@ export type SQLResultRow = Record<string, DatabaseStoredValue>;
 export type SQLResultNamespacedRow = Record<string, SQLResultRow>;
 
 type SelectOptions = { connection?: mysql.PoolConnection; nestTables?: boolean };
+const timing = channel('stamhoofd.database.duration');
+type Operation = 'acquire' | 'select' | 'insert' | 'update' | 'delete' | 'statement';
+
+/** The diagnostic event contains only a wrapper operation, outcome and elapsed milliseconds. */
+function measure<T>(operation: Operation, run: () => Promise<T>): Promise<T> {
+    if (!timing.hasSubscribers) return run();
+    const start = performance.now();
+    return (async () => {
+        let outcome = 'error';
+        try {
+            const result = await run();
+            outcome = 'success';
+            return result;
+        } finally {
+            timing.publish({ operation, outcome, duration: performance.now() - start });
+        }
+    })();
+}
+
 export type PoolOptions = {
     debug?: boolean;
     user?: string;
@@ -150,8 +170,7 @@ export class DatabaseInstance {
     }
 
     async getConnection(): Promise<mysql.PoolConnection> {
-        // Todo: use the settings here to provide a good connection pool
-        return await this.pool.getConnection();
+        return await measure('acquire', () => this.pool.getConnection());
     }
 
     /// Returns the connection of the transaction that is running in the current async context, if any.
@@ -236,11 +255,13 @@ export class DatabaseInstance {
         const explicitConnection = options.connection ?? this.getTransactionConnection();
         const connection: mysql.PoolConnection = explicitConnection ?? (await this.getConnection());
         try {
-            const q = await connection.query({
-                sql: query,
-                nestTables: options.nestTables ?? true,
-                values: values,
-            });
+            const q = await measure('select', () =>
+                connection.query({
+                    sql: query,
+                    nestTables: options.nestTables ?? true,
+                    values: values,
+                }),
+            );
             return [
                 q[0] as (SQLResultNamespacedRow | SQLResultRow)[],
                 q[1] as mysql.FieldPacket[] | undefined,
@@ -260,7 +281,7 @@ export class DatabaseInstance {
         const explicitConnection = useConnection ?? this.getTransactionConnection();
         const connection: mysql.PoolConnection = explicitConnection ?? (await this.getConnection());
         try {
-            const q = await connection.query({ sql: query, values: values });
+            const q = await measure('insert', () => connection.query({ sql: query, values }));
             return [
                 q[0] as { insertId: any; affectedRows: number },
                 q[1] as mysql.FieldPacket[] | undefined,
@@ -285,7 +306,7 @@ export class DatabaseInstance {
         const explicitConnection = useConnection ?? this.getTransactionConnection();
         const connection: mysql.PoolConnection = explicitConnection ?? (await this.getConnection());
         try {
-            const q = await connection.query({ sql: query, values: values });
+            const q = await measure('update', () => connection.query({ sql: query, values }));
             return [
                 q[0] as { changedRows: number; affectedRows: number },
                 q[1] as mysql.FieldPacket[] | undefined,
@@ -305,7 +326,7 @@ export class DatabaseInstance {
         const explicitConnection = useConnection ?? this.getTransactionConnection();
         const connection: mysql.PoolConnection = explicitConnection ?? (await this.getConnection());
         try {
-            const q = await connection.query({ sql: query, values: values });
+            const q = await measure('delete', () => connection.query({ sql: query, values }));
             return [q[0] as { affectedRows: number }, q[1] as mysql.FieldPacket[] | undefined];
         } finally {
             if (!explicitConnection) {
@@ -322,7 +343,7 @@ export class DatabaseInstance {
         const explicitConnection = useConnection ?? this.getTransactionConnection();
         const connection: mysql.PoolConnection = explicitConnection ?? (await this.getConnection());
         try {
-            const q = await connection.query({ sql: query, values: values });
+            const q = await measure('statement', () => connection.query({ sql: query, values }));
             return [q[0] as any, q[1] as any];
         } finally {
             if (!explicitConnection) {

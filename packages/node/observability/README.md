@@ -24,6 +24,21 @@ the application starts. Applications have no dependency on the CLI or socket cli
 Subscribers must catch their own failures because Node treats subscriber exceptions
 as uncaught errors.
 
+## Application metrics
+
+Set `STAM_METRICS_PORT` to an unused TCP port per process to enable a Prometheus
+scrape at `http://127.0.0.1:<port>/metrics`. Vector must scrape from the same
+network namespace. Metrics are off by default and do not enable traces or logs.
+`service_name` is the executable's service name (or `OTEL_SERVICE_NAME`).
+
+The `stamhoofd_db_acquire_duration_milliseconds` histogram measures pool checkout,
+including connection setup and waiting for a slot. `stamhoofd_db_execute_duration_milliseconds`
+measures the driver call after checkout, including result transfer, for the
+`select`, `insert`, `update`, `delete` and `statement` wrapper methods. Explicit
+and transaction connections reuse their checkout; their queries still count.
+Both histograms label completed attempts with `outcome="success"` or `"error"`.
+No SQL, bindings, error details or database identifiers are collected.
+
 ## OTLP configuration
 
 Set `OTEL_EXPORTER_OTLP_ENDPOINT` or signal-specific traces/logs endpoint variables
