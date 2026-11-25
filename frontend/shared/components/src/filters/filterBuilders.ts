@@ -673,11 +673,13 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
 // Events
 export function useAuditLogUIFilterBuilders() {
     const organization = useOrganization();
+    const platform = usePlatform();
     const packages = organization.value?.meta.packages;
     return getAuditLogUIFilterBuilders({
         isPlatform: STAMHOOFD.userMode === 'platform',
         isOrganizationLog: !!organization.value,
         // The admin panel shows logs of all organizations
+        platform: platform.value,
         packages: {
             members: packages?.useMembers ?? true,
             webshops: packages?.useWebshops ?? true,
@@ -714,7 +716,7 @@ const membersPackageTypes = new Set([
  * Types that can not appear in the log that is shown, so they are left out of the filters.
  */
 function getUnavailableAuditLogTypes(context: AuditLogFilterContext): Set<AuditLogType> {
-    const { isPlatform, isOrganizationLog, packages } = context;
+    const { isPlatform, isOrganizationLog, platform, packages } = context;
 
     // Only used for old logs from before types existed; filtering on it is not useful
     const unavailable = new Set<AuditLogType>([AuditLogType.Unknown]);
@@ -727,6 +729,12 @@ function getUnavailableAuditLogTypes(context: AuditLogFilterContext): Set<AuditL
         unavailable.add(AuditLogType.EventNotificationAdded);
         unavailable.add(AuditLogType.EventNotificationEdited);
         unavailable.add(AuditLogType.EventNotificationDeleted);
+    } else {
+        if (platform && !platform.config.featureFlags.includes('event-notifications')) {
+            unavailable.add(AuditLogType.EventNotificationAdded);
+            unavailable.add(AuditLogType.EventNotificationDeleted);
+            unavailable.add(AuditLogType.EventNotificationEdited);
+        }
     }
 
     if (isOrganizationLog) {

@@ -102,7 +102,7 @@ import SegmentedControl from '#inputs/SegmentedControl.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { ArrayDecoder, PatchableArray } from '@common/encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation';
+import { usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
@@ -113,6 +113,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { usePlatform } from '#hooks/usePlatform.ts';
+
+const platform = usePlatform();
 
 const props = withDefaults(
     defineProps<{
@@ -132,7 +134,7 @@ const props = withDefaults(
 
             return [...Object.values(EmailTemplateType)].filter((type) => {
                 if (app === 'admin' || !organization.value) {
-                    return EmailTemplate.allowPlatformLevel(type);
+                    return EmailTemplate.allowPlatformLevel(type, platform.value);
                 }
                 return EmailTemplate.allowOrganizationLevel(type, organization.value, platform.value);
             });
@@ -153,7 +155,6 @@ const organization = useOrganization();
 const present = usePresent();
 const pop = usePop();
 const saving = ref(false);
-const platform = usePlatform();
 
 loadTemplates().catch(console.error);
 

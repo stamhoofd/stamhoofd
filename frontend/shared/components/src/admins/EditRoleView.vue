@@ -79,11 +79,11 @@
                 <p>{{ $t('%Z4') }}</p>
 
                 <STList>
-                    <ResourcePermissionRow :role="patched" :resource="{id: PermissionsResourceKey.All, name: $t('%53'), type: PermissionsResourceType.OrganizationTags }" :inherited-roles="inheritedRoles" :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer, AccessRight.PlatformCreateOrganizations]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow :role="patched" :resource="{id: PermissionsResourceKey.All, name: $t('%53'), type: PermissionsResourceType.OrganizationTags }" :inherited-roles="inheritedRoles" :configurable-access-rights="availableRolesForGroups" type="resource" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow v-for="tag in tags" :key="tag.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: tag.id, name: tag.name, type: PermissionsResourceType.OrganizationTags }" :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer, AccessRight.PlatformCreateOrganizations]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-for="tag in tags" :key="tag.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: tag.id, name: tag.name, type: PermissionsResourceType.OrganizationTags }" :configurable-access-rights="availableRolesForGroups" type="resource" @patch:role="addPatch" />
 
-                    <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.OrganizationTags, patched, tags)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.OrganizationEventNotificationReviewer, AccessRight.PlatformCreateOrganizations]" type="resource" :unlisted="true" @patch:role="addPatch" />
+                    <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.OrganizationTags, patched, tags)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="availableRolesForGroups" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>
             </CategorizedBox>
 
@@ -264,12 +264,12 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { getGroupTypeName, getPermissionLevelName, getPermissionLevelNumber, getUnlistedResources, GroupType, maximumPermissionlevel, PermissionRoleForResponsibility, PermissionsResourceKey, ResourcePermissions } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { useSearchEventsInPeriod } from '#hooks/networking/useGetEvents';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import AccessRightPermissionRow from './components/AccessRightPermissionRow.vue';
 import ResourcePermissionRow from './components/ResourcePermissionRow.vue';
 import { useAdmins } from './hooks/useAdmins';
+import { useSearchEventsInPeriod } from '#hooks/networking/useGetEvents.ts';
 
 const errors = useErrors();
 const auth = useAuth();
@@ -336,6 +336,16 @@ const senders = computed(() => {
 });
 
 const allRoles = computed(() => [patched.value, ...props.inheritedRoles]);
+
+const availableRolesForGroups = computed(() => {
+    const roles = [AccessRight.EventWrite, AccessRight.OrganizationFinanceDirector, AccessRight.PlatformCreateOrganizations];
+
+    if (platform.value.config.featureFlags.includes('event-notifications')) {
+        roles.push(AccessRight.OrganizationEventNotificationReviewer);
+    }
+
+    return roles;
+});
 
 /**
  * The resources of a type that are explicitly granted by this role or one of the inherited roles,
