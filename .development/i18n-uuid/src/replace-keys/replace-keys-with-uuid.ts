@@ -133,6 +133,51 @@ export function findTranslationKeyUsages(fileContent: string): Set<string> {
     return keys;
 }
 
+/**
+ * Matches the start of a `$t(` call that passes a string literal, capturing the opening quote.
+ */
+const literalKeyStart = /\$t\(\s*(['"`])/g;
+
+/**
+ * Returns the source text of every `$t(...)` literal that contains a backslash.
+ *
+ * The extractor stores the literal source text of the argument as the translation value, while the
+ * running code sees the string the escape stands for. So `$t('Foto\'s')` either stores the escape
+ * itself as the value, or - when the escape hides the closing quote - makes the key regexes above
+ * miss the call entirely, leaving it untranslated in every language without warning.
+ */
+export function findEscapedTranslationKeyUsages(fileContent: string): Set<string> {
+    const escaped = new Set<string>();
+
+    for (const match of fileContent.matchAll(literalKeyStart)) {
+        const quote = match[1];
+        const start = match.index + match[0].length;
+        let hasBackslash = false;
+
+        for (let index = start; index < fileContent.length; index++) {
+            const char = fileContent[index];
+
+            if (char === '\\') {
+                hasBackslash = true;
+                index++;
+                continue;
+            }
+            if (char === quote) {
+                if (hasBackslash) {
+                    escaped.add(fileContent.slice(start, index));
+                }
+                break;
+            }
+            // Only a template literal may span lines, so anything else is not a literal key.
+            if (char === '\n' && quote !== '`') {
+                break;
+            }
+        }
+    }
+
+    return escaped;
+}
+
 function createKeyPatterns(key: string): { searchValue: RegExp; replaceValue: (newKey: string) => string }[] {
     const escapedKey = escapeRegExp(key);
     return [
