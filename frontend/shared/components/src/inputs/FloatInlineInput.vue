@@ -10,7 +10,6 @@
                     :aria-label="label ?? undefined"
                     type="text"
                     :inputmode="fractionDigits > 0 ? 'decimal' : 'numeric'"
-                    step="any"
                     @focus="onFocus"
                     @keydown.up.prevent="step(1)"
                     @keydown.down.prevent="step(-1)"
