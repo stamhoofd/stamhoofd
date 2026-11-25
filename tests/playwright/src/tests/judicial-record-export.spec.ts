@@ -69,9 +69,9 @@ test.describe('Judicial record status export @judicial-record-export', () => {
         organizationPeriod.settings.rootCategory?.categoryIds.push(category.id);
         await organizationPeriod.save();
 
-        // Nothing about the judicial record is shown while the feature flag is off
+        // The judicial record column is only offered while the feature flag is on
         const platform = await Platform.getForEditing();
-        platform.config.featureFlags = [judicialRecordFeatureFlag];
+        platform.config.featureFlags.push(judicialRecordFeatureFlag);
         await platform.save();
 
         const asksForExtract = await new PlatformResponsibilityFactory({
