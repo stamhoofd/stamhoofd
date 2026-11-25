@@ -75,7 +75,9 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/members/@id/judicial-record/fetch', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/members/@id/judicial-record/fetch', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -91,7 +93,13 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
 
         // The same audience as delivering: the member's own account, or an administrator with full
         // access to them, who scans the same code when they upload on someone's behalf.
-        if (!member || !(Context.auth.isUserManager(member) || await Context.auth.canAccessMember(member, PermissionLevel.Full))) {
+        if (
+            !member ||
+            !(
+                Context.auth.isUserManager(member) ||
+                (await Context.auth.canAccessMember(member, PermissionLevel.Full))
+            )
+        ) {
             throw Context.auth.memberNotFoundOrNoAccess();
         }
 
@@ -101,7 +109,9 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Not a url of FOD Justitie',
-                human: $t('Deze QR-code komt niet van FOD Justitie. Scan de QR-code op het uittreksel dat je van FOD Justitie kreeg.'),
+                human: $t(
+                    'Deze QR-code komt niet van FOD Justitie. Scan de QR-code op het uittreksel dat je van FOD Justitie kreeg.',
+                ),
                 field: 'url',
                 statusCode: 400,
             });
@@ -203,7 +213,9 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
         return new SimpleError({
             code: 'judicial_record_not_available',
             message: 'FOD Justitie did not return a pdf',
-            human: $t('We konden je uittreksel niet ophalen bij FOD Justitie. Probeer het over 20 minuten nog eens of upload het originele document.'),
+            human: $t(
+                'We konden je uittreksel niet ophalen bij FOD Justitie. Probeer het over 20 minuten nog eens of upload het originele document.',
+            ),
             statusCode: 400,
         });
     }
