@@ -344,6 +344,7 @@ describe('JudicialRecordService.deliver', () => {
 
         expect(record?.reviewDecision).toBe(JudicialRecordReviewDecision.Ok);
         expect(record?.file).toBeNull();
+        expect(record?.identityHash).toBe(member.identityHash);
 
         // Expiry runs from this date, so an automatic approval without one would never expire
         expect(record?.reviewedAt).not.toBeNull();

@@ -73,11 +73,18 @@ export class JudicialRecordService {
         member: Member,
         data: Uint8Array | null,
     ): Promise<JudicialRecordStatus> {
+        const identityHash = member.identityHash;
+
+        if (identityHash === null) {
+            throw new Error('Cannot store a judicial record for a member without an identity hash');
+        }
+
         await this.removeCurrentRecord(member.id);
 
         const record = new JudicialRecord();
         record.id = uuidv4();
         record.memberId = member.id;
+        record.identityHash = identityHash;
 
         if (data === null) {
             record.reviewDecision = JudicialRecordReviewDecision.Ok;

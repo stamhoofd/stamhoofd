@@ -24,6 +24,7 @@ async function setup() {
 
     const record = new JudicialRecord();
     record.memberId = member.id;
+    record.identityHash = member.identityHash!;
     record.reviewDecision = JudicialRecordReviewDecision.ConditionallyAccepted;
     record.reviewedAt = new Date();
     record.reviewDetails = JudicialRecordReviewDetails.create({

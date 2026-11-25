@@ -54,7 +54,8 @@ const otherwise = 'otherwise';
  * Whether the member's current judicial record matches `condition`.
  *
  * A member has one record, so it is found by an indexed equality rather than a max(createdAt) subquery per
- * member.
+ * member. A record whose identity hash no longer matches the member is not found at all: it was granted to a
+ * different name or birth date, so it says nothing about who they are now.
  *
  * Everything about the record is asked inside this subquery, because `judicial_records` is not joined into the
  * query this expression ends up in - the outer query is over `members`.
@@ -64,6 +65,10 @@ function currentRecordMatches(condition: SQLWhere): SQLWhere {
         SQL.select(new SQLCount())
             .from(SQL.table(JudicialRecord.table))
             .where(SQL.column(JudicialRecord.table, 'memberId'), SQL.column('members', 'id'))
+            .where(
+                SQL.column(JudicialRecord.table, 'identityHash'),
+                SQL.column('members', 'identityHash'),
+            )
             .where(condition),
     );
 

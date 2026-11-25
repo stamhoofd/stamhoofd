@@ -44,6 +44,15 @@ export class JudicialRecord extends QueryableModel {
     @column({ type: 'json', decoder: JudicialRecordFile, nullable: true })
     file: JudicialRecordFile | null = null;
 
+    /**
+     * A copy of `members.identityHash` as it stood when this row was written.
+     *
+     * Copied from the member rather than re-derived, so the two can only ever disagree because the member changed.
+     * A member whose name or birth date changes no longer matches it, which is what asks them to deliver again.
+     */
+    @column({ type: 'string' })
+    identityHash: string;
+
     @column({
         type: 'datetime',
         beforeSave(old?: any) {
