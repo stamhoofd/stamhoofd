@@ -28,10 +28,7 @@ import {
     User,
     Webshop,
 } from '@stamhoofd/models';
-import type {
-    EmailRecipient as EmailRecipientStruct,
-    PaymentGeneral,
-} from '@stamhoofd/structures';
+import type { EmailRecipient as EmailRecipientStruct, PaymentGeneral } from '@stamhoofd/structures';
 import {
     BaseOrganization,
     getAppHost,
@@ -730,7 +727,7 @@ export class AuthenticatedStructures {
                 ? await JudicialRecord.select()
                       .where(
                           'memberId',
-                          members.map(m => m.id),
+                          members.map((m) => m.id),
                       )
                       .fetch()
                 : [];
@@ -1005,14 +1002,14 @@ export class AuthenticatedStructures {
                 });
             blob.registrationInvitations = memberRegistrationInvitations.get(blob.id) ?? [];
 
-            const record = judicialRecords.find(r => r.memberId === blob.id);
+            const record = judicialRecords.find((r) => r.memberId === blob.id);
 
             blob.judicialRecord = record
                 ? MemberJudicialRecord.create({
-                        reviewDecision: record.reviewDecision,
-                        reviewedAt: record.reviewedAt,
-                        hasDocument: (record.file?.reference ?? null) !== null,
-                    })
+                      reviewDecision: record.reviewDecision,
+                      reviewedAt: record.reviewedAt,
+                      hasDocument: (record.file?.reference ?? null) !== null,
+                  })
                 : null;
         }
 

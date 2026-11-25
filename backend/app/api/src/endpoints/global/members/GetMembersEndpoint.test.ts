@@ -4273,24 +4273,40 @@ describe('Endpoint.GetMembersEndpoint', () => {
             const { token, members, memberIds } = await setupMembers();
             await approve(members.adult);
 
-            const response = await testServer.test(endpoint, Request.get({
-                path: baseUrl,
-                host: platformHost,
-                query: new LimitedFilteredRequest({ filter: { id: { $in: memberIds } }, sort: [{ key: 'id', order: SortItemDirection.ASC }], limit: 100 }),
-                headers: { authorization: 'Bearer ' + token.accessToken },
-            }));
+            const response = await testServer.test(
+                endpoint,
+                Request.get({
+                    path: baseUrl,
+                    host: platformHost,
+                    query: new LimitedFilteredRequest({
+                        filter: { id: { $in: memberIds } },
+                        sort: [{ key: 'id', order: SortItemDirection.ASC }],
+                        limit: 100,
+                    }),
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                }),
+            );
             expect(response.status).toBe(200);
 
-            const approved = response.body.results.members.find(m => m.id === members.adult.id);
+            const approved = response.body.results.members.find((m) => m.id === members.adult.id);
             expect(approved?.judicialRecord?.reviewDecision).toBe(JudicialRecordReviewDecision.Ok);
 
             // A member who delivered nothing carries no record, rather than an empty one
-            const other = response.body.results.members.find(m => m.id === members.turnsTwentyToday.id);
+            const other = response.body.results.members.find(
+                (m) => m.id === members.turnsTwentyToday.id,
+            );
             expect(other?.judicialRecord).toBeNull();
 
             // And the filter, which reads the database instead of the blob, puts them in the same status
-            expect(await fetchMemberIds({ token, filter: { id: { $in: memberIds }, judicialRecordStatus: { $in: [JudicialRecordStatus.Ok] } } }))
-                .toIncludeSameMembers([members.adult.id]);
+            expect(
+                await fetchMemberIds({
+                    token,
+                    filter: {
+                        id: { $in: memberIds },
+                        judicialRecordStatus: { $in: [JudicialRecordStatus.Ok] },
+                    },
+                }),
+            ).toIncludeSameMembers([members.adult.id]);
         });
 
         test('Lists the members that need an extract', async () => {

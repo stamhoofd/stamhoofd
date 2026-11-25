@@ -69,7 +69,10 @@ export class JudicialRecordService {
      * A member has one record, so the one before it goes first. A failure after that leaves the member without
      * a record, so they are asked to deliver again - the safe direction.
      */
-    private static async store(member: Member, data: Uint8Array | null): Promise<JudicialRecordStatus> {
+    private static async store(
+        member: Member,
+        data: Uint8Array | null,
+    ): Promise<JudicialRecordStatus> {
         await this.removeCurrentRecord(member.id);
 
         const record = new JudicialRecord();
@@ -82,8 +85,7 @@ export class JudicialRecordService {
             // An automatic approval expires like a reviewer's does, and expiry runs from this date, so it is
             // set even though no person decided. A null here would make the approval permanent.
             record.reviewedAt = new Date();
-        }
-        else {
+        } else {
             record.reviewDecision = JudicialRecordReviewDecision.UnderReview;
 
             // Stored before the row that points at it: an object nothing references is swept up by retention,
@@ -95,9 +97,7 @@ export class JudicialRecordService {
 
         await record.save();
 
-        return data === null
-            ? JudicialRecordStatus.Ok
-            : JudicialRecordStatus.UnderReview;
+        return data === null ? JudicialRecordStatus.Ok : JudicialRecordStatus.UnderReview;
     }
 
     /**
@@ -130,11 +130,16 @@ export class JudicialRecordService {
             });
         }
 
-        if (request.outcome === JudicialRecordReviewDecision.ConditionallyAccepted && comment.length === 0) {
+        if (
+            request.outcome === JudicialRecordReviewDecision.ConditionallyAccepted &&
+            comment.length === 0
+        ) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'A conditional acceptance needs its conditions',
-                human: $t('Schrijf op onder welke voorwaarden dit lid mag werken met minderjarigen.'),
+                human: $t(
+                    'Schrijf op onder welke voorwaarden dit lid mag werken met minderjarigen.',
+                ),
                 field: 'comment',
                 statusCode: 400,
             });
@@ -169,9 +174,7 @@ export class JudicialRecordService {
 
     /** The member's record, the one a decision is recorded on. */
     static async getCurrentRecord(memberId: string): Promise<JudicialRecord> {
-        const records = await JudicialRecord.select()
-            .where('memberId', memberId)
-            .fetch();
+        const records = await JudicialRecord.select().where('memberId', memberId).fetch();
 
         const record = records[0];
 
@@ -215,7 +218,7 @@ export class JudicialRecordService {
         const { status, description } = JudicialRecordHelper.getForMember({
             firstName: member.details.firstName,
             birthDay: member.details.birthDay,
-            responsibilities: records.map(record => ({
+            responsibilities: records.map((record) => ({
                 startDate: record.startDate,
                 endDate: record.endDate,
                 minimumAge: minimumAges.get(record.responsibilityId) ?? null,
@@ -226,10 +229,13 @@ export class JudicialRecordService {
             throw new SimpleError({
                 code: 'judicial_record_not_required',
                 message: 'No judicial record extract is required for this member',
-                human: $t('Er is geen uittreksel uit het strafregister nodig voor {name}. {reason}', {
-                    name: member.details.firstName,
-                    reason: description,
-                }),
+                human: $t(
+                    'Er is geen uittreksel uit het strafregister nodig voor {name}. {reason}',
+                    {
+                        name: member.details.firstName,
+                        reason: description,
+                    },
+                ),
                 statusCode: 400,
             });
         }

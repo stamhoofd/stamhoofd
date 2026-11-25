@@ -1,4 +1,11 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, StringDecoder, field } from '@common/encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    StringDecoder,
+    field,
+} from '@common/encoding';
 
 /**
  * The outcome a reviewer gave a delivered extract, or that nobody has looked at it yet.

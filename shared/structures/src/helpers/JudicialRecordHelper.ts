@@ -84,7 +84,13 @@ export class JudicialRecordHelper {
      * This is also where the feature flag is answered: everything the feature shows or asks for hangs off this
      * one question, so turning the flag off hides all of it without a second check anywhere else.
      */
-    static asksForExtract({ platform, organization }: { platform: Platform; organization?: Organization | null }): boolean {
+    static asksForExtract({
+        platform,
+        organization,
+    }: {
+        platform: Platform;
+        organization?: Organization | null;
+    }): boolean {
         if (!hasJudicialRecordFeature({ platform, organization })) {
             return false;
         }
@@ -92,7 +98,7 @@ export class JudicialRecordHelper {
         return [
             ...platform.config.responsibilities,
             ...(organization?.privateMeta?.responsibilities ?? []),
-        ].some(responsibility => responsibility.judicialRecordMinimumAge !== null);
+        ].some((responsibility) => responsibility.judicialRecordMinimumAge !== null);
     }
 
     static getStatusName(status: JudicialRecordStatus): string {
@@ -120,7 +126,10 @@ export class JudicialRecordHelper {
      * Null means fall back to the responsibilities: there is no usable record, so the member is in the same
      * position as one who never delivered.
      */
-    static getStoredStatus(record: JudicialRecordCurrentRecord | null, atDate: Date = new Date()): JudicialRecordStatus | null {
+    static getStoredStatus(
+        record: JudicialRecordCurrentRecord | null,
+        atDate: Date = new Date(),
+    ): JudicialRecordStatus | null {
         if (record === null) {
             return null;
         }
@@ -139,10 +148,14 @@ export class JudicialRecordHelper {
                 return this.hasExpired(record.reviewedAt, atDate) ? null : JudicialRecordStatus.Ok;
 
             case JudicialRecordReviewDecision.ConditionallyAccepted:
-                return this.hasExpired(record.reviewedAt, atDate) ? null : JudicialRecordStatus.ConditionallyAccepted;
+                return this.hasExpired(record.reviewedAt, atDate)
+                    ? null
+                    : JudicialRecordStatus.ConditionallyAccepted;
 
             case JudicialRecordReviewDecision.PermanentlyRejected:
-                return this.hasExpired(record.reviewedAt, atDate) ? null : JudicialRecordStatus.PermanentlyRejected;
+                return this.hasExpired(record.reviewedAt, atDate)
+                    ? null
+                    : JudicialRecordStatus.PermanentlyRejected;
         }
     }
 
@@ -152,7 +165,12 @@ export class JudicialRecordHelper {
             return false;
         }
 
-        return Formatter.luxon(reviewedAt).startOf('day').plus({ years: JUDICIAL_RECORD_VALIDITY_YEARS }).toJSDate() <= atDate;
+        return (
+            Formatter.luxon(reviewedAt)
+                .startOf('day')
+                .plus({ years: JUDICIAL_RECORD_VALIDITY_YEARS })
+                .toJSDate() <= atDate
+        );
     }
 
     /**
@@ -167,14 +185,24 @@ export class JudicialRecordHelper {
     }
 
     /** Whether the member holds this responsibility on `atDate`. */
-    static holdsResponsibility(responsibility: JudicialRecordResponsibility, atDate: Date): boolean {
-        return responsibility.startDate <= atDate && (responsibility.endDate === null || responsibility.endDate > atDate);
+    static holdsResponsibility(
+        responsibility: JudicialRecordResponsibility,
+        atDate: Date,
+    ): boolean {
+        return (
+            responsibility.startDate <= atDate &&
+            (responsibility.endDate === null || responsibility.endDate > atDate)
+        );
     }
 
     /**
      * Whether this single responsibility requires the member to have an extract checked on `atDate`.
      */
-    static requiresExtract({ responsibility, birthDay, atDate = new Date() }: {
+    static requiresExtract({
+        responsibility,
+        birthDay,
+        atDate = new Date(),
+    }: {
         responsibility: JudicialRecordResponsibility;
         birthDay: Date | null;
         atDate?: Date;
@@ -195,7 +223,13 @@ export class JudicialRecordHelper {
     /**
      * The judicial record status of the member on `atDate`, with the reason behind it.
      */
-    static getForMember({ firstName, birthDay, responsibilities, record = null, atDate = new Date() }: {
+    static getForMember({
+        firstName,
+        birthDay,
+        responsibilities,
+        record = null,
+        atDate = new Date(),
+    }: {
         /** Used in the description, so it talks about the member by name. */
         firstName: string;
         birthDay: Date | null;
@@ -205,14 +239,17 @@ export class JudicialRecordHelper {
         record?: JudicialRecordCurrentRecord | null;
         atDate?: Date;
     }): JudicialRecordForMember {
-        const requiresExtract = responsibilities.some(responsibility => this.requiresExtract({ responsibility, birthDay, atDate }));
+        const requiresExtract = responsibilities.some((responsibility) =>
+            this.requiresExtract({ responsibility, birthDay, atDate }),
+        );
 
         // A delivered outcome only says anything while an extract is actually required: a member who no longer
         // holds a responsibility that asks for one is NotRequired, whatever they delivered before.
         const stored = requiresExtract ? this.getStoredStatus(record, atDate) : null;
 
-        const status = stored
-            ?? (requiresExtract ? JudicialRecordStatus.Required : JudicialRecordStatus.NotRequired);
+        const status =
+            stored ??
+            (requiresExtract ? JudicialRecordStatus.Required : JudicialRecordStatus.NotRequired);
 
         /** The earliest date an extract is required from, over the responsibilities the member holds on `atDate`. */
         let requiredFrom: Date | null = null;
@@ -221,12 +258,16 @@ export class JudicialRecordHelper {
         let requiredFromAge: number | null = null;
 
         for (const responsibility of responsibilities) {
-            if (responsibility.minimumAge === null || !this.holdsResponsibility(responsibility, atDate)) {
+            if (
+                responsibility.minimumAge === null ||
+                !this.holdsResponsibility(responsibility, atDate)
+            ) {
                 continue;
             }
 
             const minimumAgeDate = this.getMinimumAgeDate(birthDay, responsibility.minimumAge);
-            const reachesAgeLater = minimumAgeDate !== null && minimumAgeDate > responsibility.startDate;
+            const reachesAgeLater =
+                minimumAgeDate !== null && minimumAgeDate > responsibility.startDate;
             const date = reachesAgeLater ? minimumAgeDate : responsibility.startDate;
 
             if (requiredFrom === null || date < requiredFrom) {
@@ -236,7 +277,11 @@ export class JudicialRecordHelper {
         }
 
         if (requiredFrom === null) {
-            if (!responsibilities.some(responsibility => this.holdsResponsibility(responsibility, atDate))) {
+            if (
+                !responsibilities.some((responsibility) =>
+                    this.holdsResponsibility(responsibility, atDate),
+                )
+            ) {
                 return {
                     status,
                     description: $t(`{name} heeft geen functies.`, { name: firstName }),
@@ -245,7 +290,10 @@ export class JudicialRecordHelper {
 
             return {
                 status,
-                description: $t(`Geen enkele functie van {name} vraagt een uittreksel uit het strafregister.`, { name: firstName }),
+                description: $t(
+                    `Geen enkele functie van {name} vraagt een uittreksel uit het strafregister.`,
+                    { name: firstName },
+                ),
             };
         }
 
@@ -257,8 +305,16 @@ export class JudicialRecordHelper {
             return {
                 status,
                 description: requiresExtract
-                    ? $t(`Sinds {date}, de {ordinal} verjaardag van {name}.`, { date, ordinal, name: firstName })
-                    : $t(`Vanaf {date}, de {ordinal} verjaardag van {name}.`, { date, ordinal, name: firstName }),
+                    ? $t(`Sinds {date}, de {ordinal} verjaardag van {name}.`, {
+                          date,
+                          ordinal,
+                          name: firstName,
+                      })
+                    : $t(`Vanaf {date}, de {ordinal} verjaardag van {name}.`, {
+                          date,
+                          ordinal,
+                          name: firstName,
+                      }),
             };
         }
 

@@ -42,16 +42,19 @@ const PDF = new TextEncoder().encode('Dit is geen pdf.');
 /** Stands in for the chain the signature validated, which only reaches the revocation call. */
 const CERTIFICATE_PATH = [{ signer: true }];
 
-function report(statuses: Partial<Record<JudicialRecordCheck, JudicialRecordCheckStatus>> = {}): JudicialRecordCheckReport {
+function report(
+    statuses: Partial<Record<JudicialRecordCheck, JudicialRecordCheckStatus>> = {},
+): JudicialRecordCheckReport {
     return JudicialRecordCheckReport.create({
-        checks: judicialRecordChecksInOrder.map(check => JudicialRecordCheckResult.create({
-            check,
-            status: statuses[check] ?? JudicialRecordCheckStatus.Passed,
-            reason: 'Een reden.',
-        })),
+        checks: judicialRecordChecksInOrder.map((check) =>
+            JudicialRecordCheckResult.create({
+                check,
+                status: statuses[check] ?? JudicialRecordCheckStatus.Passed,
+                reason: 'Een reden.',
+            }),
+        ),
     });
 }
-
 
 /**
  * Stands in for the bucket. Keyed by object key, so a test can assert that the document is actually gone and
@@ -69,7 +72,10 @@ function useFakeBucket(): Map<string, Uint8Array> {
         objects.clear();
 
         Image.s3Client = {
-            send: (command: { constructor: { name: string }; input: { Key: string; Body?: Uint8Array } }) => {
+            send: (command: {
+                constructor: { name: string };
+                input: { Key: string; Body?: Uint8Array };
+            }) => {
                 const key = command.input.Key;
 
                 switch (command.constructor.name) {
@@ -82,7 +88,9 @@ function useFakeBucket(): Map<string, Uint8Array> {
                         if (body === undefined) {
                             return Promise.reject(new Error('NoSuchKey ' + key));
                         }
-                        return Promise.resolve({ Body: { transformToByteArray: () => Promise.resolve(body) } });
+                        return Promise.resolve({
+                            Body: { transformToByteArray: () => Promise.resolve(body) },
+                        });
                     }
 
                     case 'DeleteObjectCommand':
@@ -90,7 +98,9 @@ function useFakeBucket(): Map<string, Uint8Array> {
                         return Promise.resolve({});
 
                     default:
-                        return Promise.reject(new Error('Unexpected command ' + command.constructor.name));
+                        return Promise.reject(
+                            new Error('Unexpected command ' + command.constructor.name),
+                        );
                 }
             },
         } as any;
@@ -136,7 +146,10 @@ describe('JudicialRecordService.deliver', () => {
         await platform.save();
         await Platform.clearCache();
 
-        responsibility = await new PlatformResponsibilityFactory({ name: 'Judicial record needed', judicialRecordMinimumAge: 18 }).create();
+        responsibility = await new PlatformResponsibilityFactory({
+            name: 'Judicial record needed',
+            judicialRecordMinimumAge: 18,
+        }).create();
         await Platform.clearCache();
 
         // Defined by the organization itself, so it lives in its privateMeta and not in the platform config
@@ -148,9 +161,18 @@ describe('JudicialRecordService.deliver', () => {
         organization.privateMeta.responsibilities.push(organizationResponsibility);
         await organization.save();
 
-        member = await new MemberFactory({ organization, birthDay: { year: 1990, month: 1, day: 1 } }).create();
-        memberWithoutResponsibility = await new MemberFactory({ organization, birthDay: { year: 1990, month: 1, day: 1 } }).create();
-        memberWithOrganizationResponsibility = await new MemberFactory({ organization, birthDay: { year: 1990, month: 1, day: 1 } }).create();
+        member = await new MemberFactory({
+            organization,
+            birthDay: { year: 1990, month: 1, day: 1 },
+        }).create();
+        memberWithoutResponsibility = await new MemberFactory({
+            organization,
+            birthDay: { year: 1990, month: 1, day: 1 },
+        }).create();
+        memberWithOrganizationResponsibility = await new MemberFactory({
+            organization,
+            birthDay: { year: 1990, month: 1, day: 1 },
+        }).create();
 
         await new MemberResponsibilityRecordFactory({
             member,
@@ -193,9 +215,15 @@ describe('JudicialRecordService.deliver', () => {
     }
 
     test('refuses a member no responsibility asks an extract of, without reading the document', async () => {
-        checkJudicialRecordMock.mockResolvedValue({ report: report(), certificatePath: CERTIFICATE_PATH });
+        checkJudicialRecordMock.mockResolvedValue({
+            report: report(),
+            certificatePath: CERTIFICATE_PATH,
+        });
 
-        const error = await deliver({ member: memberWithoutResponsibility }).then(() => null, (error: unknown) => error);
+        const error = await deliver({ member: memberWithoutResponsibility }).then(
+            () => null,
+            (error: unknown) => error,
+        );
 
         expect(isSimpleError(error) && error.code).toBe('judicial_record_not_required');
         expect(checkJudicialRecordMock).not.toHaveBeenCalled();
@@ -244,7 +272,10 @@ describe('JudicialRecordService.deliver', () => {
     });
 
     test('answers Ok when every check passed', async () => {
-        checkJudicialRecordMock.mockResolvedValue({ report: report(), certificatePath: CERTIFICATE_PATH });
+        checkJudicialRecordMock.mockResolvedValue({
+            report: report(),
+            certificatePath: CERTIFICATE_PATH,
+        });
 
         expect(await deliver()).toBe(JudicialRecordStatus.Ok);
 
@@ -259,24 +290,37 @@ describe('JudicialRecordService.deliver', () => {
     });
 
     test('refuses a delivery whose certificate chain is revoked', async () => {
-        checkJudicialRecordMock.mockResolvedValue({ report: report(), certificatePath: CERTIFICATE_PATH });
-        assertChainNotRevokedMock.mockRejectedValue(new SimpleError({
-            code: 'certificate_revoked',
-            message: 'A certificate in the chain is revoked',
-            human: 'Vraag een nieuw uittreksel aan bij FOD Justitie.',
-            statusCode: 400,
-        }));
+        checkJudicialRecordMock.mockResolvedValue({
+            report: report(),
+            certificatePath: CERTIFICATE_PATH,
+        });
+        assertChainNotRevokedMock.mockRejectedValue(
+            new SimpleError({
+                code: 'certificate_revoked',
+                message: 'A certificate in the chain is revoked',
+                human: 'Vraag een nieuw uittreksel aan bij FOD Justitie.',
+                statusCode: 400,
+            }),
+        );
 
-        const error = await deliver().then(() => null, (error: unknown) => error);
+        const error = await deliver().then(
+            () => null,
+            (error: unknown) => error,
+        );
 
         expect(isSimpleError(error) && error.code).toBe('certificate_revoked');
     });
 
     /** Regression test for the organization in scope that used to be a parameter of `deliver`. */
     test('finds a requirement an organization defined itself, with no organization in scope', async () => {
-        checkJudicialRecordMock.mockResolvedValue({ report: report(), certificatePath: CERTIFICATE_PATH });
+        checkJudicialRecordMock.mockResolvedValue({
+            report: report(),
+            certificatePath: CERTIFICATE_PATH,
+        });
 
-        expect(await deliver({ member: memberWithOrganizationResponsibility })).toBe(JudicialRecordStatus.Ok);
+        expect(await deliver({ member: memberWithOrganizationResponsibility })).toBe(
+            JudicialRecordStatus.Ok,
+        );
     });
 
     test('answers UnderReview on a failed content check', async () => {
@@ -289,7 +333,10 @@ describe('JudicialRecordService.deliver', () => {
     });
 
     test('keeps no document for an extract the checks approved, and dates the approval', async () => {
-        checkJudicialRecordMock.mockResolvedValue({ report: report(), certificatePath: CERTIFICATE_PATH });
+        checkJudicialRecordMock.mockResolvedValue({
+            report: report(),
+            certificatePath: CERTIFICATE_PATH,
+        });
 
         await deliver();
 
@@ -367,7 +414,12 @@ describe('JudicialRecordService.review', () => {
     let originalFeatureFlags: string[];
     let member: Member;
 
-    const reviewer = { id: 'user-1', name: 'Simon', email: 'simon@example.com', organizationId: null };
+    const reviewer = {
+        id: 'user-1',
+        name: 'Simon',
+        email: 'simon@example.com',
+        organizationId: null,
+    };
 
     beforeAll(async () => {
         organization = await new OrganizationFactory({}).create();
@@ -381,10 +433,16 @@ describe('JudicialRecordService.review', () => {
         await platform.save();
         await Platform.clearCache();
 
-        responsibility = await new PlatformResponsibilityFactory({ name: 'Review needed', judicialRecordMinimumAge: 18 }).create();
+        responsibility = await new PlatformResponsibilityFactory({
+            name: 'Review needed',
+            judicialRecordMinimumAge: 18,
+        }).create();
         await Platform.clearCache();
 
-        member = await new MemberFactory({ organization, birthDay: { year: 1990, month: 1, day: 1 } }).create();
+        member = await new MemberFactory({
+            organization,
+            birthDay: { year: 1990, month: 1, day: 1 },
+        }).create();
 
         await new MemberResponsibilityRecordFactory({
             member,
@@ -430,7 +488,10 @@ describe('JudicialRecordService.review', () => {
         const delivered = await deliverForReview();
         const reference = delivered.file!.reference!;
 
-        await review({ outcome: JudicialRecordReviewDecision.TemporarilyRejected, comment: '  Niet leesbaar.  ' });
+        await review({
+            outcome: JudicialRecordReviewDecision.TemporarilyRejected,
+            comment: '  Niet leesbaar.  ',
+        });
 
         const record = await currentRecord(member);
 
@@ -451,7 +512,10 @@ describe('JudicialRecordService.review', () => {
     test('lets a conditional acceptance through once its conditions are written down', async () => {
         await deliverForReview();
 
-        await review({ outcome: JudicialRecordReviewDecision.ConditionallyAccepted, comment: 'Nooit alleen met een groep.' });
+        await review({
+            outcome: JudicialRecordReviewDecision.ConditionallyAccepted,
+            comment: 'Nooit alleen met een groep.',
+        });
 
         const record = await currentRecord(member);
 
@@ -462,17 +526,27 @@ describe('JudicialRecordService.review', () => {
     test('refuses a conditional acceptance without conditions, and keeps the document', async () => {
         const delivered = await deliverForReview();
 
-        const error = await review({ outcome: JudicialRecordReviewDecision.ConditionallyAccepted }).then(() => null, (error: unknown) => error);
+        const error = await review({
+            outcome: JudicialRecordReviewDecision.ConditionallyAccepted,
+        }).then(
+            () => null,
+            (error: unknown) => error,
+        );
 
         expect(isSimpleError(error) && error.field).toBe('comment');
         expect(objects.has(delivered.file!.reference!)).toBe(true);
-        expect((await currentRecord(member))?.reviewDecision).toBe(JudicialRecordReviewDecision.UnderReview);
+        expect((await currentRecord(member))?.reviewDecision).toBe(
+            JudicialRecordReviewDecision.UnderReview,
+        );
     });
 
     test('refuses UnderReview, which is the absence of a decision rather than one', async () => {
         const delivered = await deliverForReview();
 
-        const error = await review({ outcome: JudicialRecordReviewDecision.UnderReview }).then(() => null, (error: unknown) => error);
+        const error = await review({ outcome: JudicialRecordReviewDecision.UnderReview }).then(
+            () => null,
+            (error: unknown) => error,
+        );
 
         expect(isSimpleError(error) && error.field).toBe('reviewDecision');
         expect(objects.has(delivered.file!.reference!)).toBe(true);
@@ -484,20 +558,29 @@ describe('JudicialRecordService.review', () => {
         const error = await review({
             outcome: JudicialRecordReviewDecision.Ok,
             comment: 'a'.repeat(JUDICIAL_RECORD_MAX_COMMENT_LENGTH + 1),
-        }).then(() => null, (error: unknown) => error);
+        }).then(
+            () => null,
+            (error: unknown) => error,
+        );
 
         expect(isSimpleError(error) && error.field).toBe('comment');
     });
 
     test('refuses to review a member who delivered nothing', async () => {
-        const other = await new MemberFactory({ organization, birthDay: { year: 1990, month: 1, day: 1 } }).create();
+        const other = await new MemberFactory({
+            organization,
+            birthDay: { year: 1990, month: 1, day: 1 },
+        }).create();
 
         const error = await JudicialRecordService.review({
             member: other,
             outcome: JudicialRecordReviewDecision.Ok,
             comment: null,
             reviewer,
-        }).then(() => null, (error: unknown) => error);
+        }).then(
+            () => null,
+            (error: unknown) => error,
+        );
 
         expect(isSimpleError(error) && error.code).toBe('judicial_record_not_found');
     });

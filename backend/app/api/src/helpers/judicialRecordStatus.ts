@@ -1,8 +1,21 @@
 import type { Organization } from '@stamhoofd/models';
 import { JudicialRecord, MemberResponsibilityRecord, Platform } from '@stamhoofd/models';
 import type { SQLExpression, SQLWhere } from '@stamhoofd/sql';
-import { SQL, SQLCount, SQLDateAddYears, SQLNow, SQLNull, SQLScalar, SQLSubQuery, SQLWhereSign } from '@stamhoofd/sql';
-import { JUDICIAL_RECORD_VALIDITY_YEARS, JudicialRecordReviewDecision, JudicialRecordStatus } from '@stamhoofd/structures';
+import {
+    SQL,
+    SQLCount,
+    SQLDateAddYears,
+    SQLNow,
+    SQLNull,
+    SQLScalar,
+    SQLSubQuery,
+    SQLWhereSign,
+} from '@stamhoofd/sql';
+import {
+    JUDICIAL_RECORD_VALIDITY_YEARS,
+    JudicialRecordReviewDecision,
+    JudicialRecordStatus,
+} from '@stamhoofd/structures';
 
 /**
  * Minimum age per responsibility, for the responsibilities that ask for a judicial record extract.
@@ -10,7 +23,9 @@ import { JUDICIAL_RECORD_VALIDITY_YEARS, JudicialRecordReviewDecision, JudicialR
  * Organizations can define their own responsibilities next to the platform ones, so the responsibilities of the
  * organization in scope are included when there is one.
  */
-export async function getJudicialRecordMinimumAges(organization: Organization | null): Promise<Map<string, number>> {
+export async function getJudicialRecordMinimumAges(
+    organization: Organization | null,
+): Promise<Map<string, number>> {
     const platform = await Platform.getSharedStruct();
 
     const responsibilities = [
@@ -69,8 +84,11 @@ function reviewDecisionIs(...statuses: JudicialRecordReviewDecision[]): SQLWhere
 function decisionStillStands(): SQLWhere {
     const reviewedAt = SQL.column(JudicialRecord.table, 'reviewedAt');
 
-    return SQL.where(reviewedAt, null)
-        .or(new SQLDateAddYears(reviewedAt, new SQLScalar(JUDICIAL_RECORD_VALIDITY_YEARS)), SQLWhereSign.Greater, new SQLNow());
+    return SQL.where(reviewedAt, null).or(
+        new SQLDateAddYears(reviewedAt, new SQLScalar(JUDICIAL_RECORD_VALIDITY_YEARS)),
+        SQLWhereSign.Greater,
+        new SQLNow(),
+    );
 }
 
 /**
@@ -88,7 +106,10 @@ function requiresExtract(minimumAges: Map<string, number>): SQLWhere {
     // The minimum age of the responsibility this record points to
     let minimumAge: SQLExpression = new SQLNull();
     for (const [responsibilityId, age] of minimumAges) {
-        minimumAge = SQL.if(SQL.column(MemberResponsibilityRecord.table, 'responsibilityId'), responsibilityId)
+        minimumAge = SQL.if(
+            SQL.column(MemberResponsibilityRecord.table, 'responsibilityId'),
+            responsibilityId,
+        )
             .then(age)
             .else(minimumAge);
     }
@@ -96,14 +117,25 @@ function requiresExtract(minimumAges: Map<string, number>): SQLWhere {
     const records = new SQLSubQuery(
         SQL.select(new SQLCount())
             .from(SQL.table(MemberResponsibilityRecord.table))
-            .where(SQL.column(MemberResponsibilityRecord.table, 'memberId'), SQL.column('members', 'id'))
+            .where(
+                SQL.column(MemberResponsibilityRecord.table, 'memberId'),
+                SQL.column('members', 'id'),
+            )
             // 1. the responsibility asks for an extract
-            .where(SQL.column(MemberResponsibilityRecord.table, 'responsibilityId'), [...minimumAges.keys()])
+            .where(SQL.column(MemberResponsibilityRecord.table, 'responsibilityId'), [
+                ...minimumAges.keys(),
+            ])
             // 2. the member holds it today
             .where(startDate, SQLWhereSign.LessEqual, new SQLNow())
             .where(SQL.where(endDate, null).or(endDate, SQLWhereSign.Greater, new SQLNow()))
             // 3. and has reached its minimum age (no birth day means adult)
-            .where(SQL.where(birthDay, null).or(new SQLDateAddYears(birthDay, minimumAge), SQLWhereSign.LessEqual, new SQLNow())),
+            .where(
+                SQL.where(birthDay, null).or(
+                    new SQLDateAddYears(birthDay, minimumAge),
+                    SQLWhereSign.LessEqual,
+                    new SQLNow(),
+                ),
+            ),
     );
 
     return SQL.where(records, SQLWhereSign.Greater, 0);
@@ -140,11 +172,15 @@ export function judicialRecordStatusExpression(minimumAges: Map<string, number>)
         ).and(required),
 
         [JudicialRecordStatus.PermanentlyRejected]: currentRecordMatches(
-            reviewDecisionIs(JudicialRecordReviewDecision.PermanentlyRejected).and(decisionStillStands()),
+            reviewDecisionIs(JudicialRecordReviewDecision.PermanentlyRejected).and(
+                decisionStillStands(),
+            ),
         ).and(required),
 
         [JudicialRecordStatus.ConditionallyAccepted]: currentRecordMatches(
-            reviewDecisionIs(JudicialRecordReviewDecision.ConditionallyAccepted).and(decisionStillStands()),
+            reviewDecisionIs(JudicialRecordReviewDecision.ConditionallyAccepted).and(
+                decisionStillStands(),
+            ),
         ).and(required),
 
         [JudicialRecordStatus.Ok]: currentRecordMatches(

@@ -1,6 +1,10 @@
 import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
-import { JudicialRecordFile, JudicialRecordReviewDetails, JudicialRecordReviewDecision } from '@stamhoofd/structures';
+import {
+    JudicialRecordFile,
+    JudicialRecordReviewDetails,
+    JudicialRecordReviewDecision,
+} from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -16,7 +20,9 @@ export class JudicialRecord extends QueryableModel {
     static table = 'judicial_records';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -39,7 +45,8 @@ export class JudicialRecord extends QueryableModel {
     file: JudicialRecordFile | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -51,7 +58,8 @@ export class JudicialRecord extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;

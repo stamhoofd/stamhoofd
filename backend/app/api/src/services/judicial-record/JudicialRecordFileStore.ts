@@ -20,14 +20,16 @@ export class JudicialRecordFileStore {
 
         const key = this.prefix() + 'judicial-records/' + recordId + '/' + uuidv4() + '.pdf';
 
-        await Image.getS3Client().send(new PutObjectCommand({
-            Bucket: STAMHOOFD.SPACES_BUCKET,
-            Key: key,
-            Body: data,
-            ContentType: CONTENT_TYPE,
-            ContentDisposition: 'attachment',
-            ACL: 'private',
-        }));
+        await Image.getS3Client().send(
+            new PutObjectCommand({
+                Bucket: STAMHOOFD.SPACES_BUCKET,
+                Key: key,
+                Body: data,
+                ContentType: CONTENT_TYPE,
+                ContentDisposition: 'attachment',
+                ACL: 'private',
+            }),
+        );
 
         return key;
     }
@@ -35,10 +37,12 @@ export class JudicialRecordFileStore {
     static async read(key: string): Promise<Uint8Array> {
         this.assertConfigured();
 
-        const response = await Image.getS3Client().send(new GetObjectCommand({
-            Bucket: STAMHOOFD.SPACES_BUCKET,
-            Key: key,
-        }));
+        const response = await Image.getS3Client().send(
+            new GetObjectCommand({
+                Bucket: STAMHOOFD.SPACES_BUCKET,
+                Key: key,
+            }),
+        );
 
         if (!response.Body) {
             throw new SimpleError({
@@ -59,21 +63,31 @@ export class JudicialRecordFileStore {
     static async remove(key: string): Promise<void> {
         this.assertConfigured();
 
-        await Image.getS3Client().send(new DeleteObjectCommand({
-            Bucket: STAMHOOFD.SPACES_BUCKET,
-            Key: key,
-        }));
+        await Image.getS3Client().send(
+            new DeleteObjectCommand({
+                Bucket: STAMHOOFD.SPACES_BUCKET,
+                Key: key,
+            }),
+        );
     }
 
     /** Keeps every environment that shares a bucket out of each other's objects, as Image and UploadFile do. */
     private static prefix(): string {
-        const parts: (string | undefined | null)[] = [STAMHOOFD.SPACES_PREFIX, STAMHOOFD.environment !== 'production' ? STAMHOOFD.environment : null];
+        const parts: (string | undefined | null)[] = [
+            STAMHOOFD.SPACES_PREFIX,
+            STAMHOOFD.environment !== 'production' ? STAMHOOFD.environment : null,
+        ];
 
-        return parts.flatMap(part => part ? [part + '/'] : []).join('');
+        return parts.flatMap((part) => (part ? [part + '/'] : [])).join('');
     }
 
     private static assertConfigured(): void {
-        if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
+        if (
+            !STAMHOOFD.SPACES_BUCKET ||
+            !STAMHOOFD.SPACES_ENDPOINT ||
+            !STAMHOOFD.SPACES_KEY ||
+            !STAMHOOFD.SPACES_SECRET
+        ) {
             throw new SimpleError({
                 code: 'not_available',
                 message: 'File storage is not configured',
