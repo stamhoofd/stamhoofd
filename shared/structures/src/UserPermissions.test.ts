@@ -1,4 +1,5 @@
 import { ObjectData } from '@common/encoding';
+import { TestUtils } from '@stamhoofd/test-utils';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { AccessRightHelper } from './AccessRight.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
@@ -546,6 +547,67 @@ describe('Unit.UserPermissions', () => {
                 AccessRight.OrganizationEventNotificationReviewer,
                 AccessRight.MemberManageNRN,
             ]);
+        });
+
+        test('an organization cannot grant the right to review judicial record extracts in platform mode', () => {
+            // A review holds for every organization the member is registered in, so only the platform hands it out
+            TestUtils.setEnvironment('userMode', 'platform');
+
+            const role = PermissionRoleDetailed.create({
+                id: 'role-1',
+                name: 'Hoofdbeheerder',
+                level: PermissionLevel.Full,
+                accessRights: [AccessRight.MemberReviewJudicialRecord],
+            });
+
+            const userPermissions = UserPermissions.create({
+                organizationPermissions: new Map([
+                    [
+                        'organization-1',
+                        Permissions.create({
+                            level: PermissionLevel.Full,
+                            roles: [PermissionRole.create({ id: role.id, name: role.name })],
+                        }),
+                    ],
+                ]),
+            });
+
+            const result = userPermissions.forWithoutInherit(
+                createOrganization({ id: 'organization-1', roles: [role] }),
+                createPlatform(),
+            );
+
+            expect(result).not.toBeNull();
+
+            // Neither by naming it in a role, nor through the full access that grants every other right
+            expect(result!.hasFullAccess()).toBe(true);
+            expect(result!.hasAccessRight(AccessRight.MemberManageNRN)).toBe(true);
+            expect(result!.hasAccessRight(AccessRight.MemberReviewJudicialRecord)).toBe(false);
+        });
+
+        test('an organization holds the right to review judicial record extracts in organization mode', () => {
+            // There is no second organization for a review to bind, so leaving it platform-only would leave
+            // nobody able to review at all.
+            TestUtils.setEnvironment('userMode', 'organization');
+
+            const userPermissions = UserPermissions.create({
+                organizationPermissions: new Map([
+                    [
+                        'organization-1',
+                        Permissions.create({
+                            level: PermissionLevel.Full,
+                        }),
+                    ],
+                ]),
+            });
+
+            const result = userPermissions.forWithoutInherit(
+                createOrganization({ id: 'organization-1' }),
+                createPlatform(),
+            );
+
+            expect(result).not.toBeNull();
+            expect(result!.hasAccessRight(AccessRight.MemberReviewJudicialRecord)).toBe(true);
         });
     });
 });
