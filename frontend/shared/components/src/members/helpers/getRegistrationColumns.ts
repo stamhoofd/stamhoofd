@@ -153,7 +153,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
         asksForJudicialRecord
             ? new Column<ObjectType, JudicialRecordStatus>({
                     id: 'member.judicialRecordStatus',
-                    name: $t(`Uittreksel uit het strafregister`),
+                    name: $t('Uittreksel uit het strafregister'),
                     enabled: false,
                     getValue: registration => registration.member.judicialRecord.status,
                     format: status => JudicialRecordHelper.getStatusName(status),
