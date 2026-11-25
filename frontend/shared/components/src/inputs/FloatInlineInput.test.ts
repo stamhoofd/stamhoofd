@@ -307,4 +307,3 @@ test('Stays clickable while the input is empty', async () => {
 
     expect(field().offsetWidth).toBeGreaterThan(4);
 });
-
