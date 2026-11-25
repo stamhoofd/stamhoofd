@@ -7,6 +7,7 @@ import {
     MFAToken,
     PasswordToken,
     Platform,
+    RateLimiter,
     Token,
     User,
     WebauthnCredential,
@@ -47,6 +48,70 @@ type Body =
     | MFAGrantStruct;
 type ResponseBody = TokenStruct;
 
+/**
+ * Counts every attempt, also a successful one: this is what bounds the password hashing
+ * work an anonymous caller can trigger. Loose, because a club shares one address.
+ */
+export const passwordLoginIPLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 60,
+            duration: 60 * 1000,
+        },
+        {
+            limit: 300,
+            duration: 15 * 60 * 1000,
+        },
+    ],
+});
+
+/**
+ * A botnet has a fresh IP budget per address, so cap guesses per account too. Only failed
+ * attempts count. Keyed with {@link getPasswordLoginAccountKey}.
+ */
+export const passwordLoginUsernameLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 10,
+            duration: 5 * 60 * 1000,
+        },
+        {
+            limit: 30,
+            duration: 60 * 60 * 1000,
+        },
+    ],
+});
+
+/**
+ * The key has to identify the account, not the string that was typed: users.email is
+ * compared case and accent insensitively (and, where the column is still
+ * utf8mb4_unicode_ci, ignoring trailing spaces), so endlessly many distinct usernames
+ * resolve to the same row and would each get their own budget. Guesses against an account
+ * that does not exist fall back to the normalised address.
+ *
+ * Both halves are scoped to the organization the request was made for, never to the one the
+ * resolved user belongs to. getForAuthentication falls back to the platform level row when an
+ * organization has no row of its own, so a platform level account answers on every
+ * organization's host: keying it on the user alone would share one budget across all of them,
+ * and an exhausted budget on one host would then tell an attacker that the address is a
+ * platform level account rather than no account at all. The cost is that such an account gets a
+ * budget per organization in organization mode; in platform mode organizationId is always null,
+ * so there is a single budget as before.
+ */
+function getPasswordLoginAccountKey(
+    user: User | undefined,
+    organizationId: string | null,
+    username: string,
+) {
+    const scope = (organizationId ?? '') + '/';
+
+    if (user) {
+        return scope + user.id;
+    }
+
+    return scope + username.trim().toLowerCase();
+}
+
 export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected bodyDecoder = CreateTokenStruct;
 
@@ -69,7 +134,6 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // - add required CAPTCHA after x failed attempts for a given username (no matter if the username exists or not)
         // - if, even after the CAPTCHAs, the account reaches a given count of failed attempts, the account should be locked out for an hour or even a day (only login endpoint)
         // - check if not multiple attempts for the same username are started in parallel
-        // - Limit the amount of failed attemps by IP (will only make it a bit harder)
         // - Detect attacks on random accounts (using email list + most used passwords) and temorary require CAPTCHA on all accounts
         const organization = await Context.setOptionalOrganizationScope({
             willAuthenticate: false,
@@ -116,6 +180,8 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             case 'password': {
+                passwordLoginIPLimiter.track(request.request.getIP());
+
                 if (STAMHOOFD.userMode === 'platform') {
                     const platform = await Platform.getSharedPrivateStruct();
                     const config = platform.config.loginMethods.get(LoginMethod.Password);
@@ -138,11 +204,15 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     }
                 }
 
-                const user = await User.login(
-                    organization?.id ?? null,
+                const organizationId =
+                    STAMHOOFD.userMode === 'platform' ? null : (organization?.id ?? null);
+                const user = await User.getForAuthentication(organizationId, request.body.username);
+                const accountKey = getPasswordLoginAccountKey(
+                    user,
+                    organizationId,
                     request.body.username,
-                    request.body.password,
                 );
+                passwordLoginUsernameLimiter.check(accountKey);
 
                 const errBody = {
                     code: 'invalid_username_or_password',
@@ -151,8 +221,8 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     statusCode: 400,
                 };
 
-                if (!user) {
-                    // TODO: increase counter
+                if (!user || !(await user.verifyPassword(request.body.password))) {
+                    passwordLoginUsernameLimiter.track(accountKey);
                     throw new SimpleError(errBody);
                 }
 
