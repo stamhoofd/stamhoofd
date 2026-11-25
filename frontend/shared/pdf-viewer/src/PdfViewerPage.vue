@@ -65,7 +65,7 @@ const failed = ref(false);
 const aspectRatio = computed(() => ownAspectRatio.value ?? props.defaultAspectRatio);
 
 const style = computed(() => ({
-    aspectRatio: `${aspectRatio.value}`,
+    'aspectRatio': `${aspectRatio.value}`,
     // pdf.js sizes the text layer with these: css pixels per pdf unit, rounded to whole pixels
     '--total-scale-factor': props.displayWidth !== null && pageWidth.value !== null ? `${props.displayWidth / pageWidth.value}` : undefined,
     '--scale-round-x': '1px',
@@ -101,8 +101,7 @@ async function renderTextLayer(loadedPage: PDFPageProxy) {
 
     try {
         await textLayer.render();
-    }
-    catch (error) {
+    } catch (error) {
         // Only the selection is missing then: the page itself is on the canvas
         if (!(error instanceof Error && error.name === 'AbortException')) {
             console.error('Failed to lay out the text of pdf page', props.pageNumber, error);
@@ -178,8 +177,7 @@ async function render() {
             failed.value = false;
             void renderTextLayer(page);
         }
-    }
-    catch (error) {
+    } catch (error) {
         if (current !== generation || error instanceof RenderingCancelledException) {
             return;
         }
@@ -201,8 +199,7 @@ watch(() => [props.document, props.pageNumber], () => {
 watch([() => props.width, near], () => {
     if (near.value) {
         void render();
-    }
-    else {
+    } else {
         discard();
     }
 });
@@ -221,8 +218,7 @@ onMounted(() => {
         observer.observe(el.value);
 
         onBeforeUnmount(() => observer.disconnect());
-    }
-    catch (error) {
+    } catch (error) {
         // Without an IntersectionObserver every page renders at once, which still works.
         console.error('No IntersectionObserver, rendering all pdf pages at once', error);
         near.value = true;

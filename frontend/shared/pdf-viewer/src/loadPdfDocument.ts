@@ -39,8 +39,7 @@ export async function loadPdfDocument(data: Uint8Array): Promise<LoadedPdf> {
                 worker.destroy();
             },
         };
-    }
-    catch (error) {
+    } catch (error) {
         worker.destroy();
         throw error;
     }

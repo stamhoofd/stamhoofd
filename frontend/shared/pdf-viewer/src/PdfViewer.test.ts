@@ -201,8 +201,7 @@ test('It renders without AbortSignal.any, which iOS below 17.4 lacks', async () 
         }, { timeout: 10_000 });
 
         expect(any).not.toHaveBeenCalled();
-    }
-    finally {
+    } finally {
         any.mockRestore();
     }
 });

@@ -141,8 +141,7 @@ async function load(data: Uint8Array) {
         emit('loaded', { pageCount: loaded.document.numPages });
         currentPage = 1;
         emit('page', 1);
-    }
-    catch (error) {
+    } catch (error) {
         if (current !== generation) {
             return;
         }
@@ -284,8 +283,7 @@ onMounted(() => {
         observer.observe(el.value);
 
         onBeforeUnmount(() => observer.disconnect());
-    }
-    catch (error) {
+    } catch (error) {
         // Without a ResizeObserver the pages keep the resolution they were first rendered at.
         console.error('No ResizeObserver, pdf pages will not be re-rendered on resize', error);
     }
