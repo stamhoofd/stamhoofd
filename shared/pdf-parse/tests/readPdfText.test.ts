@@ -189,6 +189,14 @@ describe('readDatedLabelledValue', () => {
     test('is null when no line carries the label', () => {
         expect(readDatedLabelledValue(['BLANCO STRAFREGISTER (05/10/2026)'], [label])).toBeNull();
     });
+
+    test('throws on a template carrying a second date placeholder', () => {
+        expect(() => readDatedLabelledValue([sentence, url], ['Geldig van {date} tot {date} via'])).toThrow('exactly one {date}');
+    });
+
+    test('throws on a template carrying no date placeholder', () => {
+        expect(() => readDatedLabelledValue([sentence, url], ['De authenticiteit van dit uittreksel kan tot 01/02/2027 gecontroleerd worden via'])).toThrow('exactly one {date}');
+    });
 });
 
 describe('parsePrintedDate', () => {

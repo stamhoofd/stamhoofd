@@ -129,13 +129,19 @@ const DATE_PLACEHOLDER = '{date}';
  * Date and value come back together because read by two calls they could resolve against different
  * lines and disagree, with no way for a caller to notice. Here they are the pair printed on one
  * line, or nothing.
+ *
+ * Throws when a template does not hold exactly one `{date}`, rather than reading a sentence nobody
+ * described.
  */
 export function readDatedLabelledValue(lines: string[], labels: readonly string[]): { date: Date; value: string } | null {
     for (const label of labels) {
-        const [before, after] = collapseSpaces(label).split(DATE_PLACEHOLDER);
+        const [before, after, ...rest] = collapseSpaces(label).split(DATE_PLACEHOLDER);
+        if (after === undefined || rest.length > 0) {
+            throw new Error(`Label template "${label}" has to carry exactly one ${DATE_PLACEHOLDER}.`);
+        }
 
         // ` ?` rather than `\s*`, as in `readMarkerDate`
-        const pattern = new RegExp(`^${escapeRegExp(before ?? '')} ?(${PRINTED_DATE}) ?${escapeRegExp(after ?? '')} ?[:：](.*)$`, 'iu');
+        const pattern = new RegExp(`^${escapeRegExp(before)} ?(${PRINTED_DATE}) ?${escapeRegExp(after)} ?[:：](.*)$`, 'iu');
 
         for (const [index, line] of lines.entries()) {
             const match = pattern.exec(collapseSpaces(line));
