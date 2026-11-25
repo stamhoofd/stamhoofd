@@ -1657,6 +1657,8 @@ async function addWaitingList() {
             name: TranslatedString.create($t('%yh') + ' ' + patchedGroup.value.settings.name.toString()),
             registrationStartDate: patchedGroup.value.settings.registrationStartDate ? new Date(patchedGroup.value.settings.registrationStartDate) : null,
             registrationEndDate: patchedGroup.value.settings.registrationEndDate ? new Date(patchedGroup.value.settings.registrationEndDate) : null,
+            startDate: patchedPeriod.value.period.getDefaultGroupStartDate(),
+            endDate: new Date(patchedPeriod.value.period.endDate),
         }),
         status: patchedGroup.value.status,
     });

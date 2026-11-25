@@ -20,6 +20,8 @@ export function useCreateGroupView(saveHandler?: (patch: AutoEncoderPatchType<Or
             periodId: period.period.id,
             settings: GroupSettings.create({
                 genderType: organization.value.meta.genderType === OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale,
+                startDate: period.period.getDefaultGroupStartDate(),
+                endDate: new Date(period.period.endDate),
             }),
             privateSettings: GroupPrivateSettings.create({}),
             status: GroupStatus.Closed,
