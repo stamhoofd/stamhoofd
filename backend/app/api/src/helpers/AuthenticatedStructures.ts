@@ -14,6 +14,7 @@ import {
     Event,
     Group,
     Invoice,
+    JudicialRecord,
     Member,
     MemberPlatformMembership,
     MemberResponsibilityRecord,
@@ -32,6 +33,7 @@ import {
     BaseOrganization,
     getAppHost,
     ImpersonatedBy,
+    MemberJudicialRecord,
     OrganizationPrivateMetaData,
 } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
@@ -716,6 +718,25 @@ export class AuthenticatedStructures {
                       .where('periodId', relevantPeriodIds)
                       .fetch()
                 : [];
+
+        // The judicial record of each member, one row per member at most. Without it the member list and the
+        // member view would disagree, the list reading the status from SQL and the view falling back to
+        // Required for an approved member.
+        const judicialRecords =
+            members.length > 0
+                ? await JudicialRecord.select()
+                      .where(
+                          'memberId',
+                          members.map((m) => m.id),
+                      )
+                      .fetch()
+                : [];
+
+        // The reviewer's comment is the condition or the reason behind the decision, so the member it is about
+        // reads it. For everyone else it stays with the review endpoint.
+        const ownMemberIds = new Set(
+            members.filter((m) => Context.auth.isUserManager(m)).map((m) => m.id),
+        );
         const registrationInvitations =
             members.length > 0
                 ? await RegistrationInvitation.select()
@@ -986,6 +1007,19 @@ export class AuthenticatedStructures {
                     return r.getStructure(group);
                 });
             blob.registrationInvitations = memberRegistrationInvitations.get(blob.id) ?? [];
+
+            const record = judicialRecords.find((r) => r.memberId === blob.id);
+
+            blob.judicialRecord = record
+                ? MemberJudicialRecord.create({
+                      reviewDecision: record.reviewDecision,
+                      reviewedAt: record.reviewedAt,
+                      hasDocument: (record.file?.reference ?? null) !== null,
+                      comment: ownMemberIds.has(blob.id)
+                          ? (record.reviewDetails?.comment ?? null)
+                          : null,
+                  })
+                : null;
         }
 
         return MembersBlob.create({

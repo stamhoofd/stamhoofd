@@ -910,6 +910,7 @@ export class PlatformMember implements ObjectWithRecords {
                     this.getResponsibility(record, { requireLoaded: true })
                         ?.judicialRecordMinimumAge ?? null,
             })),
+            record: this.patchedMember.judicialRecord,
         });
     }
 

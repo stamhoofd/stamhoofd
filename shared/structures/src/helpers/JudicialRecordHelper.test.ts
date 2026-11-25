@@ -2,8 +2,16 @@ import { MemberResponsibility } from '../MemberResponsibility.js';
 import { Organization } from '../Organization.js';
 import { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
 import { Platform, PlatformConfig } from '../Platform.js';
-import type { JudicialRecordResponsibility } from './JudicialRecordHelper.js';
-import { JudicialRecordHelper, JudicialRecordStatus } from './JudicialRecordHelper.js';
+import { JudicialRecordReviewDecision } from '../members/JudicialRecordReview.js';
+import type {
+    JudicialRecordCurrentRecord,
+    JudicialRecordResponsibility,
+} from './JudicialRecordHelper.js';
+import {
+    JUDICIAL_RECORD_VALIDITY_YEARS,
+    JudicialRecordHelper,
+    JudicialRecordStatus,
+} from './JudicialRecordHelper.js';
 import { judicialRecordFeatureFlag } from './judicialRecordFeature.js';
 
 describe('JudicialRecordHelper.getForMember', () => {
@@ -284,5 +292,152 @@ describe('JudicialRecordHelper.asksForExtract', () => {
                 ),
             }),
         ).toBe(true);
+    });
+});
+
+describe('JudicialRecordHelper.getStoredStatus', () => {
+    const atDate = new Date(2026, 5, 15);
+
+    function record(
+        reviewDecision: JudicialRecordReviewDecision,
+        options: { reviewedAt?: Date | null; hasDocument?: boolean } = {},
+    ): JudicialRecordCurrentRecord {
+        return {
+            reviewDecision,
+            reviewedAt:
+                options.reviewedAt === undefined ? new Date(2026, 0, 1) : options.reviewedAt,
+            hasDocument: options.hasDocument ?? true,
+        };
+    }
+
+    /** Every review outcome, and the status it gives the member: one for one, nothing collapsed. */
+    const mapping: [JudicialRecordReviewDecision, JudicialRecordStatus][] = [
+        [JudicialRecordReviewDecision.UnderReview, JudicialRecordStatus.UnderReview],
+        [JudicialRecordReviewDecision.Ok, JudicialRecordStatus.Ok],
+        [
+            JudicialRecordReviewDecision.ConditionallyAccepted,
+            JudicialRecordStatus.ConditionallyAccepted,
+        ],
+        [
+            JudicialRecordReviewDecision.TemporarilyRejected,
+            JudicialRecordStatus.TemporarilyRejected,
+        ],
+        [
+            JudicialRecordReviewDecision.PermanentlyRejected,
+            JudicialRecordStatus.PermanentlyRejected,
+        ],
+    ];
+
+    test.each(mapping)('%s gives the member %s', (reviewDecision, expected) => {
+        expect(JudicialRecordHelper.getStoredStatus(record(reviewDecision), atDate)).toBe(expected);
+    });
+
+    test('a conditional acceptance permits, but is not an unconditional one', () => {
+        const status = JudicialRecordHelper.getStoredStatus(
+            record(JudicialRecordReviewDecision.ConditionallyAccepted),
+            atDate,
+        );
+
+        expect(status).toBe(JudicialRecordStatus.ConditionallyAccepted);
+        expect(status).not.toBe(JudicialRecordStatus.Ok);
+    });
+
+    test('an approval older than the validity window decides nothing', () => {
+        const expired = new Date(atDate);
+        expired.setFullYear(expired.getFullYear() - JUDICIAL_RECORD_VALIDITY_YEARS);
+        expired.setDate(expired.getDate() - 1);
+
+        expect(
+            JudicialRecordHelper.getStoredStatus(
+                record(JudicialRecordReviewDecision.Ok, { reviewedAt: expired }),
+                atDate,
+            ),
+        ).toBeNull();
+    });
+
+    test('a temporary rejection does not expire, because it already asks for a new extract', () => {
+        const longAgo = new Date(2000, 0, 1);
+
+        expect(
+            JudicialRecordHelper.getStoredStatus(
+                record(JudicialRecordReviewDecision.TemporarilyRejected, { reviewedAt: longAgo }),
+                atDate,
+            ),
+        ).toBe(JudicialRecordStatus.TemporarilyRejected);
+    });
+
+    test('an unreviewed record cannot expire', () => {
+        expect(JudicialRecordHelper.hasExpired(null, atDate)).toBe(false);
+    });
+
+    test('a review nobody got to before retention took the document decides nothing', () => {
+        expect(
+            JudicialRecordHelper.getStoredStatus(
+                record(JudicialRecordReviewDecision.UnderReview, {
+                    reviewedAt: null,
+                    hasDocument: false,
+                }),
+                atDate,
+            ),
+        ).toBeNull();
+    });
+
+    test('a decision stands without the document, which is removed as soon as one is taken', () => {
+        expect(
+            JudicialRecordHelper.getStoredStatus(
+                record(JudicialRecordReviewDecision.Ok, { hasDocument: false }),
+                atDate,
+            ),
+        ).toBe(JudicialRecordStatus.Ok);
+    });
+
+    test('only NotRequired, Ok and ConditionallyAccepted let a member act', () => {
+        const permitted = Object.values(JudicialRecordStatus).filter(
+            (status) =>
+                status === JudicialRecordStatus.NotRequired ||
+                status === JudicialRecordStatus.Ok ||
+                status === JudicialRecordStatus.ConditionallyAccepted,
+        );
+
+        expect(permitted).toHaveLength(3);
+        expect(Object.values(JudicialRecordStatus)).toHaveLength(7);
+    });
+});
+
+describe('JudicialRecordHelper.getEarliestReviewedAtStillStanding', () => {
+    test('is the boundary hasExpired draws, to the millisecond', () => {
+        const atDate = new Date(2029, 0, 5, 9, 0);
+        const boundary = JudicialRecordHelper.getEarliestReviewedAtStillStanding(atDate);
+
+        expect(JudicialRecordHelper.hasExpired(boundary, atDate)).toBe(false);
+        expect(JudicialRecordHelper.hasExpired(new Date(boundary.getTime() - 1), atDate)).toBe(
+            true,
+        );
+    });
+
+    test('the time of day a decision was taken does not move the boundary', () => {
+        // Both ends are written as instants, because the window is counted in Belgian days:
+        // new Date(y, m, d, h) is that clock time wherever the test runs, which lands on a different
+        // Brussels day in a zone far enough from ours.
+        const atDate = new Date(Date.UTC(2029, 0, 5, 8, 0)); // 09:00 in Brussels
+        const boundary = JudicialRecordHelper.getEarliestReviewedAtStillStanding(atDate);
+
+        // The same day of the year, JUDICIAL_RECORD_VALIDITY_YEARS earlier, reviewed at 14:00 Brussels:
+        // expired on this date whatever the clock said back then
+        const reviewedAt = new Date(Date.UTC(2029 - JUDICIAL_RECORD_VALIDITY_YEARS, 0, 5, 13, 0));
+
+        expect(JudicialRecordHelper.hasExpired(reviewedAt, atDate)).toBe(true);
+        expect(reviewedAt.getTime()).toBeLessThan(boundary.getTime());
+    });
+
+    test('holds on a leap day, where the window does not shift by whole years at both ends', () => {
+        for (const atDate of [new Date(2027, 1, 28, 9, 0), new Date(2028, 1, 29, 9, 0)]) {
+            const boundary = JudicialRecordHelper.getEarliestReviewedAtStillStanding(atDate);
+
+            expect(JudicialRecordHelper.hasExpired(boundary, atDate)).toBe(false);
+            expect(JudicialRecordHelper.hasExpired(new Date(boundary.getTime() - 1), atDate)).toBe(
+                true,
+            );
+        }
     });
 });

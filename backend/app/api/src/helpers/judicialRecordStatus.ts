@@ -1,5 +1,5 @@
 import type { Organization } from '@stamhoofd/models';
-import { MemberResponsibilityRecord, Platform } from '@stamhoofd/models';
+import { JudicialRecord, MemberResponsibilityRecord, Platform } from '@stamhoofd/models';
 import type { SQLExpression, SQLWhere } from '@stamhoofd/sql';
 import {
     SQL,
@@ -11,7 +11,11 @@ import {
     SQLSubQuery,
     SQLWhereSign,
 } from '@stamhoofd/sql';
-import { JudicialRecordStatus } from '@stamhoofd/structures';
+import {
+    JudicialRecordHelper,
+    JudicialRecordReviewDecision,
+    JudicialRecordStatus,
+} from '@stamhoofd/structures';
 
 /**
  * Minimum age per responsibility, for the responsibilities that ask for a judicial record extract.
@@ -47,13 +51,57 @@ const fallbackStatus = JudicialRecordStatus.NotRequired;
 const otherwise = 'otherwise';
 
 /**
- * Marks a status nothing can produce yet.
+ * Whether the member's current judicial record matches `condition`.
  *
- * All of `JudicialRecordStatus` exists from the start, but a member cannot deliver an extract until later in
- * this stack, so the delivered outcomes have no row to read and no condition to match. They are listed here
- * anyway: the map is exhaustive over the enum, which is what makes a forgotten status a compile error.
+ * A member has one record, so it is found by an indexed equality rather than a max(createdAt) subquery per
+ * member.
+ *
+ * Everything about the record is asked inside this subquery, because `judicial_records` is not joined into the
+ * query this expression ends up in - the outer query is over `members`.
  */
-const notYet = 'notYet';
+function currentRecordMatches(condition: SQLWhere): SQLWhere {
+    const records = new SQLSubQuery(
+        SQL.select(new SQLCount())
+            .from(SQL.table(JudicialRecord.table))
+            .where(SQL.column(JudicialRecord.table, 'memberId'), SQL.column('members', 'id'))
+            .where(condition),
+    );
+
+    return SQL.where(records, SQLWhereSign.Greater, 0);
+}
+
+/** The review outcomes a record may carry. */
+function reviewDecisionIs(...statuses: JudicialRecordReviewDecision[]): SQLWhere {
+    return SQL.where(SQL.column(JudicialRecord.table, 'reviewDecision'), statuses);
+}
+
+/**
+ * A decision this old no longer stands, so the member is back to having to deliver one.
+ *
+ * The boundary comes from `JudicialRecordHelper.getEarliestReviewedAtStillStanding` rather than being computed
+ * here: `hasExpired` reads the Brussels day a decision was taken, which the database cannot work out on its own
+ * (its time zone is whatever it is, and its time zone tables need not even be loaded). Validity runs from the
+ * review and not from the document, because the document is deleted as soon as a decision is made and nothing
+ * can be recomputed from it.
+ */
+function decisionStillStands(): SQLWhere {
+    const reviewedAt = SQL.column(JudicialRecord.table, 'reviewedAt');
+
+    return SQL.where(reviewedAt, null).or(
+        reviewedAt,
+        SQLWhereSign.GreaterEqual,
+        JudicialRecordHelper.getEarliestReviewedAtStillStanding(),
+    );
+}
+
+/** The extract is still stored, so a review can still be carried out. The mirror of `MemberJudicialRecord.hasDocument`. */
+function hasDocument(): SQLWhere {
+    return SQL.where(
+        SQL.jsonValue(SQL.column(JudicialRecord.table, 'file'), '$.value.reference', 'CHAR'),
+        SQLWhereSign.NotEqual,
+        null,
+    );
+}
 
 /**
  * At least one responsibility requires the member to have an extract checked today.
@@ -117,15 +165,43 @@ export function judicialRecordStatusExpression(minimumAges: Map<string, number>)
         return new SQLScalar(fallbackStatus);
     }
 
+    // A delivered outcome only says anything while an extract is actually required, so every stored condition
+    // is ANDed with the requirement: a member who no longer holds a responsibility that asks for one is
+    // NotRequired, whatever they delivered before. Mirrors what JudicialRecordHelper.getStatus does.
+    const required = requiresExtract(minimumAges);
+
     // One entry per status: a new JudicialRecordStatus does not compile until SQL decides it too. The first
     // matching condition wins; the status marked `otherwise` is the one left over.
-    const conditions: Record<JudicialRecordStatus, SQLWhere | typeof otherwise | typeof notYet> = {
-        [JudicialRecordStatus.UnderReview]: notYet,
-        [JudicialRecordStatus.TemporarilyRejected]: notYet,
-        [JudicialRecordStatus.PermanentlyRejected]: notYet,
-        [JudicialRecordStatus.ConditionallyAccepted]: notYet,
-        [JudicialRecordStatus.Ok]: notYet,
-        [JudicialRecordStatus.Required]: requiresExtract(minimumAges),
+    const conditions: Record<JudicialRecordStatus, SQLWhere | typeof otherwise> = {
+        // Retention takes the document from a record nobody got to, which leaves a review that can no longer
+        // be carried out, so the member falls back to Required and delivers again.
+        [JudicialRecordStatus.UnderReview]: currentRecordMatches(
+            reviewDecisionIs(JudicialRecordReviewDecision.UnderReview).and(hasDocument()),
+        ).and(required),
+
+        // A temporary rejection already asks the member to deliver again, so there is nothing for an expiry
+        // to change. Every other decision lapses, which is what sends the member back to Required.
+        [JudicialRecordStatus.TemporarilyRejected]: currentRecordMatches(
+            reviewDecisionIs(JudicialRecordReviewDecision.TemporarilyRejected),
+        ).and(required),
+
+        [JudicialRecordStatus.PermanentlyRejected]: currentRecordMatches(
+            reviewDecisionIs(JudicialRecordReviewDecision.PermanentlyRejected).and(
+                decisionStillStands(),
+            ),
+        ).and(required),
+
+        [JudicialRecordStatus.ConditionallyAccepted]: currentRecordMatches(
+            reviewDecisionIs(JudicialRecordReviewDecision.ConditionallyAccepted).and(
+                decisionStillStands(),
+            ),
+        ).and(required),
+
+        [JudicialRecordStatus.Ok]: currentRecordMatches(
+            reviewDecisionIs(JudicialRecordReviewDecision.Ok).and(decisionStillStands()),
+        ).and(required),
+
+        [JudicialRecordStatus.Required]: required,
         [JudicialRecordStatus.NotRequired]: otherwise,
     };
 
@@ -134,10 +210,6 @@ export function judicialRecordStatusExpression(minimumAges: Map<string, number>)
     // Reverse order: the last condition is the innermost else of the IF chain, so the first one wins
     for (const status of Object.keys(conditions).reverse() as JudicialRecordStatus[]) {
         const condition = conditions[status];
-
-        if (condition === notYet) {
-            continue;
-        }
 
         if (condition === otherwise) {
             if (expression !== null) {

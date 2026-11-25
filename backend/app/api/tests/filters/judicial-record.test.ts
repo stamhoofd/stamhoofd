@@ -1,5 +1,6 @@
 import type { Organization } from '@stamhoofd/models';
 import {
+    JudicialRecord,
     Member,
     MemberFactory,
     MemberResponsibilityRecordFactory,
@@ -9,8 +10,19 @@ import {
 } from '@stamhoofd/models';
 import { SQL, SQLAlias, SQLSelectAs, compileToSQLFilter } from '@stamhoofd/sql';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
-import type { JudicialRecordResponsibility, MemberResponsibility } from '@stamhoofd/structures';
-import { JudicialRecordHelper, JudicialRecordStatus } from '@stamhoofd/structures';
+import type {
+    JudicialRecordCurrentRecord,
+    JudicialRecordResponsibility,
+    MemberResponsibility,
+} from '@stamhoofd/structures';
+import {
+    JUDICIAL_RECORD_VALIDITY_YEARS,
+    JudicialRecordFile,
+    JudicialRecordHelper,
+    JudicialRecordReviewDecision,
+    JudicialRecordStatus,
+} from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 import { judicialRecordStatusExpression } from '../../src/helpers/judicialRecordStatus.js';
 import { memberFilterCompilers } from '../../src/sql-filters/members.js';
@@ -85,6 +97,17 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
             startDate?: Date;
             endDate?: Date | null;
         }[];
+
+        /** A delivered extract, when the scenario has one. */
+        record?: {
+            reviewDecision: JudicialRecordReviewDecision;
+
+            /** Null leaves it unreviewed, which is what UnderReview means. */
+            reviewedAt?: Date | null;
+
+            /** Whether the document is still stored. Removed once a reviewer decided, or by retention. */
+            hasDocument?: boolean;
+        };
     };
 
     /**
@@ -175,6 +198,153 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
                     { responsibility: withAge, startDate: longAgo, endDate: daysFromNow(-1) },
                 ],
             },
+
+            // Delivered extracts. The same adult who would otherwise be Required, so the record is the only
+            // thing that moves the status.
+            ...storedScenarios(),
+        ];
+    }
+
+    /**
+     * The adult of the first scenario, who is Required until a record says otherwise.
+     *
+     * A function and not a constant: the responsibilities only exist after beforeAll, the same reason
+     * buildScenarios is lazy.
+     */
+    function requiredAdult() {
+        return {
+            birthDay: { year: 1990, month: 3, day: 10 },
+            responsibilities: [{ responsibility: withAge, startDate: longAgo }],
+        };
+    }
+
+    function yearsAgo(years: number, plusDays = 0): Date {
+        const date = new Date();
+        date.setFullYear(date.getFullYear() - years);
+        date.setDate(date.getDate() + plusDays);
+        return date;
+    }
+
+    /**
+     * The same, but late in the Brussels day, which `yearsAgo` never is.
+     *
+     * The window runs from midnight of the day a decision was taken, so a scenario a whole day away from the
+     * boundary cannot tell a mirror that keeps the time of day from one that drops it.
+     */
+    function yearsAgoLateInTheDay(years: number, plusDays = 0): Date {
+        return Formatter.luxon(new Date())
+            .startOf('day')
+            .minus({ years })
+            .plus({ days: plusDays })
+            .set({ hour: 23 })
+            .toJSDate();
+    }
+
+    /** One scenario per path through the stored half of the rule, including every review outcome. */
+    function storedScenarios(): Scenario[] {
+        const justReviewed = daysFromNow(-1);
+        const expired = yearsAgo(JUDICIAL_RECORD_VALIDITY_YEARS, -1);
+        const almostExpired = yearsAgo(JUDICIAL_RECORD_VALIDITY_YEARS, 1);
+
+        return [
+            {
+                name: 'delivered, nobody has looked yet',
+                ...requiredAdult(),
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.UnderReview,
+                    reviewedAt: null,
+                    hasDocument: true,
+                },
+            },
+            {
+                name: 'delivered, but retention took the document before anyone looked',
+                ...requiredAdult(),
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.UnderReview,
+                    reviewedAt: null,
+                    hasDocument: false,
+                },
+            },
+            {
+                name: 'approved yesterday',
+                ...requiredAdult(),
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.Ok,
+                    reviewedAt: justReviewed,
+                },
+            },
+            {
+                name: 'accepted under conditions',
+                ...requiredAdult(),
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.ConditionallyAccepted,
+                    reviewedAt: justReviewed,
+                },
+            },
+            {
+                name: 'approved just inside the validity window',
+                ...requiredAdult(),
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.Ok,
+                    reviewedAt: almostExpired,
+                },
+            },
+            {
+                name: 'approved just outside the validity window',
+                ...requiredAdult(),
+                record: { reviewDecision: JudicialRecordReviewDecision.Ok, reviewedAt: expired },
+            },
+            {
+                name: 'approved late on the day the validity window runs out',
+                ...requiredAdult(),
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.Ok,
+                    reviewedAt: yearsAgoLateInTheDay(JUDICIAL_RECORD_VALIDITY_YEARS),
+                },
+            },
+            {
+                name: 'approved late on the last day inside the validity window',
+                ...requiredAdult(),
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.Ok,
+                    reviewedAt: yearsAgoLateInTheDay(JUDICIAL_RECORD_VALIDITY_YEARS, 1),
+                },
+            },
+            {
+                name: 'temporarily rejected',
+                ...requiredAdult(),
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.TemporarilyRejected,
+                    reviewedAt: justReviewed,
+                },
+            },
+            {
+                name: 'permanently rejected',
+                ...requiredAdult(),
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.PermanentlyRejected,
+                    reviewedAt: justReviewed,
+                },
+            },
+            {
+                name: 'permanently rejected long enough ago to have lapsed',
+                ...requiredAdult(),
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.PermanentlyRejected,
+                    reviewedAt: expired,
+                },
+            },
+            {
+                name: 'approved, but no responsibility asks for an extract any more',
+                birthDay: { year: 1990, month: 3, day: 10 },
+                responsibilities: [
+                    { responsibility: withAge, startDate: longAgo, endDate: daysFromNow(-1) },
+                ],
+                record: {
+                    reviewDecision: JudicialRecordReviewDecision.Ok,
+                    reviewedAt: daysFromNow(-1),
+                },
+            },
         ];
     }
 
@@ -210,6 +380,27 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
             });
         }
 
+        let record: JudicialRecordCurrentRecord | null = null;
+
+        if (scenario.record) {
+            const hasDocument = scenario.record.hasDocument ?? false;
+
+            const current = new JudicialRecord();
+            current.memberId = member.id;
+            current.reviewDecision = scenario.record.reviewDecision;
+            current.reviewedAt = scenario.record.reviewedAt ?? null;
+            current.file = JudicialRecordFile.create({
+                reference: hasDocument ? `judicial-records/${member.id}.pdf` : null,
+            });
+            await current.save();
+
+            record = {
+                reviewDecision: scenario.record.reviewDecision,
+                reviewedAt: scenario.record.reviewedAt ?? null,
+                hasDocument,
+            };
+        }
+
         return {
             scenario,
             id: member.id,
@@ -218,6 +409,7 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
                 firstName: member.details.firstName,
                 birthDay: member.details.birthDay,
                 responsibilities,
+                record,
             }).status,
         };
     }
@@ -277,9 +469,9 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
             ).toBe(member.helperStatus);
         }
 
-        // Both engines decide more than one status here, otherwise agreeing would prove nothing
+        // Every status has to be reached by some member, otherwise agreeing would prove nothing about it
         expect(new Set(members.map((m) => m.helperStatus))).toEqual(
-            new Set([JudicialRecordStatus.Required, JudicialRecordStatus.NotRequired]),
+            new Set(Object.values(JudicialRecordStatus)),
         );
     });
 

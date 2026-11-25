@@ -1,4 +1,5 @@
 import { Formatter } from '@stamhoofd/utility';
+import { JudicialRecordReviewDecision } from '../members/JudicialRecordReview.js';
 import type { Organization } from '../Organization.js';
 import type { Platform } from '../Platform.js';
 import { hasJudicialRecordFeature } from './judicialRecordFeature.js';
@@ -7,8 +8,7 @@ import { hasJudicialRecordFeature } from './judicialRecordFeature.js';
  * The judicial record status of a member: what the rest of the system acts on.
  *
  * Every status the feature will ever have is here from the start, so a call site that switches on one does
- * not have to be found again later. Only `NotRequired` and `Required` are reached until a member can
- * actually deliver an extract; the delivered outcomes follow further down the stack.
+ * not have to be found again later.
  *
  * The delivered outcomes live here rather than in an enum of their own so that a member has one judicial
  * record status, not two that have to be combined at every call site. Each outcome a reviewer can give keeps
@@ -42,6 +42,9 @@ export enum JudicialRecordStatus {
     Ok = 'Ok',
 }
 
+/** How long a reviewer's decision stands before the member has to deliver again. */
+export const JUDICIAL_RECORD_VALIDITY_YEARS = 3;
+
 /**
  * A status with the reason behind it, so a member view can explain why an extract is (not) required.
  */
@@ -61,6 +64,17 @@ export interface JudicialRecordResponsibility {
 
     /** `judicialRecordMinimumAge` of the responsibility this record points to, null when it never asks for an extract. */
     minimumAge: number | null;
+}
+
+/** The member's current judicial record, reduced to what decides their status. */
+export interface JudicialRecordCurrentRecord {
+    reviewDecision: JudicialRecordReviewDecision;
+
+    /** When a reviewer decided, null while nobody has looked. */
+    reviewedAt: Date | null;
+
+    /** Whether the document is still there to be looked at. */
+    hasDocument: boolean;
 }
 
 export class JudicialRecordHelper {
@@ -107,6 +121,82 @@ export class JudicialRecordHelper {
             case JudicialRecordStatus.Ok:
                 return $t(`OK`);
         }
+    }
+
+    /**
+     * The status a member's current record gives them, or null when the record does not decide it.
+     *
+     * Null means fall back to the responsibilities: there is no usable record, so the member is in the same
+     * position as one who never delivered.
+     */
+    static getStoredStatus(
+        record: JudicialRecordCurrentRecord | null,
+        atDate: Date = new Date(),
+    ): JudicialRecordStatus | null {
+        if (record === null) {
+            return null;
+        }
+
+        switch (record.reviewDecision) {
+            case JudicialRecordReviewDecision.UnderReview:
+                // Nobody has looked yet, so there is no decision to expire. Once retention has taken the
+                // document there is nothing left to look at either, so the member delivers again instead of
+                // waiting on a review that can no longer be carried out.
+                return record.hasDocument ? JudicialRecordStatus.UnderReview : null;
+
+            case JudicialRecordReviewDecision.TemporarilyRejected:
+                // The member has to deliver another extract, which is what this status already asks of them,
+                // so there is nothing for an expiry to change.
+                return JudicialRecordStatus.TemporarilyRejected;
+
+            case JudicialRecordReviewDecision.Ok:
+                return this.hasExpired(record.reviewedAt, atDate) ? null : JudicialRecordStatus.Ok;
+
+            case JudicialRecordReviewDecision.ConditionallyAccepted:
+                return this.hasExpired(record.reviewedAt, atDate)
+                    ? null
+                    : JudicialRecordStatus.ConditionallyAccepted;
+
+            case JudicialRecordReviewDecision.PermanentlyRejected:
+                return this.hasExpired(record.reviewedAt, atDate)
+                    ? null
+                    : JudicialRecordStatus.PermanentlyRejected;
+        }
+    }
+
+    /** Whether a decision taken on `reviewedAt` no longer stands. A record nobody decided cannot expire. */
+    static hasExpired(reviewedAt: Date | null, atDate: Date = new Date()): boolean {
+        if (reviewedAt === null) {
+            return false;
+        }
+
+        return (
+            Formatter.luxon(reviewedAt)
+                .startOf('day')
+                .plus({ years: JUDICIAL_RECORD_VALIDITY_YEARS })
+                .toJSDate() <= atDate
+        );
+    }
+
+    /**
+     * The earliest `reviewedAt` whose decision still stands on `atDate`.
+     *
+     * `hasExpired` reads nothing but the day a decision was taken, so every decision of a day expires at the
+     * same instant and the boundary is one date. The SQL mirror in
+     * `backend/app/api/src/helpers/judicialRecordStatus.ts` compares against this instead of repeating the
+     * arithmetic, which is what keeps the two from drifting apart over a time zone or a leap day.
+     */
+    static getEarliestReviewedAtStillStanding(atDate: Date = new Date()): Date {
+        let day = Formatter.luxon(atDate)
+            .startOf('day')
+            .minus({ years: JUDICIAL_RECORD_VALIDITY_YEARS });
+
+        // A leap day moves one end of the window and not the other, so the first candidate is not always it
+        while (this.hasExpired(day.toJSDate(), atDate)) {
+            day = day.plus({ days: 1 });
+        }
+
+        return day.toJSDate();
     }
 
     /**
@@ -163,19 +253,29 @@ export class JudicialRecordHelper {
         firstName,
         birthDay,
         responsibilities,
+        record = null,
         atDate = new Date(),
     }: {
         /** Used in the description, so it talks about the member by name. */
         firstName: string;
         birthDay: Date | null;
         responsibilities: JudicialRecordResponsibility[];
+
+        /** The member's current record, when they have one. */
+        record?: JudicialRecordCurrentRecord | null;
         atDate?: Date;
     }): JudicialRecordForMember {
-        const status = responsibilities.some((responsibility) =>
+        const requiresExtract = responsibilities.some((responsibility) =>
             this.requiresExtract({ responsibility, birthDay, atDate }),
-        )
-            ? JudicialRecordStatus.Required
-            : JudicialRecordStatus.NotRequired;
+        );
+
+        // A delivered outcome only says anything while an extract is actually required: a member who no longer
+        // holds a responsibility that asks for one is NotRequired, whatever they delivered before.
+        const stored = requiresExtract ? this.getStoredStatus(record, atDate) : null;
+
+        const status =
+            stored ??
+            (requiresExtract ? JudicialRecordStatus.Required : JudicialRecordStatus.NotRequired);
 
         /** The earliest date an extract is required from, over the responsibilities the member holds on `atDate`. */
         let requiredFrom: Date | null = null;
@@ -230,27 +330,25 @@ export class JudicialRecordHelper {
 
             return {
                 status,
-                description:
-                    status === JudicialRecordStatus.Required
-                        ? $t(`Sinds {date}, de {ordinal} verjaardag van {name}.`, {
-                              date,
-                              ordinal,
-                              name: firstName,
-                          })
-                        : $t(`Vanaf {date}, de {ordinal} verjaardag van {name}.`, {
-                              date,
-                              ordinal,
-                              name: firstName,
-                          }),
+                description: requiresExtract
+                    ? $t(`Sinds {date}, de {ordinal} verjaardag van {name}.`, {
+                          date,
+                          ordinal,
+                          name: firstName,
+                      })
+                    : $t(`Vanaf {date}, de {ordinal} verjaardag van {name}.`, {
+                          date,
+                          ordinal,
+                          name: firstName,
+                      }),
             };
         }
 
         return {
             status,
-            description:
-                status === JudicialRecordStatus.Required
-                    ? $t(`Sinds {date}, de startdatum van de functie.`, { date })
-                    : $t(`Vanaf {date}, de startdatum van de functie.`, { date }),
+            description: requiresExtract
+                ? $t(`Sinds {date}, de startdatum van de functie.`, { date })
+                : $t(`Vanaf {date}, de startdatum van de functie.`, { date }),
         };
     }
 }
