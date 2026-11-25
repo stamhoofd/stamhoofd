@@ -52,6 +52,8 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 
 [Context-aware logging](../packages/node/logging/README.md)
 
+[Backend metrics: coverage, panel queries and staging verification](backend/metrics.md)
+
 ## Common patterns
 
 [OpenTelemetry decorators](../packages/common/opentelemetry-decorators/README.md)
