@@ -31,9 +31,7 @@ export class JudicialRecordService {
             await assertChainNotRevoked(certificatePath);
         }
 
-        return report.isPassed
-            ? JudicialRecordStatus.Ok
-            : JudicialRecordStatus.UnderReview;
+        return report.isPassed ? JudicialRecordStatus.Ok : JudicialRecordStatus.UnderReview;
     }
 
     private static async assertExtractRequired(member: Member): Promise<void> {
@@ -43,7 +41,7 @@ export class JudicialRecordService {
         const { status, description } = JudicialRecordHelper.getForMember({
             firstName: member.details.firstName,
             birthDay: member.details.birthDay,
-            responsibilities: records.map(record => ({
+            responsibilities: records.map((record) => ({
                 startDate: record.startDate,
                 endDate: record.endDate,
                 minimumAge: minimumAges.get(record.responsibilityId) ?? null,
@@ -54,10 +52,13 @@ export class JudicialRecordService {
             throw new SimpleError({
                 code: 'judicial_record_not_required',
                 message: 'No judicial record extract is required for this member',
-                human: $t('Er is geen uittreksel uit het strafregister nodig voor {name}. {reason}', {
-                    name: member.details.firstName,
-                    reason: description,
-                }),
+                human: $t(
+                    'Er is geen uittreksel uit het strafregister nodig voor {name}. {reason}',
+                    {
+                        name: member.details.firstName,
+                        reason: description,
+                    },
+                ),
                 statusCode: 400,
             });
         }
@@ -70,11 +71,15 @@ export class JudicialRecordService {
      * of their own, so a null scope would read one of those as no requirement and refuse a member
      * who does have to deliver.
      */
-    private static async getMinimumAges(records: MemberResponsibilityRecord[]): Promise<Map<string, number | null>> {
+    private static async getMinimumAges(
+        records: MemberResponsibilityRecord[],
+    ): Promise<Map<string, number | null>> {
         const platform = await Platform.getSharedStruct();
         const responsibilities = [...platform.config.responsibilities];
 
-        const organizationIds = Formatter.uniqueArray(records.map(record => record.organizationId));
+        const organizationIds = Formatter.uniqueArray(
+            records.map((record) => record.organizationId),
+        );
 
         if (organizationIds.length > 0) {
             for (const organization of await Organization.getByIDs(...organizationIds)) {
@@ -82,6 +87,11 @@ export class JudicialRecordService {
             }
         }
 
-        return new Map(responsibilities.map(responsibility => [responsibility.id, responsibility.judicialRecordMinimumAge]));
+        return new Map(
+            responsibilities.map((responsibility) => [
+                responsibility.id,
+                responsibility.judicialRecordMinimumAge,
+            ]),
+        );
     }
 }

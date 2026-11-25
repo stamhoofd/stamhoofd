@@ -1,7 +1,21 @@
 import { SimpleError, isSimpleError } from '@common/errors';
 import type { Member, Organization } from '@stamhoofd/models';
-import { MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, PlatformResponsibilityFactory } from '@stamhoofd/models';
-import { JudicialRecordCheck, JudicialRecordCheckReport, JudicialRecordCheckResult, JudicialRecordCheckStatus, JudicialRecordStatus, judicialRecordChecksInOrder, MemberResponsibility } from '@stamhoofd/structures';
+import {
+    MemberFactory,
+    MemberResponsibilityRecordFactory,
+    OrganizationFactory,
+    Platform,
+    PlatformResponsibilityFactory,
+} from '@stamhoofd/models';
+import {
+    JudicialRecordCheck,
+    JudicialRecordCheckReport,
+    JudicialRecordCheckResult,
+    JudicialRecordCheckStatus,
+    JudicialRecordStatus,
+    judicialRecordChecksInOrder,
+    MemberResponsibility,
+} from '@stamhoofd/structures';
 import { JUDICIAL_RECORD_MAX_AGE_IN_DAYS, JudicialRecordService } from './JudicialRecordService.js';
 
 const checkJudicialRecordMock = vi.hoisted(() => vi.fn());
@@ -21,13 +35,17 @@ const PDF = new TextEncoder().encode('Dit is geen pdf.');
 /** Stands in for the chain the signature validated, which only reaches the revocation call. */
 const CERTIFICATE_PATH = [{ signer: true }];
 
-function report(statuses: Partial<Record<JudicialRecordCheck, JudicialRecordCheckStatus>> = {}): JudicialRecordCheckReport {
+function report(
+    statuses: Partial<Record<JudicialRecordCheck, JudicialRecordCheckStatus>> = {},
+): JudicialRecordCheckReport {
     return JudicialRecordCheckReport.create({
-        checks: judicialRecordChecksInOrder.map(check => JudicialRecordCheckResult.create({
-            check,
-            status: statuses[check] ?? JudicialRecordCheckStatus.Passed,
-            reason: 'Een reden.',
-        })),
+        checks: judicialRecordChecksInOrder.map((check) =>
+            JudicialRecordCheckResult.create({
+                check,
+                status: statuses[check] ?? JudicialRecordCheckStatus.Passed,
+                reason: 'Een reden.',
+            }),
+        ),
     });
 }
 
@@ -51,7 +69,10 @@ describe('JudicialRecordService.deliver', () => {
         const platform = await Platform.getForEditing();
         originalResponsibilities = platform.config.responsibilities;
 
-        responsibility = await new PlatformResponsibilityFactory({ name: 'Judicial record needed', judicialRecordMinimumAge: 18 }).create();
+        responsibility = await new PlatformResponsibilityFactory({
+            name: 'Judicial record needed',
+            judicialRecordMinimumAge: 18,
+        }).create();
         await Platform.clearCache();
 
         // Defined by the organization itself, so it lives in its privateMeta and not in the platform config
@@ -63,9 +84,18 @@ describe('JudicialRecordService.deliver', () => {
         organization.privateMeta.responsibilities.push(organizationResponsibility);
         await organization.save();
 
-        member = await new MemberFactory({ organization, birthDay: { year: 1990, month: 1, day: 1 } }).create();
-        memberWithoutResponsibility = await new MemberFactory({ organization, birthDay: { year: 1990, month: 1, day: 1 } }).create();
-        memberWithOrganizationResponsibility = await new MemberFactory({ organization, birthDay: { year: 1990, month: 1, day: 1 } }).create();
+        member = await new MemberFactory({
+            organization,
+            birthDay: { year: 1990, month: 1, day: 1 },
+        }).create();
+        memberWithoutResponsibility = await new MemberFactory({
+            organization,
+            birthDay: { year: 1990, month: 1, day: 1 },
+        }).create();
+        memberWithOrganizationResponsibility = await new MemberFactory({
+            organization,
+            birthDay: { year: 1990, month: 1, day: 1 },
+        }).create();
 
         await new MemberResponsibilityRecordFactory({
             member,
@@ -100,16 +130,25 @@ describe('JudicialRecordService.deliver', () => {
     }
 
     test('refuses a member no responsibility asks an extract of, without reading the document', async () => {
-        checkJudicialRecordMock.mockResolvedValue({ report: report(), certificatePath: CERTIFICATE_PATH });
+        checkJudicialRecordMock.mockResolvedValue({
+            report: report(),
+            certificatePath: CERTIFICATE_PATH,
+        });
 
-        const error = await deliver({ member: memberWithoutResponsibility }).then(() => null, (error: unknown) => error);
+        const error = await deliver({ member: memberWithoutResponsibility }).then(
+            () => null,
+            (error: unknown) => error,
+        );
 
         expect(isSimpleError(error) && error.code).toBe('judicial_record_not_required');
         expect(checkJudicialRecordMock).not.toHaveBeenCalled();
     });
 
     test('answers Ok when every check passed', async () => {
-        checkJudicialRecordMock.mockResolvedValue({ report: report(), certificatePath: CERTIFICATE_PATH });
+        checkJudicialRecordMock.mockResolvedValue({
+            report: report(),
+            certificatePath: CERTIFICATE_PATH,
+        });
 
         expect(await deliver()).toBe(JudicialRecordStatus.Ok);
 
@@ -124,24 +163,37 @@ describe('JudicialRecordService.deliver', () => {
     });
 
     test('refuses a delivery whose certificate chain is revoked', async () => {
-        checkJudicialRecordMock.mockResolvedValue({ report: report(), certificatePath: CERTIFICATE_PATH });
-        assertChainNotRevokedMock.mockRejectedValue(new SimpleError({
-            code: 'certificate_revoked',
-            message: 'A certificate in the chain is revoked',
-            human: 'Vraag een nieuw uittreksel aan bij FOD Justitie.',
-            statusCode: 400,
-        }));
+        checkJudicialRecordMock.mockResolvedValue({
+            report: report(),
+            certificatePath: CERTIFICATE_PATH,
+        });
+        assertChainNotRevokedMock.mockRejectedValue(
+            new SimpleError({
+                code: 'certificate_revoked',
+                message: 'A certificate in the chain is revoked',
+                human: 'Vraag een nieuw uittreksel aan bij FOD Justitie.',
+                statusCode: 400,
+            }),
+        );
 
-        const error = await deliver().then(() => null, (error: unknown) => error);
+        const error = await deliver().then(
+            () => null,
+            (error: unknown) => error,
+        );
 
         expect(isSimpleError(error) && error.code).toBe('certificate_revoked');
     });
 
     /** Regression test for the organization in scope that used to be a parameter of `deliver`. */
     test('finds a requirement an organization defined itself, with no organization in scope', async () => {
-        checkJudicialRecordMock.mockResolvedValue({ report: report(), certificatePath: CERTIFICATE_PATH });
+        checkJudicialRecordMock.mockResolvedValue({
+            report: report(),
+            certificatePath: CERTIFICATE_PATH,
+        });
 
-        expect(await deliver({ member: memberWithOrganizationResponsibility })).toBe(JudicialRecordStatus.Ok);
+        expect(await deliver({ member: memberWithOrganizationResponsibility })).toBe(
+            JudicialRecordStatus.Ok,
+        );
     });
 
     test('answers UnderReview on a failed content check', async () => {
