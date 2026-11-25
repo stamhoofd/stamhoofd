@@ -8,11 +8,11 @@
         "src"
     ],
     "dependencies": {
-        "@oxlint/migrate": "1.90.0",
-        "eslint": "10.13.0",
+        "@oxlint/migrate": "1.94.0",
+        "eslint": "10.15.0",
         "eslint-plugin-stamhoofd": "workspace:*",
-        "oxlint": "1.91.0",
-        "oxlint-tsgolint": "7.0.2005"
+        "oxlint": "1.94.0",
+        "oxlint-tsgolint": "7.0.2007"
     },
     "license": "UNLICENCED",
     "publishConfig": {
