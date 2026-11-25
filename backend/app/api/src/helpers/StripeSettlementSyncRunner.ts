@@ -106,7 +106,8 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
         }
 
         if (this.#retryUnsynced) {
-            await this.retryUnsyncedSettlements({ windowStart: start, abort });
+            const failures = await this.retryUnsyncedSettlements({ windowStart: start, abort });
+            summary.failed += failures;
         }
     }
 
@@ -191,7 +192,8 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
     }: {
         windowStart: Date;
         abort?: AbortSignal;
-    }): Promise<void> {
+    }): Promise<number> {
+        let failures = 0;
         const settlements = await Settlement.select()
             .where('provider', PaymentProvider.Stripe)
             .where('syncedAt', null)
@@ -215,12 +217,17 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
                     secretKey: this.#secretKey,
                     stripeAccount: stripeAccount ?? null,
                 });
-                await sync.syncPayoutById(settlement.externalId, { force: true, abort });
+                const { errors } = await sync.syncPayoutById(settlement.externalId, {
+                    force: true,
+                    abort,
+                });
+                if (errors.length > 0) failures++;
             } catch (e) {
                 // An interrupted retry may not count towards the cap: the payout is still waiting
                 // for a real attempt
                 abort.throwIfAborted();
 
+                failures++;
                 console.error('Retry of settlement ' + settlement.externalId + ' failed', e);
 
                 // Errors before the walk (e.g. the payout can't be retrieved anymore) don't pass
@@ -233,5 +240,6 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
                 }
             }
         }
+        return failures;
     }
 }
