@@ -6,7 +6,6 @@ import { Platform } from '../models/Platform.js';
 class Options {
     name?: string;
     organizationBased?: boolean;
-    judicialRecordMinimumAge?: number | null;
 }
 
 export class PlatformResponsibilityFactory extends Factory<Options, MemberResponsibility> {
@@ -16,7 +15,6 @@ export class PlatformResponsibilityFactory extends Factory<Options, MemberRespon
                 this.options.name ??
                 'Responsibility ' + (new Date().getTime() + Math.floor(Math.random() * 999999)),
             organizationBased: this.options.organizationBased ?? true,
-            judicialRecordMinimumAge: this.options.judicialRecordMinimumAge ?? null,
         });
 
         // Add to platform
