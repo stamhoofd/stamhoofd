@@ -1,9 +1,9 @@
 import { registerCron } from '@stamhoofd/crons';
-import { defineWorker } from '@node/observability/workloads';
+import { WorkerMetrics } from '@node/observability/worker-metrics';
 import { sendSuccessHeartbeat, traceStatisticsCycle } from '@node/observability';
 import { runStatisticsCycle } from './sync.js';
 
-const cycle = defineWorker('stats_cycle');
+const cycle = new WorkerMetrics('stats_cycle');
 registerCron('syncPlatformStatistics', syncPlatformStatistics);
 
 /**

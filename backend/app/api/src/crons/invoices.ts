@@ -1,5 +1,5 @@
 import { isSimpleError, isSimpleErrors } from '@common/errors';
-import { defineWorker } from '@node/observability/workloads';
+import { WorkerMetrics } from '@node/observability/worker-metrics';
 import { sendSuccessHeartbeat } from '@node/observability';
 import { registerTenantCron } from './helpers/registerTenantCron.js';
 import type { Invoice } from '@stamhoofd/models';
@@ -19,7 +19,7 @@ import { useSavedIterator } from './helpers/useSavedIterator.js';
 import { OrganizationAdminService } from '../services/OrganizationAdminService.js';
 
 registerTenantCron('invoices', createInvoiceCron());
-const invoiceWorker = defineWorker('invoice_create');
+const invoiceWorker = new WorkerMetrics('invoice_create');
 
 export function createInvoiceCron() {
     const iterator = useSavedIterator(

@@ -1,7 +1,7 @@
 // Nightly settlement sync for all providers. Everything is an upsert and synced payouts are
 // skipped, so the windowed re-walk is cheap.
 import { registerCron } from '@stamhoofd/crons';
-import { defineWorker } from '@node/observability/workloads';
+import { WorkerMetrics } from '@node/observability/worker-metrics';
 import { sendSuccessHeartbeat } from '@node/observability';
 import { Email } from '@stamhoofd/email';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
@@ -15,7 +15,7 @@ import { SettlementSyncRunner } from '../helpers/SettlementSyncRunner.js';
 import { isApplicationFeeInvoicingEnabled } from './stripe-invoices.js';
 
 registerCron('settlement-sync', syncSettlements);
-const reconciliation = defineWorker('settlement_reconciliation');
+const reconciliation = new WorkerMetrics('settlement_reconciliation');
 
 /**
  * How many days of settlements the nightly run re-walks.

@@ -8,7 +8,7 @@ import {
 import { errorDiagnostics } from '@common/errors';
 import { validate as isUuid } from 'uuid';
 import { registerCron } from '@stamhoofd/crons';
-import { defineWorker } from '@node/observability/workloads';
+import { WorkerMetrics } from '@node/observability/worker-metrics';
 import { sendSuccessHeartbeat } from '@node/observability';
 import { Email, EmailAddress } from '@stamhoofd/email';
 import { AuditLog, EmailRecipient, Organization } from '@stamhoofd/models';
@@ -21,7 +21,7 @@ import {
 import { ForwardHandler } from '../helpers/ForwardHandler.js';
 import { Email as EmailModel } from '@stamhoofd/models';
 
-const messageWorker = defineWorker('ses_message');
+const messageWorker = new WorkerMetrics('ses_message');
 registerCron('checkComplaints', checkComplaints);
 registerCron('checkReplies', checkReplies);
 registerCron('checkBounces', checkBounces);

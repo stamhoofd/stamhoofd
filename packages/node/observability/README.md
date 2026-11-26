@@ -73,6 +73,12 @@ No SQL, bindings, error details or database identifiers are collected.
 
 ### Worker and queue metrics
 
+Register a `WorkerMetrics` from `@node/observability/worker-metrics` once per
+worker definition. For queues, use `QueueMetrics` from `@node/observability/queue-metrics`;
+it also tracks how many items are waiting. `trackPending(count)` returns a handle
+when metrics are enabled. Call `removeFromPending()` when the items stop waiting,
+or pass a count when only part of a batch starts.
+
 `stamhoofd_worker_running{worker}` reports active attempts. On a successful
 scrape, zero means the reporter is loaded and idle. An absent expected worker
 means its reporter was not loaded; an unreachable scrape gives no evidence of

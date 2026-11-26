@@ -4,7 +4,8 @@ import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { channel } from 'node:diagnostics_channel';
 import { getHeapStatistics } from 'node:v8';
 import { enableHttpMetrics, disableHttpMetrics } from './http-metrics.js';
-import { enableWorkMetrics, disableWorkMetrics } from './workloads.js';
+import { QueueMetrics } from './QueueMetrics.js';
+import { WorkerMetrics } from './WorkerMetrics.js';
 
 /** A private provider keeps third-party instruments off the scrape endpoint. */
 export function initializeMetrics(service: string) {
@@ -68,11 +69,13 @@ export function initializeMetrics(service: string) {
             execute.record(duration, { operation, outcome });
     };
     enableHttpMetrics(meter, options);
-    enableWorkMetrics(meter);
+    WorkerMetrics.enable(meter);
+    QueueMetrics.enable(meter);
     timings.subscribe(record);
     const unsubscribe = () => {
         disableHttpMetrics();
-        disableWorkMetrics();
+        WorkerMetrics.disable();
+        QueueMetrics.disable();
         timings.unsubscribe(record);
     };
     const started = reader.startServer().catch(() => {

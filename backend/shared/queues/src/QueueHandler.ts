@@ -1,9 +1,9 @@
 import { errorDiagnostics, isSimpleError, SimpleError } from '@common/errors';
 import { traceQueueWait, traceStage } from '@node/observability';
-import { defineQueue } from '@node/observability/workloads';
+import { QueueMetrics } from '@node/observability/queue-metrics';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
-const worker = defineQueue('in_process');
+const queueMetrics = new QueueMetrics('in_process');
 
 class Queue {
     name: string;
@@ -47,7 +47,7 @@ export type QueueHandlerOptions = {
 };
 
 class QueueItem<T> {
-    pending = worker.enqueue(1);
+    pending = queueMetrics.trackPending(1);
     finishWait = traceQueueWait();
     canceled = false;
     handler: (options: QueueHandlerOptions) => Promise<T>;
@@ -344,9 +344,9 @@ export class QueueHandler {
         // console.log("[QUEUE] ("+q.runCount+"/"+q.parallel+") Executing "+queue+" ("+q.items.length+" remaining)")
         const abort = q.createAbortSignal();
         next.finishWait?.(next.canceled);
-        next.pending?.leave();
-        const finish = next.canceled ? undefined : worker.start();
-        if (next.canceled) worker.skip();
+        next.pending?.removeFromPending();
+        const finish = next.canceled ? undefined : queueMetrics.start();
+        if (next.canceled) queueMetrics.skip();
 
         try {
             next.resolve(
