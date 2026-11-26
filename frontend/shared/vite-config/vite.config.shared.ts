@@ -12,9 +12,10 @@ import type { ViteUserConfig } from 'vitest/config';
 import emptyLocalesPlugin from './emptyLocalesPlugin.ts';
 import svgNamespacePlugin from './svgNamespacePlugin.ts';
 import { getVendorChunkName } from './vendorChunkName.ts';
+import { exceptionArtifacts } from './exceptionArtifacts.ts';
 
 // https://vitejs.dev/config/
-export async function buildConfig(options: { name: FrontendApp.WebApp | FrontendApp.Webshop | FrontendApp.Calculator; port: number; clientFiles?: string[]; frontendDir: string }): Promise<ViteUserConfig> {
+export async function buildConfig(options: { name: FrontendApp.WebApp | FrontendApp.Webshop | FrontendApp.Calculator; webExceptionDelivery?: boolean; port: number; clientFiles?: string[]; frontendDir: string }): Promise<ViteUserConfig> {
     if (process.env.NODE_ENV === 'production') {
         console.log('Building for production...');
     }
@@ -74,6 +75,19 @@ export async function buildConfig(options: { name: FrontendApp.WebApp | Frontend
     }
 
     const frontendDir = options.frontendDir;
+    const errorsEnabled = options.webExceptionDelivery && process.env.NODE_ENV === 'production' && !isPlaywrightBuild && process.env.STAM_ERRORS_ENABLED === '1';
+    const deployment = errorsEnabled
+        ? {
+                browserOrigin: process.env.STAM_ERRORS_BROWSER_ORIGIN,
+                dsn: process.env.STAM_ERRORS_DSN, brand: process.env.STAM_ERRORS_BRAND,
+                environment: process.env.STAM_ERRORS_ENVIRONMENT, release: process.env.STAM_ERRORS_RELEASE,
+                service: options.name,
+            }
+        : null;
+    if (process.env.STAM_ERRORS_UPLOAD === '1' && errorsEnabled && (!deployment?.dsn || !process.env.STAM_ERRORS_MAP_DIR)) {
+        throw new Error('Exception source map upload requires a DSN and private map directory');
+    }
+    use_env.__STAM_ERRORS_DEPLOYMENT__ = JSON.stringify(deployment);
 
     return {
         mode: process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test' ? 'development' : 'production',
@@ -87,6 +101,7 @@ export async function buildConfig(options: { name: FrontendApp.WebApp | Frontend
             ],
         },
         plugins: [
+            deployment?.dsn && process.env.STAM_ERRORS_MAP_DIR ? exceptionArtifacts({ privateRoot: process.env.STAM_ERRORS_MAP_DIR ?? '', release: process.env.STAM_ERRORS_RELEASE ?? '', upload: process.env.STAM_ERRORS_UPLOAD === '1' }) : null,
             options.name === FrontendApp.WebApp ? devLifecyclePlugin('dashboard') : options.name === FrontendApp.Webshop ? devLifecyclePlugin('webshop') : null,
             viteSvgToWebfont({
                 ...iconConfig,
@@ -160,7 +175,7 @@ export async function buildConfig(options: { name: FrontendApp.WebApp | Frontend
                             },
                         }
                     : {
-                            sourcemap: true,
+                            sourcemap: !options.webExceptionDelivery || isPlaywrightBuild,
                             cssCodeSplit: false,
                             outDir: isPlaywrightBuild ? 'dist-playwright' : undefined,
                             rollupOptions: {

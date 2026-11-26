@@ -10,6 +10,7 @@ process.env.TZ = 'UTC';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 export default defineConfig({
     ...await buildConfig({
+        webExceptionDelivery: true,
         name: FrontendApp.Calculator,
         port: 8083,
         frontendDir: resolve(import.meta.dirname, '../..'),

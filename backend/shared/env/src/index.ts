@@ -4,16 +4,24 @@ import chalk from 'chalk';
 import crypto from 'crypto';
 import fs, { promises } from 'fs';
 import { backendRecord, initializeBackendRecords, logger } from '@node/logging';
-import { errorDiagnostics, captureExceptionEnvelope } from '@common/errors';
+import { deliverExceptionEnvelope, errorDiagnostics } from '@common/errors';
+import { configureBackendExceptions } from './exception-delivery.js';
 
 /** Preserve the fatal exit even when no exception transport is installed or delivery fails. */
-export function fatalBackendException(boundary: 'startup' | 'rejection', error: unknown): never {
+export function fatalBackendException(boundary: 'startup' | 'rejection', error: unknown): void {
     console.error('Fatal backend exception', boundary, errorDiagnostics(error));
-    captureExceptionEnvelope(
+    const delivery = deliverExceptionEnvelope(
         boundary === 'startup' ? 'backend.startup' : 'backend.rejection',
         error,
     );
     backendRecord(boundary === 'startup' ? 'application.startup.failed' : 'application.unhandled');
+    if (delivery) {
+        void Promise.race([
+            delivery,
+            new Promise<void>((resolve) => setTimeout(resolve, 1200)),
+        ]).then(() => process.exit(1));
+        return;
+    }
     process.exit(1);
 }
 
@@ -32,7 +40,10 @@ async function fileExists(path: string): Promise<boolean> {
  * Only managed development sessions suppress debug; unmanaged processes retain it.
  */
 export async function load(settings?: { path?: string; service?: BackendApp }) {
-    if (settings?.service) initializeBackendRecords(settings.service);
+    if (settings?.service) {
+        initializeBackendRecords(settings.service);
+        configureBackendExceptions(settings.service);
+    }
     logger.debugEnabled = !process.env.STAM_DEV_SESSION || process.env.STAM_DEV_VERBOSE === '1';
     let env: any;
 
