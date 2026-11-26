@@ -18,6 +18,7 @@ import { DataValidator } from '@stamhoofd/utility';
 import parsePhoneNumber from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
+import { getJudicialRecordMinimumAges } from '../../../helpers/judicialRecordStatus.js';
 import { memberFilterCompilers } from '../../../sql-filters/members.js';
 import { memberSorters } from '../../../sql-sorters/members.js';
 import { getMemberScopeFilter } from './helpers/getMemberScopeFilter.js';
@@ -52,7 +53,9 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         permissionLevel: PermissionLevel = PermissionLevel.Read,
     ) {
         const organization = Context.organization;
-        const scopedFilterCompilers = filterCompilers(organization?.id ?? null);
+        const scopedFilterCompilers = filterCompilers(organization?.id ?? null, {
+            judicialRecordMinimumAges: await getJudicialRecordMinimumAges(organization ?? null),
+        });
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         if (
