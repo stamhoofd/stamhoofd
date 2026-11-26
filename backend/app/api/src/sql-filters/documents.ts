@@ -75,4 +75,12 @@ export const documentFilterCompilers: SQLFilterDefinitions = new Map([
             nullable: false,
         }),
     ],
+    [
+        'belcotaxStatus',
+        createColumnFilter({
+            expression: SQL.column('belcotaxStatus'),
+            type: SQLValueType.String,
+            nullable: true,
+        }),
+    ],
 ]);

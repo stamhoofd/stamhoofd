@@ -69,6 +69,7 @@ export * from './UitpasClientCredential.js';
 
 export * from './BelcotaxApiLog.js';
 export * from './BelcotaxConnection.js';
+export * from './BelcotaxSubmission.js';
 
 export * from './Invoice.js';
 export * from './InvoicedBalanceItem.js';

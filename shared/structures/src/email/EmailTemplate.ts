@@ -165,6 +165,16 @@ export enum EmailTemplateType {
      * Not for failed transfer or point of sale.
      */
     AutomaticChargeFailedPayingOrganization = 'AutomaticChargeFailedPayingOrganization',
+
+    /**
+     * Result of a submission to the Belcotax API, sent to the administrator who submitted
+     */
+    BelcotaxSubmissionAccepted = 'BelcotaxSubmissionAccepted',
+    BelcotaxSubmissionRejected = 'BelcotaxSubmissionRejected',
+    /**
+     * No result within 24 hours, or the result could no longer be asked for
+     */
+    BelcotaxSubmissionUnknown = 'BelcotaxSubmissionUnknown',
 }
 
 export class EmailTemplate extends AutoEncoder {
@@ -454,6 +464,13 @@ export class EmailTemplate extends AutoEncoder {
                 return $t('%1cK');
             case EmailTemplateType.AutomaticChargeFailedPayingOrganization:
                 return $t('%Je');
+
+            case EmailTemplateType.BelcotaxSubmissionAccepted:
+                return $t('Zending naar Belcotax aanvaard');
+            case EmailTemplateType.BelcotaxSubmissionRejected:
+                return $t('Zending naar Belcotax geweigerd');
+            case EmailTemplateType.BelcotaxSubmissionUnknown:
+                return $t('Resultaat van Belcotax onbekend');
         }
     }
 
@@ -557,6 +574,11 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.ChargebackPayingOrganization:
             case EmailTemplateType.AutomaticChargeFailedPayingOrganization:
                 return $t('%1JH');
+
+            case EmailTemplateType.BelcotaxSubmissionAccepted:
+            case EmailTemplateType.BelcotaxSubmissionRejected:
+            case EmailTemplateType.BelcotaxSubmissionUnknown:
+                return $t('Belcotax');
         }
     }
 
@@ -800,6 +822,19 @@ export class EmailTemplate extends AutoEncoder {
                 return $t('%1VU');
             case EmailTemplateType.AutomaticChargeFailedPayingOrganization:
                 return $t('%1cN');
+
+            case EmailTemplateType.BelcotaxSubmissionAccepted:
+                return $t(
+                    'Automatische e-mail naar de beheerder die fiscale attesten doorstuurde, als Belcotax de zending aanvaardde.',
+                );
+            case EmailTemplateType.BelcotaxSubmissionRejected:
+                return $t(
+                    'Automatische e-mail naar de beheerder die fiscale attesten doorstuurde, als Belcotax de zending weigerde.',
+                );
+            case EmailTemplateType.BelcotaxSubmissionUnknown:
+                return $t(
+                    'Automatische e-mail naar de beheerder die fiscale attesten doorstuurde, als Belcotax binnen 24 uur geen resultaat gaf.',
+                );
         }
 
         return '';
@@ -841,6 +876,28 @@ export class EmailTemplate extends AutoEncoder {
                 ...ExampleReplacements.default,
                 ExampleReplacements.all.invoiceNumber,
                 ExampleReplacements.all.totalPrice,
+            ];
+        }
+
+        if (
+            [
+                EmailTemplateType.BelcotaxSubmissionAccepted,
+                EmailTemplateType.BelcotaxSubmissionRejected,
+                EmailTemplateType.BelcotaxSubmissionUnknown,
+            ].includes(type)
+        ) {
+            return [
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.documentTemplateName,
+                ExampleReplacements.all.submissionDate,
+                ExampleReplacements.all.documentCount,
+                ExampleReplacements.all.submissionUrl,
+                ...(type === EmailTemplateType.BelcotaxSubmissionRejected
+                    ? [ExampleReplacements.all.issueCount]
+                    : []),
+                ...(type === EmailTemplateType.BelcotaxSubmissionUnknown
+                    ? [ExampleReplacements.all.unknownReason]
+                    : []),
             ];
         }
 

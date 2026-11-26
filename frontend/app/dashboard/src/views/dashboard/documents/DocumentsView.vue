@@ -31,6 +31,10 @@ import { DocumentStatus, DocumentStatusHelper, RecordWarningType, SortItemDirect
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 import { useDocumentsObjectFetcher } from '@stamhoofd/components/fetchers/useDocumentsObjectFetcher.ts';
+import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { BelcotaxFeatureFlag } from '@stamhoofd/structures/belcotax/BelcotaxConnection.js';
+import type { BelcotaxDocumentStatus } from '@stamhoofd/structures/belcotax/BelcotaxSubmission.js';
+import { BelcotaxDocumentStatusHelper } from '@stamhoofd/structures/belcotax/BelcotaxSubmission.js';
 import { computed } from 'vue';
 import { DocumentActionBuilder } from './DocumentActionBuilder';
 import { getBelcotaxKey, hasDocumentNumbers } from './hasDocumentNumbers';
@@ -50,7 +54,10 @@ const objectFetcher = useDocumentsObjectFetcher({
 
 const tableObjectFetcher = useTableObjectFetcher<Document>(objectFetcher);
 
-const filterBuilders: UIFilterBuilders = getDocumentsUIFilterBuilders();
+const belcotaxFeature = useFeatureFlagComputed(BelcotaxFeatureFlag);
+// The documents of a fiscal template from 2026 can be sent to the Belcotax API
+const showBelcotax = belcotaxFeature.value && !hasDocumentNumbers(props.template);
+const filterBuilders: UIFilterBuilders = getDocumentsUIFilterBuilders({ belcotax: showBelcotax });
 
 // A removed document is kept for its deletion in Belcotax, it is no longer a document of the organization
 const defaultFilter: StamhoofdFilter = {
@@ -114,6 +121,18 @@ const allColumns: Column<Document, any>[] = [
         recommendedWidth: 120,
     }),
 
+    ...(showBelcotax
+        ? [new Column<Document, BelcotaxDocumentStatus | null>({
+                id: 'belcotaxStatus',
+                name: $t('Belcotax'),
+                allowSorting: false,
+                getValue: document => document.belcotaxStatus,
+                format: status => BelcotaxDocumentStatusHelper.getName(status),
+                getStyle: status => BelcotaxDocumentStatusHelper.getColor(status),
+                minimumWidth: 100,
+                recommendedWidth: 140,
+            })]
+        : []),
     new Column<Document, RecordWarning[]>({
         name: $t('%1UL'),
         allowSorting: false,

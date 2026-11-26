@@ -15,6 +15,8 @@ import { WebmasterReport } from '../../helpers/WebmasterReport.js';
 import { DocumentRenderService } from '../DocumentRenderService.js';
 import type {
     BelcotaxContact,
+    BelcotaxIssue,
+    BelcotaxExport,
     BelcotaxOrganiser,
     FiscalDocumentContext,
 } from './BelcotaxJsonlService.js';
@@ -31,18 +33,69 @@ function text(answers: Map<string, RecordAnswer>, id: string): string | null | u
     return answer.value?.trim() || null;
 }
 
-function describe(document: Document): string {
+export function describe(document: Document): string {
     return document.data.description || document.data.name;
 }
+
+export type JsonlExportBuild = {
+    organiser: BelcotaxOrganiser;
+    result: BelcotaxExport;
+    issues: JsonlExportIssue[];
+    incompleteDocuments: JsonlExportDocument[];
+    /**
+     * Every document of the template, with the answers of the template applied
+     */
+    documents: Document[];
+};
 
 /**
  * Collects the published documents of a fiscal template and turns them into a Belcotax JSON-lines file.
  */
 export class JsonlExportService {
+    static assertSupported(template: DocumentTemplate) {
+        if (
+            template.privateSettings.templateDefinition.type !== 'fiscal' ||
+            !BelcotaxJsonlService.isSupportedYear(template.year)
+        ) {
+            throw new SimpleError({
+                code: 'jsonl_export_not_supported',
+                message:
+                    'The Belcotax export is only available for fiscal documents from income year 2026 onwards',
+                human: $t(
+                    'Dit bestand voor Belcotax is enkel beschikbaar voor fiscale attesten vanaf inkomstenjaar 2026.',
+                ),
+            });
+        }
+
+        if (template.updatesEnabled) {
+            throw new SimpleError({
+                code: 'updates_enabled',
+                message: 'Disable automatic updates before exporting to Belcotax',
+                human: $t('%1Kr'),
+            });
+        }
+    }
+
     static async export(
         template: DocumentTemplate,
         organization: Organization,
     ): Promise<JsonlExportResult> {
+        const build = await this.build(template, organization);
+        await this.reportIssues(template, organization, build.result.issues);
+
+        return JsonlExportResult.create({
+            jsonl: build.result.jsonl,
+            documentCount: build.result.includedDocumentIds.length,
+            deletedCount: build.result.deletions.length,
+            issues: build.issues,
+            incompleteDocuments: build.incompleteDocuments,
+        });
+    }
+
+    static async build(
+        template: DocumentTemplate,
+        organization: Organization,
+    ): Promise<JsonlExportBuild> {
         const organiser = this.getOrganiser(template, organization);
         if (!organiser.companyNumber) {
             // Not an issue in the result: it is not a mapping error for the webmaster, and no change to the documents can solve it
@@ -96,31 +149,34 @@ export class JsonlExportService {
             .filter((d) => d.status === DocumentStatus.MissingData)
             .map((d) => JsonlExportDocument.create({ id: d.id, description: describe(d) }));
 
-        // Only the issues that point at our mapping: the organization fixes the others itself in the check before the
-        // download, and would get a mail on every retry. The description names a child, so it stays out of the mail.
-        const mappingIssues = result.issues.filter((issue) => issue.isMappingError);
-        if (mappingIssues.length) {
-            await WebmasterReport.group(
-                `Belcotax-export ${organization.name} (${template.year})`,
-                async () => {
-                    for (const issue of mappingIssues) {
-                        WebmasterReport.report(issue.message, {
-                            organizationId: organization.id,
-                            templateId: template.id,
-                            documentId: issue.documentId,
-                        });
-                    }
-                },
-            );
-        }
+        return { organiser, result, issues, incompleteDocuments, documents };
+    }
 
-        return JsonlExportResult.create({
-            jsonl: result.jsonl,
-            documentCount: result.includedDocumentIds.length,
-            deletedCount: deletedDocumentIds.length,
-            issues,
-            incompleteDocuments,
-        });
+    /**
+     * Only the issues that point at our mapping: the organization fixes the others itself in the check before the
+     * download, and would get a mail on every retry. The description names a child, so it stays out of the mail.
+     */
+    static async reportIssues(
+        template: DocumentTemplate,
+        organization: Organization,
+        issues: BelcotaxIssue[],
+    ) {
+        const mappingIssues = issues.filter((issue) => issue.isMappingError);
+        if (!mappingIssues.length) {
+            return;
+        }
+        await WebmasterReport.group(
+            `Belcotax-export ${organization.name} (${template.year})`,
+            async () => {
+                for (const issue of mappingIssues) {
+                    WebmasterReport.report(issue.message, {
+                        organizationId: organization.id,
+                        templateId: template.id,
+                        documentId: issue.documentId,
+                    });
+                }
+            },
+        );
     }
 
     /**
