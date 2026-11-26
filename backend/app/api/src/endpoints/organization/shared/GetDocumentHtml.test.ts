@@ -1,7 +1,14 @@
 import { Request } from '@node/endpoints';
 import { verifyInternalSignature } from '@stamhoofd/backend-env';
-import { Document, OrganizationFactory, UserFactory } from '@stamhoofd/models';
-import { Permissions } from '@stamhoofd/structures';
+import {
+    Document,
+    DocumentTemplateFactory,
+    GroupFactory,
+    MemberFactory,
+    OrganizationFactory,
+    UserFactory,
+} from '@stamhoofd/models';
+import { DocumentData, DocumentStatus, Permissions } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { DocumentRenderService } from '../../../services/DocumentRenderService.js';
@@ -73,5 +80,50 @@ describe('GetDocumentHtml renderer grants', () => {
         vi.mocked(DocumentRenderService.getRenderedHtml).mockClear();
         await expect(testServer.test(endpoint, request())).rejects.toThrow();
         expect(DocumentRenderService.getRenderedHtml).not.toHaveBeenCalled();
+    });
+
+    /**
+     * A member who kept a document id from before the template was published may not keep fetching it:
+     * the member portal hides those documents, so this check has to hide them too.
+     */
+    test('a member cannot fetch a document of a draft template', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const group = await new GroupFactory({ organization }).create();
+        const user = await new UserFactory({ organization }).create();
+        const member = await new MemberFactory({ organization, user }).create();
+        const token = await SessionService.createSession(user);
+
+        const template = await new DocumentTemplateFactory({
+            groups: [group],
+            status: DocumentStatus.Draft,
+        }).create();
+
+        const document = new Document();
+        document.organizationId = organization.id;
+        document.templateId = template.id;
+        document.memberId = member.id;
+        document.status = DocumentStatus.Published;
+        document.data = DocumentData.create({ name: 'Test document' });
+        await document.save();
+
+        vi.spyOn(DocumentRenderService, 'getRenderedHtml').mockResolvedValue(
+            '<html>Document</html>',
+        );
+        const request = () =>
+            Request.get({
+                path: `/documents/${document.id}/html`,
+                host: organization.getApiHost(),
+                headers: { authorization: `Bearer ${token.accessToken}` },
+            });
+        const endpoint = new GetDocumentHtml();
+
+        await expect(testServer.test(endpoint, request())).rejects.toThrow();
+        expect(DocumentRenderService.getRenderedHtml).not.toHaveBeenCalled();
+
+        template.status = DocumentStatus.Published;
+        await template.save();
+
+        const response = await testServer.test(endpoint, request());
+        expect(response.body.toString()).toBe('<html>Document</html>');
     });
 });
