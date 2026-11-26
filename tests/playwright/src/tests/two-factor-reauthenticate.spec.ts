@@ -7,10 +7,9 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { MFATestHelper } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
-import type { User } from '@stamhoofd/models';
-import { MFATOTP, Platform, Token, UserFactory, UserSession, WebauthnCredential } from '@stamhoofd/models';
+import { EmailTemplateFactory, MFATOTP, Platform, Token, User, UserFactory, UserSession, WebauthnCredential } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Permissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { EmailTemplateType, Permissions, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { TwoFactorFlow } from '../flows/TwoFactorFlow.js';
 import { installVirtualAuthenticator } from '../helpers/installVirtualAuthenticator.js';
@@ -238,6 +237,48 @@ for (const viewport of viewports) {
             await expect(reauthView).toBeHidden({ timeout: 20_000 });
             await expect(settingsView.getByTestId('passkey-item')).toHaveCount(1, { timeout: 20_000 });
             expect(await UserSession.getByID(staleSessionId)).toBeUndefined();
+        });
+
+        test('deleting the account asks to confirm the identity first', async ({ page }) => {
+            const user = await new UserFactory({
+                email: randomEmail('mfa-reauth-delete-' + viewport.name),
+                password: PASSWORD,
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const { secret } = await MFATestHelper.addConfirmedTOTP(user);
+            await new EmailTemplateFactory({ type: EmailTemplateType.DeleteAccountConfirmation }).create();
+
+            await loginAs({ page, user });
+            await page.goto(WorkerData.urls.dashboard + '/platform');
+            await page.locator('.account-switcher').click({ timeout: 30_000 });
+
+            const accountView = page.locator('#account-view');
+            await expect(accountView).toBeVisible({ timeout: 20_000 });
+            await accountView.getByTestId('delete-account').click();
+
+            const deleteView = page.getByTestId('delete-view');
+            await expect(deleteView).toBeVisible({ timeout: 20_000 });
+            await deleteView.locator('input.input').fill(user.email);
+            await deleteView.locator('.checkbox').click();
+            await deleteView.getByTestId('save-button').filter({ visible: true }).first().click();
+
+            const reauthView = page.getByTestId('reauthenticate-view');
+            await expect(reauthView).toBeVisible({ timeout: 20_000 });
+
+            // Nothing is deleted before the identity is confirmed
+            expect((await User.getByID(user.id))?.password).not.toBeNull();
+
+            await reauthView.getByTestId('reauth-password').fill(PASSWORD);
+            await reauthView.getByTestId('reauth-submit').click();
+            await new TwoFactorFlow({ page }).passTOTPChallenge(secret);
+
+            // The interrupted deletion ran on its own and signed the user out
+            await expect(reauthView).toBeHidden({ timeout: 20_000 });
+            await expect.poll(async () => (await User.getByID(user.id))?.password, { timeout: 20_000 }).toBeNull();
+            await expect(accountView).toBeHidden({ timeout: 20_000 });
+
+            expect(await MFATOTP.getForUser(user.id)).toHaveLength(0);
+            expect(await UserSession.select().where('userId', user.id).fetch()).toHaveLength(0);
         });
     });
 }

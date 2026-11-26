@@ -43,7 +43,7 @@ export class WebauthnChallenge extends QueryableModel {
 
     static async createFor(userId: string, challenge: string): Promise<WebauthnChallenge> {
         // Only keep one pending registration challenge per user
-        await this.delete().where('userId', userId);
+        await this.deleteForUser(userId);
 
         const model = new WebauthnChallenge();
         model.userId = userId;
@@ -51,6 +51,10 @@ export class WebauthnChallenge extends QueryableModel {
         model.expiresAt = new Date(Date.now() + WebauthnChallenge.EXPIRY_MS);
         await model.save();
         return model;
+    }
+
+    static async deleteForUser(userId: string): Promise<void> {
+        await this.delete().where('userId', userId);
     }
 
     isExpired(): boolean {
