@@ -42,7 +42,11 @@ import { INACTIVE_ADMIN_ENROLLMENT_DAYS, TwoFactorHelper } from '../../helpers/T
 import { WebauthnHelper } from '../../helpers/WebauthnHelper.js';
 import { PasswordForgotService } from '../../services/PasswordForgotService.js';
 import { ConfirmTOTPEndpoint } from './ConfirmTOTPEndpoint.js';
-import { CreateTokenEndpoint } from './CreateTokenEndpoint.js';
+import {
+    CreateTokenEndpoint,
+    passwordLoginIPLimiter,
+    passwordLoginUsernameLimiter,
+} from './CreateTokenEndpoint.js';
 import { DeletePasskeyEndpoint } from './DeletePasskeyEndpoint.js';
 import { DeleteTOTPEndpoint } from './DeleteTOTPEndpoint.js';
 import { GetMFAChallengeEndpoint } from './GetMFAChallengeEndpoint.js';
@@ -178,6 +182,12 @@ async function setPlatformRequiresTwoFactor(requireTwoFactor: boolean) {
 const password = 'test-password-1234';
 
 describe('MFA', () => {
+    beforeEach(() => {
+        // Rate limiters are in-memory singletons, reset them between tests
+        passwordLoginIPLimiter.reset();
+        passwordLoginUsernameLimiter.reset();
+    });
+
     afterEach(async () => {
         await setPlatformRequiresTwoFactor(false);
     });

@@ -284,28 +284,39 @@ export class User extends QueryableModel {
         password: string,
     ): Promise<User | undefined> {
         const user = await User.getForAuthentication(organizationId, email);
-        if (!user || !user.hasKeys() || user.isApiUser) {
+        if (!user) {
             return undefined;
+        }
+
+        return (await user.verifyPassword(password)) ? user : undefined;
+    }
+
+    /**
+     * Split from {@link login} so a caller can rate limit on the resolved account before
+     * paying for the password hash.
+     */
+    async verifyPassword(password: string): Promise<boolean> {
+        if (!this.hasKeys() || this.isApiUser) {
+            return false;
         }
 
         if (STAMHOOFD.environment === 'development') {
             if (password === 'stamhoofd') {
-                return user;
+                return true;
             }
         }
 
-        if (!user.password) {
-            console.log('Tried to login to a user without password', email);
-            return;
+        if (!this.password) {
+            console.log('Tried to login to a user without password', this.email);
+            return false;
         }
 
         try {
-            if (await argon2.verify(user.password, password)) {
-                return user;
-            }
+            return await argon2.verify(this.password, password);
         } catch (e) {
             // internal failure
             console.error(e);
+            return false;
         }
     }
 

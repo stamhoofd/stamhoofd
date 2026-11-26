@@ -6,12 +6,24 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions, SessionClientType, Token as TokenStruct } from '@stamhoofd/structures';
 import { SessionService } from '../../services/SessionService.js';
 
+import { TestUtils } from '@stamhoofd/test-utils';
+
 import { testServer } from '../../../tests/helpers/TestServer.js';
-import { CreateTokenEndpoint } from './CreateTokenEndpoint.js';
+import {
+    CreateTokenEndpoint,
+    passwordLoginIPLimiter,
+    passwordLoginUsernameLimiter,
+} from './CreateTokenEndpoint.js';
 
 describe('Endpoint.CreateToken', () => {
     // Test endpoint
     const endpoint = new CreateTokenEndpoint();
+
+    beforeEach(() => {
+        // Rate limiters are in-memory singletons, reset them between tests
+        passwordLoginIPLimiter.reset();
+        passwordLoginUsernameLimiter.reset();
+    });
 
     test('Can get a token via password flow', async () => {
         const organization = await new OrganizationFactory({}).create();
@@ -359,6 +371,158 @@ describe('Endpoint.CreateToken', () => {
                 code: 'invalid_refresh_token',
             });
             expect(await Token.getByAccessToken(otherSession.accessToken)).toBeDefined();
+        });
+    });
+
+    describe('rate limits', () => {
+        const password = 'test-password-1234';
+
+        function attempt(organization: Organization, username: string, ip: string) {
+            const r = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
+                grant_type: 'password',
+                username,
+                password: 'wrong-password',
+            });
+            vi.spyOn(r, 'getIP').mockReturnValue(ip);
+            return r;
+        }
+
+        test('spraying unknown accounts from one address is blocked', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            for (let i = 0; i < 60; i++) {
+                await expect(
+                    testServer.test(
+                        endpoint,
+                        attempt(organization, `nobody${i}@example.com`, '1.2.3.4'),
+                    ),
+                ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+            }
+
+            await expect(
+                testServer.test(endpoint, attempt(organization, 'nobody60@example.com', '1.2.3.4')),
+            ).rejects.toMatchObject({ code: 'rate_limit' });
+
+            // Another address keeps its own budget
+            await expect(
+                testServer.test(endpoint, attempt(organization, 'nobody60@example.com', '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+        });
+
+        test('guessing the password of one account is blocked, also from another address', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, password }).create();
+
+            for (let i = 0; i < 10; i++) {
+                await expect(
+                    testServer.test(endpoint, attempt(organization, user.email, '1.2.3.4')),
+                ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+            }
+
+            await expect(
+                testServer.test(endpoint, attempt(organization, user.email, '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'rate_limit' });
+        });
+
+        test('spelling the username differently does not create a new budget', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                email: 'victim@example.com',
+                password,
+            }).create();
+
+            // users.email is compared case and accent insensitively, so each of these
+            // resolves to the same account
+            const variants = [
+                user.email,
+                'victím@example.com',
+                'vïctim@example.com',
+                'victim@éxample.com',
+                'VICTIM@example.com',
+            ];
+
+            for (let i = 0; i < 10; i++) {
+                await expect(
+                    testServer.test(
+                        endpoint,
+                        attempt(organization, variants[i % variants.length]!, '1.2.3.4'),
+                    ),
+                ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+            }
+
+            await expect(
+                testServer.test(endpoint, attempt(organization, 'vìctim@example.com', '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'rate_limit' });
+        });
+
+        test('a blocked account does not block the same address in another organization', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const other = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, password }).create();
+            await new UserFactory({ organization: other, email: user.email, password }).create();
+
+            for (let i = 0; i < 10; i++) {
+                await expect(
+                    testServer.test(endpoint, attempt(organization, user.email, '1.2.3.4')),
+                ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+            }
+
+            await expect(
+                testServer.test(endpoint, attempt(organization, user.email, '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'rate_limit' });
+
+            await expect(
+                testServer.test(endpoint, attempt(other, user.email, '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+        });
+
+        test('a blocked platform level account does not reveal itself on another organization', async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+
+            const organization = await new OrganizationFactory({}).create();
+            const other = await new OrganizationFactory({}).create();
+
+            // A platform level account has no organization of its own, and
+            // getForAuthentication answers with it on every organization's host.
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+                password,
+            }).create();
+            expect(user.organizationId).toBeNull();
+
+            for (let i = 0; i < 10; i++) {
+                await expect(
+                    testServer.test(endpoint, attempt(organization, user.email, '1.2.3.4')),
+                ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+            }
+
+            await expect(
+                testServer.test(endpoint, attempt(organization, user.email, '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'rate_limit' });
+
+            // Answering rate_limit here would tell an attacker that this address is a
+            // platform level account rather than no account at all.
+            await expect(
+                testServer.test(endpoint, attempt(other, user.email, '5.6.7.8')),
+            ).rejects.toMatchObject({ code: 'invalid_username_or_password' });
+        });
+
+        test('a successful login does not count towards the account limit', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({ organization, password }).create();
+
+            for (let i = 0; i < 11; i++) {
+                const r = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
+                    grant_type: 'password',
+                    username: user.email,
+                    password,
+                });
+                vi.spyOn(r, 'getIP').mockReturnValue('1.2.3.4');
+
+                const response = await testServer.test(endpoint, r);
+                expect(response.body).toBeInstanceOf(TokenStruct);
+            }
         });
     });
 });
