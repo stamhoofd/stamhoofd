@@ -1761,8 +1761,8 @@ importers:
         specifier: workspace:*
         version: link:../../shared/vite-config
       '@trapezedev/configure':
-        specifier: 7.1.11
-        version: 7.1.11(supports-color@10.2.2)
+        specifier: 7.1.13
+        version: 7.1.13(supports-color@10.2.2)
       eslint-plugin-stamhoofd:
         specifier: workspace:*
         version: link:../../../shared/eslint
@@ -8091,16 +8091,23 @@ packages:
       y-protocols: ^1.0.1
       yjs: ^13.6.13
 
-  '@trapezedev/configure@7.1.11':
-    resolution: {integrity: sha512-xfGIisoAnVSv/3hJn8uCCCn59s8gyR+5Frpp3HXOkqPJ+3mixslWNe1fKmM4She4ih94GGgRjAdg0wRslAfwSA==}
+  '@trapezedev/configure@7.1.13':
+    resolution: {integrity: sha512-myFofi4ZwTnlwM4EZ4+lePKY/KUjG6/alNjj/yGm/6GClaG0FT27e1GgwX3/ZRRCNJx9iUVVhMuJCyjnb2w2yA==}
     engines: {node: '>=18'}
     hasBin: true
 
   '@trapezedev/gradle-parse@7.1.11':
     resolution: {integrity: sha512-yOhKGCrrCa2PrqEjwpWHKhlQ0tySDRbNMVTFCPW/KVuH+fQcLBAlkQvbAcGRTTBgwVlQwvWn+tCJGgHueNH/NQ==}
 
+  '@trapezedev/gradle-parse@7.1.13':
+    resolution: {integrity: sha512-fWXhxfb/QiVRcCjypx9IWJ3r9XUJaBd68a71nmlWba0sM5lHjteZU1hACCoOo6ygRP9nAPTapyCrrOgtJIOL7A==}
+
   '@trapezedev/project@7.1.11':
     resolution: {integrity: sha512-/8aALgJji4gXoILcPxFIQp7x3dDDtoinVseaUf4LdH2QqFSHOqjQ0cJdmfVnJNGCe8ZkMOM30bHAGE4G6LPXGw==}
+    engines: {node: '>=18'}
+
+  '@trapezedev/project@7.1.13':
+    resolution: {integrity: sha512-RnYuCYxYs/XW+5DCZlUdoJ81PsoC9nQUy2lNaY7VX9a/aMo62PwoodTwb+jokP/jobxLJvQXOu8B1KFWKCrXCQ==}
     engines: {node: '>=18'}
 
   '@tufjs/canonical-json@2.0.0':
@@ -21092,12 +21099,12 @@ snapshots:
       y-protocols: 1.0.7(yjs@13.6.33)
       yjs: 13.6.33
 
-  '@trapezedev/configure@7.1.11(supports-color@10.2.2)':
+  '@trapezedev/configure@7.1.13(supports-color@10.2.2)':
     dependencies:
       '@ionic/cli-framework-output': 2.2.8(supports-color@10.2.2)
       '@ionic/utils-fs': 3.1.7(supports-color@10.2.2)
       '@ionic/utils-terminal': 2.3.5(supports-color@10.2.2)
-      '@trapezedev/project': 7.1.11(supports-color@10.2.2)
+      '@trapezedev/project': 7.1.13(supports-color@10.2.2)
       commander: 8.3.0
       kleur: 4.1.5
       lodash: 4.18.1
@@ -21108,6 +21115,8 @@ snapshots:
       - supports-color
 
   '@trapezedev/gradle-parse@7.1.11': {}
+
+  '@trapezedev/gradle-parse@7.1.13': {}
 
   '@trapezedev/project@7.1.11(supports-color@10.2.2)':
     dependencies:
@@ -21125,6 +21134,26 @@ snapshots:
       plist: 3.1.1
       prettier: 2.8.8
       xcode: 3.0.1
+      xml-js: 1.6.11
+      xpath: 0.0.32
+    transitivePeerDependencies:
+      - supports-color
+
+  '@trapezedev/project@7.1.13(supports-color@10.2.2)':
+    dependencies:
+      '@ionic/utils-fs': 3.1.7(supports-color@10.2.2)
+      '@ionic/utils-subprocess': 2.1.14(supports-color@10.2.2)
+      '@prettier/plugin-xml': 2.2.0
+      '@trapezedev/gradle-parse': 7.1.13
+      '@xmldom/xmldom': 0.9.12
+      cross-spawn: 7.0.6
+      diff: 5.2.2
+      gradle-to-js: 2.0.1
+      kleur: 4.1.5
+      lodash: 4.18.1
+      plist: 3.1.1
+      prettier: 2.8.8
+      xcode: 4.0.0
       xml-js: 1.6.11
       xpath: 0.0.32
     transitivePeerDependencies:
