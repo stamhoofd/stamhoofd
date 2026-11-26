@@ -40,7 +40,7 @@
     "devDependencies": {
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/vite-config": "workspace:*",
-        "@vue/test-utils": "2.5.1",
+        "@vue/test-utils": "2.6.0",
         "eslint-plugin-stamhoofd": "workspace:*",
         "vite": "8.3.5",
         "vitest": "4.1.12",
