@@ -14,7 +14,7 @@ import { PatchableArray } from '@common/encoding';
 import { Request, Router, RouterServer } from '@node/endpoints';
 import { initializeTelemetry, traceEndpoint } from '@node/observability';
 import { signInternal } from '@stamhoofd/backend-env';
-import { Invoice, OrganizationFactory, UserFactory } from '@stamhoofd/models';
+import { Image, Invoice, OrganizationFactory, UserFactory } from '@stamhoofd/models';
 import { File, InvoiceStruct, Permissions, Version } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { fork } from 'node:child_process';
@@ -39,7 +39,7 @@ async function listen(server: Server) {
 }
 
 export async function runWaterfall(
-    mode: 'production' | 'local' | 'both' | 'ordinary' | 'unpinned',
+    mode: 'production' | 'local' | 'both' | 'ordinary' | 'unpinned' | 'upload-failure',
 ) {
     const dir = await mkdtemp(path.join(tmpdir(), 'trace-renderer-'));
     const bytes: Buffer[] = [];
@@ -119,7 +119,15 @@ export async function runWaterfall(
     });
     let redirectParent: string | undefined;
     let interruptedParent: string | undefined;
+    let probe: 'timeout' | 'http_status' | undefined;
+    const causes = new Map<string, string>();
     const redirect = createServer((req, res) => {
+        if (probe) {
+            causes.set(String(req.headers.traceparent).split('-')[1], probe);
+            if (probe === 'timeout') setTimeout(() => res.end(), 500);
+            else res.writeHead(500).end();
+            return;
+        }
         if (redirectParent) {
             interruptedParent = req.headers.traceparent as string;
             res.writeHead(200, { 'content-length': 100 }).write('partial');
@@ -140,7 +148,7 @@ export async function runWaterfall(
     const wire: { parent: string; proof: boolean; localParent?: string }[] = [];
     const remote = new InMemorySpanExporter();
     const runtime =
-        mode === 'ordinary'
+        mode === 'ordinary' || mode === 'upload-failure'
             ? initializeTelemetry('api')
             : initializeTelemetry('api', {
                   ownsMetrics: false,
@@ -216,17 +224,8 @@ export async function runWaterfall(
         vi.spyOn(InvoicePdfService, 'generateHtml').mockImplementation(
             async (invoice) => `<html>${invoice.number}</html>`,
         );
-        vi.spyOn(InvoicePdfService, 'uploadPdf').mockResolvedValue(
-            new File({
-                id: crypto.randomUUID(),
-                name: 'fixture.pdf',
-                path: 'fixture.pdf',
-                server: 'https://fixture.invalid',
-                size: 3,
-                isPrivate: false,
-                contentType: 'application/pdf',
-            }),
-        );
+        const put = vi.spyOn(Image.getS3Client(), 'send').mockResolvedValue(undefined);
+        vi.spyOn(File.prototype, 'sign').mockResolvedValue(true);
 
         // A valid browser PDF grant cannot authenticate its chosen trace ID.
         const form = new FormData();
@@ -290,13 +289,56 @@ export async function runWaterfall(
                         subscriber
                             .snapshot()
                             .flat()
-                            .some((s) => s.name === 'http.client.renderer'),
+                            .some(
+                                (s) =>
+                                    s.name === 'http.client.renderer' &&
+                                    s.reason === 'http_status' &&
+                                    s.status === 400,
+                            ),
                     )
                     .toBe(true);
                 return;
             }
             vi.stubEnv('STAM_DEV_RENDERER_AUTHORITY', STAMHOOFD.domains.rendererApi);
             vi.stubEnv('STAM_DEV_RENDERER_PORT', String(port));
+            if (mode === 'upload-failure') {
+                put.mockRejectedValueOnce(
+                    Object.assign(Error('canary-private-provider'), {
+                        $metadata: {
+                            httpStatusCode: 503,
+                            attempts: 4,
+                            requestId: 'canary-private',
+                        },
+                    }),
+                );
+                expect(await regenerate(invoices[0])).toBe(400);
+                child.send('flush');
+                expect((await exit)[0]).toBe(0);
+                await detach?.();
+                const [tree] = subscriber.snapshot();
+                const root = tree.find((s) => !s.parentId)!;
+                expect(root.code).toBe(2);
+                const client = tree.filter((s) => s.name === 'http.client.renderer');
+                expect(client).toHaveLength(1);
+                expect(client[0]).toMatchObject({ code: 0, status: 200, parentId: root.spanId });
+                expect(tree.some((s) => s.name === 'pdf.render' && s.code === 0)).toBe(true);
+                const upload = tree.find((s) => s.name === 'invoice.upload')!;
+                expect(upload).toMatchObject({ reason: 'upload', parentId: root.spanId });
+                expect(tree.filter((s) => s.name === 'storage.put')).toEqual([
+                    expect.objectContaining({
+                        reason: 'http_status',
+                        retry: 3,
+                        status: 503,
+                        parentId: upload.spanId,
+                    }),
+                ]);
+                expect(
+                    tree.every((s) => s.traceId === root.traceId && s.name !== 'invoice.persist'),
+                ).toBe(true);
+                expect(JSON.stringify(tree)).not.toContain('canary');
+                expect(bytes).toHaveLength(0);
+                return;
+            }
             if (mode === 'local')
                 for (let i = 0; i < 2; i++)
                     await traceEndpoint({}, 'GET', async () => ({ status: 200 }));
@@ -342,7 +384,9 @@ export async function runWaterfall(
             }
             const root = tree.find((s) => !s.parentId)!;
             const client = tree.find((s) => s.name === 'http.client.renderer')!;
-            const render = tree.find((s) => s.service === 'renderer')!;
+            const render = tree.find(
+                (s) => s.service === 'renderer' && s.name === 'http.server.request',
+            )!;
             expect([root.service, root.method, root.route]).toEqual(['api', 'PATCH', '/invoices']);
             if (mode === 'both') {
                 expect(
@@ -360,6 +404,19 @@ export async function runWaterfall(
                         .some((s) => s.spanContext().traceId === production?.parent.split('-')[1]),
                 ).toBe(true);
             }
+            expect(tree.some((s) => s.name === 'mysql.acquire' && s.operation === 'acquire')).toBe(
+                true,
+            );
+            expect(tree.some((s) => s.name === 'pdf.render' && s.retry === 0 && s.kind === 0)).toBe(
+                true,
+            );
+            expect(tree.some((s) => s.name === 'queue.wait')).toBe(true);
+            expect(tree.some((s) => s.name === 'queue.execute')).toBe(true);
+            const upload = tree.find((s) => s.name === 'invoice.upload')!;
+            expect(tree.some((s) => s.name === 'storage.put' && s.parentId === upload.spanId)).toBe(
+                true,
+            );
+            expect(tree.some((s) => s.name === 'invoice.persist')).toBe(true);
             expect(client.parentId).toBe(root.spanId);
             for (const parent of parents.filter((p) => p.split('-')[1] === root.traceId)) {
                 const id = parent.split('-')[2];
@@ -401,6 +458,38 @@ export async function runWaterfall(
         vi.spyOn(performance, 'now').mockImplementation(() => monotonic() + 20_000);
         expect(await regenerate(invoices[3])).toBeGreaterThanOrEqual(400);
         expect(interruptedParent).toBeTruthy();
+        const advance = (step: number) =>
+            vi.spyOn(performance, 'now').mockImplementation(() => monotonic() + step * 10_000);
+        advance(3);
+        probe = 'http_status';
+        expect(await regenerate(invoices[3])).toBeGreaterThanOrEqual(400);
+        advance(4);
+        probe = 'timeout';
+        const timer = globalThis.setTimeout;
+        vi.stubGlobal(
+            'setTimeout',
+            new Proxy(timer, {
+                apply(target, receiver, args) {
+                    if (args[1] === 30_000) args[1] = 100;
+                    return Reflect.apply(target, receiver, args);
+                },
+            }),
+        );
+        expect(await regenerate(invoices[3])).toBeGreaterThanOrEqual(400);
+        vi.stubGlobal('setTimeout', timer);
+        STAMHOOFD.domains.rendererApi = `127.0.0.1:${port}`;
+        advance(5);
+        put.mockRejectedValueOnce(Error('canary-provider'));
+        expect(await regenerate(invoices[3])).toBeGreaterThanOrEqual(400);
+        causes.set(wire.at(-1)!.parent.split('-')[1], 'upload');
+        advance(6);
+        const save = Invoice.prototype.save;
+        vi.spyOn(Invoice.prototype, 'save').mockImplementation(function (this: Invoice, ...args) {
+            if (this.pdf) throw Error('canary-persistence');
+            return save.apply(this, args);
+        });
+        expect(await regenerate(invoices[3])).toBeGreaterThanOrEqual(400);
+        causes.set(wire.at(-1)!.parent.split('-')[1], 'persistence');
         child.send('flush');
         expect((await exit)[0]).toBe(0);
         await runtime.shutdown();
@@ -419,10 +508,10 @@ export async function runWaterfall(
             ),
         );
         const roots = spans.filter(({ span }) => span.parentSpanId.length === 0);
-        expect(roots).toHaveLength(4);
+        expect(roots).toHaveLength(8);
         const hex = (id: Uint8Array) => Buffer.from(id).toString('hex');
         const traces = new Set(roots.map(({ span }) => hex(span.traceId)));
-        expect(traces.size).toBe(4);
+        expect(traces.size).toBe(8);
         expect(traces.has('f'.repeat(32))).toBe(false);
         expect(
             spans.every(
@@ -437,10 +526,42 @@ export async function runWaterfall(
             expect(service).toBe('api');
             const group = spans.filter(({ span }) => hex(span.traceId) === hex(root.traceId));
             const clients = group.filter(({ span }) => span.name === 'http.client.renderer');
-            const renders = group.filter((s) => s.service === 'renderer');
+            const renders = group.filter(
+                (s) => s.service === 'renderer' && s.span.name === 'http.server.request',
+            );
             expect(clients).toHaveLength(1);
             expect(hex(clients[0].span.parentSpanId)).toBe(hex(root.spanId));
+            const cause = causes.get(hex(root.traceId));
+            const errorType = (name: string) =>
+                group
+                    .find((s) => s.span.name === name)
+                    ?.span.attributes.find((a) => a.key === 'error.type')?.value?.value.value;
+            if (cause === 'timeout' || cause === 'http_status') {
+                expect(errorType('http.client.renderer')).toBe(cause);
+                expect(
+                    clients[0].span.attributes.find((a) => a.key === 'http.response.status_code')
+                        ?.value?.value.value,
+                ).toBe(cause === 'timeout' ? undefined : 500n);
+                continue;
+            }
+            if (cause === 'upload' || cause === 'persistence') {
+                expect(clients[0].span.status?.code).toBe(0);
+                expect(errorType('http.client.renderer')).toBeUndefined();
+                expect(errorType(cause === 'upload' ? 'invoice.upload' : 'invoice.persist')).toBe(
+                    cause,
+                );
+                expect(errorType('storage.put')).toBe(cause === 'upload' ? 'provider' : undefined);
+                const upload = group.find((s) => s.span.name === 'invoice.upload')!.span;
+                const storage = group.find((s) => s.span.name === 'storage.put')!.span;
+                expect(hex(upload.parentSpanId)).toBe(hex(root.spanId));
+                expect(hex(storage.parentSpanId)).toBe(hex(upload.spanId));
+                expect(group.some((s) => s.span.name === 'invoice.persist')).toBe(
+                    cause === 'persistence',
+                );
+                continue;
+            }
             if (interruptedParent?.split('-')[1] === hex(root.traceId)) {
+                expect(errorType('http.client.renderer')).toBe('transport');
                 const transfer = clients[0].span;
                 expect(
                     transfer.attributes.find((a) => a.key === 'http.response.status_code')?.value
@@ -458,6 +579,14 @@ export async function runWaterfall(
                 expect(clients[0].span.status?.code).toBe(2); // OTLP ERROR
                 continue;
             }
+            const attempts = group.filter((s) => s.span.name === 'pdf.render');
+            expect(
+                attempts.map(
+                    (s) =>
+                        s.span.attributes.find((a) => a.key === 'retry.count')?.value?.value.value,
+                ),
+            ).toEqual(root.status?.code ? [0n, 1n, 2n] : [0n]);
+            expect(errorType('pdf.render')).toBe(root.status?.code ? 'render' : undefined);
             expect(renders).toHaveLength(1);
             expect(renders[0].span.kind).toBe(2); // OTLP SERVER
             expect(clients[0].span.kind).toBe(3); // OTLP CLIENT

@@ -11,6 +11,7 @@ import type {
 } from './SQLExpression.js';
 import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
 import {
+    queryModels,
     SQLAlias,
     SQLColumnExpression,
     SQLCount,
@@ -60,6 +61,18 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow>
     extends Whereable(Orderable(SQLSelectBase))
     implements SQLExpression
 {
+    private get effectiveJoins() {
+        if (!this._where) return this._joins;
+        const filterJoins = Formatter.uniqueArray(this._where.getJoins()).filter(
+            (join) => !this._joins.includes(join),
+        );
+        return this._joins.concat(filterJoins);
+    }
+
+    override get modelTargets() {
+        return queryModels(this._from, this.effectiveJoins);
+    }
+
     _columns: SQLExpression[];
     _from: SQLNamedExpression;
 
@@ -187,13 +200,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow>
         query.push(this._from.getSQL(options));
 
         // Joins
-        query.push(...this._joins.map((j) => j.getSQL(options)));
-        if (this._where) {
-            const whereJoins = Formatter.uniqueArray(this._where.getJoins()).filter(
-                (j) => !this._joins.includes(j),
-            );
-            query.push(...whereJoins.map((j) => j.getSQL(options)));
-        }
+        query.push(...this.effectiveJoins.map((j) => j.getSQL(options)));
 
         // Where
         if (this._where) {
@@ -274,7 +281,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow>
         let rows: SQLResultNamespacedRow[];
         try {
             const [_rows] = await SQLLogger.log(
-                Database.select(query, params, { nestTables: true }),
+                Database.select(query, params, { nestTables: true, model: this.modelTargets }),
                 query,
                 params,
             );
@@ -339,7 +346,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow>
         const { query, params } = normalizeSQLQuery(this.getSQL());
 
         const [rows] = await SQLLogger.log(
-            Database.select(query, params, { nestTables: true }),
+            Database.select(query, params, { nestTables: true, model: this.modelTargets }),
             query,
             params,
         );
@@ -374,7 +381,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow>
         // console.log(query, params);
 
         const [rows] = await SQLLogger.log(
-            Database.select(query, params, { nestTables: true }),
+            Database.select(query, params, { nestTables: true, model: this.modelTargets }),
             query,
             params,
         );

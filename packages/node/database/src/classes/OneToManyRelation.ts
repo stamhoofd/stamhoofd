@@ -84,7 +84,7 @@ export class OneToManyRelation<Key extends keyof any, A extends Model, B extends
             str += this.orderByQuery('B');
         }
 
-        const [rows] = await Database.select(str, params);
+        const [rows] = await Database.select(str, params, { nestTables: true, model: this.modelB });
         const modelsB = this.modelB.fromRows(rows, namespaceB) as B[];
         modelA.setManyRelation(this, modelsB);
         return modelsB;

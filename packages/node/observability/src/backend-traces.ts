@@ -1,10 +1,39 @@
+import { isDevCollection, isDevCollections } from './db-collections.js';
 import { ROOT_CONTEXT, SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
 import type { Span, SpanContext, Tracer } from '@opentelemetry/api';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { channel } from 'node:diagnostics_channel';
 import { boundedMethod } from './http-metrics.js';
 
+const stages = {
+    'auth.authenticate': 'execution',
+    'organization.resolve_scope': 'execution',
+    'organization.assemble': 'execution',
+    'organization.period_groups': 'execution',
+    'organization.webshop_previews': 'execution',
+
+    'queue.execute': 'execution',
+    'invoice.upload': 'upload',
+    'invoice.persist': 'persistence',
+    'storage.put': 'provider',
+    'pdf.render': 'render',
+    'statistics.incremental': 'execution',
+    'statistics.deletes': 'execution',
+    'statistics.settle': 'execution',
+} as const;
+type Stage = keyof typeof stages;
+type StageOptions = { retry?: number; isAborted?: (e: unknown) => boolean };
+type Reason =
+    | (typeof stages)[Stage]
+    | 'pool'
+    | 'timeout'
+    | 'transport'
+    | 'http_status'
+    | 'cancelled';
 type Operation =
+    | Stage
+    | 'queue.wait'
+    | 'mysql.acquire'
     | 'http.server.request'
     | 'http.client.renderer'
     | 'mysql.execute'
@@ -19,6 +48,10 @@ type Owned = {
     db?: string;
     endpoint?: string;
     localRequest?: LocalRequest;
+    collection?: string;
+    collections?: string[];
+    reason?: Reason;
+    retry?: number;
 };
 const owned = new WeakMap<object, Owned>();
 const timings = channel('stamhoofd.database.duration');
@@ -57,6 +90,8 @@ function lane(role: string, tracer: Tracer, selection?: string) {
         );
         if (meta.route) span.setAttribute('http.route', meta.route);
         if (meta.db) span.setAttribute('db.operation.name', meta.db);
+        if (meta.collection) span.setAttribute('db.collection.name', meta.collection);
+        if (meta.collections) span.setAttribute('stamhoofd.db.collections', meta.collections);
         owned.set(span, meta);
         return span;
     }
@@ -70,20 +105,118 @@ function lane(role: string, tracer: Tracer, selection?: string) {
         return true;
     }
 
+    function fail(span: Span, reason: Reason) {
+        owned.get(span)!.reason = reason;
+        span.setAttribute('error.type', reason);
+        span.setStatus({ code: SpanStatusCode.ERROR });
+    }
+
+    function child(name: Operation, kind: SpanKind, reserve: number) {
+        const work = current.getStore();
+        if (!work?.span.isRecording() || work.budget.children <= reserve) return;
+        work.budget.children--;
+        return {
+            span: start({ name, kind, parent: work.span.spanContext() }),
+            budget: work.budget,
+        };
+    }
+
+    // AWS metadata may be absent on transport failures. Read only bounded numeric values;
+    // instrumenting an unexpected rejection must never replace the original rejection.
+    function storageOutcome(span: Span, value: unknown): Reason {
+        try {
+            const sdk = value as {
+                name?: unknown;
+                code?: unknown;
+                $metadata?: { attempts?: unknown; httpStatusCode?: unknown };
+            } | null;
+            const attempts = sdk?.$metadata?.attempts,
+                status = sdk?.$metadata?.httpStatusCode;
+            if (typeof attempts === 'number' && Number.isSafeInteger(attempts) && attempts >= 1) {
+                const retry = Math.min(attempts - 1, 9);
+                owned.get(span)!.retry = retry;
+                span.setAttribute('retry.count', retry);
+            }
+            if (
+                typeof status === 'number' &&
+                Number.isInteger(status) &&
+                status >= 100 &&
+                status <= 599
+            ) {
+                span.setAttribute('http.response.status_code', status);
+                if (status >= 400) return 'http_status';
+            }
+            if (sdk?.name === 'TimeoutError' || sdk?.code === 'ETIMEDOUT') return 'timeout';
+        } catch {
+            /* Non-SDK rejection. */
+        }
+        return 'provider';
+    }
+    function stage<T>(name: Stage, handle: () => Promise<T>, options?: StageOptions) {
+        const work = child(
+            name,
+            name === 'storage.put' ? SpanKind.CLIENT : SpanKind.INTERNAL,
+            name === 'queue.execute' ? 8 : 0,
+        );
+        if (!work) return handle();
+        const retry = options?.retry;
+        if (retry !== undefined && Number.isInteger(retry) && retry >= 0 && retry <= 2) {
+            owned.get(work.span)!.retry = retry;
+            work.span.setAttribute('retry.count', retry);
+        }
+        return run(
+            work.span,
+            async () => {
+                try {
+                    const result = await handle();
+                    if (
+                        name === 'storage.put' &&
+                        storageOutcome(work.span, result) === 'http_status'
+                    )
+                        fail(work.span, 'http_status');
+                    if (name === 'pdf.render' && result === null) fail(work.span, 'render');
+                    return result;
+                } catch (e) {
+                    fail(
+                        work.span,
+                        name === 'storage.put'
+                            ? storageOutcome(work.span, e)
+                            : name === 'queue.execute' && options?.isAborted?.(e)
+                              ? 'cancelled'
+                              : stages[name],
+                    );
+                    throw e;
+                }
+            },
+            work.budget,
+        );
+    }
+
+    function wait() {
+        const work = child('queue.wait', SpanKind.INTERNAL, 8);
+        if (work)
+            return (cancelled: boolean) => {
+                if (cancelled) fail(work.span, 'cancelled');
+                work.span.end();
+            };
+    }
     function databaseTime(message: unknown) {
         const work = current.getStore();
         if (
             !work ||
             !work.span.isRecording() ||
-            work.budget.children <= 1 ||
+            work.budget.children <= 8 ||
             !message ||
             typeof message !== 'object'
         )
             return;
-        const { operation, duration, outcome } = message as Record<string, unknown>;
+        const { operation, duration, outcome, collection, collections } = message as Record<
+            string,
+            unknown
+        >;
         if (
             typeof operation !== 'string' ||
-            !['select', 'insert', 'update', 'delete', 'statement'].includes(operation) ||
+            !['acquire', 'select', 'insert', 'update', 'delete', 'statement'].includes(operation) ||
             typeof duration !== 'number' ||
             !Number.isFinite(duration) ||
             duration < 0 ||
@@ -95,14 +228,22 @@ function lane(role: string, tracer: Tracer, selection?: string) {
         const end = Date.now();
         const span = start(
             {
-                name: 'mysql.execute',
+                name: operation === 'acquire' ? 'mysql.acquire' : 'mysql.execute',
                 kind: SpanKind.CLIENT,
                 parent: work.span.spanContext(),
                 db: operation,
+                collections:
+                    selection && operation !== 'acquire' && isDevCollections(collections)
+                        ? collections
+                        : undefined,
+                collection:
+                    selection && operation !== 'acquire' && isDevCollection(collection)
+                        ? collection
+                        : undefined,
             },
             end - duration,
         );
-        if (outcome === 'error') span.setStatus({ code: SpanStatusCode.ERROR });
+        if (outcome === 'error') fail(span, operation === 'acquire' ? 'pool' : 'execution');
         span.end(end);
     }
 
@@ -166,7 +307,10 @@ function lane(role: string, tracer: Tracer, selection?: string) {
     }
 
     function traceStatisticsCycle<T>(work: () => Promise<T>) {
-        return !selection && role === 'stats' && sample()
+        const admit =
+            role === 'stats' &&
+            (selection ? selection === '*' || selection === 'statistics.cycle' : sample());
+        return admit
             ? run(start({ name: 'statistics.cycle', kind: SpanKind.INTERNAL }), work)
             : work();
     }
@@ -188,15 +332,26 @@ function lane(role: string, tracer: Tracer, selection?: string) {
             span,
             async () => {
                 const ctx = span.spanContext();
-                return post(
-                    span.isRecording() && ctx.traceFlags === 1
-                        ? `00-${ctx.traceId}-${ctx.spanId}-01`
-                        : undefined,
-                    (status) => {
-                        span.setAttribute('http.response.status_code', status);
-                        if (status >= 400) span.setStatus({ code: SpanStatusCode.ERROR });
-                    },
-                );
+                try {
+                    return await post(
+                        span.isRecording() && ctx.traceFlags === 1
+                            ? `00-${ctx.traceId}-${ctx.spanId}-01`
+                            : undefined,
+                        (status) => {
+                            span.setAttribute('http.response.status_code', status);
+                            if (status !== 200) fail(span, 'http_status');
+                        },
+                    );
+                } catch (error) {
+                    if (!owned.get(span)?.reason)
+                        fail(
+                            span,
+                            error instanceof DOMException && error.name === 'AbortError'
+                                ? 'timeout'
+                                : 'transport',
+                        );
+                    throw error;
+                }
             },
             work.budget,
         );
@@ -233,6 +388,8 @@ function lane(role: string, tracer: Tracer, selection?: string) {
 
     timings.subscribe(databaseTime);
     return {
+        stage,
+        wait,
         traceEndpoint,
         traceRendererCall,
         traceVerifiedRender,
@@ -276,7 +433,8 @@ export function traceEndpoint<T extends { status: number }>(
     return production ? production.traceEndpoint(endpoint, method, work) : work();
 }
 export function traceStatisticsCycle<T>(work: () => Promise<T>) {
-    return production ? production.traceStatisticsCycle(work) : work();
+    const handle = local ? () => local!.traceStatisticsCycle(work) : work;
+    return production ? production.traceStatisticsCycle(handle) : handle();
 }
 export function traceRendererCall<T>(
     post: (
@@ -308,4 +466,21 @@ export function traceVerifiedRender<T>(
 ) {
     const work = local ? () => local!.traceVerifiedRender(localParent, handle, request) : handle;
     return production ? production.traceVerifiedRender(parent, work) : work();
+}
+
+/** Fixed application-owned boundaries only. No dynamic operation names or exception text. */
+export function traceStage<T>(name: Stage, handle: () => Promise<T>, options?: StageOptions) {
+    if (!Object.hasOwn(stages, name)) return handle();
+    const work = local ? () => local!.stage(name, handle, options) : handle;
+    return production ? production.stage(name, work, options) : work();
+}
+
+export function traceQueueWait() {
+    const remoteWait = production?.wait(),
+        localWait = local?.wait();
+    if (remoteWait || localWait)
+        return (cancelled: boolean) => {
+            remoteWait?.(cancelled);
+            localWait?.(cancelled);
+        };
 }

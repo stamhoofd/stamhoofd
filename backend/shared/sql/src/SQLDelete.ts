@@ -1,3 +1,4 @@
+import { queryModels } from './SQLExpressions.js';
 import { Database } from '@node/database';
 import type {
     SQLExpression,
@@ -70,7 +71,11 @@ export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
 
         const { query, params } = normalizeSQLQuery(this.getSQL());
 
-        const [rows] = await SQLLogger.log(Database.delete(query, params), query, params);
+        const [rows] = await SQLLogger.log(
+            Database.delete(query, params, undefined, queryModels(this._from, this._joins)),
+            query,
+            params,
+        );
         return rows;
     }
 

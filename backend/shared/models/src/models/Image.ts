@@ -1,3 +1,4 @@
+import { putObject } from '../helpers/putObject.js';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
 import { column } from '@node/database';
 import { ArrayDecoder } from '@common/encoding';
@@ -248,7 +249,7 @@ export class Image extends QueryableModel {
                 ACL: isPrivateFile ? 'private' : 'public-read',
             });
 
-            uploadPromises.push(client.send(cmd));
+            uploadPromises.push(putObject(client, cmd));
 
             const _file = new File({
                 id: fileId,
@@ -308,7 +309,7 @@ export class Image extends QueryableModel {
             ContentDisposition: 'attachment',
             ACL: 'private',
         });
-        uploadPromises.push(client.send(cmd));
+        uploadPromises.push(putObject(client, cmd));
 
         await Promise.all(uploadPromises);
         await image.save();

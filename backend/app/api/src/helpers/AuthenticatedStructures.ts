@@ -1,3 +1,4 @@
+import { traceStage } from '@node/observability';
 import { SimpleError } from '@common/errors';
 import type {
     AuditLog,
@@ -274,79 +275,81 @@ export class AuthenticatedStructures {
             return [];
         }
 
-        const periodIds = periods
-            ? Formatter.uniqueArray(periods.map((p) => p.id))
-            : Formatter.uniqueArray(organizationRegistrationPeriods.map((p) => p.periodId));
+        return traceStage('organization.period_groups', async () => {
+            const periodIds = periods
+                ? Formatter.uniqueArray(periods.map((p) => p.id))
+                : Formatter.uniqueArray(organizationRegistrationPeriods.map((p) => p.periodId));
 
-        if (!periods) {
-            periods = await RegistrationPeriod.getByIDs(...periodIds);
-        }
-
-        const organizationIds = Formatter.uniqueArray(
-            organizationRegistrationPeriods.map((r) => r.organizationId),
-        );
-
-        const groupIds = Formatter.uniqueArray([
-            ...organizationRegistrationPeriods.flatMap((p) =>
-                p.settings.categories.flatMap((c) => c.groupIds),
-            ),
-            ...(options?.forceGroupIds ?? []),
-        ]);
-
-        let groups: Group[] = [];
-
-        const whereWaitingList = SQL.where('organizationId', organizationIds)
-            .and('periodId', periodIds)
-            .and('type', GroupType.WaitingList)
-            .and('eventId', null)
-            .and('deletedAt', null);
-
-        if (groupIds.length) {
-            const whereGroupIds = SQL.where('id', groupIds);
-
-            if (organizationIds.length && periodIds.length) {
-                groups = await Group.select()
-                    .where(whereGroupIds)
-                    .orWhere(whereWaitingList)
-                    .fetch();
-            } else {
-                groups = await Group.select().where(whereGroupIds).fetch();
-            }
-        } else if (organizationIds.length && periodIds.length) {
-            groups = await Group.select().where(whereWaitingList).fetch();
-        }
-
-        const groupStructs = await this.groups(groups);
-
-        const structs: OrganizationRegistrationPeriodStruct[] = [];
-        for (const organizationPeriod of organizationRegistrationPeriods) {
-            const period = periods.find((p) => p.id === organizationPeriod.periodId) ?? null;
-            if (!period) {
-                continue;
+            if (!periods) {
+                periods = await RegistrationPeriod.getByIDs(...periodIds);
             }
 
-            const struct = OrganizationRegistrationPeriodStruct.create({
-                ...organizationPeriod,
-                period: period.getStructure(),
-                groups: groupStructs
-                    .filter((gg) => {
-                        if (gg.organizationId !== organizationPeriod.organizationId) {
-                            return false;
-                        }
+            const organizationIds = Formatter.uniqueArray(
+                organizationRegistrationPeriods.map((r) => r.organizationId),
+            );
 
-                        if (gg.periodId !== organizationPeriod.periodId) {
-                            return false;
-                        }
+            const groupIds = Formatter.uniqueArray([
+                ...organizationRegistrationPeriods.flatMap((p) =>
+                    p.settings.categories.flatMap((c) => c.groupIds),
+                ),
+                ...(options?.forceGroupIds ?? []),
+            ]);
 
-                        return true;
-                    })
-                    .sort(GroupStruct.defaultSort),
-            });
+            let groups: Group[] = [];
 
-            structs.push(struct);
-        }
+            const whereWaitingList = SQL.where('organizationId', organizationIds)
+                .and('periodId', periodIds)
+                .and('type', GroupType.WaitingList)
+                .and('eventId', null)
+                .and('deletedAt', null);
 
-        return structs;
+            if (groupIds.length) {
+                const whereGroupIds = SQL.where('id', groupIds);
+
+                if (organizationIds.length && periodIds.length) {
+                    groups = await Group.select()
+                        .where(whereGroupIds)
+                        .orWhere(whereWaitingList)
+                        .fetch();
+                } else {
+                    groups = await Group.select().where(whereGroupIds).fetch();
+                }
+            } else if (organizationIds.length && periodIds.length) {
+                groups = await Group.select().where(whereWaitingList).fetch();
+            }
+
+            const groupStructs = await this.groups(groups);
+
+            const structs: OrganizationRegistrationPeriodStruct[] = [];
+            for (const organizationPeriod of organizationRegistrationPeriods) {
+                const period = periods.find((p) => p.id === organizationPeriod.periodId) ?? null;
+                if (!period) {
+                    continue;
+                }
+
+                const struct = OrganizationRegistrationPeriodStruct.create({
+                    ...organizationPeriod,
+                    period: period.getStructure(),
+                    groups: groupStructs
+                        .filter((gg) => {
+                            if (gg.organizationId !== organizationPeriod.organizationId) {
+                                return false;
+                            }
+
+                            if (gg.periodId !== organizationPeriod.periodId) {
+                                return false;
+                            }
+
+                            return true;
+                        })
+                        .sort(GroupStruct.defaultSort),
+                });
+
+                structs.push(struct);
+            }
+
+            return structs;
+        });
     }
 
     static async organizationRegistrationPeriod(
@@ -392,187 +395,187 @@ export class AuthenticatedStructures {
             return [];
         }
 
-        const periodIdOrganizationsMap = new Map<string, Organization[]>();
-        const organizationIdsToGetWebshopsFor: string[] = [];
+        return traceStage('organization.assemble', async () => {
+            const periodIdOrganizationsMap = new Map<string, Organization[]>();
+            const organizationIdsToGetWebshopsFor: string[] = [];
 
-        for (const organization of organizations) {
-            const periodId = organization.periodId;
-            const array = periodIdOrganizationsMap.get(periodId);
-            if (array !== undefined) {
-                array.push(organization);
-            } else {
-                periodIdOrganizationsMap.set(periodId, [organization]);
-            }
-        }
-
-        // Get registration period and whether private data can be accessed for each organization
-        const organizationData: Map<
-            string,
-            {
-                organizationRegistrationPeriod: OrganizationRegistrationPeriodStruct;
-                canAccessPrivateData: boolean;
-                doesFrontendExpectPrivateMeta: boolean;
-            }
-        > = new Map();
-        const allPeriodIds = periodIdOrganizationsMap.keys();
-        const allPeriods = await RegistrationPeriod.getByIDs(...allPeriodIds);
-        const periodMap = new Map<string, RegistrationPeriod>(allPeriods.map((p) => [p.id, p]));
-
-        for (const [periodId, organizations] of periodIdOrganizationsMap.entries()) {
-            const result = await OrganizationRegistrationPeriod.where({
-                periodId,
-                organizationId: {
-                    sign: 'IN',
-                    value: Formatter.uniqueArray(organizations.map((o) => o.id)),
-                },
-            });
-            const period = periodMap.get(periodId);
-            if (!period) {
-                console.error('Period not found for id', periodId);
-                throw new Error('Period not found for id ' + periodId);
-            }
-
-            // Automatically create missing organization periods for now
             for (const organization of organizations) {
-                const organizationPeriodModel = result.find(
-                    (r) => r.organizationId === organization.id,
-                );
-                if (!organizationPeriodModel) {
-                    result.push(await organization.getPeriod());
+                const periodId = organization.periodId;
+                const array = periodIdOrganizationsMap.get(periodId);
+                if (array !== undefined) {
+                    array.push(organization);
+                } else {
+                    periodIdOrganizationsMap.set(periodId, [organization]);
                 }
             }
 
-            // Do this onece per period, because otherwise we can't optimize fetching the groups for each period
-            const organizationRegistrationPeriods = await this.organizationRegistrationPeriods(
-                result,
-                [period],
-            );
+            // Get registration period and whether private data can be accessed for each organization
+            const organizationData: Map<
+                string,
+                {
+                    organizationRegistrationPeriod: OrganizationRegistrationPeriodStruct;
+                    canAccessPrivateData: boolean;
+                    doesFrontendExpectPrivateMeta: boolean;
+                }
+            > = new Map();
+            const allPeriodIds = periodIdOrganizationsMap.keys();
+            const allPeriods = await RegistrationPeriod.getByIDs(...allPeriodIds);
+            const periodMap = new Map<string, RegistrationPeriod>(allPeriods.map((p) => [p.id, p]));
 
-            for (const organization of organizations) {
-                const organizationId = organization.id;
-                const organizationPeriodModel = result.find(
-                    (r) => r.organizationId === organizationId,
-                );
-                if (organizationPeriodModel) {
-                    const organizationRegistrationPeriod = organizationRegistrationPeriods.find(
-                        (o) => o.id === organizationPeriodModel.id,
+            for (const [periodId, organizations] of periodIdOrganizationsMap.entries()) {
+                const result = await OrganizationRegistrationPeriod.where({
+                    periodId,
+                    organizationId: {
+                        sign: 'IN',
+                        value: Formatter.uniqueArray(organizations.map((o) => o.id)),
+                    },
+                });
+                const period = periodMap.get(periodId);
+                if (!period) {
+                    console.error('Period not found for id', periodId);
+                    throw new Error('Period not found for id ' + periodId);
+                }
+
+                // Automatically create missing organization periods for now
+                for (const organization of organizations) {
+                    const organizationPeriodModel = result.find(
+                        (r) => r.organizationId === organization.id,
                     );
-                    if (!organizationRegistrationPeriod) {
+                    if (!organizationPeriodModel) {
+                        result.push(await organization.getPeriod());
+                    }
+                }
+
+                // Do this onece per period, because otherwise we can't optimize fetching the groups for each period
+                const organizationRegistrationPeriods = await this.organizationRegistrationPeriods(
+                    result,
+                    [period],
+                );
+
+                for (const organization of organizations) {
+                    const organizationId = organization.id;
+                    const organizationPeriodModel = result.find(
+                        (r) => r.organizationId === organizationId,
+                    );
+                    if (organizationPeriodModel) {
+                        const organizationRegistrationPeriod = organizationRegistrationPeriods.find(
+                            (o) => o.id === organizationPeriodModel.id,
+                        );
+                        if (!organizationRegistrationPeriod) {
+                            throw new Error(
+                                'Organization registration period not found for id ' +
+                                    organizationPeriodModel.id,
+                            );
+                        }
+
+                        // check if private data can be accessed
+                        const canAccessPrivateData =
+                            (await Context.optionalAuth?.canAccessPrivateOrganizationData(
+                                organization,
+                            )) ?? false;
+                        const doesFrontendExpectPrivateMeta =
+                            canAccessPrivateData ||
+                            ((await Context.optionalAuth?.doesFrontendExpectPrivateMeta(
+                                organization,
+                            )) ??
+                                false);
+
+                        if (canAccessPrivateData) {
+                            organizationIdsToGetWebshopsFor.push(organization.id);
+                        }
+                        organizationData.set(organizationId, {
+                            organizationRegistrationPeriod,
+                            canAccessPrivateData,
+                            doesFrontendExpectPrivateMeta,
+                        });
+                    } else {
+                        // Should never happen
                         throw new Error(
-                            'Organization registration period not found for id ' +
-                                organizationPeriodModel.id,
+                            'Organization registration period model not found for organization id ' +
+                                organizationId +
+                                ' and period id ' +
+                                periodId,
                         );
                     }
-
-                    // check if private data can be accessed
-                    const canAccessPrivateData =
-                        (await Context.optionalAuth?.canAccessPrivateOrganizationData(
-                            organization,
-                        )) ?? false;
-                    const doesFrontendExpectPrivateMeta =
-                        canAccessPrivateData ||
-                        ((await Context.optionalAuth?.doesFrontendExpectPrivateMeta(
-                            organization,
-                        )) ??
-                            false);
-
-                    if (canAccessPrivateData) {
-                        organizationIdsToGetWebshopsFor.push(organization.id);
-                    }
-                    organizationData.set(organizationId, {
-                        organizationRegistrationPeriod,
-                        canAccessPrivateData,
-                        doesFrontendExpectPrivateMeta,
-                    });
-                } else {
-                    // Should never happen
-                    throw new Error(
-                        'Organization registration period model not found for organization id ' +
-                            organizationId +
-                            ' and period id ' +
-                            periodId,
-                    );
                 }
             }
-        }
 
-        // Get webshop previews
-        const webshops =
-            organizationIdsToGetWebshopsFor.length > 0
-                ? await Webshop.where(
-                      {
-                          organizationId: {
-                              sign: 'IN',
-                              value: organizationIdsToGetWebshopsFor,
-                          },
-                      },
-                      { select: Webshop.selectColumnsWithout(undefined, 'products', 'categories') },
-                  )
-                : [];
+            const webshopPreviews = new Map<string, WebshopPreview[]>();
+            if (organizationIdsToGetWebshopsFor.length > 0)
+                await traceStage('organization.webshop_previews', async () => {
+                    const webshops = await Webshop.where(
+                        { organizationId: { sign: 'IN', value: organizationIdsToGetWebshopsFor } },
+                        {
+                            select: Webshop.selectColumnsWithout(
+                                undefined,
+                                'products',
+                                'categories',
+                            ),
+                        },
+                    );
+                    for (const w of webshops) {
+                        if (!(await Context.auth.canAccessWebshop(w))) {
+                            continue;
+                        }
 
-        const webshopPreviews = new Map<string, WebshopPreview[]>();
+                        const organizationId = w.organizationId;
+                        const array = webshopPreviews.get(organizationId);
+                        const preview = await this.webshopPreview(w);
 
-        for (const w of webshops) {
-            if (!(await Context.auth.canAccessWebshop(w))) {
-                continue;
-            }
-
-            const organizationId = w.organizationId;
-            const array = webshopPreviews.get(organizationId);
-            const preview = await this.webshopPreview(w);
-
-            if (array) {
-                array.push(preview);
-            } else {
-                webshopPreviews.set(organizationId, [preview]);
-            }
-        }
-
-        // Create organization structs
-        const results: OrganizationStruct[] = [];
-
-        for (const organization of organizations) {
-            const registrationPeriod = periodMap.get(organization.periodId);
-            if (!registrationPeriod) {
-                console.error('Registration period is undefined.');
-                continue;
-            }
-
-            const organizationId = organization.id;
-            const data = organizationData.get(organizationId);
-            if (data === undefined) {
-                console.error('Organization data is undefined.');
-                continue;
-            }
-
-            let result: OrganizationStruct;
-
-            const period = data.organizationRegistrationPeriod;
-            const baseStruct = organization.getBaseStructure();
-
-            if (data.canAccessPrivateData) {
-                result = OrganizationStruct.create({
-                    ...baseStruct,
-                    period,
-                    privateMeta: organization.privateMeta.removedPrivateKeys,
-                    webshops: webshopPreviews
-                        .get(organization.id)
-                        ?.sort((a, b) => Sorter.byDateValue(b.createdAt, a.createdAt)),
+                        if (array) {
+                            array.push(preview);
+                        } else {
+                            webshopPreviews.set(organizationId, [preview]);
+                        }
+                    }
                 });
-            } else {
-                result = OrganizationStruct.create({
-                    ...baseStruct,
-                    period,
-                    privateMeta: data.doesFrontendExpectPrivateMeta
-                        ? OrganizationPrivateMetaData.create({})
-                        : undefined,
-                });
+
+            // Create organization structs
+            const results: OrganizationStruct[] = [];
+
+            for (const organization of organizations) {
+                const registrationPeriod = periodMap.get(organization.periodId);
+                if (!registrationPeriod) {
+                    console.error('Registration period is undefined.');
+                    continue;
+                }
+
+                const organizationId = organization.id;
+                const data = organizationData.get(organizationId);
+                if (data === undefined) {
+                    console.error('Organization data is undefined.');
+                    continue;
+                }
+
+                let result: OrganizationStruct;
+
+                const period = data.organizationRegistrationPeriod;
+                const baseStruct = organization.getBaseStructure();
+
+                if (data.canAccessPrivateData) {
+                    result = OrganizationStruct.create({
+                        ...baseStruct,
+                        period,
+                        privateMeta: organization.privateMeta.removedPrivateKeys,
+                        webshops: webshopPreviews
+                            .get(organization.id)
+                            ?.sort((a, b) => Sorter.byDateValue(b.createdAt, a.createdAt)),
+                    });
+                } else {
+                    result = OrganizationStruct.create({
+                        ...baseStruct,
+                        period,
+                        privateMeta: data.doesFrontendExpectPrivateMeta
+                            ? OrganizationPrivateMetaData.create({})
+                            : undefined,
+                    });
+                }
+
+                results.push(result);
             }
 
-            results.push(result);
-        }
-
-        return results;
+            return results;
+        });
     }
 
     static async adminOrganizations(organizations: Organization[]): Promise<OrganizationStruct[]> {

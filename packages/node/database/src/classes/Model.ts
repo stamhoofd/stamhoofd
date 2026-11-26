@@ -381,6 +381,7 @@ export class Model /* static implements RowInitiable<Model> */ {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM \`${this.table}\` WHERE \`${this.primary.name}\` = ? LIMIT 1`,
             [id],
+            { nestTables: true, model: this },
         );
 
         if (rows.length === 0) {
@@ -406,6 +407,7 @@ export class Model /* static implements RowInitiable<Model> */ {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM \`${this.table}\` WHERE \`${this.primary.name}\` IN (?) LIMIT ?`,
             [ids, ids.length],
+            { nestTables: true, model: this },
         );
 
         // Read member + address from first row
@@ -593,7 +595,7 @@ export class Model /* static implements RowInitiable<Model> */ {
             params.push(extra.limit);
         }
 
-        const [rows] = await Database.select(query, params);
+        const [rows] = await Database.select(query, params, { nestTables: true, model: this });
 
         return this.fromRows(rows, this.table);
     }
@@ -610,7 +612,7 @@ export class Model /* static implements RowInitiable<Model> */ {
             params.push(limit);
         }
 
-        const [rows] = await Database.select(query, params);
+        const [rows] = await Database.select(query, params, { nestTables: true, model: this });
         return this.fromRows(rows, this.table);
     }
 
@@ -789,6 +791,8 @@ export class Model /* static implements RowInitiable<Model> */ {
             const [result] = await Database.insert(
                 'INSERT INTO `' + this.static.table + '` SET ?',
                 [fields],
+                undefined,
+                this.static,
             );
 
             if (this.static.primary.type === 'integer' && this.static.primary.name === 'id') {
@@ -806,6 +810,8 @@ export class Model /* static implements RowInitiable<Model> */ {
                     this.static.primary.name +
                     '` = ?',
                 [fields, id],
+                undefined,
+                this.static,
             );
             if (result.changedRows !== 1 && Model.showWarnings) {
                 console.warn(
@@ -892,6 +898,8 @@ export class Model /* static implements RowInitiable<Model> */ {
         const [result] = await Database.delete(
             'DELETE FROM `' + this.static.table + '` WHERE `' + this.static.primary.name + '` = ?',
             [id],
+            undefined,
+            this.static,
         );
         if (result.affectedRows !== 1 && Model.showWarnings) {
             console.warn(

@@ -1,3 +1,4 @@
+import { putObject } from '@stamhoofd/models/helpers/putObject.js';
 import { PutObjectCommand } from '@aws-sdk/client-s3'; // ES Modules import
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
@@ -271,7 +272,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             ContentDisposition: uploadType.canRenderInline ? 'inline' : 'attachment',
             ACL: request.query.isPrivate ? 'private' : 'public-read',
         });
-        await Image.getS3Client().send(cmd);
+        await putObject(Image.getS3Client(), cmd);
 
         return new Response(fileStruct);
     }

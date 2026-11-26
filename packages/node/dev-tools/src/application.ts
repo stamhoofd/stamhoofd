@@ -21,7 +21,7 @@ export function attachApplication(app: DevApp) {
             if (queued in value) Reflect.set(value, queued, true);
         }
     };
-    if (process.env.STAM_DEV_CAPTURE && process.env.STAM_DEV_SESSION && (app === 'api' || app === 'renderer')) spans.subscribe(send);
+    if (process.env.STAM_DEV_CAPTURE && process.env.STAM_DEV_SESSION && (app === 'api' || app === 'renderer' || app === 'stats')) spans.subscribe(send);
     const lifecycle = channel('stamhoofd.application.lifecycle');
     const receive = (message: unknown) => {
         if (!message || typeof message !== 'object') return;

@@ -15,6 +15,7 @@
         "lint": "eslint . --quiet"
     },
     "dependencies": {
+        "@node/observability": "workspace:*",
         "concurrently": "10.0.7",
         "typescript": "6.0.3"
     },

@@ -3,6 +3,8 @@ export { initializeTelemetry } from './telemetry.js';
 export { runApplication } from './application.js';
 export { observeRequest } from './request.js';
 export {
+    traceStage,
+    traceQueueWait,
     traceEndpoint,
     traceRendererCall,
     traceVerifiedRender,

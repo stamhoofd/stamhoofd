@@ -107,17 +107,19 @@ The backend tracer observes a matched router **handler**, not time spent reading
 headers, decoding/authenticating the request, or streaming the response. API,
 renderer, backup and redirecter install that hook. The statistics worker uses
 a `statistics.cycle` root instead. The optional local span processor belongs to
-the process owner; no backend processor is installed by default.
+the process owner. Standalone processes do not capture by default. Managed
+`stam dev` sessions capture instrumented requests and statistics cycles locally.
 
 The representative path is `PATCH /invoices` for a numbered invoice without a
 PDF: real application MySQL calls, an API `http.client.renderer` POST, and the
 renderer’s `http.server.request` after grant verification. Only the compiled
 endpoint-to-template table supplies route names. The database timing channel
 supplies a fixed operation, outcome and duration, never a statement or row.
-Each process admits a burst of two roots, refilling one per ten seconds, with
-at most 32 children per root and one slot reserved for internal HTTP. The
-renderer uses a separate bucket of the same size for verified continuations, so public roots cannot consume it. Detached work after a parent ends
-does not inherit its budget.
+Production sampling admits a burst of two roots per process, refilling one per ten seconds, with
+at most 32 children per root. SQL and queue spans leave eight slots for renderer
+calls and named stages. Production renderer continuations have a separate bucket.
+Authenticated local continuations instead have a limit of 32 active handlers.
+Detached work after a parent ends does not inherit its budget.
 
 Public trace headers never select or name a root. The renderer accepts an
 ID pair only with both a valid render grant and a separate service signature
@@ -125,7 +127,23 @@ binding that grant to the exact sampled traceparent. An unselected request
 carries neither trace header nor service proof. Only the configured renderer
 authority receives the signed POST; context requires HTTPS (or development
 loopback), and redirects are refused even when tracing is off. No automatic
-propagation, baggage, provider instrumentation or browser tracking is added.
+propagation, baggage or browser tracking is added.
+
+A pool checkout (`mysql.acquire`) is distinct from a statement (`mysql.execute`).
+Transactional statements reuse their pinned connection. An in-process queue records
+`queue.wait` until dequeue, then `queue.execute` in the submitter’s context. Cancelled
+items have no execution span, and recursive queue bypass creates neither span.
+The renderer client distinguishes `timeout`, `transport` and `http_status`; the
+HTTP status survives a subsequent body-transfer failure. `pdf.render` records the
+zero-based retry number. `invoice.upload` contains `storage.put`; `invoice.persist`
+follows a successful upload. Application file, image, XML and PDF uploads share the
+same `storage.put` boundary. SDK attempts become a zero-based `retry.count` capped
+at nine; only numeric HTTP status and bounded failure reason are retained. A queue
+execution reports `cancelled` only for a cooperative rejection, not merely because
+a cancellation was requested. Fixed `error.type` values never include SDK messages.
+Use `STAM_DEV_CAPTURE=statistics.cycle` for each matching statistics worker cycle and
+its incremental, deletion and settlement stages. These operations require no OTLP
+endpoint; the remote projection is a separate review gate.
 
 `STAM_BACKEND_TRACE_SMOKE=1 stam test api trace-waterfall`, after building the
 backend entries, exercises concurrent numbered receipts in managed MySQL and
@@ -157,3 +175,15 @@ for their separate local record sink. Metrics and trace opt-ins are independent.
 
 Run `pnpm stam test observability`, `pnpm stam check lint --filter @node/observability`, and
 `pnpm stam check typecheck --filter @node/observability` from the repository root.
+
+Local `mysql.execute` spans identify the registered physical table (`collection`),
+or up to four distinct verified owners (`collections`). Builder joins and aliases
+use their physical sources, never their namespace. Reviewed raw queries pass
+model constructors explicitly. Unknown sources, oversized sets, and pool
+checkout have no collection fields. Table identity is not a metric or OTLP field.
+
+Bearer authentication, organization scope resolution, assembly, period/group
+loading and webshop previews are fixed stages in both recording lanes. Optional
+authentication without a token and empty batches do not create stages. Local
+request spans show a registered template or static matched endpoint identity;
+these labels do not expand the production route allowlist.

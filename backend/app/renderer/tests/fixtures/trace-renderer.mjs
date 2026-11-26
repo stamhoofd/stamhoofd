@@ -21,7 +21,7 @@ if (attempts) {
     if (!attempts.count()) throw Error('HTTP attempt observer inactive');
 }
 const baseline = attempts?.count();
-const runtime = attempts ? initializeTelemetry('renderer') : initializeTelemetry('renderer', { localProcessor: process.env.STAM_DEV_CAPTURE ? new SimpleSpanProcessor({ exporter: remote }) : new BatchSpanProcessor({ exporter: new OTLPTraceExporter({ url: process.env.TEST_COLLECTOR }) }) });
+const runtime = attempts || process.env.TEST_MODE === 'upload-failure' ? initializeTelemetry('renderer') : initializeTelemetry('renderer', { localProcessor: process.env.STAM_DEV_CAPTURE ? new SimpleSpanProcessor({ exporter: remote }) : new BatchSpanProcessor({ exporter: new OTLPTraceExporter({ url: process.env.TEST_COLLECTOR }) }) });
 if (process.env.TEST_MODE === 'local') {
     for (let i = 0; i < 2; i++) {
         await traceEndpoint({}, 'GET', async () => ({ status: 200 }));
@@ -31,7 +31,25 @@ if (process.env.TEST_MODE === 'local') {
 const router = new Router();
 const endpoint = new HtmlToPdfEndpoint();
 // Real multipart, grant verification, cache and response. No browser process or remote content.
-endpoint.htmlToPdf = async html => html.includes('canary-error') ? null : Buffer.from('PDF');
+const browser = {
+    connected: true,
+    newPage: async () => {
+        let fail = false;
+        return {
+            setJavaScriptEnabled() {},
+            emulateMediaType() {},
+            setContent(html) {
+                fail = html.includes('canary-error');
+            },
+            pdf() {
+                if (fail) throw Error('synthetic browser failure');
+                return Buffer.from('PDF');
+            },
+            close() {},
+        };
+    },
+};
+HtmlToPdfEndpoint.browsers = Array.from({ length: 4 }, () => ({ browser, count: 0 }));
 router.endpoints.push(endpoint);
 const app = new RouterServer(router);
 app.observeEndpoint = traceEndpoint;
@@ -40,7 +58,7 @@ const server = createServer((req, res) => {
     void app.requestListener(req, res);
 }).listen(0, '127.0.0.1', () => process.send({ port: server.address().port }));
 process.once('message', () => server.close(async () => {
-    if (!attempts && process.env.STAM_DEV_CAPTURE && remote.getFinishedSpans().length !== (process.env.TEST_MODE === 'local' ? 4 : 1)) process.exitCode = 1;
+    if (!attempts && process.env.TEST_MODE !== 'upload-failure' && process.env.STAM_DEV_CAPTURE && remote.getFinishedSpans().filter(s => s.name === 'http.server.request').length !== (process.env.TEST_MODE === 'local' ? 4 : 1)) process.exitCode = 1;
     await runtime.shutdown();
     if (attempts?.count() !== baseline) process.exitCode = 1;
     attempts?.close();

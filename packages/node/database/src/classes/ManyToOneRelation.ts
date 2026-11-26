@@ -44,7 +44,10 @@ export class ManyToOneRelation<Key extends keyof any, M extends Model> {
         let str = `SELECT ${this.model.getDefaultSelect()} FROM ${this.model.table}\n`;
         str += `WHERE ${this.model.primary.name} IN (?)`;
 
-        const [rows] = await Database.select(str, [modelsA.map((m) => m[this.foreignKey])]);
+        const [rows] = await Database.select(str, [modelsA.map((m) => m[this.foreignKey])], {
+            nestTables: true,
+            model: this.model,
+        });
         const modelsB = this.model.fromRows(rows, this.model.table) as M[];
 
         for (const model of modelsA) {

@@ -246,12 +246,16 @@ export class SessionService {
             const [result] = await Database.update(
                 'UPDATE `user_sessions` SET `lastActiveTokenId` = ? WHERE `id` = ? AND `lastUsedTokenId` = ?',
                 [token.id, token.sessionId, token.id],
+                undefined,
+                UserSession,
             );
             if (result.affectedRows > 0) {
-                await Database.delete('DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ?', [
-                    token.sessionId,
-                    token.id,
-                ]);
+                await Database.delete(
+                    'DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ?',
+                    [token.sessionId, token.id],
+                    undefined,
+                    Token,
+                );
                 return true;
             }
             return await this.isActiveToken(token);
@@ -262,6 +266,7 @@ export class SessionService {
         const [sessions] = await Database.select(
             'SELECT `id` FROM `user_sessions` WHERE `id` = ? AND `lastActiveTokenId` = ? LIMIT 1',
             [token.sessionId, token.id],
+            { nestTables: true, model: UserSession },
         );
         return sessions.length > 0;
     }
@@ -413,6 +418,8 @@ export class SessionService {
         const [result] = await Database.update(
             'UPDATE `user_sessions` SET `lastUsedTokenId` = ? WHERE `id` = ? AND (`lastUsedTokenId` = ? OR `lastActiveTokenId` = ?)',
             [tokenId, sessionId, previousTokenId, previousTokenId],
+            undefined,
+            UserSession,
         );
         if (result.affectedRows === 0) {
             return false;
@@ -420,6 +427,8 @@ export class SessionService {
         await Database.delete(
             'DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ? AND `id` != (SELECT `lastActiveTokenId` FROM `user_sessions` WHERE `id` = ?)',
             [sessionId, tokenId, sessionId],
+            undefined,
+            [Token, UserSession],
         );
         return true;
     }
@@ -436,14 +445,18 @@ export class SessionService {
         const [result] = await Database.update(
             'UPDATE `user_sessions` SET `lastUsedTokenId` = ? WHERE `id` = ? AND `lastUsedTokenId` = ?',
             [tokenId, sessionId, handoffTokenId],
+            undefined,
+            UserSession,
         );
         if (result.affectedRows === 0) {
             return false;
         }
-        await Database.delete('DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ?', [
-            sessionId,
-            tokenId,
-        ]);
+        await Database.delete(
+            'DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ?',
+            [sessionId, tokenId],
+            undefined,
+            Token,
+        );
         return true;
     }
 

@@ -47,6 +47,7 @@
         "@common/errors": "workspace:*",
         "@node/database": "workspace:*",
         "@node/endpoints": "workspace:*",
+        "@node/observability": "workspace:*",
         "@stamhoofd/backend-i18n": "workspace:*",
         "@stamhoofd/queues": "workspace:*",
         "@stamhoofd/sql": "workspace:*",

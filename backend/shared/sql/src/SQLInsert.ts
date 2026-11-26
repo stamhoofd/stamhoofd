@@ -113,7 +113,11 @@ export class SQLInsert implements SQLExpression {
 
     async insert(): Promise<{ insertId: any; affectedRows: number }> {
         const { query, params } = normalizeSQLQuery(this.getSQL());
-        const result = await SQLLogger.log(Database.insert(query, params), query, params);
+        const result = await SQLLogger.log(
+            Database.insert(query, params, undefined, this._into.modelTarget),
+            query,
+            params,
+        );
         return result[0];
     }
 }

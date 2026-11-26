@@ -1,3 +1,4 @@
+import { putObject } from '@stamhoofd/models/helpers/putObject.js';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { SimpleError } from '@common/errors';
 import type { Invoice } from '@stamhoofd/models';
@@ -404,7 +405,7 @@ export class InvoiceXMlService {
             ContentType: 'application/xml',
             ACL: 'private',
         });
-        await Image.getS3Client().send(cmd);
+        await putObject(Image.getS3Client(), cmd);
 
         // Sign the structure so it is accessible
         if (!(await fileStruct.sign())) {

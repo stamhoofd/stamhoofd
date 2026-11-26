@@ -1,4 +1,5 @@
-import { Database } from '@node/database';
+import { SQLSelectBase } from './SQLQueryContracts.js';
+import { Database, registeredModel, type ModelTarget } from '@node/database';
 import type {
     SQLExpression,
     SQLExpressionOptions,
@@ -449,6 +450,22 @@ export class SQLIfNull implements SQLExpression {
 }
 
 export class SQLTableExpression implements SQLNamedExpression {
+    private owner?: { readonly table: string };
+
+    static forModel(model: { readonly table: string }) {
+        const expression = new SQLTableExpression(model.table);
+        expression.owner = model;
+        return expression;
+    }
+
+    get modelTarget() {
+        return this.owner
+            ? this.owner.table === this.table
+                ? this.owner
+                : undefined
+            : registeredModel(this.table);
+    }
+
     /**
      * By default the table name will be used as the namespace by MySQL.
      */
@@ -604,4 +621,27 @@ export class SQLAggregateColumnExpression implements SQLExpression {
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([this.type + '(', this.expression.getSQL(options), ')']);
     }
+}
+
+/** Resolve FROM/JOIN owners without reading aliases, raw expressions, SQL or bindings. */
+export function queryModels(
+    from: SQLNamedExpression,
+    joins: readonly { table: SQLNamedExpression }[],
+): ModelTarget[] | undefined {
+    const models = new Set<ModelTarget>();
+    for (const source of [from, ...joins.map((j) => j.table)]) {
+        const owners =
+            source instanceof SQLTableExpression
+                ? [source.modelTarget]
+                : source instanceof SQLSelectBase
+                  ? source.modelTargets
+                  : undefined;
+        if (!owners?.length) return;
+        for (const owner of owners) {
+            if (!owner) return;
+            models.add(owner);
+            if (models.size > 4) return;
+        }
+    }
+    return [...models];
 }

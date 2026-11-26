@@ -125,6 +125,7 @@ export class Token extends QueryableModel {
                 this.table
             } ${Token.user.joinQuery(this.table, 'user')} ${Token.session.joinQuery(this.table, 'session')} WHERE ${this.primary.name} = ? LIMIT 1 `,
             [accessToken],
+            { nestTables: true, model: [this, User, UserSession] },
         );
 
         if (rows.length == 0) {
@@ -170,6 +171,7 @@ export class Token extends QueryableModel {
                 this.table
             } ${Token.user.joinQuery(this.table, 'user')} WHERE \`refreshToken\` = ? LIMIT 1 `,
             [refreshToken],
+            { nestTables: true, model: [this, User] },
         );
 
         if (rows.length == 0) {

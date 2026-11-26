@@ -1,6 +1,7 @@
+import { putObject } from '@stamhoofd/models/helpers/putObject.js';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { SimpleError } from '@common/errors';
-import { traceRendererCall } from '@node/observability';
+import { traceRendererCall, traceStage } from '@node/observability';
 import { signInternal } from '@stamhoofd/backend-env';
 import type { Invoice } from '@stamhoofd/models';
 import { Image, InvoicedBalanceItem, Organization, Payment, Platform } from '@stamhoofd/models';
@@ -274,7 +275,7 @@ export class InvoicePdfService {
             ContentType: 'application/pdf',
             ACL: 'private',
         });
-        await Image.getS3Client().send(cmd);
+        await putObject(Image.getS3Client(), cmd);
 
         // Sign the structure so it is accessible
         if (!(await fileStruct.sign())) {
@@ -432,8 +433,10 @@ export class InvoicePdfService {
                         });
                     },
                 );
-                invoice.pdf = await this.uploadPdf(invoice, buffer);
-                await invoice.save();
+                invoice.pdf = await traceStage('invoice.upload', () =>
+                    this.uploadPdf(invoice, buffer),
+                );
+                await traceStage('invoice.persist', () => invoice.save());
             }
         } catch (err) {
             console.error('Failed to generate invoice PDF', err);

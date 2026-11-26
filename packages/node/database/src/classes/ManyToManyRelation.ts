@@ -143,7 +143,10 @@ export class ManyToManyRelation<
             str += this.orderByQuery('A', 'B');
         }
 
-        const [rows] = await Database.select(str, params);
+        const [rows] = await Database.select(str, params, {
+            nestTables: true,
+            model: this.modelLink ? [this.modelLink, this.modelB] : undefined,
+        });
         const modelsB = this.modelB.fromRows(rows, namespaceB) as (B & { _link: Link })[];
 
         // Also load link table if possible
@@ -178,11 +181,12 @@ export class ManyToManyRelation<
     async setLinkTable(modelA: A, modelB: B, linkTableValues: { [key: string]: any }) {
         const str = `UPDATE ${this.linkTable} SET ? WHERE ${Database.escapeId(this.linkKeyA)} = ? AND ${Database.escapeId(this.linkKeyB)} = ?`;
 
-        const [result] = await Database.update(str, [
-            linkTableValues,
-            modelA.getPrimaryKey(),
-            modelB.getPrimaryKey(),
-        ]);
+        const [result] = await Database.update(
+            str,
+            [linkTableValues, modelA.getPrimaryKey(), modelB.getPrimaryKey()],
+            undefined,
+            this.modelLink,
+        );
         if (result.changedRows !== 1) {
             // Todo: add option to fail silently
             throw new Error('Failed to update link table. Check if combination exists');
@@ -225,19 +229,29 @@ export class ManyToManyRelation<
                     ${Database.escapeId(this.linkKeyB)}, 
                     ${linkTableKeys.map((k) => Database.escapeId(k)).join(', ')}
                 ) VALUES ?`;
-            [result] = await Database.insert(query, [
-                modelsB.map((modelB, i) => [
-                    modelA,
-                    modelB,
-                    ...linkTableKeys.map((k) => linkTableValues[k][i]),
-                ]),
-            ]);
+            [result] = await Database.insert(
+                query,
+                [
+                    modelsB.map((modelB, i) => [
+                        modelA,
+                        modelB,
+                        ...linkTableKeys.map((k) => linkTableValues[k][i]),
+                    ]),
+                ],
+                undefined,
+                this.modelLink,
+            );
         } else {
             const query = `INSERT INTO ${Database.escapeId(this.linkTable)} (
                     ${Database.escapeId(this.linkKeyA)}, 
                     ${Database.escapeId(this.linkKeyB)}
                 ) VALUES ?`;
-            [result] = await Database.insert(query, [modelsB.map((modelB) => [modelA, modelB])]);
+            [result] = await Database.insert(
+                query,
+                [modelsB.map((modelB) => [modelA, modelB])],
+                undefined,
+                this.modelLink,
+            );
         }
         return result.affectedRows;
     }
@@ -290,7 +304,7 @@ export class ManyToManyRelation<
         const query = `DELETE FROM ${this.linkTable} WHERE ${this.linkKeyA} = ?`;
 
         // Arrays are turned into list, e.g. ['a', 'b'] turns into 'a', 'b'
-        const [result] = await Database.delete(query, [modelA]);
+        const [result] = await Database.delete(query, [modelA], undefined, this.modelLink);
 
         if (result.affectedRows === 0 && Model.debug) {
             console.warn("Cleared many to many relation, but didn't deleted any entries");
@@ -327,7 +341,7 @@ export class ManyToManyRelation<
         const query = `DELETE FROM ${this.linkTable} WHERE ${this.linkKeyA} = ? AND ${this.linkKeyB} IN (?)`;
 
         // Arrays are turned into list, e.g. ['a', 'b'] turns into 'a', 'b'
-        const [result] = await Database.delete(query, [modelA, modelsB]);
+        const [result] = await Database.delete(query, [modelA, modelsB], undefined, this.modelLink);
 
         return result;
     }
