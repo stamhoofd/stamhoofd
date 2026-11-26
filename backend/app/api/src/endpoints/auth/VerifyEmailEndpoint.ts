@@ -2,7 +2,7 @@ import type { Decoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
-import { EmailVerificationCode, User } from '@stamhoofd/models';
+import { EmailVerificationCode, RateLimiter, User } from '@stamhoofd/models';
 import { UserService } from '@stamhoofd/models/services/UserService.js';
 import {
     SessionLoginMethod,
@@ -19,6 +19,23 @@ type Params = Record<string, never>;
 type Query = undefined;
 type Body = VerifyEmailRequest;
 type ResponseBody = TokenStruct;
+
+/**
+ * Guesses against a single code are capped on the code itself
+ * (EmailVerificationCode.MAX_TRIES); this caps the attempts from one address across codes.
+ */
+export const verifyEmailIPLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 60,
+            duration: 15 * 60 * 1000,
+        },
+        {
+            limit: 200,
+            duration: 60 * 60 * 1000,
+        },
+    ],
+});
 
 export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = VerifyEmailRequest as Decoder<VerifyEmailRequest>;
@@ -40,6 +57,8 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const organization = await Context.setOptionalOrganizationScope({
             willAuthenticate: false,
         });
+
+        verifyEmailIPLimiter.track(request.request.getIP());
 
         if (!request.body.token) {
             throw new SimpleError({

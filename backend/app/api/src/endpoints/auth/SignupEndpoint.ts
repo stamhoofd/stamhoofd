@@ -2,7 +2,13 @@ import type { Decoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
-import { EmailVerificationCode, PasswordToken, Platform, User } from '@stamhoofd/models';
+import {
+    EmailVerificationCode,
+    PasswordToken,
+    Platform,
+    RateLimiter,
+    User,
+} from '@stamhoofd/models';
 import { sendEmailTemplate } from '../../helpers/EmailBuilder.js';
 import {
     EmailTemplateType,
@@ -22,6 +28,39 @@ type Query = undefined;
 type Body = NewUser;
 type ResponseBody = SignupResponse;
 
+/**
+ * Bounds the accounts, and with that the verification emails, one address can create.
+ */
+export const signupIPLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 20,
+            duration: 15 * 60 * 1000,
+        },
+        {
+            limit: 60,
+            duration: 60 * 60 * 1000,
+        },
+    ],
+});
+
+/**
+ * Signing up with an address that already has an account emails that account, so cap it
+ * per mailbox.
+ */
+export const signupEmailLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 3,
+            duration: 10 * 60 * 1000,
+        },
+        {
+            limit: 10,
+            duration: 60 * 60 * 1000,
+        },
+    ],
+});
+
 export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = NewUser as Decoder<NewUser>;
 
@@ -40,6 +79,9 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setUserOrganizationScope({ willAuthenticate: false });
+
+        signupIPLimiter.track(request.request.getIP());
+        signupEmailLimiter.track(request.body.email.toLowerCase());
 
         if (!organization) {
             if (STAMHOOFD.userMode === 'organization') {
