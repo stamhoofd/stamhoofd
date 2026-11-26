@@ -1,0 +1,27 @@
+{
+  "$id": "urn:f:x:1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "Delete Fiche",
+  "properties": {
+    "$s": {
+      "title": "Schema",
+      "const": "urn:f:x:1"
+    },
+    "k": {
+      "title": "Key",
+      "description": "Key used to refer to the fiche",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "examples": [
+        "F-12345"
+      ]
+    }
+  },
+  "additionalProperties" : false,
+  "required": [
+    "$s",
+    "k"
+  ]
+}

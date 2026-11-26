@@ -121,10 +121,6 @@ export class DataValidator {
         const realChecksum = 97 - (toCheck % 97); // Dates before 2000
         const realChecksum2 = 97 - ((2000000000 + toCheck) % 97); // Dates after 2000
 
-        if (STAMHOOFD.environment === 'development') {
-            return true;
-        }
-
         if (checksum === realChecksum || checksum === realChecksum2) {
             // Check birth day via doesMatchBelgianNationalNumber
             return true;
