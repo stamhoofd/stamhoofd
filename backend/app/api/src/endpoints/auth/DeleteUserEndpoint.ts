@@ -1,7 +1,15 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 
-import { EmailVerificationCode, MFAToken, PasswordToken } from '@stamhoofd/models';
+import {
+    EmailVerificationCode,
+    MFARecoveryCode,
+    MFATOTP,
+    MFAToken,
+    PasswordToken,
+    WebauthnChallenge,
+    WebauthnCredential,
+} from '@stamhoofd/models';
 
 import { getDefaultEmailFrom, sendEmailTemplate } from '../../helpers/EmailBuilder.js';
 import { EmailTemplateType, Recipient } from '@stamhoofd/structures';
@@ -29,12 +37,10 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
-        const { user } = await Context.authenticate({ allowWithoutAccount: true });
-
-        // This deletes the account of the session, which while impersonating is the
-        // administrator's own - never what they meant to do from inside somebody else's
-        // account.
-        Context.assertNotImpersonating();
+        // Also refuses impersonated sessions: this deletes the account of the session,
+        // which while impersonating is the administrator's own - never what they meant to
+        // do from inside somebody else's account.
+        const { user } = await Context.authenticateFresh({ allowWithoutAccount: true });
 
         // Send an e-mail to inform everyone about this action
 
@@ -75,6 +81,10 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         await PasswordToken.clearFor(user.id);
         await EmailVerificationCode.clearFor(user.id);
         await MFAToken.clearFor(user.id);
+        await MFATOTP.deleteForUser(user.id);
+        await WebauthnCredential.deleteForUser(user.id);
+        await WebauthnChallenge.deleteForUser(user.id);
+        await MFARecoveryCode.deleteForUser(user.id);
 
         return new Response(undefined);
     }

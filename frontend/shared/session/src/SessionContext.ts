@@ -1121,9 +1121,10 @@ export class SessionContext implements RequestMiddleware {
 
         if (this.token) {
             this.isLoggingOut = true;
-            console.log('Logout');
+            console.log('Delete account');
 
-            // Delete first to prevent loops (could be already invalid so the deletion might fail)
+            // A refused deletion (e.g. when recent authentication is required) is thrown
+            // and keeps the user signed in: the account still exists.
             try {
                 await this.authenticatedServer.request({
                     method: 'DELETE',
@@ -1131,16 +1132,10 @@ export class SessionContext implements RequestMiddleware {
                     shouldRetry: false,
                     allowErrorRetry: true, // sometimes we need to refresh a token before we can delete it
                 });
-            } catch (e) {
-                if (Request.isNetworkError(e) || Request.isAbortError(e)) {
-                    // Network access is required for a reliable logout
-                    this.isLoggingOut = false;
-                    throw e;
-                }
-                console.error('Failed to delete token. Probably already deleted?', e);
+            } finally {
+                this.isLoggingOut = false;
             }
 
-            this.isLoggingOut = false;
             await this.unsetToken(true);
         }
     }

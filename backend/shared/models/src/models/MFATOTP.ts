@@ -131,4 +131,8 @@ export class MFATOTP extends QueryableModel {
     static async deleteUnconfirmedForUser(userId: string): Promise<void> {
         await this.delete().where('userId', userId).where('confirmedAt', null);
     }
+
+    static async deleteForUser(userId: string): Promise<void> {
+        await this.delete().where('userId', userId);
+    }
 }

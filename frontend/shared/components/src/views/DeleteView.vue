@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="loading" :disabled="disabled" :title="title" :save-text="deleteText" :cancel-text="cancelText" :add-extra-cancel="true" save-icon="trash" save-button-class="destructive" @save="doDelete">
+    <SaveView :loading="loading" :disabled="disabled" :title="title" :save-text="deleteText" :cancel-text="cancelText" :add-extra-cancel="true" save-icon="trash" save-button-class="destructive" data-testid="delete-view" @save="doDelete">
         <h1>{{ title }}</h1>
 
         <p>{{ description }}</p>
@@ -26,6 +26,8 @@ import { useErrors } from '../errors/useErrors';
 import { useValidation } from '../errors/useValidation';
 import STInputBox from '../inputs/STInputBox.vue';
 import { Toast } from '../overlays/Toast';
+import type { NavigationActions } from '../types/NavigationActions';
+import { useNavigationActions } from '../types/NavigationActions';
 
 const props
     = defineProps<{
@@ -35,11 +37,12 @@ const props
         confirmationPlaceholder: string;
         confirmationCode: string;
         checkboxText: string;
-        onDelete: () => Promise<boolean>;
+        onDelete: (navigation: NavigationActions) => Promise<boolean>;
     }>();
 
 const pop = usePop();
 const errors = useErrors();
+const navigationActions = useNavigationActions();
 
 const deleteText = $t('%CJ');
 const cancelText = $t('%1Lh');
@@ -82,7 +85,7 @@ async function doDelete() {
             return;
         }
 
-        const isDeleted = await props.onDelete();
+        const isDeleted = await props.onDelete(navigationActions);
 
         if (isDeleted) {
             await pop();

@@ -131,4 +131,8 @@ export class WebauthnCredential extends QueryableModel {
         }
         return (await this.select().where('credentialId', credentialId).first(false)) ?? undefined;
     }
+
+    static async deleteForUser(userId: string): Promise<void> {
+        await this.delete().where('userId', userId);
+    }
 }

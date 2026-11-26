@@ -121,7 +121,7 @@
                     </h3>
                 </STListItem>
 
-                <STListItem v-if="canEditAccount" :selectable="true" @click.prevent="deleteRequest">
+                <STListItem v-if="canEditAccount" :selectable="true" data-testid="delete-account" @click.prevent="deleteRequest">
                     <template #left>
                         <LoadingButton>
                             <IconContainer icon="trash" class="error" />
@@ -238,6 +238,7 @@ import LoadingButton from '#navigation/LoadingButton.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
+import type { NavigationActions } from '#types/NavigationActions.ts';
 
 import { SimpleErrors } from '@common/errors';
 import { ComponentWithProperties, useDismiss, usePop, usePresent, useShow } from '@browser/navigation';
@@ -379,8 +380,13 @@ async function deleteRequest() {
                 confirmationPlaceholder: $t('%12D'),
                 confirmationCode,
                 checkboxText: $t('%6P'),
-                onDelete: async () => {
-                    await $context.value.deleteAccount();
+                onDelete: async (navigation: NavigationActions) => {
+                    // Reauthenticate on top of the confirmation sheet and retry once if
+                    // the session is not fresh enough.
+                    await runFresh(() => $context.value.deleteAccount(), {
+                        context: $context.value,
+                        navigation,
+                    });
 
                     Toast.success($t('%12E')).show();
                     await pop({ force: true });
