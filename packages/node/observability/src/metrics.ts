@@ -2,6 +2,7 @@ import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { channel } from 'node:diagnostics_channel';
+import { getHeapStatistics } from 'node:v8';
 import { enableHttpMetrics, disableHttpMetrics } from './http-metrics.js';
 import { enableWorkMetrics, disableWorkMetrics } from './workloads.js';
 
@@ -29,6 +30,24 @@ export function initializeMetrics(service: string) {
         readers: [reader],
     });
     const meter = provider.getMeter('@node/observability');
+    const cpu = meter.createObservableCounter('stamhoofd.process.cpu.seconds');
+    cpu.addCallback((result) => {
+        const { user, system } = process.cpuUsage();
+        result.observe((user + system) / 1_000_000);
+    });
+    const rss = meter.createObservableGauge('stamhoofd.process.resident.memory.bytes');
+    const heapUsed = meter.createObservableGauge('stamhoofd.nodejs.heap.used.bytes');
+    const heapTotal = meter.createObservableGauge('stamhoofd.nodejs.heap.total.bytes');
+    const heapLimit = meter.createObservableGauge('stamhoofd.nodejs.heap.limit.bytes');
+    const external = meter.createObservableGauge('stamhoofd.nodejs.external.memory.bytes');
+    meter.addBatchObservableCallback((result) => {
+        const usage = process.memoryUsage();
+        result.observe(rss, usage.rss);
+        result.observe(heapUsed, usage.heapUsed);
+        result.observe(heapTotal, usage.heapTotal);
+        result.observe(heapLimit, getHeapStatistics().heap_size_limit);
+        result.observe(external, usage.external);
+    }, [rss, heapUsed, heapTotal, heapLimit, external]);
     const options = {
         unit: 'ms',
         advice: { explicitBucketBoundaries: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 5000, 30000] },

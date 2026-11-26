@@ -2,8 +2,6 @@ import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@common/encodin
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
-import { CpuService } from '@stamhoofd/logging/CpuService';
-import { MemoryService } from '@stamhoofd/logging/MemoryService';
 import { StartupHealthService } from '../../services/StartupHealthService.js';
 
 type Params = Record<string, never>;
@@ -63,13 +61,7 @@ export class HealthEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
             });
         }
 
-        const errors = [...StartupHealthService.getErrors()];
-
-        if (CpuService.getAverage(60) > 80) {
-            errors.push('CPU usage is too high');
-        }
-
-        errors.push(...MemoryService.getErrors());
+        const errors = StartupHealthService.getErrors();
 
         const health = ResponseBody.create({
             status: errors.length > 0 ? 'error' : 'ok',

@@ -2,8 +2,6 @@ import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@common/encodin
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
-import { CpuService } from '@stamhoofd/logging/CpuService';
-import { MemoryService } from '@stamhoofd/logging/MemoryService';
 
 type Params = Record<string, never>;
 type Body = undefined;
@@ -64,28 +62,6 @@ export class HealthEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
             });
         }
 
-        const errors: string[] = [];
-
-        // The renderer is CPU-bound (Puppeteer). Sustained high load means it can no longer render
-        // pages in time, so report it as unhealthy so it can be taken out of rotation.
-        if (CpuService.getAverage(60) > 80) {
-            errors.push('CPU usage is too high');
-        }
-
-        errors.push(...MemoryService.getErrors());
-
-        const health = ResponseBody.create({
-            status: errors.length > 0 ? 'error' : 'ok',
-            errors: errors.length > 0 ? errors : undefined,
-        });
-
-        const response = new Response(
-            health,
-        );
-
-        if (health.status === 'error') {
-            response.status = 503;
-        }
-        return response;
+        return new Response(ResponseBody.create({ status: 'ok' }));
     }
 }

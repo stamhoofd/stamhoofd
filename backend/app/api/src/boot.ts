@@ -6,8 +6,6 @@ import { CORSMiddleware, LogMiddleware, VersionMiddleware } from '@stamhoofd/bac
 import { checkReadOnly } from '@stamhoofd/crons';
 import { Email } from '@stamhoofd/email';
 import { loadLogger } from '@stamhoofd/logging';
-import { CpuService } from '@stamhoofd/logging/CpuService';
-import { MemoryService } from '@stamhoofd/logging/MemoryService';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 
@@ -33,7 +31,7 @@ import { PlatformMembershipService } from './services/PlatformMembershipService.
 import { UitpasService } from './services/uitpas/UitpasService.js';
 import { UniqueMemberNumberService } from './services/UniqueMemberNumberService.js';
 import { UniqueUserService } from './services/UniqueUserService.js';
-import { QueryableModel, SQLLogger } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/sql';
 import { WebshopCrowdfundingService } from './services/WebshopCrowdfundingService.js';
 
 process.on('unhandledRejection', (error) => fatalBackendException('rejection', error));
@@ -205,23 +203,7 @@ export const boot = async (options: { killProcess: boolean; lifecycle?: Applicat
 
     resumeEmails().catch(console.error);
 
-    if (STAMHOOFD.environment !== 'development' && STAMHOOFD.environment !== 'test') {
-        // Tune SQL slow-query logging based on CPU load: under heavy load timings are unreliable,
-        // and when idle we can afford to log all slow queries.
-        CpuService.addSampleListener((average5s) => {
-            if (average5s > 80) {
-                // Danger zone: don't log slow queries any longer because the timings won't be trustworthy.
-                SQLLogger.slowQueryThresholdMs = null;
-            } else if (average5s < 20) {
-                // No load, safe to log all slow queries
-                SQLLogger.slowQueryThresholdMs = 300;
-            } else {
-                SQLLogger.slowQueryThresholdMs = 500;
-            }
-        });
-        CpuService.startMonitoring();
-        MemoryService.startMonitoring();
-    } else if (STAMHOOFD.environment === 'development') {
+    if (STAMHOOFD.environment === 'development') {
         const { loadDebugFunctions } = await import('./debug.js');
         loadDebugFunctions({ routerServer });
     }

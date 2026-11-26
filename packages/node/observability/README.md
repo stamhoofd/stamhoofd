@@ -37,6 +37,15 @@ DevOps controls this single switch in process configuration: set a distinct port
 for each staging service sharing a network namespace; leave it unset in production
 until rollout. An unset port installs no metric subscribers or scrape listener.
 
+Each scrape reports cumulative process CPU (`stamhoofd_process_cpu_seconds_total`,
+user plus system; its rate measures cores used) and RSS (`stamhoofd_process_resident_memory_bytes`).
+`stamhoofd_nodejs_heap_used_bytes`, `stamhoofd_nodejs_heap_total_bytes` and
+`stamhoofd_nodejs_heap_limit_bytes` distinguish occupied heap, allocated capacity
+and the V8 limit. `stamhoofd_nodejs_external_memory_bytes` measures memory tracked
+by Node outside the JS heap; it does not account for all native allocations.
+Resource pressure does not change the API or renderer `/health` status. The API
+still reports startup errors; the renderer checks HTTP liveness.
+
 API, renderer, redirecter, backup and docs measure incoming requests. The
 `stamhoofd_http_requests_in_flight` gauge includes open responses, including streams.
 `stamhoofd_http_request_duration_milliseconds` ends when the response finishes
