@@ -70,6 +70,20 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             throw Context.auth.notFoundOrNoAccess($t('%DE'));
         }
 
+        const newEmail =
+            request.body.email &&
+            request.body.email !== editUser.email &&
+            (await Context.auth.canEditUserEmail(editUser))
+                ? request.body.email
+                : null;
+
+        // The email address is a credential of its own: whoever controls it can reset the
+        // password. Replacing it needs recent authentication, like the other login methods.
+        // Checked before anything is written, so a stale session changes nothing at all.
+        if (newEmail) {
+            await Context.authenticateFresh({ allowWithoutAccount: true });
+        }
+
         if (await Context.auth.canEditUserName(editUser)) {
             if (editUser.memberId) {
                 const member = await Member.getByID(editUser.memberId);
@@ -272,29 +286,21 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         await editUser.save();
 
-        if (await Context.auth.canEditUserEmail(editUser)) {
-            if (request.body.email && request.body.email !== editUser.email) {
-                Context.assertNotImpersonating();
+        if (newEmail) {
+            // Don't return the token: the change can only be confirmed with the link in the email.
+            // Otherwise the requester could guess the code, and confirming merges the account
+            // that already uses this address.
+            const code = await EmailVerificationCode.createFor(editUser, newEmail);
+            VerificationCodeService.send(code, editUser, organization, request.i18n, false).catch(
+                console.error,
+            );
 
-                // Don't return the token: the change can only be confirmed with the link in the email.
-                // Otherwise the requester could guess the code, and confirming merges the account
-                // that already uses this address.
-                const code = await EmailVerificationCode.createFor(editUser, request.body.email);
-                VerificationCodeService.send(
-                    code,
-                    editUser,
-                    organization,
-                    request.i18n,
-                    false,
-                ).catch(console.error);
-
-                throw new SimpleError({
-                    code: 'verify_email_link',
-                    message: 'Your email address needs verification via the link in the email',
-                    human: $t('%DJ'),
-                    statusCode: 403,
-                });
-            }
+            throw new SimpleError({
+                code: 'verify_email_link',
+                message: 'Your email address needs verification via the link in the email',
+                human: $t('%DJ'),
+                statusCode: 403,
+            });
         }
 
         return new Response(await AuthenticatedStructures.userWithMembers(editUser));
