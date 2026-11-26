@@ -33,7 +33,7 @@
         "@vue/runtime-core": "3.5.44",
         "@vitejs/plugin-vue": "5.2.4",
         "@vitest/browser-playwright": "4.1.12",
-        "playwright": "1.64.1",
+        "playwright": "1.65.1",
         "sass": "1.108.2",
         "vite": "6.4.5",
         "vue-tsc": "3.3.11",
