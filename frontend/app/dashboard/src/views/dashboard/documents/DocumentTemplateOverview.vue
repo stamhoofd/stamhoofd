@@ -9,7 +9,7 @@
             <p v-if="template.privateSettings.templateDefinition.type === 'fiscal'">
                 <I18nComponent :t="$t('%1Kp')">
                     <template #button="{content}">
-                        <a class="inline-link" :href="LocalizedDomains.getDocs('fiscaal-attest-kinderopvang')" target="_blank">
+                        <a class="inline-link" :href="LocalizedDomains.getDocs(isJsonlExport ? 'fiscaal-attest-kinderopvang-2026' : 'fiscaal-attest-kinderopvang')" target="_blank">
                             {{ content }}
                         </a>
                     </template>
@@ -86,6 +86,7 @@ import { ComponentWithProperties, defineRoutes, NavigationController, useNavigat
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import ActionButtonsBox from '@stamhoofd/components/payments/components/ActionButtonsBox.vue';
 import type { ActionButton } from '@stamhoofd/components/payments/components/ActionButtonsBox.vue';
@@ -97,7 +98,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import type { PatchAnswers, RecordAnswer } from '@stamhoofd/structures';
-import { DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplateGroup, DocumentTemplatePrivate, RecordCheckboxAnswer, RecordType } from '@stamhoofd/structures';
+import { JsonlExportResult, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplateGroup, DocumentTemplatePrivate, RecordCategory, RecordCheckboxAnswer, RecordTextAnswer, RecordType, TranslatedString } from '@stamhoofd/structures';
 import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 
@@ -117,6 +118,7 @@ const present = usePresent();
 const pop = usePop();
 const requestOwner = useRequestOwner();
 const context = useContext();
+const organization = useRequiredOrganization();
 const deleting = ref(false);
 const publishing = ref(false);
 const $navigate = useNavigate();
@@ -343,17 +345,28 @@ async function exportXml() {
     }
 
     // Start firing questions
-    const c = gotoRecordCategory(0);
-    if (c) {
-        await present({
-            components: [
-                new ComponentWithProperties(NavigationController, {
-                    root: c,
-                }),
-            ],
-            modalDisplayStyle: 'sheet',
+    const startDownload = () => {
+        const pendingToast = new Toast('Aanmaken...', 'spinner').setProgress(0).setHide(null).show();
+        downloadXml().catch(console.error).finally(() => {
+            pendingToast.hide();
         });
+    };
+    const c = gotoRecordCategory(props.template.privateSettings.templateDefinition.exportFieldCategories, 0, (component) => {
+        component.dismiss({ force: true }).catch(console.error);
+        startDownload();
+    });
+    if (!c) {
+        startDownload();
+        return;
     }
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: c,
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    });
 }
 
 async function generateXML(): Promise<Blob> {
@@ -382,16 +395,14 @@ async function downloadXml() {
     }
 }
 
-function gotoRecordCategory(index: number) {
-    if (index >= props.template.privateSettings.templateDefinition.exportFieldCategories.length) {
-        const pendingToast = new Toast('Aanmaken...', 'spinner').setProgress(0).setHide(null).show();
-        downloadXml().catch(console.error).finally(() => {
-            pendingToast.hide();
-        });
+/**
+ * Asks the export questions one category at a time and saves the answers on the template, then calls done.
+ */
+function gotoRecordCategory(categories: RecordCategory[], index: number, done: (component: NavigationActions) => void) {
+    const category = categories[index];
+    if (!category) {
         return;
     }
-
-    const category = props.template.privateSettings.templateDefinition.exportFieldCategories[index];
     return AsyncComponent(() => import('@stamhoofd/components/records/FillRecordCategoryView.vue'), {
         category,
         value: props.template,
@@ -404,9 +415,9 @@ function gotoRecordCategory(index: number) {
                 }),
             }));
 
-            const c = gotoRecordCategory(index + 1);
+            const c = gotoRecordCategory(categories, index + 1, done);
             if (!c) {
-                component.dismiss({ force: true }).catch(console.error);
+                done(component);
                 return;
             }
             component.show(c).catch(console.error);
@@ -415,6 +426,179 @@ function gotoRecordCategory(index: number) {
 }
 
 const xmlExportDescription = computed(() => props.template.privateSettings.templateDefinition.xmlExportDescription);
+
+const isJsonlExport = computed(() => props.template.privateSettings.templateDefinition.type === fiscal.type && !fiscalDocumentYearHelper.isXmlExportSupported(props.template.year));
+
+const jsonlContactRecordIds = ['organization.contactName', 'organization.phone', 'organization.email'];
+
+/**
+ * From 2026 the export only asks for the contact person: the file is checked before the download instead of the
+ * confirmation, and the organiser number comes from the company instead of the refertenummer question.
+ */
+function getJsonlExportCategories(): RecordCategory[] {
+    const records = props.template.privateSettings.templateDefinition.exportFieldCategories
+        .flatMap(c => c.getAllRecords())
+        .filter(r => jsonlContactRecordIds.includes(r.id))
+        .map((r) => {
+            if (r.id !== 'organization.email') {
+                return r;
+            }
+            // The description of the XML export promises a confirmation by e-mail, Belcotax-on-web shows its feedback in the application instead
+            const record = r.clone();
+            record.description = TranslatedString.create($t('Belcotax gebruikt dit e-mailadres als contact voor vragen over de fiscale attesten.'));
+            return record;
+        });
+    if (records.length === 0) {
+        return [];
+    }
+
+    return [RecordCategory.create({
+        id: 'belcotax-contact',
+        name: TranslatedString.create($t('Contactpersoon voor Belcotax')),
+        description: TranslatedString.create($t('De FOD Financiën contacteert deze persoon bij vragen over de aangifte.')),
+        records,
+    })];
+}
+
+/**
+ * Same source as the export: the company number on the template, or the one of the billing details when it is empty.
+ */
+function hasJsonlCompanyNumber() {
+    const answer = props.template.settings.fieldAnswers.get('organization.companyNumber');
+    const companyNumber = (answer instanceof RecordTextAnswer ? answer.value?.trim() : null) || organization.value.meta.companies[0]?.companyNumber?.trim();
+    return !!companyNumber;
+}
+
+async function exportJsonl() {
+    // Belcotax refuses the whole file for an organiser without a company number, so a feitelijke vereniging cannot use it
+    if (!hasJsonlCompanyNumber()) {
+        new CenteredMessage(
+            $t('Ondernemingsnummer nodig'),
+            $t('Het bestand voor Belcotax werkt enkel voor een organisator met een ondernemingsnummer. Heeft je vereniging een ondernemingsnummer? Vul het dan in bij de facturatiegegevens. Als feitelijke vereniging zonder ondernemingsnummer geef je de fiscale attesten rechtstreeks in op Belcotax-on-web.'),
+        ).addCloseButton().show();
+        return;
+    }
+
+    if (props.template.updatesEnabled) {
+        Toast.error($t('%1Kr')).show();
+        return;
+    }
+
+    if (!fiscalDocumentYearHelper.canDownloadFiscalDocumentXML(props.template.year)) {
+        Toast.error($t('%1IX')).show();
+        return;
+    }
+
+    if (fiscalDocumentYearHelper.isAfterDeadline(props.template.year)) {
+        const stop = await CenteredMessage.show({
+            title: $t('%1Le'),
+            description: $t('Je moet fiscale attesten voor 1 maart indienen in Belcotax. Enkel in heel uitzonderlijke gevallen kan je nog later indienen.'),
+            buttons: [
+                {
+                    text: $t('Toch downloaden'),
+                    value: false,
+                    type: 'destructive',
+                    availabilityDelay: 2_000,
+                }, {
+                    text: $t('%1Lh'),
+                    value: true,
+                    type: 'secundary',
+                },
+            ],
+        });
+        if (stop) {
+            return;
+        }
+    }
+
+    const c = gotoRecordCategory(getJsonlExportCategories(), 0, (component) => {
+        component.dismiss({ force: true }).catch(console.error);
+        downloadJsonl().catch(console.error);
+    });
+    if (!c) {
+        await downloadJsonl();
+        return;
+    }
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: c,
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
+async function requestJsonlExport(): Promise<JsonlExportResult | null> {
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: '/organization/document-templates/' + encodeURIComponent(props.template.id) + '/jsonl',
+            decoder: JsonlExportResult as Decoder<JsonlExportResult>,
+            shouldRetry: false,
+            timeout: 5 * 60 * 1000,
+            owner: requestOwner,
+        });
+        return response.data;
+    }
+    catch (e: any) {
+        // A second attempt aborts the build of the first one, like the XML export
+        if (!Request.isAbortError(e as Error)) {
+            Toast.fromError(e).show();
+        }
+        else {
+            new Toast('Downloaden geannuleerd', 'info').show();
+        }
+        return null;
+    }
+}
+
+async function downloadJsonlFile(result: JsonlExportResult) {
+    const fileName = Formatter.fileSlug(props.template.settings.name) + '.jsonl';
+    await AppManager.shared.downloadFile(new Blob([result.jsonl], { type: 'application/jsonl' }), fileName);
+    return fileName;
+}
+
+async function downloadJsonl() {
+    const pendingToast = new Toast($t('Attesten controleren...'), 'spinner').setHide(null).show();
+    let result: JsonlExportResult | null;
+    try {
+        result = await requestJsonlExport();
+    }
+    finally {
+        pendingToast.hide();
+    }
+    if (!result) {
+        return;
+    }
+
+    if (result.issues.length || result.incompleteDocuments.length) {
+        await present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: AsyncComponent(() => import('./JsonlExportIssuesView.vue'), {
+                        initialResult: result,
+                        template: props.template,
+                        check: requestJsonlExport,
+                        download: downloadJsonlFile,
+                    }),
+                }),
+            ],
+            modalDisplayStyle: 'popup',
+        });
+        return;
+    }
+
+    const fileName = await downloadJsonlFile(result);
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('./JsonlDownloadedView.vue'), { fileName, year: props.template.year }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
 
 const documentTemplateActions = computed<ActionButton[]>(() => [
     {
@@ -431,8 +615,17 @@ const documentTemplateActions = computed<ActionButton[]>(() => [
         icon: 'government',
         asideIcon: 'download stroke small',
         listItemClass: 'left-center',
-        enabled: !isDraft.value && !isLocked.value && !!xmlExportDescription.value,
+        enabled: !isDraft.value && !isLocked.value && !!xmlExportDescription.value && !isJsonlExport.value,
         action: exportXml,
+    },
+    {
+        name: $t('Bestand downloaden voor Belcotax'),
+        description: $t('JSON-bestand voor Belcotax-on-web, inkomstenjaar {year}', { year: props.template.year.toString() }),
+        icon: 'government',
+        asideIcon: 'download stroke small',
+        listItemClass: 'left-center',
+        enabled: !isDraft.value && !isLocked.value && isJsonlExport.value && fiscalDocumentYearHelper.isJsonlExportSupported(props.template.year),
+        action: exportJsonl,
     },
     {
         name: $t('%Ke'),
