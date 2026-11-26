@@ -206,7 +206,7 @@
                 </STList>
             </template>
 
-            <template v-if="mailchimpFeature || uitpasFeature">
+            <template v-if="mailchimpFeature || uitpasFeature || belcotaxFeature">
                 <hr>
                 <h2>{{ $t('%ZvE') }}</h2>
                 <STList class="illustration-list">
@@ -219,6 +219,21 @@
                         </h2>
                         <p class="style-description-small">
                             {{ $t('%ZuM') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="belcotaxFeature" :selectable="true" class="left-center" data-testid="open-belcotax-settings" @click="$navigate(Routes.Belcotax)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/company.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Belcotax') }}
+                        </h2>
+                        <p class="style-description-small">
+                            {{ $t('Fiscale attesten rechtstreeks doorsturen naar de FOD Financiën') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -336,6 +351,7 @@ import { DataPermissionsSettings, DetailedPayableBalance, EmailTemplate, EmailTe
 import { computed } from 'vue';
 
 import { usePatchOrganization } from '@stamhoofd/components/organizations/usePatchOrganization.ts';
+import { BelcotaxFeatureFlag } from '@stamhoofd/structures/belcotax/BelcotaxConnection.js';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 
 enum Routes {
@@ -360,6 +376,7 @@ enum Routes {
     DataPermissions = 'toestemming-gegevensverzameling',
     Invoices = 'uitgaande-facturen',
     Mailchimp = 'mailchimp',
+    Belcotax = 'belcotax',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -369,8 +386,14 @@ const organization = useRequiredOrganization();
 const patchOrganization = usePatchOrganization();
 const uitpasFeature = useFeatureFlagComputed('uitpas');
 const mailchimpFeature = useFeatureFlagComputed('mailchimp');
+const belcotaxFeature = useFeatureFlagComputed(BelcotaxFeatureFlag);
 
 defineRoutes([
+    {
+        url: Routes.Belcotax,
+        present: 'popup',
+        component: async () => (await import('./BelcotaxSettingsView.vue')).default,
+    },
     {
         url: Routes.Mailchimp,
         present: 'popup',

@@ -6,7 +6,7 @@
  * - registerCron — genuinely global: not attributable to a tenant
  *
  * The global ones are amazon-ses (bounces, complaints and replies arrive for every tenant at once),
- * clearExcelCache, mollie-refunds and mollie-chargebacks.
+ * clearExcelCache, mollie-refunds, mollie-chargebacks and delete-old-belcotax-api-logs (the log has no tenant).
  */
 import './amazon-ses.js';
 import './clearExcelCache.js';
@@ -18,6 +18,7 @@ import './delete-old-email-drafts.js';
 import './delete-expired-mfa-tokens.js';
 import './delete-expired-impersonation-tokens.js';
 import './delete-archived-data.js';
+import './delete-old-belcotax-api-logs.js';
 import './mollie-chargebacks.js';
 import './mollie-refunds.js';
 import './fake-settlements.js';

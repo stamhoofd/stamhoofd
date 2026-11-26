@@ -16,6 +16,10 @@ type SsoStartOptions = {
      * request when the redirect URI the backend sends is not listed here.
      */
     redirectUris: string[];
+    /**
+     * Redirect URIs of the Belcotax client, which stands in for the login of FOD Financiën
+     */
+    belcotaxRedirectUris: string[];
     background?: boolean;
 };
 
@@ -68,6 +72,7 @@ export class SsoService extends DockerService<SsoStartOptions, SsoPrepared> {
         return {
             importDir: await writeKeycloakRealm(context, options.redirectUris, {
                 dirName: this.variant ? `keycloak-${this.variant.name}` : undefined,
+                belcotaxRedirectUris: options.belcotaxRedirectUris,
             }),
         };
     }

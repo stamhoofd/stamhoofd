@@ -44,6 +44,10 @@ describe('buildDevelopmentConfig', () => {
         expect(config.appEnv.SMTP_HOST).toBe(localIpv4Host);
         expect(config.appEnv.SMTP_USERNAME).toBe(maildevUsername);
         expect(config.appEnv.SMTP_PASSWORD).toBe(maildevPassword);
+        expect(config.appEnv).toMatchObject({
+            BELCOTAX_ENVIRONMENT: 'local',
+            BELCOTAX_ISSUER: 'https://sso.stamhoofd/dex/realms/belcotax',
+        });
     });
 
     it('uses environment domains for primary non-Stamhoofd configs', () => {

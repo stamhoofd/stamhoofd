@@ -29,11 +29,14 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
             version = request.getVersion();
         } catch (e) {
             if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('missing_version')) {
-                // Allow missing version on /openid/ path
+                // Allow missing version on /openid/ path, and on the URLs of the Belcotax
+                // connection that are registered at FOD Financiën
                 if (
                     STAMHOOFD.environment === 'development' ||
                     STAMHOOFD.environment === 'test' ||
-                    request.url.startsWith('/openid/')
+                    request.url.startsWith('/openid/') ||
+                    request.url === '/oauth/belcotax' ||
+                    request.url === '/belcotax/jwks'
                 ) {
                     request.version = this.latestVersions.web;
                     return;
