@@ -8,4 +8,4 @@ if (fix) await ESLint.outputFixes(results);
 const formatter = await eslint.loadFormatter('stylish');
 const output = formatter.format(results);
 if (output) console.log(output);
-if (results.some(result => result.errorCount || result.warningCount)) process.exitCode = 1;
+if (results.some(result => result.errorCount || (!fix && result.warningCount))) process.exitCode = 1;

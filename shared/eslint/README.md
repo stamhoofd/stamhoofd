@@ -11,7 +11,8 @@ when invoked from nested package directories. See the
 `pnpm stam check format` uses the syntax-only runner in `bin/format.mjs`. It retains
 each file's effective configuration but runs only rules whose metadata declares
 `type: 'layout'`, with TypeScript project services disabled. `--fix` applies layout
-fixes only. Remaining warnings and syntax errors fail the command; correctness
+fixes only. Remaining warnings fail check mode but are only reported in fix mode.
+Syntax errors fail both modes; correctness
 checks belong to `stam check lint`.
 
 Formatting uses one process and a separate content-based ESLint cache, including a

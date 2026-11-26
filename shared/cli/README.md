@@ -494,8 +494,10 @@ hashes participate in native refresh validation.
 
 Formatting runs only ESLint layout rules, with TypeScript project services and worker
 threads disabled. It retains each file's normal formatting settings, including Vue
-template rules, without running semantic, security, or import-graph checks. Both
-check and fix mode fail on remaining formatting warnings or syntax errors. Run
+template rules, without running semantic, security, or import-graph checks.
+Remaining warnings fail check mode but are only reported in fix mode; syntax errors
+fail both. In `jj run --root`, use `pnpm stam check format --fix` to run the CLI
+from the isolated checkout with its dependencies installed. Run
 `stam check lint` separately for correctness checks. The isolated content-based cache
 in `.cache/eslint-format` is invalidated by configuration and local plugin changes;
 it is not shared with type-aware linting. `indent-binary-ops` is disabled because it
