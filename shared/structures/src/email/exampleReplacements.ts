@@ -86,6 +86,10 @@ function getReplacements() {
             token: 'email',
             value: $t('%13a'),
         }),
+        newEmail: Replacement.create({
+            token: 'newEmail',
+            value: $t('nieuw@voorbeeld.com'),
+        }),
         fromAddress: Replacement.create({
             token: 'fromAddress',
             value: $t('%13b'),

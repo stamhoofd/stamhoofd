@@ -107,6 +107,13 @@ export enum EmailTemplateType {
 
     VerifyEmail = 'VerifyEmail',
     VerifyEmailWithoutCode = 'VerifyEmailWithoutCode',
+
+    /**
+     * E-mail sent to the address a user is leaving behind when they change the email
+     * address of their account, so a takeover of the account cannot stay unnoticed.
+     */
+    EmailChangedNotification = 'EmailChangedNotification',
+
     AdminInvitation = 'AdminInvitation',
     AdminInvitationNewUser = 'AdminInvitationNewUser',
 
@@ -410,6 +417,8 @@ export class EmailTemplate extends AutoEncoder {
                 return $t('%pn');
             case EmailTemplateType.VerifyEmailWithoutCode:
                 return $t('%po');
+            case EmailTemplateType.EmailChangedNotification:
+                return $t('Gewijzigd e-mailadres van een account');
             case EmailTemplateType.AdminInvitation:
                 return $t('%pp');
             case EmailTemplateType.AdminInvitationNewUser:
@@ -525,6 +534,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DeleteAccountConfirmation:
             case EmailTemplateType.VerifyEmail:
             case EmailTemplateType.VerifyEmailWithoutCode:
+            case EmailTemplateType.EmailChangedNotification:
             case EmailTemplateType.MemberSecurityCode:
                 return $t('%pw');
 
@@ -698,6 +708,10 @@ export class EmailTemplate extends AutoEncoder {
                 return $t('%qB');
             case EmailTemplateType.VerifyEmailWithoutCode:
                 return $t('%qC');
+            case EmailTemplateType.EmailChangedNotification:
+                return $t(
+                    'Deze e-mail wordt naar het oude e-mailadres gestuurd nadat iemand het e-mailadres van zijn account gewijzigd heeft.',
+                );
             case EmailTemplateType.AdminInvitation:
                 return $t('%qD');
             case EmailTemplateType.AdminInvitationNewUser:
@@ -915,6 +929,10 @@ export class EmailTemplate extends AutoEncoder {
 
         if (type === EmailTemplateType.VerifyEmailWithoutCode) {
             return [...ExampleReplacements.default, ExampleReplacements.all.confirmEmailUrl];
+        }
+
+        if (type === EmailTemplateType.EmailChangedNotification) {
+            return [...ExampleReplacements.default, ExampleReplacements.all.newEmail];
         }
 
         if (type === EmailTemplateType.MemberSecurityCode) {

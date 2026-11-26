@@ -1,6 +1,9 @@
 import { Request } from '@node/endpoints';
+import { EmailMocker } from '@stamhoofd/email';
 import {
     AuditLog,
+    EmailTemplateFactory,
+    Platform,
     EmailVerificationCode,
     Member,
     MemberFactory,
@@ -13,6 +16,7 @@ import type { Organization } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     AuditLogType,
+    EmailTemplateType,
     LoginProviderType,
     PermissionRole,
     Permissions,
@@ -241,6 +245,115 @@ describe('Endpoint.VerifyEmail', () => {
             (await Token.getByAccessToken((response.body as TokenStruct).accessToken))!.user.id,
         ).toBe(user.id);
         expect((await User.getByID(user.id))!.email).toBe('new@example.com');
+    });
+
+    describe('the address that is left behind is notified', () => {
+        beforeEach(async () => {
+            await new EmailTemplateFactory({
+                type: EmailTemplateType.EmailChangedNotification,
+                html: '<p>at {{organizationName}}: moved to {{newEmail}}, was {{email}}</p>',
+                text: 'at {{organizationName}}: moved to {{newEmail}}, was {{email}}',
+            }).create();
+        });
+
+        test('the old address learns that the account moved away from it', async () => {
+            // The link only reaches the new mailbox, so this is the only signal the owner of
+            // the old one gets that their account was taken somewhere else.
+            const organization = await new OrganizationFactory({
+                name: 'Toneelgroep De Maan',
+            }).create();
+            const user = await new UserFactory({
+                organization,
+                email: 'owner@example.com',
+            }).create();
+
+            await verifyEmail(organization, user, 'moved@example.com');
+
+            const email = await vi.waitFor(
+                async () => {
+                    const sent = (await EmailMocker.transactional.getSucceededEmails()).filter(
+                        (e) => e.to.includes('owner@example.com'),
+                    );
+                    expect(sent).toHaveLength(1);
+                    return sent[0];
+                },
+                { timeout: 5000 },
+            );
+            expect(email.html).toContain(
+                'at Toneelgroep De Maan: moved to moved@example.com, was owner@example.com',
+            );
+        });
+
+        test('in platform mode, where the request carries no organization', async () => {
+            // Platform accounts have no organization of their own and the verification link is
+            // unscoped, so the endpoint sends with organization null: the template is looked up
+            // at platform level and the sender falls back to the platform address.
+            TestUtils.setEnvironment('userMode', 'platform');
+            const user = await new UserFactory({
+                email: 'platform.owner@example.com',
+            }).create();
+            expect(user.organizationId).toBeNull();
+
+            const code = await EmailVerificationCode.createFor(user, 'platform.moved@example.com');
+            await testServer.test(
+                endpoint,
+                Request.buildJson('POST', '/verify-email', STAMHOOFD.domains.api, {
+                    token: code.token,
+                    code: code.code,
+                }),
+            );
+
+            const email = await vi.waitFor(
+                async () => {
+                    const sent = (await EmailMocker.transactional.getSucceededEmails()).filter(
+                        (e) => e.to.includes('platform.owner@example.com'),
+                    );
+                    expect(sent).toHaveLength(1);
+                    return sent[0];
+                },
+                { timeout: 5000 },
+            );
+            // Without an organization the name of the platform stands in for it, instead of
+            // the raw {{organizationName}} token ending up in the email
+            const platformName = (await Platform.getSharedPrivateStruct()).config.name;
+            expect(platformName).not.toBe('');
+            expect(email.html).toContain(
+                `at ${platformName}: moved to platform.moved@example.com, was platform.owner@example.com`,
+            );
+        });
+
+        test('a signup verification of the current address notifies nobody', async () => {
+            // Most verifications confirm the address the account already has. Telling those
+            // people their address 'has been changed' would alarm every new signup.
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                email: 'signup@example.com',
+                verified: false,
+            }).create();
+
+            await verifyEmail(organization, user, user.email, { signedIn: false });
+
+            // A real change afterwards gives the background send something to arrive for: once
+            // its notification is there, one for the signup would have been there too.
+            await verifyEmail(organization, user, 'moved@example.com');
+
+            const notifications = await vi.waitFor(
+                async () => {
+                    const sent = (await EmailMocker.transactional.getSucceededEmails()).filter(
+                        (e) => e.html?.includes('moved to'),
+                    );
+                    expect(
+                        sent.some((e) =>
+                            e.html?.includes('moved to moved@example.com, was signup@example.com'),
+                        ),
+                    ).toBe(true);
+                    return sent;
+                },
+                { timeout: 5000 },
+            );
+            expect(notifications).toHaveLength(1);
+        });
     });
 
     test('parallel wrong guesses cannot exceed the maximum number of tries', async () => {

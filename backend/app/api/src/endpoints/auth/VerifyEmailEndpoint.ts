@@ -2,15 +2,20 @@ import type { Decoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
+import type { Organization } from '@stamhoofd/models';
 import { EmailVerificationCode, User } from '@stamhoofd/models';
 import { UserService } from '@stamhoofd/models/services/UserService.js';
 import {
+    EmailTemplateType,
+    Recipient,
+    Replacement,
     SessionLoginMethod,
     Token as TokenStruct,
     VerifyEmailRequest,
 } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
+import { sendEmailTemplate } from '../../helpers/EmailBuilder.js';
 import { TwoFactorHelper } from '../../helpers/TwoFactorHelper.js';
 import { BalanceItemService } from '../../services/BalanceItemService.js';
 import { SessionService } from '../../services/SessionService.js';
@@ -93,6 +98,8 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             });
         }
 
+        const previousEmail = user.email;
+
         if (user.email !== code.email) {
             const other = await User.getForAuthentication(user.organizationId, code.email, {
                 allowWithoutAccount: true,
@@ -139,6 +146,18 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw e;
         }
 
+        if (previousEmail !== user.email) {
+            // Only the new mailbox saw this change coming: it asked for the link and it got
+            // it. Tell the address that is left behind too, so a takeover of the account
+            // cannot pass unnoticed by the person who still reads the old mailbox.
+            this.sendEmailChangedNotification(user, previousEmail, organization).catch((e) => {
+                console.error(
+                    `Failed to notify the previous address of user ${user.id} of its email change`,
+                    e,
+                );
+            });
+        }
+
         // Verifying an email is a single primary credential: if this user already has a
         // second factor (or must enroll one), don't hand out a session without it. Unless
         // the request already comes from a session of that same user (changing your email
@@ -159,5 +178,32 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         const st = new TokenStruct(token);
         return new Response(st);
+    }
+
+    private async sendEmailChangedNotification(
+        user: User,
+        previousEmail: string,
+        organization: Organization | null,
+    ) {
+        await sendEmailTemplate(organization, {
+            recipients: [
+                Recipient.create({
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: previousEmail,
+                    language: user.language,
+                    replacements: [
+                        Replacement.create({
+                            token: 'newEmail',
+                            value: user.email,
+                        }),
+                    ],
+                }),
+            ],
+            template: {
+                type: EmailTemplateType.EmailChangedNotification,
+            },
+            type: 'transactional',
+        });
     }
 }
