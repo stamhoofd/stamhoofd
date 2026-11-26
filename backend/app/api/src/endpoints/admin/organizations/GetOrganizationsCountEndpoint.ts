@@ -14,12 +14,18 @@ type ResponseBody = CountResponse;
 export class GetOrganizationsCountEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = CountFilteredRequest as Decoder<CountFilteredRequest>;
 
+    static override readonly traceTemplate = '/admin/organizations/count';
+
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/admin/organizations/count', {});
+        const params = Endpoint.parseParameters(
+            request.url,
+            GetOrganizationsCountEndpoint.traceTemplate,
+            {},
+        );
 
         if (params) {
             return [true, params as Params];

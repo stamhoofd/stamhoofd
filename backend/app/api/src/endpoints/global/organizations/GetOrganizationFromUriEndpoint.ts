@@ -23,12 +23,18 @@ type ResponseBody = OrganizationStruct;
 export class GetOrganizationFromUriEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = Query as Decoder<Query>;
 
+    static override readonly traceTemplate = '/organization-from-uri';
+
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization-from-uri', {});
+        const params = Endpoint.parseParameters(
+            request.url,
+            GetOrganizationFromUriEndpoint.traceTemplate,
+            {},
+        );
 
         if (params) {
             return [true, params as Params];

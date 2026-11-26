@@ -10,6 +10,8 @@ export class Request {
     host: string;
     request?: http.IncomingMessage;
     bodyPromise?: Promise<string>;
+    /** Set only when the local span emitter queues this request’s server span. */
+    localTraceQueued = false;
 
     version?: number;
 

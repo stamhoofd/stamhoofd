@@ -25,12 +25,18 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
     queryDecoder = Query as Decoder<Query>;
     registrationDomains = [...new Set(Object.values(STAMHOOFD.domains.registration ?? {}))];
 
+    static override readonly traceTemplate = '/organization-from-domain';
+
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization-from-domain', {});
+        const params = Endpoint.parseParameters(
+            request.url,
+            GetOrganizationFromDomainEndpoint.traceTemplate,
+            {},
+        );
 
         if (params) {
             return [true, params as Params];

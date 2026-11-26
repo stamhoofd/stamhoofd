@@ -30,6 +30,19 @@ export function rendererPostUrl(authority: string, development: boolean) {
     return url;
 }
 
+/** Only a managed dev authority can carry the local proof, and only on its pinned loopback listener. */
+export function localRendererDestination(url: URL, authority: string | undefined, port: number) {
+    if (
+        url.protocol === 'http:' &&
+        authority === url.host &&
+        Number.isInteger(port) &&
+        port > 0 &&
+        port <= 65535
+    ) {
+        return new URL(url.pathname, `http://127.0.0.1:${port}`);
+    }
+}
+
 export class InvoicePdfService {
     static async generateHtml(invoice: Invoice) {
         const organization = await Organization.getByID(invoice.organizationId, true);
@@ -357,47 +370,68 @@ export class InvoicePdfService {
                     STAMHOOFD.domains.rendererApi,
                     STAMHOOFD.environment === 'development',
                 );
-                const buffer = await traceRendererCall(async (parent, receivedStatus) => {
-                    const headers: Record<string, string> = {};
-                    if (
-                        parent &&
-                        (url.protocol === 'https:' ||
-                            ['127.0.0.1', '[::1]', 'localhost'].includes(url.hostname))
-                    ) {
-                        headers.traceparent = parent;
-                        headers['x-stam-render-trace'] = signInternal(
-                            'renderer-trace-v1',
-                            grant,
-                            parent,
+                const buffer = await traceRendererCall(
+                    async (parent, receivedStatus, localParent) => {
+                        const headers: Record<string, string> = {};
+                        const trusted =
+                            url.protocol === 'https:' ||
+                            ['127.0.0.1', '[::1]', 'localhost'].includes(url.hostname);
+                        // Use the session's actual renderer listener for a selected managed dev domain.
+                        // Ordinary calls and production propagation keep their original destination policy.
+                        const port = Number(process.env.STAM_DEV_RENDERER_PORT);
+                        const pin = localParent
+                            ? localRendererDestination(
+                                  url,
+                                  process.env.STAM_DEV_RENDERER_AUTHORITY,
+                                  port,
+                              )
+                            : undefined;
+                        const destination = pin ?? url;
+                        if (localParent && pin) {
+                            const proof = signInternal(
+                                'dev-render-trace-v1',
+                                process.env.STAM_DEV_SESSION!,
+                                grant,
+                                localParent,
+                            );
+                            headers['x-stam-dev-render'] = `${localParent}.${proof}`;
+                        }
+                        if (parent && trusted) {
+                            headers.traceparent = parent;
+                            headers['x-stam-render-trace'] = signInternal(
+                                'renderer-trace-v1',
+                                grant,
+                                parent,
+                            );
+                        }
+                        const result = await fetch(destination, {
+                            method: 'POST',
+                            body: form,
+                            signal: controller.signal,
+                            headers,
+                            redirect: 'error',
+                        });
+                        receivedStatus(result.status);
+                        if (result.status === 200) return Buffer.from(await result.arrayBuffer());
+                        let txt = '';
+                        try {
+                            txt = await result.text();
+                        } catch (e) {
+                            txt = '<unreadable stream>';
+                            console.error('Could not read response', e);
+                        }
+                        console.error(
+                            'Failed to generate invoice PDF. Non 200 statuscode: ',
+                            result.status,
+                            txt,
                         );
-                    }
-                    const result = await fetch(url, {
-                        method: 'POST',
-                        body: form,
-                        signal: controller.signal,
-                        headers,
-                        redirect: 'error',
-                    });
-                    receivedStatus(result.status);
-                    if (result.status === 200) return Buffer.from(await result.arrayBuffer());
-                    let txt = '';
-                    try {
-                        txt = await result.text();
-                    } catch (e) {
-                        txt = '<unreadable stream>';
-                        console.error('Could not read response', e);
-                    }
-                    console.error(
-                        'Failed to generate invoice PDF. Non 200 statuscode: ',
-                        result.status,
-                        txt,
-                    );
-                    throw new SimpleError({
-                        code: 'pdf_creation_timeout',
-                        message: 'Failed to generate invoice PDF',
-                        human: $t('%ZgV'),
-                    });
-                });
+                        throw new SimpleError({
+                            code: 'pdf_creation_timeout',
+                            message: 'Failed to generate invoice PDF',
+                            human: $t('%ZgV'),
+                        });
+                    },
+                );
                 invoice.pdf = await this.uploadPdf(invoice, buffer);
                 await invoice.save();
             }

@@ -7,6 +7,7 @@ import { resourceFromAttributes } from '@opentelemetry/resources';
 import { randomUUID } from 'node:crypto';
 import { sanitizedLogExporter, sanitizedTraceExporter } from './exporters.js';
 import { initializeMetrics } from './metrics.js';
+import { startLocalCapture } from './local-capture.js';
 import { enableBackendTraces } from './backend-traces.js';
 
 let runtime: { shutdown(): Promise<void> } | undefined;
@@ -26,6 +27,7 @@ export function initializeTelemetry(
 ): { shutdown(): Promise<void> } {
     if (runtime) return runtime;
     let sdk: NodeSDK | undefined;
+    let stopLocal: ReturnType<typeof startLocalCapture>;
     let stopTraces: (() => void) | undefined;
     let metrics: ReturnType<typeof initializeMetrics>;
     let shutdown: Promise<void> | undefined;
@@ -76,6 +78,7 @@ export function initializeTelemetry(
                     : [],
         });
         sdk.start();
+        stopLocal = startLocalCapture(service);
         if (localProcessor) stopTraces = enableBackendTraces(service);
     } catch {
         console.warn('Application telemetry could not be initialized.');
@@ -87,7 +90,7 @@ export function initializeTelemetry(
                 try {
                     stopTraces?.();
                     await Promise.race([
-                        Promise.all([sdk?.shutdown(), metrics?.shutdown()]),
+                        Promise.all([stopLocal?.(), sdk?.shutdown(), metrics?.shutdown()]),
                         new Promise<void>((resolve) => {
                             timer = setTimeout(resolve, 2000);
                         }),

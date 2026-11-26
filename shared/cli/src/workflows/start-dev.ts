@@ -215,6 +215,9 @@ export async function runDev(
         channel = await openDevEventChannel(
             (event) => lifecycle.receive(event),
             carrier.traceparent,
+            target === DevTarget.Docs || target === DevTarget.Frontend
+                ? ''
+                : process.env.STAM_DEV_CAPTURE || '*',
         );
         status.start();
         const names =
@@ -239,6 +242,12 @@ export async function runDev(
                     ...buildBackendEnv(context),
                     ...stripeEnv,
                     ...channel.env,
+                    ...(channel.env.STAM_DEV_CAPTURE
+                        ? {
+                              STAM_DEV_RENDERER_AUTHORITY: domains.renderer,
+                              STAM_DEV_RENDERER_PORT: String(ports.renderer),
+                          }
+                        : {}),
                     STAM_DEV_VERBOSE: context.verbose ? '1' : '0',
                     STAM_DEV_API_INSPECT_PORT: String(ports.apiInspector),
                     STAM_DEV_STATS_INSPECT_PORT: String(ports.statsInspector),

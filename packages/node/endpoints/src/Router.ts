@@ -24,6 +24,16 @@ function isEndpointType(endpoint: any): endpoint is EndpointConstructor {
 export class Router {
     endpoints: GenericEndpoint[] = [];
     verbose = false;
+    private readonly moduleNames = new WeakMap<GenericEndpoint, string>();
+
+    /** Only call for the handler returned by decode. Never derive labels from the request. */
+    matchedIdentity(endpoint: GenericEndpoint) {
+        const constructor = Object.getPrototypeOf(endpoint).constructor as typeof Endpoint;
+        return {
+            endpoint: this.moduleNames.get(endpoint) ?? constructor.name,
+            route: constructor.traceTemplate,
+        };
+    }
 
     async loadAllEndpoints(folder: string) {
         const parts = folder.split('/');
@@ -82,7 +92,9 @@ export class Router {
                     if (this.verbose) {
                         console.log('Loaded ' + key);
                     }
-                    this.endpoints.push(new element());
+                    const endpoint = new element();
+                    this.moduleNames.set(endpoint, file.slice(0, -3));
+                    this.endpoints.push(endpoint);
                 }
             }
         }
