@@ -36,7 +36,7 @@
     },
     "dependencies": {
         "@anthropic-ai/sdk": "0.137.0",
-        "@aws-sdk/client-s3": "3.1171.0",
+        "@aws-sdk/client-s3": "3.1172.0",
         "@common/opentelemetry-decorators": "workspace:*",
         "@inquirer/prompts": "7.10.1",
         "@node/dev-tools": "workspace:*",
