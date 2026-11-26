@@ -40,6 +40,8 @@
         "@opentelemetry/exporter-logs-otlp-proto": "0.301.2"
     },
     "devDependencies": {
+        "@buf/opentelemetry_opentelemetry.bufbuild_es": "https://buf.build/gen/npm/v1/@buf/opentelemetry_opentelemetry.bufbuild_es/-/opentelemetry_opentelemetry.bufbuild_es-2.17.0-20261002203906-f3a7b1f1162b.1.tgz",
+        "@bufbuild/protobuf": "2.17.0",
         "oxlint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.12"
     }

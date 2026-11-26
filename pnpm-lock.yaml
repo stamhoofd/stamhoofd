@@ -3044,6 +3044,12 @@ importers:
         specifier: 3.1.1
         version: 3.1.1(@opentelemetry/api@1.10.0)
     devDependencies:
+      '@buf/opentelemetry_opentelemetry.bufbuild_es':
+        specifier: https://buf.build/gen/npm/v1/@buf/opentelemetry_opentelemetry.bufbuild_es/-/opentelemetry_opentelemetry.bufbuild_es-2.17.0-20261002203906-f3a7b1f1162b.1.tgz
+        version: https://buf.build/gen/npm/v1/@buf/opentelemetry_opentelemetry.bufbuild_es/-/opentelemetry_opentelemetry.bufbuild_es-2.17.0-20261002203906-f3a7b1f1162b.1.tgz(@bufbuild/protobuf@2.17.0)
+      '@bufbuild/protobuf':
+        specifier: 2.17.0
+        version: 2.17.0
       oxlint-plugin-stamhoofd:
         specifier: workspace:*
         version: link:../../../shared/oxlint

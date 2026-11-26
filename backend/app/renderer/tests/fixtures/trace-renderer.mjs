@@ -21,7 +21,7 @@ if (attempts) {
     if (!attempts.count()) throw Error('HTTP attempt observer inactive');
 }
 const baseline = attempts?.count();
-const runtime = attempts || process.env.TEST_MODE === 'upload-failure' ? initializeTelemetry('renderer') : initializeTelemetry('renderer', { localProcessor: process.env.STAM_DEV_CAPTURE ? new SimpleSpanProcessor({ exporter: remote }) : new BatchSpanProcessor({ exporter: new OTLPTraceExporter({ url: process.env.TEST_COLLECTOR }) }) });
+const runtime = process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || attempts || process.env.TEST_MODE === 'upload-failure' ? initializeTelemetry('renderer') : initializeTelemetry('renderer', { localProcessor: process.env.STAM_DEV_CAPTURE ? new SimpleSpanProcessor({ exporter: remote }) : new BatchSpanProcessor({ exporter: new OTLPTraceExporter({ url: process.env.TEST_COLLECTOR }) }) });
 if (process.env.TEST_MODE === 'local') {
     for (let i = 0; i < 2; i++) {
         await traceEndpoint({}, 'GET', async () => ({ status: 200 }));
