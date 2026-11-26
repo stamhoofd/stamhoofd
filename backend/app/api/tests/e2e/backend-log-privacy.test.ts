@@ -136,3 +136,15 @@ describe.skipIf(!process.env.STAM_BACKEND_LOG_SMOKE)('compiled entries', () => {
         },
     );
 });
+
+for (const mode of ['both', 'local', 'off'])
+    it(`matches dedicated response logs to decoded provider spans: ${mode}`, () => {
+        const result = run(
+            path.resolve(import.meta.dirname, '../fixtures/trace-log-correlation.mjs'),
+            true,
+            [mode],
+        );
+        expect(result.status, result.local).toBe(0);
+        expect(result.local).not.toMatch(/"(?:span_id|trace_id)":/);
+        expect(result.dedicated).not.toMatch(/private|aaaaaaa|bbbbbbb/);
+    });

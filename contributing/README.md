@@ -54,6 +54,8 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 
 [Backend metrics: coverage, panel queries and staging verification](backend/metrics.md)
 
+[Consolidated staging observability acceptance](backend/observability-staging.md)
+
 [Backend log privacy and forwarding gate](backend/log-privacy.md)
 
 [Exception privacy gate](backend/exception-privacy.md)

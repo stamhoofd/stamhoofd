@@ -663,6 +663,9 @@ importers:
       '@node/dev-tools':
         specifier: workspace:*
         version: link:../../../packages/node/dev-tools
+      '@opentelemetry/api':
+        specifier: 1.10.0
+        version: 1.10.0
       '@opentelemetry/exporter-trace-otlp-proto':
         specifier: 0.301.2
         version: 0.301.2(@opentelemetry/api@1.10.0)
@@ -2978,6 +2981,9 @@ importers:
 
   packages/node/logging:
     dependencies:
+      '@node/observability':
+        specifier: workspace:*
+        version: link:../observability
       chalk:
         specifier: 4.1.2
         version: 4.1.2

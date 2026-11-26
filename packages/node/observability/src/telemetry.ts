@@ -97,7 +97,8 @@ export function initializeTelemetry(
         });
         sdk.start();
         stopLocal = startLocalCapture(service);
-        if (localProcessor || traceUrl) stopTraces = enableBackendTraces(service);
+        if (localProcessor || traceUrl)
+            stopTraces = enableBackendTraces(service, !!traceUrl && !localProcessor);
     } catch {
         console.warn('Application telemetry could not be initialized.');
     }

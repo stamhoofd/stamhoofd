@@ -4,6 +4,10 @@
     "private": true,
     "type": "module",
     "exports": {
+        "./request-span-ids": {
+            "types": "./dist-types/request-span-ids.d.ts",
+            "import": "./dist/request-span-ids.js"
+        },
         "./dev-capture-selectors": {
             "types": "./dist-types/dev-capture-selectors.d.ts",
             "import": "./dist/dev-capture-selectors.js"
