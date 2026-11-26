@@ -25,6 +25,6 @@
         "@node/dev-tools": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
         "sass": "1.108.2",
-        "vite-svg-2-webfont": "8.5.0"
+        "vite-svg-2-webfont": "8.7.0"
     }
 }
