@@ -9,6 +9,7 @@ import {
 } from '@stamhoofd/models';
 import { EmailTemplateType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { MAX_AUTH_EMAILS_PER_HOUR } from '../helpers/AuthEmailRateLimiter.js';
 import { VerificationCodeService } from './VerificationCodeService.js';
 
 const i18n = new I18n(I18n.defaultLanguage, I18n.defaultCountry);
@@ -74,6 +75,21 @@ describe('VerificationCodeService', () => {
             const emails = await EmailMocker.transactional.getSucceededEmails();
             expect(emails.length).toBe(1);
             expect(emails[0].text).toContain(PLATFORM_NAME);
+        });
+
+        test('Stops sending after too many emails for the same address', async () => {
+            TestUtils.setEnvironment('userMode', 'platform');
+            await createVerifyEmailTemplate();
+
+            const user = await new UserFactory({}).create();
+            const code = await EmailVerificationCode.createFor(user, user.email);
+
+            for (let i = 0; i < MAX_AUTH_EMAILS_PER_HOUR + 3; i++) {
+                await VerificationCodeService.send(code, user, null, i18n);
+            }
+
+            const emails = await EmailMocker.transactional.getSucceededEmails();
+            expect(emails.length).toBe(MAX_AUTH_EMAILS_PER_HOUR);
         });
     });
 });

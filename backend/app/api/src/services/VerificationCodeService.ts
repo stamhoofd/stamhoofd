@@ -3,6 +3,7 @@ import type { Organization } from '@stamhoofd/models';
 import { EmailVerificationCode, Platform, User } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { EmailTemplateType, getAppHost, Recipient, Replacement } from '@stamhoofd/structures';
+import { canSendAuthEmail } from '../helpers/AuthEmailRateLimiter.js';
 
 /**
  * Sends the verification emails for an EmailVerificationCode. The code itself is generated, stored
@@ -35,6 +36,10 @@ export class VerificationCodeService {
         i18n: I18n,
         withCode = true,
     ) {
+        if (!canSendAuthEmail(code.email)) {
+            return;
+        }
+
         const url = this.getEmailVerificationUrl(code, user, organization, i18n);
 
         const name = organization?.name ?? (await Platform.getSharedPrivateStruct()).config.name;

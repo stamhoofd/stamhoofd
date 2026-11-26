@@ -11,6 +11,7 @@ import {
 } from '@stamhoofd/structures';
 
 import { SimpleError } from '@common/errors';
+import { canSendAuthEmail } from '../../helpers/AuthEmailRateLimiter.js';
 import { Context } from '../../helpers/Context.js';
 import { PasswordForgotService } from '../../services/PasswordForgotService.js';
 
@@ -99,6 +100,10 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
         });
 
         if (!user) {
+            if (!canSendAuthEmail(request.body.email)) {
+                return new Response(undefined);
+            }
+
             // Create e-mail builder
             await sendEmailTemplate(organization, {
                 recipients: [
