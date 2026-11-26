@@ -150,25 +150,16 @@ export class MemberResponsibilityRecord extends MemberResponsibilityRecordBase {
     group: Group | null = null;
 
     getName(member: PlatformMember, includeOrganization = true) {
-        let allResponsibilities = member.family.platform.config.responsibilities;
-
         let suffix = this.group ? ' ' + $t('%wR') + ' ' + this.group.settings.name : '';
 
-        if (this.organizationId) {
+        if (this.organizationId && includeOrganization) {
             const organization = member.family.getOrganization(this.organizationId);
-            if (organization && organization.privateMeta) {
-                allResponsibilities = [
-                    ...allResponsibilities,
-                    ...organization.privateMeta.responsibilities,
-                ];
-            }
-
-            if (organization && includeOrganization) {
+            if (organization) {
                 suffix += ' ' + $t('%i0') + ' ' + organization.name;
             }
         }
 
-        const responsibility = allResponsibilities.find((r) => r.id == this.responsibilityId);
+        const responsibility = member.getResponsibility(this);
         return (responsibility ? responsibility.name : $t('%qZ')) + suffix;
     }
 }
