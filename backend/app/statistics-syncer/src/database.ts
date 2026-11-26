@@ -97,8 +97,12 @@ export function getStatisticsPoolOptions(): PoolOptions {
     }
     if (config.DB_TLS_SERVER_NAME) {
         return {
-            ...base, useSSL: true, ca: config.DB_CA, verifyIdentity: true,
-            host: config.DB_TLS_SERVER_NAME, connectHost: config.DB_HOST,
+            ...base,
+            useSSL: true,
+            ca: config.DB_CA,
+            verifyIdentity: true,
+            host: config.DB_TLS_SERVER_NAME,
+            connectHost: config.DB_HOST,
         };
     }
     return { ...base, useSSL: true, ca: config.DB_CA };

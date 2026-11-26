@@ -108,33 +108,53 @@ describe('getStatisticsPoolOptions', () => {
 
     it('requires a CA even when the client certificate is present', () => {
         TestUtils.setEnvironment('statisticsDatabase', {
-            ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example', ...certs, DB_CA: undefined,
+            ...STAMHOOFD.statisticsDatabase,
+            DB_HOST: 'statistics.example',
+            ...certs,
+            DB_CA: undefined,
         });
         expect(() => getStatisticsPoolOptions()).toThrow(/DB_CA/);
     });
 
     it('supports explicit managed server-auth TLS and keeps TCP routing separate from identity', () => {
         TestUtils.setEnvironment('statisticsDatabase', {
-            ...STAMHOOFD.statisticsDatabase, DB_HOST: '10.90.0.4', DB_PORT: 3306,
-            DB_CA: '/certs/managed-ca.pem', DB_TLS_MODE: 'server', DB_TLS_SERVER_NAME: 'mysql.example.com',
+            ...STAMHOOFD.statisticsDatabase,
+            DB_HOST: '10.90.0.4',
+            DB_PORT: 3306,
+            DB_CA: '/certs/managed-ca.pem',
+            DB_TLS_MODE: 'server',
+            DB_TLS_SERVER_NAME: 'mysql.example.com',
         });
         expect(getStatisticsPoolOptions()).toMatchObject({
-            host: 'mysql.example.com', connectHost: '10.90.0.4', port: 3306,
-            useSSL: true, ca: '/certs/managed-ca.pem', verifyIdentity: true, cert: null, key: null,
+            host: 'mysql.example.com',
+            connectHost: '10.90.0.4',
+            port: 3306,
+            useSSL: true,
+            ca: '/certs/managed-ca.pem',
+            verifyIdentity: true,
+            cert: null,
+            key: null,
         });
     });
 
     it('does not silently downgrade client authentication or endpoint verification', () => {
         TestUtils.setEnvironment('statisticsDatabase', {
-            ...STAMHOOFD.statisticsDatabase, DB_HOST: '10.90.0.4', DB_CA: '/certs/managed-ca.pem', DB_TLS_MODE: 'server',
+            ...STAMHOOFD.statisticsDatabase,
+            DB_HOST: '10.90.0.4',
+            DB_CA: '/certs/managed-ca.pem',
+            DB_TLS_MODE: 'server',
         });
         expect(() => getStatisticsPoolOptions()).toThrow(/DB_TLS_SERVER_NAME/);
     });
 
     it('never loads inherited client credentials in managed server-auth mode', async () => {
         TestUtils.setEnvironment('statisticsDatabase', {
-            ...STAMHOOFD.statisticsDatabase, DB_HOST: '10.90.0.4', DB_PORT: 3306,
-            DB_CA: '/managed-ca.pem', DB_TLS_MODE: 'server', DB_TLS_SERVER_NAME: 'mysql.example.com',
+            ...STAMHOOFD.statisticsDatabase,
+            DB_HOST: '10.90.0.4',
+            DB_PORT: 3306,
+            DB_CA: '/managed-ca.pem',
+            DB_TLS_MODE: 'server',
+            DB_TLS_SERVER_NAME: 'mysql.example.com',
         });
         vi.stubEnv('DB_CERT', '/must-not-read-legacy-client.pem');
         vi.stubEnv('DB_KEY', '/must-not-read-legacy-client-key.pem');
