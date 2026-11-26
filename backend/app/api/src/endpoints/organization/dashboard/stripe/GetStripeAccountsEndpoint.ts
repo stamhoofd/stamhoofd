@@ -2,7 +2,7 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { StripeAccount } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import type { StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 
@@ -39,6 +39,7 @@ export class GetStripeAccountLinkEndpoint extends Endpoint<Params, Query, Body, 
             organizationId: organization.id,
             status: 'active',
         });
-        return new Response(models.map((m) => StripeAccountStruct.create(m)));
+        const includeBlob = Context.auth.isStamhoofdStaff();
+        return new Response(models.map((m) => m.getStructure({ includeBlob })));
     }
 }

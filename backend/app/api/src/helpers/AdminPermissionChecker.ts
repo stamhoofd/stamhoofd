@@ -3071,4 +3071,10 @@ export class AdminPermissionChecker {
     canManagePlatformAdmins() {
         return this.hasPlatformFullAccess();
     }
+
+    isStamhoofdStaff(): boolean {
+        return (
+            this.user.email.endsWith('@stamhoofd.be') || this.user.email.endsWith('@stamhoofd.nl')
+        );
+    }
 }
