@@ -8,7 +8,7 @@ import {
 import { Upload } from '@aws-sdk/lib-storage';
 import { Database } from '@node/database';
 import { traceStage } from '@node/observability';
-import { defineWorker } from '@node/observability/workloads';
+import { WorkerMetrics } from '@node/observability/worker-metrics';
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Formatter } from '@stamhoofd/utility';
@@ -324,7 +324,7 @@ export function getBackupFileDate(filename: string) {
     return date;
 }
 
-export const fullBackup = defineWorker('backup_full');
+export const fullBackup = new WorkerMetrics('backup_full');
 
 export async function backup() {
     if (QueueHandler.isRunning('backup')) {

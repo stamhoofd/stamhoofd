@@ -1,6 +1,6 @@
 import { errorDiagnostics } from '@common/errors';
 import { Database } from '@node/database';
-import { defineWorker } from '@node/observability/workloads';
+import { WorkerMetrics } from '@node/observability/worker-metrics';
 import { backendRecord, logger, StyledText } from '@node/logging';
 import { sleep } from '@stamhoofd/utility';
 
@@ -11,7 +11,7 @@ export type CronJobDefinition = {
 };
 
 const registeredCronJobs: CronJobDefinition[] = [];
-let dispatch: ReturnType<typeof defineWorker> | undefined;
+let dispatch: WorkerMetrics | undefined;
 
 let areSeedsNotFinished = true;
 
@@ -20,7 +20,7 @@ export function markAllSeedsFinished() {
 }
 
 export function registerCron(name: string, method: () => Promise<void>) {
-    dispatch ??= defineWorker('cron_dispatch');
+    dispatch ??= new WorkerMetrics('cron_dispatch');
     registeredCronJobs.push({
         name,
         method,

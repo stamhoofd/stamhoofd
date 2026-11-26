@@ -1,7 +1,6 @@
-import { defineQueue } from '@node/observability/workloads';
+import { type PendingQueueItems, QueueMetrics } from '@node/observability/queue-metrics';
 
-const worker = defineQueue('throttled_batch');
-type Pending = NonNullable<ReturnType<typeof worker.enqueue>>;
+const queueMetrics = new QueueMetrics('throttled_batch');
 
 /**
  * Define an expensive action that needs to run on a list of items.
@@ -10,7 +9,7 @@ type Pending = NonNullable<ReturnType<typeof worker.enqueue>>;
  * Note that the handler can be called in parallel in some situations.
  */
 export class ThrottledQueue<T> {
-    private pending?: Pending[];
+    private pending?: PendingQueueItems[];
     items: Set<T> = new Set<T>();
     timeout: NodeJS.Timeout | null = null;
 
@@ -56,7 +55,7 @@ export class ThrottledQueue<T> {
 
     private afterAdd(added: number) {
         if (added) {
-            const pending = worker.enqueue(added);
+            const pending = queueMetrics.trackPending(added);
             if (pending) (this.pending ??= []).push(pending);
         }
         if (this.items.size >= this.maxBatchSize) {
@@ -87,7 +86,7 @@ export class ThrottledQueue<T> {
 
     pendingFlushes: Set<Promise<void>> = new Set<Promise<void>>();
 
-    private async process(items: T[], pending?: Pending[]) {
+    private async process(items: T[], pending?: PendingQueueItems[]) {
         // Calculate an efficient batch size (not simply using maxBatchSize)
         const batchCount = Math.ceil(items.length / this.maxBatchSize);
         if (batchCount === 0) {
@@ -103,11 +102,11 @@ export class ThrottledQueue<T> {
             for (let remaining = batch.length; remaining && pending?.[next];) {
                 const token = pending[next];
                 const taken = Math.min(remaining, token.count);
-                token.leave(taken);
+                token.removeFromPending(taken);
                 remaining -= taken;
                 if (!token.count) next++;
             }
-            const finish = worker.start();
+            const finish = queueMetrics.start();
             try {
                 await this.handler(batch);
                 finish?.('success');

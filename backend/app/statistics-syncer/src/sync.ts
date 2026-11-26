@@ -1,6 +1,6 @@
 import { traceStage } from '@node/observability';
 import type { SQLResultNamespacedRow } from '@node/database';
-import { defineWorker } from '@node/observability/workloads';
+import { WorkerMetrics } from '@node/observability/worker-metrics';
 import {
     Group,
     Member,
@@ -922,9 +922,9 @@ export async function syncStatisticsDeletes(): Promise<void> {
     await writeSyncState('member_responsibility_records', { lastReconciledAt: new Date() });
 }
 
-const incremental = defineWorker('stats_incremental');
-const deletes = defineWorker('stats_deletes');
-const settle = defineWorker('stats_settle');
+const incremental = new WorkerMetrics('stats_incremental');
+const deletes = new WorkerMetrics('stats_deletes');
+const settle = new WorkerMetrics('stats_settle');
 
 /**
  * One whole run of the sync: everything that changed, then the rows whose source is gone, then the

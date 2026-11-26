@@ -12,9 +12,13 @@
             "types": "./dist-types/dev-capture-selectors.d.ts",
             "import": "./dist/dev-capture-selectors.js"
         },
-        "./workloads": {
-            "types": "./dist-types/workloads.d.ts",
-            "import": "./dist/workloads.js"
+        "./worker-metrics": {
+            "types": "./dist-types/WorkerMetrics.d.ts",
+            "import": "./dist/WorkerMetrics.js"
+        },
+        "./queue-metrics": {
+            "types": "./dist-types/QueueMetrics.d.ts",
+            "import": "./dist/QueueMetrics.js"
         },
         "./db-collections": {
             "types": "./dist-types/db-collections.d.ts",

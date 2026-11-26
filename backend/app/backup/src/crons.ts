@@ -7,12 +7,12 @@ import {
     cleanBinaryLogBackups,
     fullBackup,
 } from './helpers/backup.js';
-import { defineWorker } from '@node/observability/workloads';
+import { WorkerMetrics } from '@node/observability/worker-metrics';
 import { Formatter } from '@stamhoofd/utility';
 
 let lastFullBackup: Date | null = null;
-const binlogs = defineWorker('backup_binlogs');
-const cleanup = defineWorker('backup_clean');
+const binlogs = new WorkerMetrics('backup_binlogs');
+const cleanup = new WorkerMetrics('backup_clean');
 const backupStartTime = '02:00';
 const backupEndTime = '05:00';
 

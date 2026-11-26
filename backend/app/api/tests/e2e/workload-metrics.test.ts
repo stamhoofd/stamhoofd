@@ -77,6 +77,9 @@ it('scrapes waiting, running, skipped and failed work without exposing dynamic q
         expect(sample(waiting, 'worker_running', 'in_process')).toBe(1);
         expect(sample(waiting, 'queue_pending', 'in_process')).toBe(1);
         expect(sample(waiting, 'queue_pending', 'throttled_batch')).toBe(2);
+        expect(
+            sample(waiting, 'queue_oldest_pending_milliseconds', 'throttled_batch'),
+        ).toBeGreaterThan(0);
         expect(sample(waiting, 'worker_running', 'throttled_batch')).toBe(1);
         const age = sample(waiting, 'queue_oldest_pending_milliseconds', 'in_process')!;
         expect(age).toBeGreaterThan(0);
@@ -110,6 +113,7 @@ it('scrapes waiting, running, skipped and failed work without exposing dynamic q
         );
         expect(sample(done, 'queue_oldest_pending_milliseconds', 'in_process')).toBe(0);
         expect(sample(done, 'queue_pending', 'throttled_batch')).toBe(0);
+        expect(sample(done, 'queue_oldest_pending_milliseconds', 'throttled_batch')).toBe(0);
         expect(done).not.toMatch(/private|example\.com/);
     } finally {
         release();
