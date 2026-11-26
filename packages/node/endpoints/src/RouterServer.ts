@@ -33,6 +33,8 @@ export class RouterServer {
         endpoint: object,
         method: string,
         handle: () => Promise<T>,
+        request: Request,
+        identity: { endpoint: string; route?: string },
     ) => Promise<T>;
     httpsOptions: HttpsOptions | null;
 
@@ -196,8 +198,12 @@ export class RouterServer {
                         }
 
                         response = this.observeEndpoint
-                            ? await this.observeEndpoint(endpoint, request.method, () =>
-                                  endpoint.handle(decodedRequest),
+                            ? await this.observeEndpoint(
+                                  endpoint,
+                                  request.method,
+                                  () => endpoint.handle(decodedRequest),
+                                  request,
+                                  this.router.matchedIdentity(endpoint),
                               )
                             : await endpoint.handle(decodedRequest);
                     }

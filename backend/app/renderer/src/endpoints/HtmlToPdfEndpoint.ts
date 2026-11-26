@@ -149,7 +149,10 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         const proof = request.request.headers['x-stam-render-trace'];
         const verified = typeof parent === 'string' && /^00-[a-f0-9]{32}-[a-f0-9]{16}-01$/.test(parent)
             && typeof proof === 'string' && proof.length === 44 && verifyInternalSignature(proof, 'renderer-trace-v1', signature, parent);
-        return traceVerifiedRender(verified ? parent : undefined, () => this.renderResponse(html, cacheId, timestamp));
+        const dev = request.request.headers['x-stam-dev-render'];
+        const match = process.env.STAM_DEV_CAPTURE && process.env.STAM_DEV_SESSION && typeof dev === 'string' && dev.length === 100 && /^(00-[a-f0-9]{32}-[a-f0-9]{16}-01)\.([A-Za-z0-9+/=]{44})$/.exec(dev);
+        const localParent = match && verifyInternalSignature(match[2], 'dev-render-trace-v1', process.env.STAM_DEV_SESSION!, signature, match[1]) ? match[1] : undefined;
+        return traceVerifiedRender(verified ? parent : undefined, () => this.renderResponse(html, cacheId, timestamp), localParent, request.request);
     }
 
     private async renderResponse(html: string, cacheId: string, timestamp: Date) {

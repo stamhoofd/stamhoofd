@@ -660,6 +660,9 @@ importers:
       '@bufbuild/protobuf':
         specifier: 2.17.0
         version: 2.17.0
+      '@node/dev-tools':
+        specifier: workspace:*
+        version: link:../../../packages/node/dev-tools
       '@opentelemetry/exporter-trace-otlp-proto':
         specifier: 0.301.2
         version: 0.301.2(@opentelemetry/api@1.10.0)

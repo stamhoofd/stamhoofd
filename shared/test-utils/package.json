@@ -15,6 +15,10 @@
             "import": "./dist/index.js",
             "require": "./dist/index.js"
         },
+        "./otlp-attempts": {
+            "types": "./dist-types/otlp-attempts.d.ts",
+            "import": "./dist/otlp-attempts.js"
+        },
         "./environment": {
             "types": "./dist-types/environment.d.ts",
             "import": "./dist/environment.js",

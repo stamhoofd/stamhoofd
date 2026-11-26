@@ -11,12 +11,18 @@ type Body = undefined;
 type ResponseBody = OrganizationStruct;
 
 export class GetOrganizationEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+    static override readonly traceTemplate = '/organization';
+
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization', {});
+        const params = Endpoint.parseParameters(
+            request.url,
+            GetOrganizationEndpoint.traceTemplate,
+            {},
+        );
 
         if (params) {
             return [true, params as Params];

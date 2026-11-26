@@ -22,6 +22,9 @@ export abstract class Endpoint<
         | undefined,
 > {
     /** Decodes query parameters using the request version and Network medium; omitted means no decoded query. */
+    /** Static matched template, when this handler has one unambiguous route. */
+    static readonly traceTemplate?: string;
+
     protected queryDecoder: Decoder<Query> | undefined;
     /** Decodes JSON or form-urlencoded input; omitted means the body is not read here. */
     protected bodyDecoder: Decoder<RequestBody> | undefined;

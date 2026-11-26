@@ -35,12 +35,18 @@ const filterCompilers = organizationFilterCompilers;
 export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
 
+    static override readonly traceTemplate = '/admin/organizations';
+
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/admin/organizations', {});
+        const params = Endpoint.parseParameters(
+            request.url,
+            GetOrganizationsEndpoint.traceTemplate,
+            {},
+        );
 
         if (params) {
             return [true, params as Params];

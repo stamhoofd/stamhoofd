@@ -27,7 +27,11 @@ export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
         if (state) state.endpoint = endpoint.constructor.name;
     },
     handleResponse(request, response, error) {
-        if (request.method === 'OPTIONS') return;
+        if (
+            request.method === 'OPTIONS' ||
+            (request.localTraceQueued && response.status >= 200 && response.status < 300)
+        )
+            return;
         const state = requests.get(request);
         if (error && response.status >= 500) {
             logger.error(

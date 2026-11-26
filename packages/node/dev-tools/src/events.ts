@@ -1,3 +1,4 @@
+import type { DevSpan } from './spans.js';
 import net from 'node:net';
 import { randomUUID } from 'node:crypto';
 
@@ -80,6 +81,29 @@ export function createDevEmitter(app: DevApp, env: NodeJS.ProcessEnv = process.e
     let sequence = 0;
     let socket: net.Socket | undefined;
     let closed = false;
+    function write(frame: object) {
+        if (closed || !env.STAM_DEV_SOCKET || !env.STAM_DEV_SESSION) return;
+        const line = JSON.stringify(frame) + '\n';
+        if (Buffer.byteLength(line) > maxEventBytes) return;
+        if (!socket) {
+            socket = net.createConnection(env.STAM_DEV_SOCKET);
+            socket.unref();
+            socket.on('error', () => {
+                closed = true;
+                socket?.destroy();
+            });
+            socket.on('close', () => {
+                closed = true;
+            });
+        }
+        if (socket.writableLength + Buffer.byteLength(line) > maxEventBytes * 4) {
+            closed = true;
+            socket.destroy();
+            return;
+        }
+        socket.write(line);
+        return true;
+    }
     return {
         /**
          * Queues an event without waiting for delivery.
@@ -87,26 +111,10 @@ export function createDevEmitter(app: DevApp, env: NodeJS.ProcessEnv = process.e
          * @param fields - Build events must supply cycleId; other events must omit it.
          */
         emit(event: DevEventName, fields: Pick<DevEvent, 'cycleId' | 'errors' | 'failed' | 'startupOwner'> = {}) {
-            if (closed || !env.STAM_DEV_SOCKET || !env.STAM_DEV_SESSION) return;
-            const line = JSON.stringify({ ...fields, ...identity, event, time: process.hrtime.bigint().toString(), sequence: ++sequence }) + '\n';
-            if (Buffer.byteLength(line) > maxEventBytes) return;
-            if (!socket) {
-                socket = net.createConnection(env.STAM_DEV_SOCKET);
-                socket.unref();
-                socket.on('error', () => {
-                    closed = true;
-                    socket?.destroy();
-                });
-                socket.on('close', () => {
-                    closed = true;
-                });
-            }
-            if (socket.writableLength + Buffer.byteLength(line) > maxEventBytes * 4) {
-                closed = true;
-                socket.destroy();
-                return;
-            }
-            socket.write(line);
+            write({ ...fields, ...identity, event, time: process.hrtime.bigint().toString(), sequence: ++sequence });
+        },
+        span(span: DevSpan) {
+            return write({ version: 1, session: env.STAM_DEV_SESSION, span });
         },
         /** Stops further emission and drains the connection, destroying it after 250 ms. */
         async close() {

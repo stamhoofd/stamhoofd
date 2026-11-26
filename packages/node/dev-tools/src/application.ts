@@ -1,4 +1,5 @@
 import { channel } from 'node:diagnostics_channel';
+import { isDevSpan } from './spans.js';
 import { createDevEmitter } from './events.js';
 import type { DevApp } from './events.js';
 
@@ -10,10 +11,19 @@ import type { DevApp } from './events.js';
  * supervisor reports the actual process exit. Shares the supervisor's identity
  * via STAM_DEV_* and never throws from the subscriber. No cwd assumptions.
  */
-const app = process.env.STAM_DEV_APP as DevApp | undefined;
-if (app && process.env.STAM_DEV_SOCKET) {
+export function attachApplication(app: DevApp) {
     const emitter = createDevEmitter(app);
-    channel('stamhoofd.application.lifecycle').subscribe((message) => {
+    const spans = channel('stamhoofd.dev.span.finished');
+    const spanEmitter = createDevEmitter(app); // A span backlog must not disconnect lifecycle reporting.
+    const send = (value: unknown) => {
+        if (isDevSpan(value) && value.service === app && spanEmitter.span(value)) {
+            const queued = Symbol.for('stamhoofd.dev.span.queued');
+            if (queued in value) Reflect.set(value, queued, true);
+        }
+    };
+    if (process.env.STAM_DEV_CAPTURE && process.env.STAM_DEV_SESSION && (app === 'api' || app === 'renderer')) spans.subscribe(send);
+    const lifecycle = channel('stamhoofd.application.lifecycle');
+    const receive = (message: unknown) => {
         if (!message || typeof message !== 'object') return;
         const event = message as { service?: unknown; event?: unknown };
         if (event.service !== app) return;
@@ -21,7 +31,18 @@ if (app && process.env.STAM_DEV_SOCKET) {
         try {
             if (event.event === 'ready') emitter.emit('ready');
             if (event.event === 'failed') emitter.emit('stopped', { failed: true });
-            if (event.event === 'stopped' || event.event === 'failed') void emitter.close().catch(() => {});
+            if (event.event === 'stopped' || event.event === 'failed') {
+                void close().catch(() => {});
+            }
         } catch { /* Status reporting must not affect application execution. */ }
-    });
+    };
+    lifecycle.subscribe(receive);
+    function close() {
+        spans.unsubscribe(send);
+        lifecycle.unsubscribe(receive);
+        return Promise.all([emitter.close(), spanEmitter.close()]);
+    }
+    return close;
 }
+const app = process.env.STAM_DEV_APP as DevApp | undefined;
+if (app && process.env.STAM_DEV_SOCKET) attachApplication(app);

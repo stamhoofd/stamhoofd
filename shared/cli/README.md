@@ -211,6 +211,21 @@ the CLI's `dist` so shared CLI rebuilds cannot remove it before the apps start.
 
 #### Development logs and status
 
+`stam dev` provisions `STAM_DEV_CAPTURE=*` for backend sessions: every instrumented
+request is eligible locally, independently of production sampling. To narrow capture
+to the first matching registered API handler, use `STAM_DEV_CAPTURE='PATCH /invoices' stam dev`. No caller-supplied header selects the request. The local
+tracer uses its own provider and IDs; its renderer continuation is signed for the
+same dev session. The existing lifecycle socket alone does not enable capture.
+
+In the CLI process, call `subscribeDevSpans(channel.env.STAM_DEV_SESSION)` from
+`@node/dev-tools/spans` before starting producers. `snapshot()` returns up to eight
+traces with up to 128 finished spans each. Join on `traceId` and `parentId`; arrival
+order is not causal. The oldest trace is evicted first. The subscriber buffers no
+pending notifications. Call `close()` to unsubscribe and clear memory; closing the
+session does this automatically. The capture uses a separate bounded writer on the
+private socket. A disconnected or slow subscriber cannot prevent application work.
+No OTLP destination, terminal renderer or external collector is involved.
+
 Development lifecycle transport and typed producer adapters live in
 `packages/node/dev-tools`. The CLI bootstrap prepares this independent package;
 the docs target prepares its observability dependencies too. Its output survives CLI rebuilds.
