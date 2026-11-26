@@ -102,7 +102,7 @@
         "handlebars": "4.7.10",
         "jose": "5.10.0",
         "jsonwebtoken": "9.0.3",
-        "libphonenumber-js": "1.13.16",
+        "libphonenumber-js": "1.13.17",
         "luxon": "3.7.2",
         "mailparser": "3.14.5",
         "mockdate": "3.0.5",

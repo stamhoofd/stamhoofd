@@ -48,7 +48,7 @@
         "jose": "5.10.0",
         "jsvat-next": "3.0.4",
         "jszip": "3.10.2",
-        "libphonenumber-js": "1.13.16",
+        "libphonenumber-js": "1.13.17",
         "lru-cache": "11.5.3",
         "luxon": "3.7.2",
         "otplib": "12.0.1",
