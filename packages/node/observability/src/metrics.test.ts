@@ -30,6 +30,17 @@ it('exposes only approved aggregate samples and removes the listener on shutdown
             timings.publish({ duration: 5, operation: 'select', outcome: 'error', sql: 'private' });
             timings.publish({ duration: 50, operation: 'private', outcome: 'error' });
             const text = await (await fetch(url)).text();
+            for (const name of [
+                'stamhoofd_process_cpu_seconds_total',
+                'stamhoofd_process_resident_memory_bytes',
+                'stamhoofd_nodejs_heap_used_bytes',
+                'stamhoofd_nodejs_heap_total_bytes',
+                'stamhoofd_nodejs_heap_limit_bytes',
+                'stamhoofd_nodejs_external_memory_bytes',
+            ]) {
+                const line = text.split('\n').find((sample) => sample.startsWith(`${name}{`));
+                expect(Number(line?.split(' ').at(-1)), name).toBeGreaterThan(0);
+            }
             const sums = text.split('\n').filter((line) => line.includes('_sum{'));
             expect(sums).toHaveLength(2);
             expect(sums).toEqual(
