@@ -1,8 +1,16 @@
 import { isDevCollection, isDevCollections } from './db-collections.js';
-import { ROOT_CONTEXT, SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
+import {
+    isSpanContextValid,
+    ROOT_CONTEXT,
+    SpanKind,
+    SpanStatusCode,
+    trace,
+    TraceFlags,
+} from '@opentelemetry/api';
 import type { Span, SpanContext, Tracer } from '@opentelemetry/api';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { channel } from 'node:diagnostics_channel';
+import { requestSpanIds } from './request-span-state.js';
 import { boundedMethod } from './http-metrics.js';
 import { captureEndpoints, statisticsCycle } from './dev-capture-selectors.js';
 
@@ -76,7 +84,7 @@ const routes: Record<string, Record<string, string>> = {
 };
 
 // Each lane has its own context, admission decision, tracer and child budget.
-function lane(role: string, tracer: Tracer, selection?: string) {
+function lane(role: string, tracer: Tracer, selection?: string, correlateResponses = false) {
     let activeLocalRenders = 0;
     const current = new AsyncLocalStorage<{ span: Span; budget: { children: number } }>();
     const roots = { tokens: 2, lastRefill: 0 };
@@ -93,6 +101,17 @@ function lane(role: string, tracer: Tracer, selection?: string) {
         if (meta.collections) span.setAttribute('stamhoofd.db.collections', meta.collections);
         owned.set(span, meta);
         return span;
+    }
+
+    function associate(request: object | undefined, span: Span) {
+        if (!correlateResponses || !request || !span.isRecording()) return;
+        const ctx = span.spanContext();
+        if (!ctx.isRemote && ctx.traceFlags & TraceFlags.SAMPLED && isSpanContextValid(ctx)) {
+            requestSpanIds.set(
+                request,
+                Object.freeze({ trace_id: ctx.traceId, span_id: ctx.spanId }),
+            );
+        }
     }
 
     function sample(bucket = roots) {
@@ -296,6 +315,7 @@ function lane(role: string, tracer: Tracer, selection?: string) {
                     : undefined,
             localRequest: selection ? request : undefined,
         });
+        associate(request, span);
         span.setAttribute('http.request.method', boundedMethod(method));
         return run(span, async () => {
             const response = await handle();
@@ -377,6 +397,7 @@ function lane(role: string, tracer: Tracer, selection?: string) {
             localRequest: selection ? request : undefined,
             parent: { traceId: match[1], spanId: match[2], traceFlags: 1, isRemote: true },
         });
+        associate(request, span);
         span.setAttribute('http.request.method', 'POST');
         if (!selection) return run(span, work);
         activeLocalRenders++;
@@ -402,9 +423,14 @@ function lane(role: string, tracer: Tracer, selection?: string) {
 let production: ReturnType<typeof lane> | undefined;
 let local: ReturnType<typeof lane> | undefined;
 
-export function enableBackendTraces(service: string) {
+export function enableBackendTraces(service: string, correlateResponses = false) {
     if (!roles.includes(service)) return;
-    production = lane(service, trace.getTracer('@node/observability/backend'));
+    production = lane(
+        service,
+        trace.getTracer('@node/observability/backend'),
+        undefined,
+        correlateResponses,
+    );
     return () => {
         production?.close();
         production = undefined;
@@ -429,7 +455,7 @@ export function traceEndpoint<T extends { status: number }>(
     const work = local
         ? () => local!.traceEndpoint(endpoint, method, handle, request, identity)
         : handle;
-    return production ? production.traceEndpoint(endpoint, method, work) : work();
+    return production ? production.traceEndpoint(endpoint, method, work, request) : work();
 }
 export function traceStatisticsCycle<T>(work: () => Promise<T>) {
     const handle = local ? () => local!.traceStatisticsCycle(work) : work;
@@ -464,7 +490,7 @@ export function traceVerifiedRender<T>(
     request?: LocalRequest,
 ) {
     const work = local ? () => local!.traceVerifiedRender(localParent, handle, request) : handle;
-    return production ? production.traceVerifiedRender(parent, work) : work();
+    return production ? production.traceVerifiedRender(parent, work, request) : work();
 }
 
 /** Fixed application-owned boundaries only. No dynamic operation names or exception text. */

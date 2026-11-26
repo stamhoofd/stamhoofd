@@ -26,8 +26,12 @@ determines level. HTTP status is 100–599; elapsed milliseconds is a finite
 integer bounded to 0–86,400,000. There are no free-text fields. Unknown events
 are dropped; serializer or sink failures never fall back to forwarding the input.
 Deployment labels belong to the collector's trusted inventory, not to request
-headers or arbitrary environment strings. Trace IDs and route names are not part
-of this contract.
+headers or arbitrary environment strings. A dedicated `http.response` 5xx record
+may include `trace_id` (32 lowercase hex digits) and `span_id` (16) together.
+They identify the same sampled, application-owned provider server span, including
+a failure logged after its handler unwinds. Unmatched, unsampled and local-only
+requests have neither field. Mixed process streams do not get these IDs. Route
+names, request IDs, inbound trace headers and ambient context are never copied.
 
 Local diagnostics are broader: legacy application messages, native crashes,
 browser/backup subprocess output, loader failures before initialization,

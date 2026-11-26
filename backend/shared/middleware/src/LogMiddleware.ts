@@ -46,6 +46,7 @@ export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
             request.method,
             response.status,
             state && performance.now() - state.start,
+            request,
         );
     },
 };
