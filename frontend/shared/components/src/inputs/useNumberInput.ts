@@ -1,8 +1,10 @@
 import { Formatter } from '@stamhoofd/utility';
-import type { ComputedRef } from 'vue';
-import { computed } from 'vue';
+import type { ComputedRef, Ref, ShallowRef } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 type UseNumberInputOptions = { required: boolean; min: number | null; max: number | null; suffix?: string | null; suffixSingular?: string | null; fractionDigits: number; roundFractionDigits: number | null };
+
+type UseNumberInputTextOptions = UseNumberInputOptions & { autoFix: boolean };
 
 export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
     const multipier = computed(() => Math.pow(10, options.value.fractionDigits));
@@ -273,5 +275,93 @@ export function useNumberInput(options: ComputedRef<UseNumberInputOptions>) {
         stringToNumber,
         step,
         multipier,
+    };
+}
+
+/**
+ * Binds the text of an input element to a number model: the two cannot be the same value because
+ * the string that is being typed is not always a number the model can hold.
+ */
+export function useNumberInputText(options: ComputedRef<UseNumberInputTextOptions>, model: Ref<number | null>, inputElement: Readonly<ShallowRef<HTMLInputElement | null>>) {
+    const numberInput = useNumberInput(options);
+    const text = ref<string>(numberInput.numberToString(model.value, { valueIfNaN: '' }));
+    const isValid = computed(() => options.value.autoFix ? numberInput.validateText(text.value, { valueIfNaN: null }).isValid : true);
+
+    if (options.value.autoFix) {
+        // An out of range or missing value is corrected right away, so the text never shows a value the model does not have
+        updateModelValue();
+    }
+
+    // The multiplier changes what the same text means, so the model has to be derived from it again
+    watch(numberInput.multipier, () => {
+        updateModelValue();
+    });
+
+    watch(model, (value) => {
+        // do not update text while focused
+        if (isInputFocused()) {
+            return;
+        }
+        const valueAsString = numberInput.numberToString(value, { valueIfNaN: text.value });
+        if (valueAsString !== text.value) {
+            text.value = valueAsString;
+        }
+    });
+
+    function setModelValue(value: number | null, { final }: { final: boolean } = { final: true }) {
+        if (value !== model.value) {
+            model.value = value;
+        }
+        if (final) {
+            updateText(value);
+        }
+    }
+
+    function updateText(value: number | null) {
+        text.value = numberInput.numberToString(value, { valueIfNaN:
+            options.value.autoFix ? '' : text.value,
+        });
+    }
+
+    function stepModelValue(add: number) {
+        setModelValue(numberInput.step(model.value, add));
+    }
+
+    function updateModelValue({ final }: { final: boolean } = { final: true }) {
+        let number = numberInput.stringToNumber(text.value, { valueIfNaN: options.value.autoFix ? null : NaN });
+
+        if (final) {
+            if (options.value.autoFix) {
+                number = numberInput.constrain(number);
+            } else if (options.value.required && number === null) {
+                // If required the model value should never be null because a patch will not be able to set null as a value on the structure.
+                number = options.value.min ?? 0;
+            }
+
+            setModelValue(number);
+            return;
+        }
+
+        const { isValid } = numberInput.validateNumber(number);
+        if (isValid) {
+            setModelValue(number, { final });
+        }
+    }
+
+    function isInputFocused(): boolean {
+        if (!inputElement.value) {
+            return false;
+        }
+        const inputEl = inputElement.value;
+        const activeElement = (('getRootNode' in inputEl ? (inputEl.getRootNode() ?? document) : document) as any).activeElement as HTMLElement;
+        return activeElement === inputEl;
+    }
+
+    return {
+        ...numberInput,
+        text,
+        isValid,
+        stepModelValue,
+        updateModelValue,
     };
 }
