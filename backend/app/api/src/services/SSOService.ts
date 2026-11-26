@@ -679,6 +679,20 @@ export class SSOServiceWithSession {
 
             this.service.validateEmail(claims.email);
 
+            // Some providers send the boolean claim as a string.
+            const emailVerified = claims.email_verified as boolean | string | undefined;
+
+            if (emailVerified === false || emailVerified === 'false') {
+                throw new SimpleError({
+                    code: 'invalid_user',
+                    message: 'Email address not verified by the identity provider',
+                    human: $t(
+                        'Je e-mailadres is niet bevestigd bij je loginprovider. Bevestig het daar en probeer daarna opnieuw.',
+                    ),
+                    statusCode: 403,
+                });
+            }
+
             if (this.session.userId) {
                 if (!claims.auth_time || claims.auth_time * 1000 < Date.now() - 1000 * 60 * 5) {
                     if (
