@@ -88,7 +88,7 @@
         "postcss-discard-duplicates": "8.0.4",
         "sass": "1.108.2",
         "terser": "5.51.2",
-        "turbo": "2.11.12",
+        "turbo": "2.11.13",
         "typescript": "6.0.3",
         "vite": "8.3.8",
         "vitest": "4.1.12",
