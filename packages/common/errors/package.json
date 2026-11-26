@@ -22,6 +22,7 @@
         "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
+        "@sentry/core": "10.78.0",
         "tslib": "2.9.1",
         "uuid": "14.0.3"
     },

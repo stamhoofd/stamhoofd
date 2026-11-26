@@ -46,7 +46,10 @@ describe.skipIf(!process.env.STAM_BACKEND_EXCEPTION_SMOKE)('compiled exception b
             );
             expect(result.status, result.local).toBe(1);
             expect(result.local + result.envelope).not.toContain('canary');
-            expect(JSON.parse(result.envelope!)).toEqual({ boundary: 'backend.startup', type: 'SyntaxError' });
+            expect(JSON.parse(result.envelope!)).toEqual({
+                boundary: 'backend.startup',
+                type: 'SyntaxError',
+            });
 
             const rejection = run(
                 path.resolve(
@@ -62,7 +65,10 @@ describe.skipIf(!process.env.STAM_BACKEND_EXCEPTION_SMOKE)('compiled exception b
             expect(rejection.status, rejection.local).toBe(1);
             expect(rejection.local + rejection.envelope).not.toContain('canary');
             expect(rejection.local).toContain('application.unhandled');
-            expect(JSON.parse(rejection.envelope!)).toEqual({ boundary: 'backend.rejection', type: 'RangeError' });
+            expect(JSON.parse(rejection.envelope!)).toEqual({
+                boundary: 'backend.rejection',
+                type: 'RangeError',
+            });
         },
     );
     it('preserves typed HTTP failures and projects only the unexpected exception before conversion', () => {
@@ -73,6 +79,9 @@ describe.skipIf(!process.env.STAM_BACKEND_EXCEPTION_SMOKE)('compiled exception b
         const on = run(entry);
         expect(on.status, on.local).toBe(0);
         expect(on.envelope).not.toContain('canary');
-        expect(JSON.parse(on.envelope!)).toEqual({ boundary: 'backend.request', type: 'TypeError' });
+        expect(JSON.parse(on.envelope!)).toEqual({
+            boundary: 'backend.request',
+            type: 'TypeError',
+        });
     });
 });

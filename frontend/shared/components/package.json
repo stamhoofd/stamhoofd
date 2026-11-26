@@ -20,6 +20,7 @@
         "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
+        "@sentry/vue": "10.78.0",
         "@stamhoofd/frontend-notifications": "workspace:*",
         "@stamhoofd/frontend-application": "workspace:*",
         "@stamhoofd/frontend-session": "workspace:*",

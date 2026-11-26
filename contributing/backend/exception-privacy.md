@@ -1,33 +1,33 @@
-# Exception privacy gate
+# Exception delivery and staging validation
 
-Exception transport is **off by default**. `@common/errors` exposes an explicit,
-process- or page-local exception sink. No app installs a sink, and an OTLP
-endpoint, DSN or log forwarding setting cannot enable exception export.
+Exception reporting is off by default, independent of OTLP and log forwarding. When enabled, the application posts one projected Sentry event per `Error` object to the configured [Better Stack Errors ingest DSN](https://betterstack.com/docs/errors/collecting-errors/sentry-sdk/). The Vue SDK captures Vue and global browser errors; a standalone Node SDK client uses the existing request and fatal handlers without installing process handlers or an OpenTelemetry provider. The SDKs parse stacks, serialize envelopes and deliver events. There is no retry queue, persistent storage, RUM, replay, tracing, session tracking or client reporting.
 
-The sink receives a boundary, a bounded JavaScript error type and the original
-`Error` for local stack parsing. Expected `SimpleError` and `SimpleErrors`,
-non-errors, and unsupported boundaries are dropped. The original exception and
-its context must never be serialized directly for upload.
-Transport failure is dropped without a raw fallback or retry spool. Fatal
-handlers still exit immediately; asynchronous delivery on exit is not guaranteed.
+**Configuration owner.** Set `STAM_ERRORS_ENABLED=1` only with `STAM_ERRORS_DSN` (public application ingest DSN), `STAM_ERRORS_ENVIRONMENT`, `STAM_ERRORS_BRAND` and `STAM_ERRORS_RELEASE` from the deployment. Supply these from deployment inventory, never tenant settings, requests or device metadata. The application entry supplies its service. For backend processes these are runtime variables; for ordinary web browsers they are production **build** inputs. To disable already shipped frontend code, replace it with a disabled build or revoke the destination; changing a server variable alone does not disable installed bundles.
 
-| Boundary               | Local evidence                                                                                                                                                                           | Limit                                                                                                                                                                 |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Backend                | Compiled API, renderer, backup, redirecter and statistics-syncer startup failures; HTTP exception before response conversion; existing fatal rejection handlers use the same projection. | No interception of OS crashes, migrations or arbitrary caught exceptions.                                                                                             |
-| Browser                | The installed Vue error handler projects a mounted-component failure; the test inspects the complete message received by a local transport.                                              | Window-level errors, unrelated console output and third-party scripts are not captured.                                                                               |
-| Capacitor WebView      | The same Vue boundary tested with the iOS and Android wrapper's platform selections.                                                                                                     | Browser harness, not an on-device test.                                                                                                                               |
-| Native iOS and Android | No native crash SDK or upload path configured in the app's own `AppDelegate` or `MainActivity`.                                                                                          | Native crashes are **not** validated by a WebView test. Keep native export disabled pending device tests of the actual final payload, queued reports and attachments. |
+**Projection.** Typed `SimpleError(s)` are excluded. No raw messages, causes, function names, URLs, request/response data, props, user objects, breadcrumbs or attachments enter the envelope. The custom fingerprint includes environment, brand, release, service, boundary, bounded JS error type and the innermost approved coordinate when available. Unmapped failures at named framework boundaries fall back to boundary/type within the same deployment. Window error/rejection handlers require an owned frame. The Vue development rethrow cannot send a second event for the same object. Network failures are dropped; fatal handlers wait at most 1.2 seconds for submission and still exit 1.
 
-For local checks use `stam test errors`, `stam test components vueExceptionHandler`,
-and, after building the five backend apps, `STAM_BACKEND_EXCEPTION_SMOKE=1 stam test api exception-privacy`.
-No credentials or remote destination are needed.
+Browser delivery additionally requires `STAM_ERRORS_BROWSER_ORIGIN`: one explicitly reviewed, public first-party origin for this build. Do not configure tenant or custom domains. Embedded frames, mismatches and opaque origins are disabled. This matters even with `credentials: omit` and `no-referrer`: the browser supplies `Origin` on a cross-origin POST.
 
-Before DEV-32 enables any transport, verify effective retention for the intended
-Better Stack **Errors application**, including defaults, overrides, archives and
-deletion, against the provisional **30-day** target. This is unverified.
-Test the chosen SDK/transport's final request, including transport headers,
-implicit enrichment (IP, device, environment), additional envelope items and
-failure paths. Verify that only the projected event is transmitted. Validate deployment-controlled brand, environment and release,
-private source maps and allowlisted build-artifact coordinates before claiming
-symbolication. Verify native and WebView separately, and confirm no other
-telemetry is enabled.
+| Runtime            | Captured boundary                                                                                                      | Coordinate source and limits                                                                                                                                                                                                                                                                                            |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Five Node services | Startup and registered rejection handlers; API `RouterServer.processError` before conversion                           | Executable’s compiled `dist` files and adjacent TypeScript maps. With `--enable-source-maps`, the rewritten TS path, line **and column** must match a mapped original position. Missing maps and dependency paths are omitted. Pre-loader errors, OS crashes and arbitrary caught exceptions are outside this boundary. |
+| Browser            | Web-app, webshop and calculator install `VueGlobalHelper.setup`; Vue failures and subsequent owned-frame global errors | Exact emitted module URL matches an in-bundle index. At most eight frames carry synthetic `app:///…js` filenames, debug IDs and bounded generated positions. No raw URL leaves the projection.                                                                                                                          |
+
+Mobile is outside this release scope.
+
+### Private release artifacts
+
+`devops/src/helpers/build.ts` invokes the application production build. To enable source locations for a web build, `STAM_ERRORS_MAP_DIR` must be an existing absolute owner-only directory outside the repository and output tree. Rolldown generates matching debug IDs for each chunk and map. Vite puts private JS/map pairs in a new release subdirectory there, removes maps from distributable output and checks copied assets. Keep this private directory out of deployment, CI logs, shared caches and public assets. Backend TypeScript maps are local server assets, not web assets.
+
+Only a separately authorized release job should set `STAM_ERRORS_UPLOAD=1`. The build then requires `sentry-cli` on PATH and `SENTRY_URL`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` from the intended Errors application's **Advanced settings**, not a browser env file. It invokes `sentry-cli sourcemaps upload --release … --validate --wait` on that build’s private directory. See [private uploads and limits](https://betterstack.com/docs/errors/collecting-errors/upload-source-maps/). Never substitute an API token for a public ingest DSN. The CLI upload and provider-side processing have not been exercised here.
+
+### Staging runbook (requires separate authorization)
+
+1. **Retention is a blocker.** Record the intended Errors application, region, effective retention and deletion for primary events, archives and any downstream copies. Require evidence of the **30-day** target; source/log retention is not evidence for Errors. Review who can read private release artifacts and when they are removed.
+2. Build from a recorded revision for each service/brand. Record hashes of the web output. Inspect the final served assets for `.map` files and inline or external `sourceMappingURL` directives. Confirm private map/source content and management credentials are absent. Upload maps privately for that **exact** bundle; record the processed status, release and debug IDs before generating events.
+3. With synthetic data only, first leave reporting disabled with other telemetry running. Induce a typed error and a defect; confirm no Errors traffic, local spool or delayed report after restart. Then enable only for the approved staging slice. Inspect the complete outbound request and stored event: exactly one event item; no raw canaries in headers, frames, SDK enrichment or stored fields. Check CORS/CSP, automatic Origin, IP, user agent and device enrichment. Do not broaden CSP or accept provider enrichment without review.
+4. Exercise one unexpected HTTP failure, typed HTTP errors and a fatal startup/rejection in each backend service. Record response or exit status, delivery count and source position. In each frontend trigger two `TypeError`s at different owned sites and repeat one: expect two groups, the repeat in its original group, correct release/service/brand/environment and original lines. Vary release, brand and environment independently. Verify Vue plus a global rethrow yields one event; check offline/timeout behavior and absence of unrelated telemetry.
+
+For offline regression checks, use `stam test errors`, `stam test components vueExceptionHandler`, `stam test vite-config exceptionArtifacts` and, after building the five backend apps, `STAM_BACKEND_EXCEPTION_SMOKE=1 stam test api exception-privacy exception-delivery`. No live destination or upload is required.
+
+`stam test vite-config exceptionOrigin` inspects an actual Chromium POST at a loopback HTTPS receiver.

@@ -21,29 +21,36 @@ export function setExceptionEnvelopeSink(destination: Sink | undefined) {
 }
 
 /** Report unexpected exceptions only at registered application boundaries. */
-export function captureExceptionEnvelope(boundary: ExceptionBoundary, error: unknown) {
+export function deliverExceptionEnvelope(boundary: ExceptionBoundary, error: unknown) {
     if (!sink) return;
     try {
-        if (
-            !boundaries.includes(boundary) ||
-            !(error instanceof Error) ||
-            error instanceof SimpleErrors ||
-            isSimpleError(error) ||
-            isSimpleErrors(error)
-        )
-            return;
-        const type =
-            error instanceof TypeError
-                ? 'TypeError'
-                : error instanceof RangeError
-                  ? 'RangeError'
-                  : error instanceof ReferenceError
-                    ? 'ReferenceError'
-                    : error instanceof SyntaxError
-                      ? 'SyntaxError'
-                      : 'Error';
+        const type = unexpectedExceptionType(error);
+        if (!type || !boundaries.includes(boundary) || !(error instanceof Error)) return;
         return Promise.resolve(sink({ boundary, type }, error)).catch(() => {});
     } catch {
         // A malformed exception or failed transport must not replace the application error.
     }
+}
+
+export function unexpectedExceptionType(error: unknown) {
+    if (
+        !(error instanceof Error) ||
+        error instanceof SimpleErrors ||
+        isSimpleError(error) ||
+        isSimpleErrors(error)
+    )
+        return;
+    return error instanceof TypeError
+        ? 'TypeError'
+        : error instanceof RangeError
+          ? 'RangeError'
+          : error instanceof ReferenceError
+            ? 'ReferenceError'
+            : error instanceof SyntaxError
+              ? 'SyntaxError'
+              : 'Error';
+}
+
+export function captureExceptionEnvelope(boundary: ExceptionBoundary, error: unknown) {
+    void deliverExceptionEnvelope(boundary, error);
 }

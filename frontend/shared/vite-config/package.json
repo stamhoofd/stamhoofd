@@ -6,11 +6,15 @@
     "scripts": {
         "test": "vitest run"
     },
+    "devDependencies": {
+        "playwright": "1.64.1"
+    },
     "exports": {
         ".": "./vite.config.shared.ts",
         "./svgNamespacePlugin": "./svgNamespacePlugin.ts"
     },
     "dependencies": {
+        "@common/errors": "workspace:*",
         "@node/dev-tools": "workspace:*",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/cli": "workspace:*",

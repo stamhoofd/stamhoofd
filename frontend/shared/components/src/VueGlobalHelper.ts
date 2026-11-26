@@ -31,7 +31,7 @@ import { AutofocusDirective } from './directives/AutofocusDirective';
 import { ColorDirective } from './directives/ColorDirective';
 import { FormatInputDirective } from './directives/FormatInputDirective';
 import STErrorsDefault from './errors/STErrorsDefault.vue';
-import { vueExceptionHandler } from './errors/vueExceptionHandler';
+import { installBrowserExceptions, vueExceptionHandler } from './errors/vueExceptionHandler';
 import STInputBox from './inputs/STInputBox.vue';
 import TInput from './inputs/TInput.vue';
 import TTextarea from './inputs/TTextarea.vue';
@@ -136,6 +136,7 @@ export class VueGlobalHelper {
         };
 
         app.config.errorHandler = vueExceptionHandler;
+        installBrowserExceptions(app);
 
         app.config.warnHandler = function (msg, instance, trace) {
             // Shorter error message because the trace is complete garbage

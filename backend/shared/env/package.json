@@ -15,7 +15,9 @@
         "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
+        "@sentry/node": "10.78.0",
         "@common/errors": "workspace:*",
+        "@jridgewell/trace-mapping": "0.3.31",
         "@node/logging": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/types": "workspace:*",

@@ -2,7 +2,7 @@ import { setExceptionEnvelopeSink } from '@common/errors';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { afterEach, expect, it } from 'vitest';
 import { createApp, defineComponent } from 'vue';
-import { vueExceptionHandler } from './vueExceptionHandler';
+import { VueGlobalHelper } from '../VueGlobalHelper';
 
 afterEach(() => setExceptionEnvelopeSink(undefined));
 
@@ -23,11 +23,13 @@ it.each(['web', 'ios', 'android'] as const)('projects the Vue exception on %s wi
             mounted() { throw defect; },
             render() { return null; },
         }), { recipient: 'canary-recipient' });
+        VueGlobalHelper.setup(app);
+        const installed = app.config.errorHandler!;
         app.config.errorHandler = (...args) => {
             // Vue must finish its mounted-hook queue after the development debugger rethrow.
             expect(Reflect.get(args[1]!.$props, 'recipient')).toBe('canary-recipient');
             expect(Reflect.get(args[1]!.$data, 'payment')).toBe('canary-payment');
-            expect(() => Reflect.apply(vueExceptionHandler, undefined, args)).toThrow(defect);
+            expect(() => installed(...args)).toThrow(defect);
         };
         app.mount(document.createElement('div'));
         app.unmount();
