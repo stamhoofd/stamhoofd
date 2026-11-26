@@ -8,7 +8,7 @@ import {
     InMemorySpanExporter,
     SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace';
-import { fromBinary } from '@bufbuild/protobuf';
+import { fromBinary, toJson } from '@bufbuild/protobuf';
 import { ExportTraceServiceRequestSchema } from '@buf/opentelemetry_opentelemetry.bufbuild_es/opentelemetry/proto/collector/trace/v1/trace_service_pb.js';
 import { PatchableArray } from '@common/encoding';
 import { Request, Router, RouterServer } from '@node/endpoints';
@@ -71,6 +71,8 @@ export async function runWaterfall(
         expect(attempts.count()).toBeGreaterThan(before);
     }
     const baseline = attempts?.count();
+    const exportMode = mode === 'production' && process.env.STAM_BACKEND_TRACE_EXPORT_SMOKE === '1';
+    if (exportMode) vi.stubEnv('OTEL_EXPORTER_OTLP_TRACES_ENDPOINT', url);
     const capture =
         mode !== 'production'
             ? await openDevEventChannel(
@@ -94,7 +96,9 @@ export async function runWaterfall(
                 PATH: process.env.PATH,
                 ...(capture
                     ? { ...capture.env, STAM_DEV_APP: 'renderer', TEST_MODE: mode, PROBE_URL: url }
-                    : { TEST_COLLECTOR: url }),
+                    : exportMode
+                      ? { OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: url }
+                      : { TEST_COLLECTOR: url }),
             },
             execArgv: capture
                 ? ['--import', import.meta.resolve('@node/dev-tools/application')]
@@ -148,7 +152,7 @@ export async function runWaterfall(
     const wire: { parent: string; proof: boolean; localParent?: string }[] = [];
     const remote = new InMemorySpanExporter();
     const runtime =
-        mode === 'ordinary' || mode === 'upload-failure'
+        exportMode || mode === 'ordinary' || mode === 'upload-failure'
             ? initializeTelemetry('api')
             : initializeTelemetry('api', {
                   ownsMetrics: false,
@@ -479,7 +483,11 @@ export async function runWaterfall(
         vi.stubGlobal('setTimeout', timer);
         STAMHOOFD.domains.rendererApi = `127.0.0.1:${port}`;
         advance(5);
-        put.mockRejectedValueOnce(Error('canary-provider'));
+        put.mockRejectedValueOnce(
+            Object.assign(Error('canary-provider'), {
+                $metadata: { httpStatusCode: 503, attempts: 3, requestId: 'canary-storage' },
+            }),
+        );
         expect(await regenerate(invoices[3])).toBeGreaterThanOrEqual(400);
         causes.set(wire.at(-1)!.parent.split('-')[1], 'upload');
         advance(6);
@@ -507,6 +515,35 @@ export async function runWaterfall(
                 ),
             ),
         );
+        if (exportMode)
+            for (const body of bytes) {
+                const message = fromBinary(ExportTraceServiceRequestSchema, body);
+                for (const resource of message.resourceSpans) {
+                    const service = resource.resource?.attributes[0]?.value?.value.value;
+                    expect(['api', 'renderer']).toContain(service);
+                    // Compare the complete metadata envelope without the separately checked span bodies.
+                    for (const scope of resource.scopeSpans) scope.spans = [];
+                    expect(
+                        toJson(ExportTraceServiceRequestSchema, {
+                            ...message,
+                            resourceSpans: [resource],
+                        }),
+                    ).toEqual({
+                        resourceSpans: [
+                            {
+                                resource: {
+                                    attributes: [
+                                        { key: 'service.name', value: { stringValue: service } },
+                                    ],
+                                },
+                                scopeSpans: resource.scopeSpans.map(() => ({
+                                    scope: { name: '@node/observability' },
+                                })),
+                            },
+                        ],
+                    });
+                }
+            }
         const roots = spans.filter(({ span }) => span.parentSpanId.length === 0);
         expect(roots).toHaveLength(8);
         const hex = (id: Uint8Array) => Buffer.from(id).toString('hex');
@@ -532,6 +569,83 @@ export async function runWaterfall(
             expect(clients).toHaveLength(1);
             expect(hex(clients[0].span.parentSpanId)).toBe(hex(root.spanId));
             const cause = causes.get(hex(root.traceId));
+            if (exportMode) {
+                const id = hex(root.traceId);
+                const redirect = redirectParent?.split('-')[1] === id;
+                const interrupted = interruptedParent?.split('-')[1] === id;
+                const renderFailed =
+                    !cause && !redirect && !interrupted && Number(root.status?.code) === 2;
+                const db = new Set();
+                for (const { service: owner, span } of group) {
+                    const attrs = span.attributes.map((a) => [a.key, a.value?.value.value]);
+                    expect(new Set(attrs.map((a) => a[0])).size).toBe(attrs.length);
+                    if (span !== root)
+                        expect(
+                            group.some((s) => hex(s.span.spanId) === hex(span.parentSpanId)),
+                        ).toBe(true);
+                    const expected: Record<string, unknown> = {};
+                    switch (span.name) {
+                        case 'http.server.request':
+                            expect(span.kind).toBe(2);
+                            expect(owner).toBe(span === root ? 'api' : 'renderer');
+                            expected['http.route'] = span === root ? '/invoices' : '/html-to-pdf';
+                            expected['http.request.method'] = span === root ? 'PATCH' : 'POST';
+                            if (span === root && !root.status?.code)
+                                expected['http.response.status_code'] = 200n;
+                            break;
+                        case 'mysql.acquire':
+                        case 'mysql.execute':
+                            expect(span.kind).toBe(3);
+                            expected['db.operation.name'] =
+                                span.name === 'mysql.acquire'
+                                    ? 'acquire'
+                                    : expect.stringMatching(
+                                          /^(select|insert|update|delete|statement)$/,
+                                      );
+                            db.add(Object.fromEntries(attrs)['db.operation.name']);
+                            break;
+                        case 'http.client.renderer':
+                            expect(span.kind).toBe(3);
+                            if (redirect || interrupted) expected['error.type'] = 'transport';
+                            else if (cause === 'timeout' || cause === 'http_status' || renderFailed)
+                                expected['error.type'] = renderFailed ? 'http_status' : cause;
+                            if (!redirect && cause !== 'timeout')
+                                expected['http.response.status_code'] =
+                                    cause === 'http_status' ? 500n : renderFailed ? 400n : 200n;
+                            break;
+                        case 'pdf.render':
+                            expected['retry.count'] = expect.any(BigInt);
+                            if (renderFailed) expected['error.type'] = 'render';
+                            break;
+                        case 'invoice.persist':
+                            if (cause === 'persistence') expected['error.type'] = 'persistence';
+                            break;
+                        case 'invoice.upload':
+                            if (cause === 'upload') expected['error.type'] = 'upload';
+                            break;
+                        case 'storage.put':
+                            if (cause === 'upload')
+                                Object.assign(expected, {
+                                    'error.type': 'http_status',
+                                    'retry.count': 2n,
+                                    'http.response.status_code': 503n,
+                                });
+                            break;
+                        case 'auth.authenticate':
+                        case 'organization.resolve_scope':
+                            expect(span.kind).toBe(1);
+                            break;
+                        case 'queue.wait':
+                        case 'queue.execute':
+                            break;
+                        default:
+                            throw Error('Unexpected exported operation');
+                    }
+                    expect(Object.fromEntries(attrs)).toEqual(expected);
+                }
+                expect(db.has('acquire') && db.has('select')).toBe(true);
+                if (!root.status?.code) expect(db.has('update')).toBe(true);
+            }
             const errorType = (name: string) =>
                 group
                     .find((s) => s.span.name === name)
@@ -550,7 +664,9 @@ export async function runWaterfall(
                 expect(errorType(cause === 'upload' ? 'invoice.upload' : 'invoice.persist')).toBe(
                     cause,
                 );
-                expect(errorType('storage.put')).toBe(cause === 'upload' ? 'provider' : undefined);
+                expect(errorType('storage.put')).toBe(
+                    cause === 'upload' ? 'http_status' : undefined,
+                );
                 const upload = group.find((s) => s.span.name === 'invoice.upload')!.span;
                 const storage = group.find((s) => s.span.name === 'storage.put')!.span;
                 expect(hex(upload.parentSpanId)).toBe(hex(root.spanId));

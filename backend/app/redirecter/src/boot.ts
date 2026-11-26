@@ -1,6 +1,6 @@
 import { fatalBackendException } from '@stamhoofd/backend-env';
 import { Router, RouterServer } from '@node/endpoints';
-import { initializeMetrics, observeHttpServer, traceEndpoint } from '@node/observability';
+import { initializeHttpTelemetry, observeHttpServer, traceEndpoint } from '@node/observability';
 import { LogMiddleware } from '@stamhoofd/backend-middleware';
 import { Country } from '@stamhoofd/types/Country';
 import { Geolocator } from './classes/Geolocator.js';
@@ -17,7 +17,7 @@ if (new Date().getTimezoneOffset() !== 0) {
 }
 
 const start = async () => {
-    const metrics = initializeMetrics('redirecter');
+    const telemetry = initializeHttpTelemetry('redirecter');
     await Geolocator.shared.load(import.meta.dirname + '/data/belgium.csv', Country.Belgium);
 
     // Netherlands not needed, because it is the current default
@@ -57,7 +57,7 @@ const start = async () => {
             console.error(err);
         }
 
-        await metrics?.shutdown();
+        await telemetry?.shutdown();
 
         // Should not be needed, but added for security as sometimes a promise hangs somewhere
         process.exit(0);

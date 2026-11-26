@@ -2,7 +2,7 @@ import { afterAll, beforeAll, expect, it } from 'vitest';
 import { createServer } from 'node:http';
 import { channel } from 'node:diagnostics_channel';
 import { once } from 'node:events';
-import { context, logs, SeverityNumber, SpanStatusCode, trace } from '@opentelemetry/api';
+import { context, logs, SeverityNumber, SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace';
 import { InMemoryLogRecordExporter, SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
@@ -11,7 +11,7 @@ import { sanitizedLogExporter, sanitizedTraceExporter } from './exporters.js';
 
 const spans = new InMemorySpanExporter();
 const records = new InMemoryLogRecordExporter();
-const spanProcessor = new SimpleSpanProcessor({ exporter: sanitizedTraceExporter(spans) });
+const spanProcessor = new SimpleSpanProcessor({ exporter: sanitizedTraceExporter(spans, 'api') });
 const logProcessor = new SimpleLogRecordProcessor({ exporter: sanitizedLogExporter(records) });
 const sdk = new NodeSDK({
     autoDetectResources: false,
@@ -95,6 +95,7 @@ it('accepts an already-listening server and non-HTTP initialization', async () =
 it('exports only approved fields and fixed messages, retaining real SDK span timing', async () => {
     const tracer = trace.getTracer('@node/observability');
     const span = tracer.startSpan('http.server.request', {
+        kind: SpanKind.SERVER,
         attributes: {
             'http.request.method': 'GET',
             'http.response.status_code': 503,
@@ -123,7 +124,6 @@ it('exports only approved fields and fixed messages, retaining real SDK span tim
     expect(exported.attributes).toEqual({
         'http.request.method': 'GET',
         'http.response.status_code': 503,
-        'http.route': '/members/:id',
     });
     expect(exported.events).toEqual([]);
     expect(exported.status).toEqual({ code: SpanStatusCode.ERROR });

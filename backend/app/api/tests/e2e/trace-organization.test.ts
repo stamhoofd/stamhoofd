@@ -1,3 +1,5 @@
+import { fromBinary } from '@bufbuild/protobuf';
+import { ExportTraceServiceRequestSchema } from '@buf/opentelemetry_opentelemetry.bufbuild_es/opentelemetry/proto/collector/trace/v1/trace_service_pb.js';
 import { attachApplication } from '@node/dev-tools/application';
 import { openDevEventChannel } from '@node/dev-tools/channel';
 import { subscribeDevSpans } from '@node/dev-tools/spans';
@@ -20,6 +22,19 @@ it('shows the matched organization route, batch stages and verified SQL owners, 
     vi.stubEnv('STAM_DEV_APP', 'api');
     const detach = attachApplication('api');
     const local = subscribeDevSpans(channel.env.STAM_DEV_SESSION);
+    const envelopes: Buffer[] = [];
+    const receiver = createServer((req, res) => {
+        const chunks: Buffer[] = [];
+        req.on('data', (chunk: Buffer) => chunks.push(chunk));
+        req.on('end', () => {
+            envelopes.push(Buffer.concat(chunks));
+            res.writeHead(200, { 'Content-Type': 'application/x-protobuf' }).end();
+        });
+    }).listen(0, '127.0.0.1');
+    await once(receiver, 'listening');
+    const target = receiver.address();
+    if (!target || typeof target === 'string') throw Error('Expected TCP listener');
+    vi.stubEnv('OTEL_EXPORTER_OTLP_TRACES_ENDPOINT', `http://127.0.0.1:${target.port}/v1/traces`);
     const runtime = initializeTelemetry('api', { ownsMetrics: false });
     const router = new Router();
     router.endpoints.push(new GetOrganizationEndpoint(), new GetInvoicesCountEndpoint());
@@ -86,10 +101,63 @@ it('shows the matched organization route, batch stages and verified SQL owners, 
             collections: ['tokens', 'users', 'user_sessions'],
         });
         expect(JSON.stringify(local.snapshot())).not.toContain('canary');
+        await runtime.shutdown();
+        const exported = envelopes.flatMap((bytes) =>
+            fromBinary(ExportTraceServiceRequestSchema, bytes).resourceSpans.flatMap((r) =>
+                r.scopeSpans.flatMap((s) => s.spans),
+            ),
+        );
+        const assembly = exported.find((s) => s.name === 'organization.assemble')!;
+        const hex = (id: Uint8Array) => Buffer.from(id).toString('hex');
+        const group = exported.filter((s) => hex(s.traceId) === hex(assembly.traceId));
+        const remoteRoot = group.find((s) => !s.parentSpanId.length)!;
+        expect(hex(remoteRoot.traceId)).not.toBe(root.traceId);
+        expect(remoteRoot.attributes.map((a) => a.key).sort()).toEqual([
+            'http.request.method',
+            'http.response.status_code',
+        ]);
+        for (const name of [
+            'auth.authenticate',
+            'organization.resolve_scope',
+            'organization.assemble',
+            'organization.period_groups',
+            'organization.webshop_previews',
+        ]) {
+            const stages = group.filter((s) => s.name === name);
+            expect(stages).toHaveLength(1);
+            expect(stages[0].kind).toBe(1);
+            expect(stages[0].attributes).toEqual([]);
+            expect(stages[0].parentSpanId).toEqual(
+                (['organization.period_groups', 'organization.webshop_previews'].includes(name)
+                    ? assembly
+                    : remoteRoot
+                ).spanId,
+            );
+        }
+        for (const s of exported) {
+            if (s.parentSpanId.length)
+                expect(
+                    exported.some(
+                        (parent) =>
+                            hex(parent.traceId) === hex(s.traceId) &&
+                            hex(parent.spanId) === hex(s.parentSpanId),
+                    ),
+                ).toBe(true);
+            expect(
+                s.attributes.every((a) =>
+                    [
+                        'db.operation.name',
+                        'http.request.method',
+                        'http.response.status_code',
+                    ].includes(a.key),
+                ),
+            ).toBe(true);
+        }
     } finally {
         await runtime.shutdown();
         await detach();
         await channel.close();
+        await new Promise<void>((r) => receiver.close(() => r()));
         await new Promise<void>((r) => http.close(() => r()));
         nock.disableNetConnect();
         vi.unstubAllEnvs();

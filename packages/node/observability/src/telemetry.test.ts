@@ -9,6 +9,7 @@ function execute(
     endpoint: string,
     initialize = 'await lifecycle.ready(); await lifecycle.close();',
     service = 'docs',
+    signals: Record<string, string> = {},
 ) {
     return spawn(
         process.execPath,
@@ -22,7 +23,7 @@ function execute(
         ],
         {
             env: {
-                ...process.env,
+                PATH: process.env.PATH,
                 OTEL_SERVICE_NAME: 'docs-staging-test',
                 OTEL_EXPORTER_OTLP_ENDPOINT: endpoint,
                 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: '',
@@ -30,6 +31,7 @@ function execute(
                 OTEL_EXPORTER_OTLP_HEADERS: 'Authorization=Bearer%20synthetic-source-token',
                 OTEL_RESOURCE_ATTRIBUTES:
                     'deployment.environment.name=staging,service.version=test,secret=synthetic-secret',
+                ...signals,
             },
             stdio: 'pipe',
         },
@@ -61,8 +63,13 @@ it('exports protobuf traces and correlated lifecycle logs with runtime credentia
         for (const request of requests) {
             expect(request.authorization).toBe('Bearer synthetic-source-token');
             expect(request.type).toBe('application/x-protobuf');
-            expect(request.body).toContain('docs-staging-test');
-            expect(request.body).toContain('staging');
+            if (request.path === '/v1/logs') {
+                expect(request.body).toContain('docs-staging-test');
+                expect(request.body).toContain('staging');
+            } else {
+                expect(request.body).toContain('docs');
+                expect(request.body).not.toContain('docs-staging-test');
+            }
             expect(request.body).not.toContain('synthetic-secret');
             expect(request.body).not.toContain('synthetic-source-token');
         }
@@ -82,7 +89,7 @@ it('preserves successful application work when the receiver is unavailable', asy
     expect((await once(child, 'close'))[0]).toBe(0);
 });
 
-it('does not enable backend export from a generic endpoint', async () => {
+it('requires an explicit backend trace endpoint and keeps the other signals isolated', async () => {
     const paths: string[] = [];
     const receiver = createServer((req, res) => {
         paths.push(req.url!);
@@ -93,10 +100,56 @@ it('does not enable backend export from a generic endpoint', async () => {
     try {
         const addr = receiver.address();
         if (!addr || typeof addr === 'string') throw new Error('Expected TCP listener');
-        const child = execute(`http://127.0.0.1:${addr.port}`, undefined, 'api');
-        expect((await once(child, 'close'))[0]).toBe(0);
-        expect(paths).toEqual([]);
+        const base = `http://127.0.0.1:${addr.port}`;
+        for (const [generic, traces, logs, expected] of [
+            ['', '', '', ''],
+            [base, '', '', ''],
+            ['', '', base + '/v1/logs', ''],
+            [base, '', base + '/v1/logs', ''],
+            [base, base + '/v1/traces', '', '/v1/traces'],
+            ['', base + '/v1/traces', base + '/v1/logs', '/v1/traces'],
+        ]) {
+            paths.length = 0;
+            const child = execute(generic, undefined, 'api', {
+                OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: traces,
+                OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: logs,
+            });
+            expect((await once(child, 'close'))[0]).toBe(0);
+            expect(paths).toEqual(expected ? [expected] : []);
+        }
     } finally {
         await new Promise<void>((resolve) => receiver.close(() => resolve()));
+    }
+});
+
+it('never falls back to the generic receiver when a backend trace URL is invalid', async () => {
+    const paths: string[][] = [[], []];
+    const receivers = paths.map((list) =>
+        createServer((req, res) => {
+            list.push(req.url!);
+            req.resume();
+            res.writeHead(200, { 'Content-Type': 'application/x-protobuf' }).end();
+        }).listen(0, '127.0.0.1'),
+    );
+    await Promise.all(receivers.map((server) => once(server, 'listening')));
+    try {
+        const [generic, trace] = receivers.map((server) => {
+            const addr = server.address();
+            if (!addr || typeof addr === 'string') throw Error('Expected TCP listener');
+            return `http://127.0.0.1:${addr.port}`;
+        });
+        for (const endpoint of ['bad-url', `${trace}/v1/traces`]) {
+            const child = execute(generic, undefined, 'api', {
+                OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: endpoint,
+            });
+            expect((await once(child, 'close'))[0]).toBe(0);
+            expect(paths).toEqual([[], endpoint === 'bad-url' ? [] : ['/v1/traces']]);
+        }
+    } finally {
+        await Promise.all(
+            receivers.map(
+                (server) => new Promise<void>((resolve) => server.close(() => resolve())),
+            ),
+        );
     }
 });

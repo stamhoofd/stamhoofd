@@ -12,6 +12,19 @@ import { enableBackendTraces } from './backend-traces.js';
 
 let runtime: { shutdown(): Promise<void> } | undefined;
 
+function backendTraceUrl(value: string | undefined) {
+    if (!value || !/^https?:\/\/[^\s\\]+$/.test(value)) return;
+    const url = URL.parse(value);
+    if (url && !url.username && !url.password && !url.hash && !url.search) return url.href;
+}
+
+/** Metrics-only HTTP processes install a tracing SDK only for a valid explicit trace opt-in. */
+export function initializeHttpTelemetry(service: 'backup' | 'redirecter') {
+    return backendTraceUrl(process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT)
+        ? initializeTelemetry(service)
+        : initializeMetrics(service);
+}
+
 /**
  * Initializes one process-owned SDK before application instrumentation runs.
  * Export is opt-in through OTLP endpoint variables. Uses HTTP/protobuf, with no
@@ -31,6 +44,7 @@ export function initializeTelemetry(
     let stopTraces: (() => void) | undefined;
     let metrics: ReturnType<typeof initializeMetrics>;
     let shutdown: Promise<void> | undefined;
+    const traceUrl = backendTraceUrl(process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT);
     const configured = (signal: 'TRACES' | 'LOGS') =>
         !!(
             process.env[`OTEL_EXPORTER_OTLP_${signal}_ENDPOINT`] ||
@@ -55,11 +69,15 @@ export function initializeTelemetry(
             metricReaders: [],
             spanProcessors: localProcessor
                 ? [localProcessor]
-                : service === 'docs' && configured('TRACES')
+                : (service === 'docs' ? configured('TRACES') : traceUrl)
                   ? [
                         new BatchSpanProcessor({
                             exporter: sanitizedTraceExporter(
-                                new OTLPTraceExporter({ timeoutMillis: 1500 }),
+                                new OTLPTraceExporter({
+                                    timeoutMillis: 1500,
+                                    url: service === 'docs' ? undefined : traceUrl,
+                                }),
+                                service,
                             ),
                         }),
                     ]
@@ -79,7 +97,7 @@ export function initializeTelemetry(
         });
         sdk.start();
         stopLocal = startLocalCapture(service);
-        if (localProcessor) stopTraces = enableBackendTraces(service);
+        if (localProcessor || traceUrl) stopTraces = enableBackendTraces(service);
     } catch {
         console.warn('Application telemetry could not be initialized.');
     }

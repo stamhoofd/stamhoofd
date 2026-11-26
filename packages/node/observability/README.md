@@ -152,22 +152,35 @@ and object storage are substituted. The test processor serializes OTLP to a
 controlled loopback receiver. Public grants, failure, unsampled requests and
 redirects are checked there as well.
 
-### Docs pilot
+### Remote trace export
 
-For the docs pilot set `OTEL_EXPORTER_OTLP_ENDPOINT` or signal-specific traces/logs endpoint variables
-at runtime to enable export. The SDK uses HTTP/protobuf and standard OTLP headers.
-`OTEL_SERVICE_NAME` overrides the service name. From `OTEL_RESOURCE_ATTRIBUTES`,
-only `service.version` and `deployment.environment.name` are retained. Instance
-identity is generated per process. Exporters use 1.5-second request deadlines;
-SDK shutdown is idempotent and bounded to two seconds.
+Backend trace export requires `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` at runtime.
+A generic OTLP endpoint, log endpoint, Errors DSN or metrics port does not
+enable it. The separate docs pilot retains its generic OTLP endpoint fallback
+for traces and fixed lifecycle/error logs. Exporters use HTTP/protobuf,
+deployment-configured OTLP headers and 1.5-second request deadlines; shutdown is
+bounded to two seconds.
 
-The docs pilot exports only this package's named lifecycle/server spans and
-fixed lifecycle/error log identifiers. Export adapters strip unapproved attributes,
-span events, links, and status messages. Route attributes must come from registered
-framework route templates, never request URLs. No automatic console, HTTP, SQL,
-host, or process capture is enabled. This is not a sanitizer for arbitrary existing
-application logging; broader instrumentation requires extending and testing the
-explicit export contract.
+**Trace contract.** Legacy lifecycle and docs server spans must be local sampled
+roots. Only SDK spans created by the backend instrumentation above may contribute
+parent links, registered routes, database operations, bounded `error.type` and
+`retry.count` (0–2 for PDF attempts, 0–9 for storage). Storage may also carry
+validated HTTP status. Unreviewed operation names are dropped. The producer's private span metadata,
+not `http.route` or user-supplied IDs, authorizes these fields. Events, span links,
+tracestate, drop counts, schema URLs, SQL and status messages are omitted. The
+resource contains only the compiled service role. A projection failure drops the
+batch without a raw fallback. The development CLI's own telemetry owner is separate.
+
+`STAM_BACKEND_TRACE_SMOKE=1 STAM_BACKEND_TRACE_EXPORT_SMOKE=1 stam test api trace-waterfall`
+runs the same controlled cross-process test through the application export policy.
+
+**Trace retention is unverified.** Before enabling an application trace
+destination, confirm its effective retention and deletion against the
+provisional **14-day** target, including defaults, overrides, archives and
+downstream copies. Record redacted evidence for the actual trace source.
+Logs, Errors and metrics are independent signals. `stam test observability
+span-privacy` checks the final protobuf body at a loopback receiver using the
+generated OTLP schema; this is not evidence of provider-side retention.
 
 The five backend services do not register an OTLP log exporter. See the
 [backend log privacy and forwarding gate](../../../contributing/backend/log-privacy.md)

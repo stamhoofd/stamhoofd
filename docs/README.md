@@ -133,13 +133,14 @@ the deployment secret configuration. No collector is required for this pilot.
 Omitting the endpoint disables remote export without changing readiness behavior.
 The same variables can be used locally alongside the Stam footer.
 
-The initial export contract includes startup, readiness, graceful shutdown, and
-request method/status/duration with registered route templates. It excludes raw
-URLs, request content, arbitrary console logs, and exception messages. A server 5xx
-produces a fixed failure log correlated with the request trace. Browser telemetry
-is not enabled. Source retention is configured in Better Stack, not by this image.
+Docs traces identify the service as `docs` and carry startup or server request
+timing, bounded HTTP method/status and a status code. They omit routes, environment,
+release and host metadata. The separate log exporter retains the configured service,
+environment and release, and emits fixed readiness, shutdown and server failure
+records. Neither exporter needs request content or exception messages. Browser
+telemetry is not enabled. See the [trace retention gate](../packages/node/observability/README.md#otlp-configuration).
 
-After deployment, verify the service/environment/release in Better Stack, request
+After deployment, verify those deployment labels on the logs, request
 a normal page and a missing page, and verify startup and request traces. Confirm
 SIGTERM flushes pending telemetry and that a telemetry outage does not stop the
 server. Automated protocol/privacy coverage runs with `pnpm stam test observability`.
