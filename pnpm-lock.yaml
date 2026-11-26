@@ -3136,6 +3136,9 @@ importers:
       '@node/dev-tools':
         specifier: workspace:*
         version: link:../../packages/node/dev-tools
+      '@node/observability':
+        specifier: workspace:*
+        version: link:../../packages/node/observability
       '@node/opentelemetry-process':
         specifier: workspace:*
         version: link:../../packages/node/opentelemetry-process

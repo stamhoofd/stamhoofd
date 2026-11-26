@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Parser } from '@oclif/core';
 import Dev from './index.js';
 import { DevTarget, runDev } from '../../workflows/start-dev.js';
 import { showHelp } from '../../runtime/show-help.js';
@@ -19,7 +20,10 @@ vi.mock('../../workflows/setup-node.js', () => ({
 }));
 
 describe('Dev command', () => {
+    afterEach(() => vi.unstubAllEnvs());
+
     beforeEach(() => {
+        vi.stubEnv('STAM_DEV_CAPTURE', undefined);
         vi.clearAllMocks();
         vi.mocked(checkNodeVersion).mockResolvedValue({
             ok: true,
@@ -39,6 +43,22 @@ describe('Dev command', () => {
 
         expect(showHelp).toHaveBeenCalledWith(command.config, ['dev']);
         expect(runDev).not.toHaveBeenCalled();
+    });
+
+    it('parses compact detail by default, independent of subprocess verbosity, and rejects obsolete flags', async () => {
+        const parse = (args: string[]) => Parser.parse(args, { flags: Dev.flags });
+        for (const args of [
+            [],
+            ['--trace-detail', 'full'],
+            ['--trace-detail', 'compact'],
+            ['--quiet'],
+        ]) {
+            const { flags } = await parse(args);
+            expect(flags['trace-detail']).toBe(args.includes('full') ? 'full' : 'compact');
+            expect(flags.verbose).toBe(false);
+        }
+        await expect(parse(['--trace', 'GET /health'])).rejects.toThrow();
+        await expect(parse(['--trace-detail', 'other'])).rejects.toThrow();
     });
 
     it('defaults services to false for the frontend target', async () => {
@@ -72,9 +92,16 @@ describe('Dev command', () => {
     });
 
     it('passes explicit flags through to backend runs', async () => {
+        vi.stubEnv('STAM_DEV_CAPTURE', 'GET /health');
         const command = createCommand({
             args: { target: DevTarget.Backend },
-            flags: { services: false, stripe: true, open: true },
+            flags: {
+                services: false,
+                stripe: true,
+                open: true,
+                'trace-detail': 'compact',
+                'trace-filter': 'PATCH /invoices',
+            },
         });
 
         await command.run();
@@ -83,7 +110,75 @@ describe('Dev command', () => {
             services: false,
             stripe: true,
             open: true,
+            traceDetail: 'compact',
+            traceFilter: 'PATCH /invoices',
         });
+    });
+
+    it.each(['GET /invoices', 'statistics.cycle', '*'])(
+        'accepts %s from the environment',
+        async (trace) => {
+            vi.stubEnv('STAM_DEV_CAPTURE', trace);
+            const command = createCommand({
+                args: { target: DevTarget.All },
+                flags: { services: false, stripe: false, open: false },
+            });
+            await command.run();
+            expect(runDev).toHaveBeenCalledWith(
+                { context: 'dev' },
+                DevTarget.All,
+                expect.objectContaining({ traceFilter: trace }),
+            );
+        },
+    );
+
+    it.each(['flag', 'environment'])(
+        'rejects unsupported selectors from %s with the choices shown in help',
+        async (source) => {
+            const invalid = 'DELETE /invoices';
+            if (source === 'environment') vi.stubEnv('STAM_DEV_CAPTURE', invalid);
+            const command = createCommand({
+                args: { target: DevTarget.Backend },
+                flags: {
+                    services: false,
+                    stripe: false,
+                    open: false,
+                    'trace-filter': source === 'flag' ? invalid : undefined,
+                },
+            });
+            const choices = '*, PATCH /invoices, GET /invoices, GET /health, statistics.cycle';
+            expect(Dev.flags['trace-filter'].description).toContain(choices);
+            await expect(command.run()).rejects.toThrow(choices);
+            expect(runDev).not.toHaveBeenCalled();
+        },
+    );
+
+    it('rejects an environment selector before docs setup', async () => {
+        vi.stubEnv('STAM_DEV_CAPTURE', 'GET /health');
+        const command = createCommand({
+            args: { target: DevTarget.Docs },
+            flags: { services: false, stripe: false, open: false },
+        });
+        await expect(command.run()).rejects.toThrow(
+            '--trace-filter requires the all, instance, or backend target.',
+        );
+        expect(runDev).not.toHaveBeenCalled();
+    });
+
+    it('rejects request capture on targets without the API', async () => {
+        const command = createCommand({
+            args: { target: DevTarget.Frontend },
+            flags: {
+                services: false,
+                stripe: false,
+                open: false,
+                'trace-filter': 'PATCH /invoices',
+            },
+        });
+        await expect(command.run()).rejects.toThrow(
+            '--trace-filter requires the all, instance, or backend target.',
+        );
+        expect(runDev).not.toHaveBeenCalled();
     });
 
     it('stops before creating a development context when Node.js is wrong', async () => {
@@ -108,7 +203,13 @@ describe('Dev command', () => {
 
 function createCommand(parseResult: {
     args: { target: DevTarget | undefined };
-    flags: { services: boolean | undefined; stripe: boolean; open: boolean };
+    flags: {
+        services: boolean | undefined;
+        stripe: boolean;
+        open: boolean;
+        'trace-filter'?: string;
+        'trace-detail'?: string;
+    };
 }): Dev {
     const command = new Dev([], {} as any);
     (command as any).config = {};
