@@ -1,3 +1,4 @@
+import { traceStage } from '@node/observability';
 import { Request } from '@node/endpoints';
 import { isSimpleError, SimpleError } from '@common/errors';
 import { I18n } from '@stamhoofd/backend-i18n';
@@ -256,14 +257,16 @@ export class ContextInstance {
             options = {};
         }
 
-        const organization = await Organization.fromApiHost(this.request.host, {
-            allowInactive: options.willAuthenticate ?? true,
+        return traceStage('organization.resolve_scope', async () => {
+            const organization = await Organization.fromApiHost(this.request.host, {
+                allowInactive: options?.willAuthenticate ?? true,
+            });
+
+            this.organization = organization;
+            this.i18n.switchToLocale({ country: organization.address.country });
+
+            return organization;
         });
-
-        this.organization = organization;
-        this.i18n.switchToLocale({ country: organization.address.country });
-
-        return organization;
     }
 
     async setManualOrganizationScope(organization: Organization) {
@@ -351,85 +354,87 @@ export class ContextInstance {
             });
         }
 
-        const accessToken = header.substring('Bearer '.length);
+        return traceStage('auth.authenticate', async () => {
+            const accessToken = header.substring('Bearer '.length);
 
-        const token = await Token.getByAccessToken(accessToken, true);
+            const token = await Token.getByAccessToken(accessToken, true);
 
-        if (
-            !token ||
-            (this.organization &&
-                token.user.organizationId !== null &&
-                token.user.organizationId !== this.organization.id) ||
-            (!this.organization &&
-                token.user.organizationId &&
-                (!allowUnscoped || !token.user.isApiUser))
-        ) {
-            throw new SimpleError({
-                code: 'invalid_access_token',
-                message: 'The access token is invalid',
-                human: $t('%Fi'),
-                statusCode: 401,
+            if (
+                !token ||
+                (this.organization &&
+                    token.user.organizationId !== null &&
+                    token.user.organizationId !== this.organization.id) ||
+                (!this.organization &&
+                    token.user.organizationId &&
+                    (!allowUnscoped || !token.user.isApiUser))
+            ) {
+                throw new SimpleError({
+                    code: 'invalid_access_token',
+                    message: 'The access token is invalid',
+                    human: $t('%Fi'),
+                    statusCode: 401,
+                });
+            }
+
+            if (!this.organization && token.user.organizationId && allowUnscoped) {
+                // Automatically scope full request to the user's scope
+                await this.setManualOrganizationScope(
+                    await Organization.getByID(token.user.organizationId, true),
+                );
+            }
+
+            if (token.isAccessTokenExpired()) {
+                console.log('Expired access token for user', token.user.id);
+                throw new SimpleError({
+                    code: 'expired_access_token',
+                    message: 'The access token is expired',
+                    human: $t('%Fi'),
+                    statusCode: 401,
+                });
+            }
+
+            if (!(await SessionService.activateToken(token))) {
+                throw new SimpleError({
+                    code: 'invalid_access_token',
+                    message: 'The access token is invalid',
+                    human: $t('%Fi'),
+                    statusCode: 401,
+                });
+            }
+
+            if (!token.user.hasAccount() && !allowWithoutAccount) {
+                console.log('Inactive user account', token.user.id);
+                throw new SimpleError({
+                    code: 'not_activated',
+                    message: 'This user is not yet activated',
+                    human: $t('%Fj'),
+                    statusCode: 401,
+                });
+            }
+
+            // Rate limits for api users
+            if (token.user.isApiUser) {
+                apiUserRateLimiter.track(
+                    this.organization?.id ?? token.user.id,
+                    1,
+                    token.user.meta?.rateLimits ?? undefined,
+                );
+            }
+
+            const user = token.user;
+            const impersonatedUser = token.session.impersonatedUserId
+                ? await this.resolveImpersonation(token.session.impersonatedUserId, user)
+                : null;
+
+            // Load member of user
+            await this.insecurelyAuthenticateAs(user, impersonatedUser);
+
+            console.log('Authenticated user', {
+                userId: user.id,
+                impersonatedUserId: impersonatedUser?.id,
             });
-        }
-
-        if (!this.organization && token.user.organizationId && allowUnscoped) {
-            // Automatically scope full request to the user's scope
-            await this.setManualOrganizationScope(
-                await Organization.getByID(token.user.organizationId, true),
-            );
-        }
-
-        if (token.isAccessTokenExpired()) {
-            console.log('Expired access token for user', token.user.id);
-            throw new SimpleError({
-                code: 'expired_access_token',
-                message: 'The access token is expired',
-                human: $t('%Fi'),
-                statusCode: 401,
-            });
-        }
-
-        if (!(await SessionService.activateToken(token))) {
-            throw new SimpleError({
-                code: 'invalid_access_token',
-                message: 'The access token is invalid',
-                human: $t('%Fi'),
-                statusCode: 401,
-            });
-        }
-
-        if (!token.user.hasAccount() && !allowWithoutAccount) {
-            console.log('Inactive user account', token.user.id);
-            throw new SimpleError({
-                code: 'not_activated',
-                message: 'This user is not yet activated',
-                human: $t('%Fj'),
-                statusCode: 401,
-            });
-        }
-
-        // Rate limits for api users
-        if (token.user.isApiUser) {
-            apiUserRateLimiter.track(
-                this.organization?.id ?? token.user.id,
-                1,
-                token.user.meta?.rateLimits ?? undefined,
-            );
-        }
-
-        const user = token.user;
-        const impersonatedUser = token.session.impersonatedUserId
-            ? await this.resolveImpersonation(token.session.impersonatedUserId, user)
-            : null;
-
-        // Load member of user
-        await this.insecurelyAuthenticateAs(user, impersonatedUser);
-
-        console.log('Authenticated user', {
-            userId: user.id,
-            impersonatedUserId: impersonatedUser?.id,
+            return { user, token };
         });
-        return { user, token };
     }
 
     /**

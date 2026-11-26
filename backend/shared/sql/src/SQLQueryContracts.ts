@@ -1,3 +1,4 @@
+import type { ModelTarget } from '@node/database';
 import type { SQLExpression, SQLNamedExpression } from './SQLExpression.js';
 
 export enum SQLJoinType {
@@ -14,6 +15,9 @@ export interface SQLJoinExpression extends SQLExpression {
 
 // Nominal identity for SELECT-specific handling without importing the query builder.
 export class SQLSelectBase {
+    get modelTargets(): ModelTarget[] | undefined {
+        return undefined;
+    }
     get isAlways(): boolean | null {
         return null;
     }

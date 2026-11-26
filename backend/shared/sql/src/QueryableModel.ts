@@ -1,6 +1,7 @@
 import type { SQLResultNamespacedRow } from '@node/database';
 import { Model } from '@node/database';
 import { SQLSelect } from './SQLSelect.js';
+import { SQLTableExpression } from './SQLExpressions.js';
 import { SQL } from './SQL.js';
 import type { SQLDelete } from './SQLDelete.js';
 import type { SQLUpdate } from './SQLUpdate.js';
@@ -51,20 +52,20 @@ export class QueryableModel extends Model {
             transformer,
             ...(columns.length === 0 ? [SQL.wildcard()] : columns),
         );
-        return select.from(SQL.table(this.table)).primaryKey(this.primary.name);
+        return select.from(SQLTableExpression.forModel(this)).primaryKey(this.primary.name);
     }
 
     /** Builds a thenable delete query; awaiting without a where clause deletes every row in the table. */
     static delete(): SQLDelete {
-        return SQL.delete().from(SQL.table(this.table));
+        return SQL.delete().from(SQLTableExpression.forModel(this));
     }
 
     static update(): SQLUpdate {
-        return SQL.update(SQL.table(this.table));
+        return SQL.update(SQLTableExpression.forModel(this));
     }
 
     static insert(): SQLInsert {
-        return SQL.insert(SQL.table(this.table));
+        return SQL.insert(SQLTableExpression.forModel(this));
     }
 
     async refresh() {

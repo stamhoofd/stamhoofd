@@ -964,6 +964,9 @@ importers:
         specifier: 3.24.6
         version: 3.24.6(@types/node@22.20.4)
     devDependencies:
+      '@node/dev-tools':
+        specifier: workspace:*
+        version: link:../../../packages/node/dev-tools
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
@@ -1171,6 +1174,9 @@ importers:
       '@node/endpoints':
         specifier: workspace:*
         version: link:../../../packages/node/endpoints
+      '@node/observability':
+        specifier: workspace:*
+        version: link:../../../packages/node/observability
       '@stamhoofd/backend-i18n':
         specifier: workspace:*
         version: link:../i18n
@@ -2931,6 +2937,9 @@ importers:
 
   packages/node/dev-tools:
     dependencies:
+      '@node/observability':
+        specifier: workspace:*
+        version: link:../observability
       concurrently:
         specifier: 10.0.7
         version: 10.0.7

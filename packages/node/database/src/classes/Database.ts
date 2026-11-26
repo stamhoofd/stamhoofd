@@ -8,13 +8,45 @@ import type { DatabaseStoredValue } from './DatabaseStoredValue.js';
 export type SQLResultRow = Record<string, DatabaseStoredValue>;
 export type SQLResultNamespacedRow = Record<string, SQLResultRow>;
 
-type SelectOptions = { connection?: mysql.PoolConnection; nestTables?: boolean };
+export type ModelTarget = { readonly table: string };
+type QueryModels = ModelTarget | ModelTarget[];
+const catalog = new Map<string, ModelTarget>();
+/** The structured table expression's physical source, never its namespace/alias. */
+export function registeredModel(table: string) {
+    return catalog.get(table);
+}
+const modelTables = new WeakMap<ModelTarget, string>();
+/** Called by the application model catalog, never by raw SQL/table builders. */
+export function registerModelTarget(model: ModelTarget) {
+    modelTables.set(model, model.table);
+    catalog.set(model.table, model);
+}
+
+type SelectOptions = {
+    connection?: mysql.PoolConnection;
+    nestTables?: boolean;
+    model?: QueryModels;
+};
 const timing = channel('stamhoofd.database.duration');
 type Operation = 'acquire' | 'select' | 'insert' | 'update' | 'delete' | 'statement';
 
 /** The diagnostic event contains only a wrapper operation, outcome and elapsed milliseconds. */
-function measure<T>(operation: Operation, run: () => Promise<T>): Promise<T> {
+function measure<T>(operation: Operation, run: () => Promise<T>, model?: QueryModels): Promise<T> {
     if (!timing.hasSubscribers) return run();
+    const collections: string[] = [];
+    if (model)
+        for (const owner of Array.isArray(model) ? model : [model]) {
+            const name = modelTables.get(owner);
+            if (!name || name !== owner.table) {
+                collections.length = 0;
+                break;
+            }
+            if (!collections.includes(name)) collections.push(name);
+            if (collections.length > 4) {
+                collections.length = 0;
+                break;
+            }
+        }
     const start = performance.now();
     return (async () => {
         let outcome = 'error';
@@ -23,7 +55,16 @@ function measure<T>(operation: Operation, run: () => Promise<T>): Promise<T> {
             outcome = 'success';
             return result;
         } finally {
-            timing.publish({ operation, outcome, duration: performance.now() - start });
+            timing.publish({
+                operation,
+                outcome,
+                ...(collections.length === 1
+                    ? { collection: collections[0] }
+                    : collections.length
+                      ? { collections }
+                      : {}),
+                duration: performance.now() - start,
+            });
         }
     })();
 }
@@ -256,12 +297,15 @@ export class DatabaseInstance {
         const explicitConnection = options.connection ?? this.getTransactionConnection();
         const connection: mysql.PoolConnection = explicitConnection ?? (await this.getConnection());
         try {
-            const q = await measure('select', () =>
-                connection.query({
-                    sql: query,
-                    nestTables: options.nestTables ?? true,
-                    values: values,
-                }),
+            const q = await measure(
+                'select',
+                () =>
+                    connection.query({
+                        sql: query,
+                        nestTables: options.nestTables ?? true,
+                        values: values,
+                    }),
+                options.model,
             );
             return [
                 q[0] as (SQLResultNamespacedRow | SQLResultRow)[],
@@ -278,11 +322,16 @@ export class DatabaseInstance {
         query: string,
         values?: any,
         useConnection?: mysql.PoolConnection,
+        model?: QueryModels,
     ): Promise<[{ insertId: any; affectedRows: number }, mysql.FieldPacket[] | undefined]> {
         const explicitConnection = useConnection ?? this.getTransactionConnection();
         const connection: mysql.PoolConnection = explicitConnection ?? (await this.getConnection());
         try {
-            const q = await measure('insert', () => connection.query({ sql: query, values }));
+            const q = await measure(
+                'insert',
+                () => connection.query({ sql: query, values }),
+                model,
+            );
             return [
                 q[0] as { insertId: any; affectedRows: number },
                 q[1] as mysql.FieldPacket[] | undefined,
@@ -298,6 +347,7 @@ export class DatabaseInstance {
         query: string,
         values?: any,
         useConnection?: mysql.PoolConnection,
+        model?: QueryModels,
     ): Promise<
         [
             { /** @deprecated */ changedRows: number; affectedRows: number },
@@ -307,7 +357,11 @@ export class DatabaseInstance {
         const explicitConnection = useConnection ?? this.getTransactionConnection();
         const connection: mysql.PoolConnection = explicitConnection ?? (await this.getConnection());
         try {
-            const q = await measure('update', () => connection.query({ sql: query, values }));
+            const q = await measure(
+                'update',
+                () => connection.query({ sql: query, values }),
+                model,
+            );
             return [
                 q[0] as { changedRows: number; affectedRows: number },
                 q[1] as mysql.FieldPacket[] | undefined,
@@ -323,11 +377,16 @@ export class DatabaseInstance {
         query: string,
         values?: any,
         useConnection?: mysql.PoolConnection,
+        model?: QueryModels,
     ): Promise<[{ affectedRows: number }, mysql.FieldPacket[] | undefined]> {
         const explicitConnection = useConnection ?? this.getTransactionConnection();
         const connection: mysql.PoolConnection = explicitConnection ?? (await this.getConnection());
         try {
-            const q = await measure('delete', () => connection.query({ sql: query, values }));
+            const q = await measure(
+                'delete',
+                () => connection.query({ sql: query, values }),
+                model,
+            );
             return [q[0] as { affectedRows: number }, q[1] as mysql.FieldPacket[] | undefined];
         } finally {
             if (!explicitConnection) {

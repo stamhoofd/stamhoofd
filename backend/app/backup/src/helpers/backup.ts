@@ -7,6 +7,7 @@ import {
 } from '@aws-sdk/client-s3'; // ES Modules import
 import { Upload } from '@aws-sdk/lib-storage';
 import { Database } from '@node/database';
+import { traceStage } from '@node/observability';
 import { defineWorker } from '@node/observability/workloads';
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -680,7 +681,7 @@ export async function uploadBinaryLog(
 
     console.log('Uploading binlog to ' + key + '...');
     const command = new PutObjectCommand(params);
-    const response = await client.send(command);
+    const response = await traceStage('storage.put', () => client.send(command));
 
     if (response.$metadata.httpStatusCode !== 200) {
         throw new Error('Failed to upload binlog');

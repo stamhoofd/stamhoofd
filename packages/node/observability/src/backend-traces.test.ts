@@ -40,10 +40,13 @@ it('bounds SQL children of a statistics cycle and stops recording detached work'
         const spans = records.getFinishedSpans();
         const root = spans.find((s) => s.name === 'statistics.cycle')!;
         const children = spans.filter((s) => s.name === 'mysql.execute');
-        expect(children).toHaveLength(31);
+        expect(children).toHaveLength(24);
         for (const child of children) {
             expect(child.parentSpanContext?.spanId).toBe(root.spanContext().spanId);
-            expect(child.attributes).toEqual({ 'db.operation.name': 'select' });
+            expect(child.attributes).toEqual({
+                'db.operation.name': 'select',
+                'error.type': 'execution',
+            });
             expect(child.status).toEqual({ code: 2 });
         }
     } finally {

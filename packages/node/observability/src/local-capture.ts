@@ -12,7 +12,7 @@ export function startLocalCapture(service: string) {
         !process.env.STAM_DEV_SESSION ||
         !process.env.STAM_DEV_SOCKET ||
         process.env.STAM_DEV_APP !== service ||
-        !['api', 'renderer'].includes(service) ||
+        !['api', 'renderer', 'stats'].includes(service) ||
         !output.hasSubscribers
     )
         return;
@@ -42,6 +42,10 @@ export function startLocalCapture(service: string) {
                         route: op.route,
                         endpoint: op.endpoint,
                         operation: op.db,
+                        collection: op.collection,
+                        collections: op.collections,
+                        reason: op.reason,
+                        retry: op.retry,
                         method: typeof method === 'string' ? boundedMethod(method) : undefined,
                         status:
                             typeof status === 'number' &&

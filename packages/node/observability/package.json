@@ -8,6 +8,10 @@
             "types": "./dist-types/workloads.d.ts",
             "import": "./dist/workloads.js"
         },
+        "./db-collections": {
+            "types": "./dist-types/db-collections.d.ts",
+            "import": "./dist/db-collections.js"
+        },
         ".": {
             "types": "./dist-types/index.d.ts",
             "import": "./dist/index.js"

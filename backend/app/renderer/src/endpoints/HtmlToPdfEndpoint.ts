@@ -2,7 +2,7 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { errorDiagnostics, SimpleError } from '@common/errors';
 import { verifyInternalSignature } from '@stamhoofd/backend-env';
-import { traceVerifiedRender } from '@node/observability';
+import { traceStage, traceVerifiedRender } from '@node/observability';
 import { QueueHandler } from '@stamhoofd/queues';
 import formidable from 'formidable';
 import { firstValues } from 'formidable/src/helpers/firstValues.js';
@@ -219,7 +219,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
      * This will move to a different external service
      */
     async htmlToPdf(html: string, options: { retryCount: number; startDate: Date }): Promise<Uint8Array | null> {
-        const response = await HtmlToPdfEndpoint.useBrowser(async (browser) => {
+        const response = await HtmlToPdfEndpoint.useBrowser(browser => traceStage('pdf.render', async () => {
             try {
                 // Create a new page
                 const page = await browser.newPage();
@@ -244,7 +244,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 console.error('Failed to render document pdf', errorDiagnostics(error));
                 return null;
             }
-        });
+        }, { retry: 2 - options.retryCount }));
         if (response === null && options.retryCount > 0 && new Date().getTime() - options.startDate.getTime() < 15000) {
             // Retry
             return await this.htmlToPdf(html, { ...options, retryCount: options.retryCount - 1 });

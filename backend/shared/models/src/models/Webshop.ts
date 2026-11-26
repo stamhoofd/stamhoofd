@@ -111,6 +111,7 @@ export class Webshop extends QueryableModel {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`organizationId\` = ? AND \`legacyUri\` = ? LIMIT 1`,
             [organizationId, uri],
+            { nestTables: true, model: this },
         );
 
         if (rows.length == 0) {
@@ -126,6 +127,7 @@ export class Webshop extends QueryableModel {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`uri\` = ? LIMIT 1`,
             [uri],
+            { nestTables: true, model: this },
         );
 
         if (rows.length == 0) {
@@ -141,6 +143,7 @@ export class Webshop extends QueryableModel {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? LIMIT 200`,
             [host],
+            { nestTables: true, model: this },
         );
 
         // Read member + address from first row
@@ -153,6 +156,7 @@ export class Webshop extends QueryableModel {
             const [rows] = await Database.select(
                 `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? AND (\`domainUri\` is null OR \`domainUri\` = "") LIMIT 1`,
                 [host],
+                { nestTables: true, model: this },
             );
 
             if (rows.length == 0) {
@@ -165,6 +169,7 @@ export class Webshop extends QueryableModel {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`domain\` = ? AND \`domainUri\` = ? LIMIT 1`,
             [host, uri],
+            { nestTables: true, model: this },
         );
 
         if (rows.length == 0) {

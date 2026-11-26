@@ -47,6 +47,7 @@
         "mysql2": "3.24.6"
     },
     "devDependencies": {
+        "@node/dev-tools": "workspace:*",
         "oxlint-plugin-stamhoofd": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@types/node": "22.20.4",

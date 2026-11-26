@@ -209,6 +209,7 @@ export class Organization extends QueryableModel {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`uri\` = ? LIMIT 1`,
             [uri],
+            { nestTables: true, model: this },
         );
 
         if (rows.length == 0) {
@@ -242,6 +243,7 @@ export class Organization extends QueryableModel {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE privateMeta->"$.value.mailDomain" = ? LIMIT 1`,
             [domain],
+            { nestTables: true, model: this },
         );
 
         if (rows.length == 0) {
@@ -257,6 +259,7 @@ export class Organization extends QueryableModel {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`registerDomain\` = ? LIMIT 1`,
             [host],
+            { nestTables: true, model: this },
         );
 
         if (rows.length == 0) {

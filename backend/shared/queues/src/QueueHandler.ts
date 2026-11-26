@@ -1,4 +1,5 @@
 import { errorDiagnostics, isSimpleError, SimpleError } from '@common/errors';
+import { traceQueueWait, traceStage } from '@node/observability';
 import { defineQueue } from '@node/observability/workloads';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
@@ -47,6 +48,7 @@ export type QueueHandlerOptions = {
 
 class QueueItem<T> {
     pending = worker.enqueue(1);
+    finishWait = traceQueueWait();
     canceled = false;
     handler: (options: QueueHandlerOptions) => Promise<T>;
     resolve: (value: T) => void;
@@ -133,6 +135,15 @@ export class AbortSignal {
     on(on: 'abort', listener: (error: unknown) => Promise<void> | void) {
         this.listeners.push(listener);
     }
+}
+
+function wasAborted(abort: AbortSignal, error: unknown) {
+    return (
+        abort.wasAbortedWith(error) ||
+        isAbortedError(error) ||
+        isDebouncedError(error) ||
+        isCanceledError(error)
+    );
 }
 
 /**
@@ -250,7 +261,9 @@ export class QueueHandler {
             snapshot(async () => {
                 const currentQueues = this.asyncLocalStorage.getStore() ?? [];
                 return await this.asyncLocalStorage.run([...currentQueues, queue], async () => {
-                    return await handler(options);
+                    return await traceStage('queue.execute', () => handler(options), {
+                        isAborted: (error) => wasAborted(options.abort, error),
+                    });
                 });
             });
 
@@ -330,6 +343,7 @@ export class QueueHandler {
         q.runCount += 1;
         // console.log("[QUEUE] ("+q.runCount+"/"+q.parallel+") Executing "+queue+" ("+q.items.length+" remaining)")
         const abort = q.createAbortSignal();
+        next.finishWait?.(next.canceled);
         next.pending?.leave();
         const finish = next.canceled ? undefined : worker.start();
         if (next.canceled) worker.skip();
@@ -343,14 +357,7 @@ export class QueueHandler {
             finish?.('success');
             // console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Resolved "+queue+" ("+q.items.length+" remaining)")
         } catch (e) {
-            finish?.(
-                abort.wasAbortedWith(e) ||
-                    isAbortedError(e) ||
-                    isDebouncedError(e) ||
-                    isCanceledError(e)
-                    ? 'aborted'
-                    : 'error',
-            );
+            finish?.(wasAborted(abort, e) ? 'aborted' : 'error');
             next.reject(e);
             const counts = {
                 running: q.runCount - 1,
