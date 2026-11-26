@@ -273,8 +273,8 @@ importers:
         specifier: 3.10.2
         version: 3.10.2
       libphonenumber-js:
-        specifier: 1.13.16
-        version: 1.13.16
+        specifier: 1.13.17
+        version: 1.13.17
       lru-cache:
         specifier: 11.5.3
         version: 11.5.3
@@ -592,8 +592,8 @@ importers:
         specifier: 9.0.3
         version: 9.0.3
       libphonenumber-js:
-        specifier: 1.13.16
-        version: 1.13.16
+        specifier: 1.13.17
+        version: 1.13.17
       luxon:
         specifier: 3.7.2
         version: 3.7.2
@@ -1580,8 +1580,8 @@ importers:
         specifier: 3.10.2
         version: 3.10.2
       libphonenumber-js:
-        specifier: 1.13.16
-        version: 1.13.16
+        specifier: 1.13.17
+        version: 1.13.17
       luxon:
         specifier: 3.7.2
         version: 3.7.2
@@ -2168,8 +2168,8 @@ importers:
         specifier: 3.0.4
         version: 3.0.4
       libphonenumber-js:
-        specifier: 1.13.16
-        version: 1.13.16
+        specifier: 1.13.17
+        version: 1.13.17
       luxon:
         specifier: 3.7.2
         version: 3.7.2
@@ -11971,8 +11971,8 @@ packages:
     resolution: {integrity: sha512-tNcU3cLH7toloAzhOOrBDhjzgbxpyuYvkf+BPPnnJCdc5EIcdJ8JcT+SglvCQKKyZ6m9dVXtCVlJcA6csxKdEA==}
     engines: {node: ^20.17.0 || >=22.9.0}
 
-  libphonenumber-js@1.13.16:
-    resolution: {integrity: sha512-tIOCM9yx2Go6d5/ZANe0K+G4AZek1Ymx81HxQpf19Sri4zMP95eQbKdnUGHAvFQ4nx0PeLhFqvAfisTADXj3tQ==}
+  libphonenumber-js@1.13.17:
+    resolution: {integrity: sha512-V92dxRHhYTsHF5B6IjR8rtKW6qL7xKuERPFFqZt7XQl8A+NikbwEzjhxGpM+R6JnWjaL7/wokWSdTG/eyYAscQ==}
 
   libqp@3.0.2:
     resolution: {integrity: sha512-24oL5vCMpFd6lGLbD3vPrmcAEGFScDPX9eARY8TXsRVBSde93xP2iG7+8pg5M56Yiu9Uy14hCVN1E+yj5LMtyQ==}
@@ -26114,7 +26114,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  libphonenumber-js@1.13.16: {}
+  libphonenumber-js@1.13.17: {}
 
   libqp@3.0.2: {}
 
