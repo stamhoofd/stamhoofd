@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { SimpleError } from '@common/errors';
 import { QueryableModel } from '@stamhoofd/sql';
-import type { Registration } from './Registration.js';
 
 export class Document extends QueryableModel {
     static table = 'documents';
@@ -90,20 +89,5 @@ export class Document extends QueryableModel {
 
     getStructure() {
         return DocumentStruct.create(this);
-    }
-
-    static async deleteForRegistrations(registrations: Registration[]) {
-        if (registrations.length === 0) {
-            return [];
-        }
-
-        const existingDocuments = await Document.where({
-            registrationId: { sign: 'IN', value: registrations.map((r) => r.id) },
-        });
-
-        for (const document of existingDocuments) {
-            console.log('Deleting document for registration', document.registrationId);
-            await document.delete();
-        }
     }
 }

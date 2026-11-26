@@ -22,6 +22,7 @@ import { Context } from '../../../../helpers/Context.js';
 import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper.js';
 import { documentFilterCompilers } from '../../../../sql-filters/documents.js';
 import { documentSorters } from '../../../../sql-sorters/documents.js';
+import { BelcotaxJsonlService } from '../../../../services/belcotax/BelcotaxJsonlService.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -138,6 +139,11 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
 function getDocumentSearchFilter(search: string | null): StamhoofdFilter | null {
     if (search === null || search === undefined) {
         return null;
+    }
+
+    const belcotaxDocumentId = BelcotaxJsonlService.documentIdFromKey(search);
+    if (belcotaxDocumentId) {
+        return { id: belcotaxDocumentId };
     }
 
     const numberFilter = SearchFilterFactory.getIntegerFilter(search);

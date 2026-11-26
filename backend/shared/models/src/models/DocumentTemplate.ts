@@ -19,7 +19,7 @@ import {
     RecordTextAnswer,
     RecordType,
 } from '@stamhoofd/structures';
-import { Formatter, Sorter } from '@stamhoofd/utility';
+import { FiscalDocumentYearHelper, Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
@@ -824,7 +824,7 @@ export class DocumentTemplate extends QueryableModel {
         if (!this.checkRegistrationIncluded(registration)) {
             // Fast fail without building answers
             for (const document of existingDocuments) {
-                await document.delete();
+                await this.discardDocument(document);
             }
             return [];
         }
@@ -838,7 +838,7 @@ export class DocumentTemplate extends QueryableModel {
 
         if (!this.checkAnswersIncluded(registration, fieldAnswers)) {
             for (const document of existingDocuments) {
-                await document.delete();
+                await this.discardDocument(document);
             }
             return [];
         }
@@ -1046,20 +1046,110 @@ export class DocumentTemplate extends QueryableModel {
     }
 
     /**
-     * Same rule as buildAll: a document that already received a number stays visible as deleted
+     * Same rule as buildAll: a document that already received a number, or that Belcotax has to delete, stays
+     * visible as deleted
      */
     private async removeDocument(document: Document) {
         if (document.isLocked) {
             return;
         }
 
-        if (document.number === null) {
+        if (document.number === null && !this.keepsDeletedDocument(document)) {
             await document.delete();
             return;
         }
 
         document.status = DocumentStatus.Deleted;
         await document.save();
+    }
+
+    /**
+     * From income year 2026 a published fiscal document can be in a file that was uploaded to Belcotax.
+     * It stays as deleted, so the next file removes it from Belcotax too.
+     */
+    keepsDeletedDocument(document: Document) {
+        return (
+            // Deleted as well as Published: the status is the only marker, so it has to survive the first removal
+            (document.status === DocumentStatus.Published ||
+                document.status === DocumentStatus.Deleted) &&
+            this.privateSettings.templateDefinition.type === 'fiscal' &&
+            !new FiscalDocumentYearHelper().isXmlExportSupported(this.year)
+        );
+    }
+
+    /**
+     * Removes a document that is no longer issued, also when it already has a number.
+     */
+    private async discardDocument(document: Document) {
+        if (!this.keepsDeletedDocument(document)) {
+            await document.delete();
+            return;
+        }
+        if (document.isLocked) {
+            return;
+        }
+        document.status = DocumentStatus.Deleted;
+        await document.save();
+    }
+
+    /**
+     * Their documents are no longer issued.
+     */
+    static async deleteForRegistrations(registrations: Registration[]) {
+        if (registrations.length === 0) {
+            return;
+        }
+
+        const documents = await Document.where({
+            registrationId: { sign: 'IN', value: registrations.map((r) => r.id) },
+        });
+        if (documents.length === 0) {
+            return;
+        }
+
+        const templates = await DocumentTemplate.getByIDs(
+            ...new Set(documents.map((d) => d.templateId)),
+        );
+        for (const document of documents) {
+            const template = templates.find((t) => t.id === document.templateId);
+            if (template) {
+                await template.discardDocument(document);
+            } else {
+                await document.delete();
+            }
+        }
+    }
+
+    /**
+     * The counterpart of deleteForRegistrations: a certificate that was kept for the Belcotax deletion is issued
+     * again under the same key, so the next file replaces the deletion there. Only for registrations that become
+     * active again: a document an admin deleted by hand stays deleted.
+     */
+    static async reissueForRegistrations(registrations: Registration[]) {
+        if (registrations.length === 0) {
+            return;
+        }
+
+        const documents = await Document.where({
+            registrationId: { sign: 'IN', value: registrations.map((r) => r.id) },
+            status: DocumentStatus.Deleted,
+        });
+        if (documents.length === 0) {
+            return;
+        }
+
+        const templates = await DocumentTemplate.getByIDs(
+            ...new Set(documents.map((d) => d.templateId)),
+        );
+        for (const document of documents) {
+            const template = templates.find((t) => t.id === document.templateId);
+            if (!template || !template.keepsDeletedDocument(document) || document.isLocked) {
+                continue;
+            }
+            document.status = template.status;
+            await template.updateDocumentWithAnswers(document, document.data.fieldAnswers);
+            await document.save();
+        }
     }
 
     checkRegistrationIncluded(registration: Registration) {
@@ -1219,7 +1309,7 @@ export class DocumentTemplate extends QueryableModel {
                 }
 
                 if (!documentSet.has(document.id)) {
-                    if (document.number === null) {
+                    if (document.number === null && !this.keepsDeletedDocument(document)) {
                         await document.delete();
                     } else {
                         document.status = DocumentStatus.Deleted;

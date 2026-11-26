@@ -201,6 +201,18 @@ export class BelcotaxJsonlService {
         return `${KEY_PREFIX}-${year}-${documentId}`;
     }
 
+    /**
+     * The document id in a key from a Belcotax message: the fiche key, or the key of its debtor (-b) or child (-c).
+     * The prefix is optional, so a key that someone copied without it is still found.
+     */
+    static documentIdFromKey(key: string): string | null {
+        const match = new RegExp(
+            `^(?:${KEY_PREFIX}-)?\\d{4}-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:-[bc])?$`,
+            'i',
+        ).exec(key.trim());
+        return match?.[1]?.toLowerCase() ?? null;
+    }
+
     static build(input: BelcotaxExportInput): BelcotaxExport {
         const version = FICHE_86_VERSIONS[input.year];
         if (version === undefined) {
