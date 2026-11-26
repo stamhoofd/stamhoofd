@@ -419,6 +419,30 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
             // Intra community reverse charge applies (Dutch buyer, Belgian seller, both with VAT)
             expect(balanceItem.VATExcempt).toBe(VATExcemptReason.IntraCommunityServices);
         });
+
+        test('Starting a webshops trial again after an earlier trial ended is refused with a clear error', async () => {
+            const { organization, token, customerCompany } = await createBuyer();
+
+            // The earlier trial has ended, but is not removed yet
+            const trial = await new STPackageFactory({
+                organization,
+                bundle: STPackageBundle.TrialWebshops,
+                removeAt: new Date(Date.now() + 30 * DAY),
+            }).create();
+            trial.validUntil = new Date(Date.now() - DAY);
+            await trial.save();
+
+            const checkout = buildCheckout({
+                bundles: [STPackageBundle.TrialWebshops],
+                customerCompany,
+            });
+
+            await expect(
+                post(membershipOrganization.id, checkout, organization, token),
+            ).rejects.toMatchObject({ code: 'already_active' });
+
+            expect(await getPackages(organization)).toHaveLength(1);
+        });
     });
 
     describe('Members package', () => {

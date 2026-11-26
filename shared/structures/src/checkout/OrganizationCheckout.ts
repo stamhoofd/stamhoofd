@@ -51,18 +51,15 @@ export class PackagePurchases extends AutoEncoder {
             // Renew after currently running packages
             let date = new Date();
 
-            let skip = false;
-
             // Do we have a collision? Make sure our package only start after the expiry date of existing packages
             for (const currentPack of [...currentPackages.packages, ...packages]) {
                 if (!STPackageBundleHelper.isCombineable(bundle, currentPack)) {
                     if (!STPackageBundleHelper.isStackable(bundle, currentPack)) {
-                        // We skip silently
-                        console.error(
-                            'Tried to activate non combineable, non stackable packages...',
-                        );
-                        skip = true;
-                        continue;
+                        throw new SimpleError({
+                            code: 'already_active',
+                            message: 'Cannot activate this package because of conflicting package',
+                            human: $t('Je hebt deze functie al geactiveerd of uitgeprobeerd.'),
+                        });
                     }
                     if (currentPack.endDate !== null) {
                         const end = currentPack.endDate;
@@ -80,9 +77,6 @@ export class PackagePurchases extends AutoEncoder {
                 }
             }
 
-            if (skip) {
-                continue;
-            }
             packages.push(STPackageBundleHelper.getCurrentPackage(bundle, date));
         }
 

@@ -153,6 +153,9 @@ class SelectablePackage {
     get statusAction() {
         switch (this.status) {
             case PackageStatus.Inactive: {
+                if (this.bundle === STPackageBundle.Webshops && !this.canStartTrial) {
+                    return $t('%1Lx');
+                }
                 return $t('%1Ly');
             }
 
@@ -316,7 +319,7 @@ function getUpdatedPackages() {
                 }
             }
 
-            /* const trialBundle = STPackageBundleHelper.getTrial(bundle);
+            const trialBundle = STPackageBundleHelper.getTrial(bundle);
             if (trialBundle) {
                 const d = PackagePurchases.create({
                     packageBundles: [trialBundle],
@@ -330,7 +333,7 @@ function getUpdatedPackages() {
                 }
             } else {
                 pp.canStartTrial = false;
-            } */
+            }
 
             packages.push(pp);
         } catch (e) {
@@ -448,6 +451,10 @@ async function checkout(pack: SelectablePackage) {
                     break;
                 }
                 case STPackageBundle.Webshops: {
+                    if (!pack.canStartTrial) {
+                        await checkoutPackage(pack);
+                        break;
+                    }
                     await checkoutTrial(STPackageBundle.TrialWebshops, $t('%1M5'));
                     break;
                 }
