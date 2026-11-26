@@ -1,6 +1,6 @@
 import { fatalBackendException } from '@stamhoofd/backend-env';
 import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
-import { initializeMetrics, observeHttpServer } from '@node/observability';
+import { initializeMetrics, observeHttpServer, traceEndpoint } from '@node/observability';
 import { CORSMiddleware, LogMiddleware } from '@stamhoofd/backend-middleware';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { loadLogger } from '@stamhoofd/logging';
@@ -26,6 +26,7 @@ const start = async () => {
     router.endpoints.push(new CORSPreflightEndpoint());
 
     const routerServer = new RouterServer(router);
+    routerServer.observeEndpoint = traceEndpoint;
     routerServer.verbose = false;
 
     // Send the app version along

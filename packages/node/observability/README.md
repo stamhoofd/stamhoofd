@@ -101,7 +101,42 @@ tenant IDs, group keys, queue URLs, message bodies or error strings.
 
 ## OTLP configuration
 
-Set `OTEL_EXPORTER_OTLP_ENDPOINT` or signal-specific traces/logs endpoint variables
+### Backend operation instrumentation
+
+The backend tracer observes a matched router **handler**, not time spent reading
+headers, decoding/authenticating the request, or streaming the response. API,
+renderer, backup and redirecter install that hook. The statistics worker uses
+a `statistics.cycle` root instead. The optional local span processor belongs to
+the process owner; no backend processor is installed by default.
+
+The representative path is `PATCH /invoices` for a numbered invoice without a
+PDF: real application MySQL calls, an API `http.client.renderer` POST, and the
+renderer’s `http.server.request` after grant verification. Only the compiled
+endpoint-to-template table supplies route names. The database timing channel
+supplies a fixed operation, outcome and duration, never a statement or row.
+Each process admits a burst of two roots, refilling one per ten seconds, with
+at most 32 children per root and one slot reserved for internal HTTP. The
+renderer uses a separate bucket of the same size for verified continuations, so public roots cannot consume it. Detached work after a parent ends
+does not inherit its budget.
+
+Public trace headers never select or name a root. The renderer accepts an
+ID pair only with both a valid render grant and a separate service signature
+binding that grant to the exact sampled traceparent. An unselected request
+carries neither trace header nor service proof. Only the configured renderer
+authority receives the signed POST; context requires HTTPS (or development
+loopback), and redirects are refused even when tracing is off. No automatic
+propagation, baggage, provider instrumentation or browser tracking is added.
+
+`STAM_BACKEND_TRACE_SMOKE=1 stam test api trace-waterfall`, after building the
+backend entries, exercises concurrent numbered receipts in managed MySQL and
+the renderer in a separate process. Only HTML generation, browser rendering
+and object storage are substituted. The test processor serializes OTLP to a
+controlled loopback receiver. Public grants, failure, unsampled requests and
+redirects are checked there as well.
+
+### Docs pilot
+
+For the docs pilot set `OTEL_EXPORTER_OTLP_ENDPOINT` or signal-specific traces/logs endpoint variables
 at runtime to enable export. The SDK uses HTTP/protobuf and standard OTLP headers.
 `OTEL_SERVICE_NAME` overrides the service name. From `OTEL_RESOURCE_ATTRIBUTES`,
 only `service.version` and `deployment.environment.name` are retained. Instance

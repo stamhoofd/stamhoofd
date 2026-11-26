@@ -82,7 +82,7 @@ it('preserves successful application work when the receiver is unavailable', asy
     expect((await once(child, 'close'))[0]).toBe(0);
 });
 
-it('does not export backend logs through a configured trace receiver', async () => {
+it('does not enable backend export from a generic endpoint', async () => {
     const paths: string[] = [];
     const receiver = createServer((req, res) => {
         paths.push(req.url!);
@@ -95,7 +95,7 @@ it('does not export backend logs through a configured trace receiver', async () 
         if (!addr || typeof addr === 'string') throw new Error('Expected TCP listener');
         const child = execute(`http://127.0.0.1:${addr.port}`, undefined, 'api');
         expect((await once(child, 'close'))[0]).toBe(0);
-        expect(paths).toEqual(['/v1/traces']);
+        expect(paths).toEqual([]);
     } finally {
         await new Promise<void>((resolve) => receiver.close(() => resolve()));
     }

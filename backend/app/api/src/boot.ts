@@ -1,6 +1,6 @@
 import { fatalBackendException } from '@stamhoofd/backend-env';
 import { Column, Database, Migration } from '@node/database';
-import { ApplicationLifecycle, observeHttpServer } from '@node/observability';
+import { ApplicationLifecycle, observeHttpServer, traceEndpoint } from '@node/observability';
 import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
 import { CORSMiddleware, LogMiddleware, VersionMiddleware } from '@stamhoofd/backend-middleware';
 import { checkReadOnly } from '@stamhoofd/crons';
@@ -143,6 +143,7 @@ export const boot = async (options: { killProcess: boolean; lifecycle?: Applicat
 
     productionLog('Creating router...');
     const routerServer = new RouterServer(router);
+    routerServer.observeEndpoint = traceEndpoint;
     routerServer.verbose = false;
 
     // Log requests and errors

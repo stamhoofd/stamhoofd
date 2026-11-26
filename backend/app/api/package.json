@@ -116,6 +116,10 @@
         "uuid": "14.0.3"
     },
     "devDependencies": {
+        "@opentelemetry/exporter-trace-otlp-proto": "0.301.2",
+        "@opentelemetry/sdk-trace": "3.1.1",
+        "@buf/opentelemetry_opentelemetry.bufbuild_es": "https://buf.build/gen/npm/v1/@buf/opentelemetry_opentelemetry.bufbuild_es/-/opentelemetry_opentelemetry.bufbuild_es-2.17.0-20261002203906-f3a7b1f1162b.1.tgz",
+        "@bufbuild/protobuf": "2.17.0",
         "oxlint-plugin-stamhoofd": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@types/cookie": "0.6.0",

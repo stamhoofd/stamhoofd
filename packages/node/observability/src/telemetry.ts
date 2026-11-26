@@ -1,5 +1,5 @@
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace';
+import { BatchSpanProcessor, type SpanProcessor } from '@opentelemetry/sdk-trace';
 import { BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-proto';
@@ -7,6 +7,7 @@ import { resourceFromAttributes } from '@opentelemetry/resources';
 import { randomUUID } from 'node:crypto';
 import { sanitizedLogExporter, sanitizedTraceExporter } from './exporters.js';
 import { initializeMetrics } from './metrics.js';
+import { enableBackendTraces } from './backend-traces.js';
 
 let runtime: { shutdown(): Promise<void> } | undefined;
 
@@ -18,10 +19,14 @@ let runtime: { shutdown(): Promise<void> } | undefined;
  */
 export function initializeTelemetry(
     service: string,
-    { ownsMetrics = true } = {},
+    {
+        ownsMetrics = true,
+        localProcessor,
+    }: { ownsMetrics?: boolean; localProcessor?: SpanProcessor } = {},
 ): { shutdown(): Promise<void> } {
     if (runtime) return runtime;
     let sdk: NodeSDK | undefined;
+    let stopTraces: (() => void) | undefined;
     let metrics: ReturnType<typeof initializeMetrics>;
     let shutdown: Promise<void> | undefined;
     const configured = (signal: 'TRACES' | 'LOGS') =>
@@ -46,15 +51,17 @@ export function initializeTelemetry(
             resource: resourceFromAttributes(resource),
             instrumentations: [],
             metricReaders: [],
-            spanProcessors: configured('TRACES')
-                ? [
-                      new BatchSpanProcessor({
-                          exporter: sanitizedTraceExporter(
-                              new OTLPTraceExporter({ timeoutMillis: 1500 }),
-                          ),
-                      }),
-                  ]
-                : [],
+            spanProcessors: localProcessor
+                ? [localProcessor]
+                : service === 'docs' && configured('TRACES')
+                  ? [
+                        new BatchSpanProcessor({
+                            exporter: sanitizedTraceExporter(
+                                new OTLPTraceExporter({ timeoutMillis: 1500 }),
+                            ),
+                        }),
+                    ]
+                  : [],
             // The existing docs pilot is separate. Backend log forwarding awaits its own gate;
             // enabling a trace endpoint must not export backend SDK log records alongside it.
             logRecordProcessors:
@@ -69,6 +76,7 @@ export function initializeTelemetry(
                     : [],
         });
         sdk.start();
+        if (localProcessor) stopTraces = enableBackendTraces(service);
     } catch {
         console.warn('Application telemetry could not be initialized.');
     }
@@ -77,6 +85,7 @@ export function initializeTelemetry(
             return (shutdown ??= (async () => {
                 let timer: NodeJS.Timeout | undefined;
                 try {
+                    stopTraces?.();
                     await Promise.race([
                         Promise.all([sdk?.shutdown(), metrics?.shutdown()]),
                         new Promise<void>((resolve) => {

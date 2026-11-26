@@ -654,6 +654,18 @@ importers:
         specifier: 14.0.3
         version: 14.0.3
     devDependencies:
+      '@buf/opentelemetry_opentelemetry.bufbuild_es':
+        specifier: https://buf.build/gen/npm/v1/@buf/opentelemetry_opentelemetry.bufbuild_es/-/opentelemetry_opentelemetry.bufbuild_es-2.17.0-20261002203906-f3a7b1f1162b.1.tgz
+        version: https://buf.build/gen/npm/v1/@buf/opentelemetry_opentelemetry.bufbuild_es/-/opentelemetry_opentelemetry.bufbuild_es-2.17.0-20261002203906-f3a7b1f1162b.1.tgz(@bufbuild/protobuf@2.17.0)
+      '@bufbuild/protobuf':
+        specifier: 2.17.0
+        version: 2.17.0
+      '@opentelemetry/exporter-trace-otlp-proto':
+        specifier: 0.301.2
+        version: 0.301.2(@opentelemetry/api@1.10.0)
+      '@opentelemetry/sdk-trace':
+        specifier: 3.1.1
+        version: 3.1.1(@opentelemetry/api@1.10.0)
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
@@ -876,6 +888,12 @@ importers:
         specifier: 25.18.1
         version: 25.18.1(yauzl@2.10.0)
     devDependencies:
+      '@opentelemetry/exporter-trace-otlp-proto':
+        specifier: 0.301.2
+        version: 0.301.2(@opentelemetry/api@1.10.0)
+      '@opentelemetry/sdk-trace':
+        specifier: 3.1.1
+        version: 3.1.1(@opentelemetry/api@1.10.0)
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
@@ -3866,6 +3884,15 @@ packages:
 
   '@blazediff/core@1.9.1':
     resolution: {integrity: sha512-ehg3jIkYKulZh+8om/O25vkvSsXXwC+skXmyA87FFx6A/45eqOkZsBltMw/TVteb0mloiGT8oGRTcjRAz66zaA==}
+
+  '@buf/opentelemetry_opentelemetry.bufbuild_es@https://buf.build/gen/npm/v1/@buf/opentelemetry_opentelemetry.bufbuild_es/-/opentelemetry_opentelemetry.bufbuild_es-2.17.0-20261002203906-f3a7b1f1162b.1.tgz':
+    resolution: {integrity: sha512-Xco7OJPmweQDEhf3TcJ0zsGigCzg6WMNf7GHj9MAUxTnzM/ZvjCQzKtAEG+2Dg3LxhECV2eENbNx3ymMD8TEdA==, tarball: https://buf.build/gen/npm/v1/@buf/opentelemetry_opentelemetry.bufbuild_es/-/opentelemetry_opentelemetry.bufbuild_es-2.17.0-20261002203906-f3a7b1f1162b.1.tgz}
+    version: 2.17.0-20261002203906-f3a7b1f1162b.1
+    peerDependencies:
+      '@bufbuild/protobuf': ^2.17.0
+
+  '@bufbuild/protobuf@2.17.0':
+    resolution: {integrity: sha512-hcPkSz6D7MiTU/5VBBhK+kxaYDoOdQ6yJRFJ3kS8Nydp+VZXfg1vrpABKPNod8bXMufsVCmiUJVIKFzCzta4uw==}
 
   '@bwip-js/node@4.11.4':
     resolution: {integrity: sha512-EIdaQskEGlY+sWQQljoAdzZri+nDp8eZKIa4RQtb1/w0wm0VvCNdlR7AMhakGL9xqHEwMTZhz8qIV3lvoUiR1Q==}
@@ -16686,6 +16713,12 @@ snapshots:
   '@bcoe/v8-coverage@1.0.2': {}
 
   '@blazediff/core@1.9.1': {}
+
+  '@buf/opentelemetry_opentelemetry.bufbuild_es@https://buf.build/gen/npm/v1/@buf/opentelemetry_opentelemetry.bufbuild_es/-/opentelemetry_opentelemetry.bufbuild_es-2.17.0-20261002203906-f3a7b1f1162b.1.tgz(@bufbuild/protobuf@2.17.0)':
+    dependencies:
+      '@bufbuild/protobuf': 2.17.0
+
+  '@bufbuild/protobuf@2.17.0': {}
 
   '@bwip-js/node@4.11.4': {}
 

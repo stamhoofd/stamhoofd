@@ -28,6 +28,12 @@ export class RouterServer {
     server?: http.Server;
     defaultHeaders: http.OutgoingHttpHeaders = {};
     verbose = false;
+    /** Optional executable-owned observation of an already matched handler. */
+    observeEndpoint?: <T extends { status: number }>(
+        endpoint: object,
+        method: string,
+        handle: () => Promise<T>,
+    ) => Promise<T>;
     httpsOptions: HttpsOptions | null;
 
     requestMiddlewares: RequestMiddleware[] = [];
@@ -189,7 +195,11 @@ export class RouterServer {
                             }
                         }
 
-                        response = await endpoint.handle(decodedRequest);
+                        response = this.observeEndpoint
+                            ? await this.observeEndpoint(endpoint, request.method, () =>
+                                  endpoint.handle(decodedRequest),
+                              )
+                            : await endpoint.handle(decodedRequest);
                     }
 
                     // Add default headers
