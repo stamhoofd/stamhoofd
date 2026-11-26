@@ -2,6 +2,7 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { errorDiagnostics, SimpleError } from '@common/errors';
 import { verifyInternalSignature } from '@stamhoofd/backend-env';
+import { traceVerifiedRender } from '@node/observability';
 import { QueueHandler } from '@stamhoofd/queues';
 import formidable from 'formidable';
 import { firstValues } from 'formidable/src/helpers/firstValues.js';
@@ -144,6 +145,14 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             });
         }
 
+        const parent = request.request.headers.traceparent;
+        const proof = request.request.headers['x-stam-render-trace'];
+        const verified = typeof parent === 'string' && /^00-[a-f0-9]{32}-[a-f0-9]{16}-01$/.test(parent)
+            && typeof proof === 'string' && proof.length === 44 && verifyInternalSignature(proof, 'renderer-trace-v1', signature, parent);
+        return traceVerifiedRender(verified ? parent : undefined, () => this.renderResponse(html, cacheId, timestamp));
+    }
+
+    private async renderResponse(html: string, cacheId: string, timestamp: Date) {
         let pdf: Uint8Array | null = null;
         try {
             pdf = await this.htmlToPdf(html, { retryCount: 2, startDate: new Date() });

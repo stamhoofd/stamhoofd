@@ -1,6 +1,6 @@
 import { registerCron } from '@stamhoofd/crons';
 import { defineWorker } from '@node/observability/workloads';
-import { sendSuccessHeartbeat } from '@node/observability';
+import { sendSuccessHeartbeat, traceStatisticsCycle } from '@node/observability';
 import { runStatisticsCycle } from './sync.js';
 
 const cycle = defineWorker('stats_cycle');
@@ -42,7 +42,7 @@ async function syncPlatformStatistics() {
         return;
     }
 
-    await cycle.run(runStatisticsCycle);
+    await cycle.run(() => traceStatisticsCycle(runStatisticsCycle));
 
     lastRun = new Date();
     await sendSuccessHeartbeat(STAMHOOFD.STATISTICS_SYNC_HEARTBEAT_URL);

@@ -1,6 +1,6 @@
 import { fatalBackendException } from '@stamhoofd/backend-env';
 import { Router, RouterServer } from '@node/endpoints';
-import { initializeMetrics, observeHttpServer } from '@node/observability';
+import { initializeMetrics, observeHttpServer, traceEndpoint } from '@node/observability';
 import { LogMiddleware } from '@stamhoofd/backend-middleware';
 import { Country } from '@stamhoofd/types/Country';
 import { Geolocator } from './classes/Geolocator.js';
@@ -29,6 +29,7 @@ const start = async () => {
     await router.loadAllEndpoints(import.meta.dirname + '/endpoints/*');
 
     const routerServer = new RouterServer(router);
+    routerServer.observeEndpoint = traceEndpoint;
     routerServer.verbose = false;
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
     observeHttpServer(routerServer.server);

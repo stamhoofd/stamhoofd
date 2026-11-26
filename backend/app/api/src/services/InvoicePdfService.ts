@@ -1,5 +1,6 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { SimpleError } from '@common/errors';
+import { traceRendererCall } from '@node/observability';
 import { signInternal } from '@stamhoofd/backend-env';
 import type { Invoice } from '@stamhoofd/models';
 import { Image, InvoicedBalanceItem, Organization, Payment, Platform } from '@stamhoofd/models';
@@ -19,6 +20,15 @@ import {
 import { Formatter } from '@stamhoofd/utility';
 import fs from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
+
+/** The configured value is an authority, never a URL or a path. URL canonicalizes default ports. */
+export function rendererPostUrl(authority: string, development: boolean) {
+    if (!authority || /[\s\\/?#@]/u.test(authority)) throw new Error('Invalid renderer authority');
+    const origin = new URL(`${development ? 'http' : 'https'}://${authority}`).origin;
+    const url = new URL(`/v${Version}/html-to-pdf`, origin);
+    if (url.origin !== origin) throw new Error('Invalid renderer origin');
+    return url;
+}
 
 export class InvoicePdfService {
     static async generateHtml(invoice: Invoice) {
@@ -316,16 +326,14 @@ export class InvoicePdfService {
         // the operation prefix prevents using it as a PDF cache-read grant.
         const expires = String(Date.now() + 60000);
         form.append('expires', expires);
-        form.append(
-            'signature',
-            signInternal(
-                'html-to-pdf',
-                cacheId,
-                invoice.updatedAt.getTime().toString(),
-                expires,
-                html,
-            ),
+        const grant = signInternal(
+            'html-to-pdf',
+            cacheId,
+            invoice.updatedAt.getTime().toString(),
+            expires,
+            html,
         );
+        form.append('signature', grant);
         form.append('timestamp', invoice.updatedAt.getTime().toString());
 
         const controller = new AbortController();
@@ -345,26 +353,33 @@ export class InvoicePdfService {
                 invoice.pdf = file;
                 await invoice.save();
             } else {
-                // Issue with system trusted CA in development
-                const result = await fetch(
-                    (STAMHOOFD.environment === 'development' ? 'http://' : 'https://') +
-                        STAMHOOFD.domains.rendererApi +
-                        '/v' +
-                        Version +
-                        '/html-to-pdf',
-                    {
+                const url = rendererPostUrl(
+                    STAMHOOFD.domains.rendererApi,
+                    STAMHOOFD.environment === 'development',
+                );
+                const buffer = await traceRendererCall(async (parent, receivedStatus) => {
+                    const headers: Record<string, string> = {};
+                    if (
+                        parent &&
+                        (url.protocol === 'https:' ||
+                            ['127.0.0.1', '[::1]', 'localhost'].includes(url.hostname))
+                    ) {
+                        headers.traceparent = parent;
+                        headers['x-stam-render-trace'] = signInternal(
+                            'renderer-trace-v1',
+                            grant,
+                            parent,
+                        );
+                    }
+                    const result = await fetch(url, {
                         method: 'POST',
                         body: form,
                         signal: controller.signal,
-                    },
-                );
-                if (result.status === 200) {
-                    // todo
-                    const buffer = Buffer.from(await result.arrayBuffer());
-                    const file = await this.uploadPdf(invoice, buffer);
-                    invoice.pdf = file;
-                    await invoice.save();
-                } else {
+                        headers,
+                        redirect: 'error',
+                    });
+                    receivedStatus(result.status);
+                    if (result.status === 200) return Buffer.from(await result.arrayBuffer());
                     let txt = '';
                     try {
                         txt = await result.text();
@@ -382,7 +397,9 @@ export class InvoicePdfService {
                         message: 'Failed to generate invoice PDF',
                         human: $t('%ZgV'),
                     });
-                }
+                });
+                invoice.pdf = await this.uploadPdf(invoice, buffer);
+                await invoice.save();
             }
         } catch (err) {
             console.error('Failed to generate invoice PDF', err);
