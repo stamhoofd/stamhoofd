@@ -22,13 +22,17 @@ export function isDevSpan(value: unknown): value is DevSpan {
         && (s.status === undefined || (Number.isInteger(s.status) && s.status >= 100 && s.status <= 599));
 }
 
-/** Pull subscriber: no delivery queue, timers or parent-first ordering requirement. */
-export function subscribeDevSpans(session: string) {
+export const maxDevTraceSpans = 128;
+
+/** Pull subscriber. An optional synchronous consumer can flush pending output before eviction. */
+export function subscribeDevSpans(session: string, beforeEvict?: (spans: DevSpan[], truncated: boolean) => void) {
     const events = channel('stamhoofd.dev.session.span');
     const traces = new Map<string, Map<string, DevSpan>>();
+    const truncated = new Set<string>();
     function close() {
         events.unsubscribe(receive);
         traces.clear();
+        truncated.clear();
     }
     function receive(value: unknown) {
         if (!value || typeof value !== 'object' || !('session' in value) || value.session !== session) return;
@@ -38,13 +42,20 @@ export function subscribeDevSpans(session: string) {
         let trace = traces.get(span.traceId);
         if (!trace) {
             if (traces.size === 8) {
-                const oldest = traces.keys().next();
-                if (!oldest.done) traces.delete(oldest.value);
+                const oldest = traces.entries().next();
+                if (!oldest.done) {
+                    const [id, spans] = oldest.value;
+                    beforeEvict?.([...spans.values()], truncated.has(id));
+                    traces.delete(id);
+                    truncated.delete(id);
+                }
             }
             traces.set(span.traceId, trace = new Map<string, DevSpan>());
         }
-        if (trace.size < 128 && !trace.has(span.spanId)) trace.set(span.spanId, Object.freeze({ ...span }));
+        if (trace.has(span.spanId)) return;
+        if (trace.size < maxDevTraceSpans) trace.set(span.spanId, Object.freeze({ ...span }));
+        else truncated.add(span.traceId);
     }
     events.subscribe(receive);
-    return { snapshot: () => [...traces.values()].map(trace => [...trace.values()]), close };
+    return { snapshot: () => [...traces.values()].map(trace => [...trace.values()]), isTruncated: (id: string) => truncated.has(id), close };
 }

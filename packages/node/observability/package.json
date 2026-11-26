@@ -4,6 +4,10 @@
     "private": true,
     "type": "module",
     "exports": {
+        "./dev-capture-selectors": {
+            "types": "./dist-types/dev-capture-selectors.d.ts",
+            "import": "./dist/dev-capture-selectors.js"
+        },
         "./workloads": {
             "types": "./dist-types/workloads.d.ts",
             "import": "./dist/workloads.js"

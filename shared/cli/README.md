@@ -211,20 +211,62 @@ the CLI's `dist` so shared CLI rebuilds cannot remove it before the apps start.
 
 #### Development logs and status
 
-`stam dev` provisions `STAM_DEV_CAPTURE=*` for backend sessions: every instrumented
-request is eligible locally, independently of production sampling. To narrow capture
-to the first matching registered API handler, use `STAM_DEV_CAPTURE='PATCH /invoices' stam dev`. No caller-supplied header selects the request. The local
-tracer uses its own provider and IDs; its renderer continuation is signed for the
-same dev session. The existing lifecycle socket alone does not enable capture.
+Running `stam dev backend` (also `all` or `instance`) displays locally received
+application spans as one tree per trace ID on stderr. No selector is required.
+Use `--trace-filter 'PATCH /invoices'` for every matching request, or
+`--trace-filter statistics.cycle` for every worker cycle. The flag takes precedence
+over `STAM_DEV_CAPTURE`; `*` is the unfiltered default. `stam dev --help` lists all choices.
+Frontend and docs sessions do not capture backend traces. The local tracer uses
+its own provider and IDs; renderer continuation is signed for the same dev session.
+
+`--trace-detail compact` is the default, including without `--verbose`. Trace detail
+does not change subprocess logging. `--quiet` shows traces with recorded warnings
+or failures at the chosen detail level. If span loss is confirmed but no retained
+span shows a warning or failure, all detail levels print just one omission notice
+for that trace. The notice does not list healthy spans or infer the missing outcome.
+
+`summary` gives one line per snapshot with the UTC start time, service,
+operation, outcome, duration, and a recorded failure reason if available.
+`compact` keeps problems, retries, and their ancestors. A healthy operation
+gets at most two timing clues: each must take at least 10 ms and at least 20%
+of the root duration. A qualifying nested child takes precedence over a sibling.
+
+Summary and compact skip routine successful OPTIONS requests. Full shows every
+recorded operation. Compact and full use the same waterfall: each retained row
+shows its inclusive duration and its position within the entire root interval.
+Hiding short operations does not stretch the remaining bars. For example, in
+compact mode a short SQL call can be hidden while the renderer rows keep their
+positions below. A `▏` marks a sub-cell span;
+`—` marks a span that cannot be placed. Without a root or enough columns, the
+chart is omitted. Service labels change at process boundaries.
+
+```text
+12:04:03.120Z  #14cb65e9
+Operation                               Status / detail  Duration  Timeline
+└─ api  PATCH /invoices                 HTTP 200            45 ms  ━━━━━━━━━━━━━━━━━━━━━━━
+   └─ Call renderer                     HTTP 200            30 ms    ━━━━━━━━━━━━━━━
+      └─ → renderer  POST /html-to-pdf                      27 ms     ━━━━━━━━━━━━━━
+```
+
+SQL labels include the validated collection only when supplied by the producer.
+Color is optional; status, bounded reasons and retry counts remain readable in
+plain text. The backend suppresses a 2xx `http.response` stdout record only when
+its local emitter queued the server span for that exact request. Queueing is not
+a delivery guarantee. Untraced successes (including filter nonmatches), non-2xx
+response logs, and dedicated error records retain their normal logging behavior.
+Later arrivals update the tree, including parents that finish after their children.
+Missing parents and spans omitted by the per-trace limit are marked. A finished
+root does not prove all children arrived.
 
 In the CLI process, call `subscribeDevSpans(channel.env.STAM_DEV_SESSION)` from
 `@node/dev-tools/spans` before starting producers. `snapshot()` returns up to eight
 traces with up to 128 finished spans each. Join on `traceId` and `parentId`; arrival
-order is not causal. The oldest trace is evicted first. The subscriber buffers no
+order is not causal. Before the oldest trace is evicted, the terminal flushes any
+pending output for it. The subscriber buffers no
 pending notifications. Call `close()` to unsubscribe and clear memory; closing the
 session does this automatically. The capture uses a separate bounded writer on the
 private socket. A disconnected or slow subscriber cannot prevent application work.
-No OTLP destination, terminal renderer or external collector is involved.
+No OTLP destination or external collector is needed.
 
 Development lifecycle transport and typed producer adapters live in
 `packages/node/dev-tools`. The CLI bootstrap prepares this independent package;

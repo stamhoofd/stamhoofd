@@ -2,6 +2,8 @@ import { hasLogSink, log, markSpanFailed, withSpan } from '@common/opentelemetry
 import { context as otelContext, propagation } from '@opentelemetry/api';
 import { openDevEventChannel } from '../runtime/dev-event-channel.js';
 import { DevLifecycle } from '../runtime/dev-lifecycle.js';
+import { startDevTraceView, type TraceDetail } from '../runtime/dev-trace-view.js';
+import { RunVerbosity } from '../runtime/verbosity.js';
 import { processError } from '@node/opentelemetry-process';
 import { execResult } from '../runtime/process.js';
 import { getCliTelemetry, withCliCleanup } from '../runtime/telemetry.js';
@@ -16,7 +18,7 @@ import { DevStatus, formatDevStatus } from '../runtime/dev-status.js';
 import { createLiveOutput } from '../runtime/live-output.js';
 import { removeInstanceManifest, writeInstanceManifest } from '../runtime/manifest-store.js';
 import { sharedBuildReadyCommand, sharedBuildWatchCommand } from '../runtime/monorepo-runner.js';
-import { setActiveOutputTarget } from '../runtime/output-target.js';
+import { OutputStream, setActiveOutputTarget } from '../runtime/output-target.js';
 import { openUrl } from '../runtime/ux.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
 import { startServices, stopServices } from '../services/manager.js';
@@ -41,10 +43,43 @@ enum PrerequisiteState {
     Missing = 'missing',
 }
 
+/** Subscribe before child startup; flush the last snapshot before the channel clears it. */
+export async function openDevSession(
+    target: DevTarget,
+    traceFilter: string | undefined,
+    receive: Parameters<typeof openDevEventChannel>[0],
+    traceparent: string | undefined,
+    write: (block: string) => void,
+    presentation: { detail?: TraceDetail; quiet?: boolean } = {},
+) {
+    const capture =
+        target === DevTarget.Docs || target === DevTarget.Frontend ? '' : (traceFilter ?? '*');
+    const channel = await openDevEventChannel(receive, traceparent, capture);
+    const stop = capture
+        ? startDevTraceView(channel.env.STAM_DEV_SESSION, write, presentation)
+        : undefined;
+    return {
+        env: channel.env,
+        async close() {
+            try {
+                stop?.();
+            } finally {
+                await channel.close();
+            }
+        },
+    };
+}
+
 export async function runDev(
     context: CliContext,
     target: DevTarget,
-    options: { services: boolean; stripe: boolean; open?: boolean },
+    options: {
+        services: boolean;
+        stripe: boolean;
+        open?: boolean;
+        traceFilter?: string;
+        traceDetail?: TraceDetail;
+    },
 ): Promise<void> {
     let startedServices = false;
     let startedStripe = false;
@@ -63,7 +98,7 @@ export async function runDev(
     };
     const status = new DevStatus(devApps(target, domains, ports), setStatus);
     const lifecycle = new DevLifecycle((event) => status.event(event));
-    let channel: Awaited<ReturnType<typeof openDevEventChannel>> | undefined;
+    let channel: Awaited<ReturnType<typeof openDevSession>> | undefined;
 
     const refreshSetupState = (): Promise<boolean> =>
         withSpan(
@@ -212,12 +247,13 @@ export async function runDev(
         monitoring = true;
         const carrier: Record<string, string> = {};
         propagation.inject(otelContext.active(), carrier);
-        channel = await openDevEventChannel(
+        channel = await openDevSession(
+            target,
+            options.traceFilter,
             (event) => lifecycle.receive(event),
             carrier.traceparent,
-            target === DevTarget.Docs || target === DevTarget.Frontend
-                ? ''
-                : process.env.STAM_DEV_CAPTURE || '*',
+            (block) => output.write(block, OutputStream.Stderr),
+            { detail: options.traceDetail, quiet: context.verbosity === RunVerbosity.Quiet },
         );
         status.start();
         const names =

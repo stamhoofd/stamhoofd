@@ -4,6 +4,7 @@ import type { Span, SpanContext, Tracer } from '@opentelemetry/api';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { channel } from 'node:diagnostics_channel';
 import { boundedMethod } from './http-metrics.js';
+import { captureEndpoints, statisticsCycle } from './dev-capture-selectors.js';
 
 const stages = {
     'auth.authenticate': 'execution',
@@ -62,11 +63,9 @@ export function ownedOperation(span: object) {
 }
 
 const routes: Record<string, Record<string, string>> = {
-    api: {
-        PatchInvoicesEndpoint: '/invoices',
-        GetInvoicesEndpoint: '/invoices',
-        HealthEndpoint: '/health',
-    },
+    api: Object.fromEntries(
+        Object.entries(captureEndpoints).map(([name, { route }]) => [name, route]),
+    ),
     renderer: {
         HealthEndpoint: '/health',
         PrerenderEndpoint: '/prerender',
@@ -309,7 +308,7 @@ function lane(role: string, tracer: Tracer, selection?: string) {
     function traceStatisticsCycle<T>(work: () => Promise<T>) {
         const admit =
             role === 'stats' &&
-            (selection ? selection === '*' || selection === 'statistics.cycle' : sample());
+            (selection ? selection === '*' || selection === statisticsCycle : sample());
         return admit
             ? run(start({ name: 'statistics.cycle', kind: SpanKind.INTERNAL }), work)
             : work();

@@ -40,6 +40,7 @@
         "@common/opentelemetry-decorators": "workspace:*",
         "@inquirer/prompts": "7.10.1",
         "@node/dev-tools": "workspace:*",
+        "@node/observability": "workspace:*",
         "@node/opentelemetry-process": "workspace:*",
         "@node/opentelemetry-terminal": "workspace:*",
         "@node/terminal": "workspace:*",
