@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "type": "module",
-    "packageManager": "pnpm@12.19.0+sha512.87327b6619853205834e4be59ba3a231e303d9f5e435912ede3312b7539b79af890942f6513b05a4690745666888045c09b33fc420c2cd2d3bd95c01ba21dbeb",
+    "packageManager": "pnpm@12.22.0+sha512.894940a3d9a57dfa6fd373990fb4e41e09c2f2d76d982ed1d75275d39267f988fb4e2d40900cbe9921c68d97c67aa1a1096d276633db248f7b34927ac9ddb7a4",
     "scripts": {
         "postinstall": "if [ -d frontend/app/mobile ]; then node frontend/app/mobile/scripts/update-native-dependencies.mjs; fi",
         "build:backend:apps": "pnpm exec turbo run build --filter=@stamhoofd/backend --filter=@stamhoofd/backend-renderer --filter=@stamhoofd/backend-backup --filter=@stamhoofd/redirecter --filter=@stamhoofd/backend-statistics-syncer",
