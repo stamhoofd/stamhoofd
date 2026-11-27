@@ -708,6 +708,7 @@ const membersPackageTypes = new Set([
     AuditLogType.RegistrationPeriodDeleted,
     AuditLogType.MemberSecurityCodeRequested,
     AuditLogType.MemberSecurityCodeUsed,
+    AuditLogType.MemberSecurityCodeFailed,
 ]);
 
 /**

@@ -104,6 +104,7 @@ export const auditLogTypeOrder: AuditLogType[] = [
     AuditLogType.UserRecoveryCodesRegenerated,
     AuditLogType.MemberSecurityCodeRequested,
     AuditLogType.MemberSecurityCodeUsed,
+    AuditLogType.MemberSecurityCodeFailed,
     AuditLogType.UserImpersonated,
 
     AuditLogType.DocumentTemplateAdded,
@@ -193,6 +194,7 @@ export function getAuditLogTypeCategory(type: AuditLogType, context: AuditLogTyp
         case AuditLogType.UserRecoveryCodesRegenerated:
         case AuditLogType.UserImpersonated:
         case AuditLogType.MemberSecurityCodeUsed:
+        case AuditLogType.MemberSecurityCodeFailed:
         case AuditLogType.MemberSecurityCodeRequested:
             return AuditLogTypeCategory.Users;
 

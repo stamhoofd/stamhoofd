@@ -1374,6 +1374,8 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Entered the security code, so we can link the user to the member
         if (STAMHOOFD.environment !== 'development') {
             if (!member.details.securityCode || securityCode !== member.details.securityCode) {
+                await this.logSecurityCodeAttempt(member, AuditLogType.MemberSecurityCodeFailed);
+
                 throw new SimpleError({
                     code: 'invalid_field',
                     field: 'details.securityCode',
@@ -1389,12 +1391,22 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Grant temporary access to this member without needing to enter the security code again
         await Context.auth.temporarilyGrantMemberAccess(member, PermissionLevel.Full);
 
+        await this.logSecurityCodeAttempt(member, AuditLogType.MemberSecurityCodeUsed);
+    }
+
+    /**
+     * Never log the entered code.
+     */
+    private static async logSecurityCodeAttempt(
+        member: MemberWithUsersRegistrationsAndGroups,
+        type: AuditLogType.MemberSecurityCodeUsed | AuditLogType.MemberSecurityCodeFailed,
+    ) {
         const log = new AuditLog();
 
         // a member has multiple organizations, so this is difficult to determine - for now it is only visible in the admin panel
         log.organizationId = member.organizationId;
 
-        log.type = AuditLogType.MemberSecurityCodeUsed;
+        log.type = type;
         log.source = AuditLogSource.Anonymous;
 
         if (Context.user) {
