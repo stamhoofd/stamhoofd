@@ -1,4 +1,5 @@
 import {
+    captureExceptionEnvelope,
     errorDiagnostics,
     isSimpleError,
     isSimpleErrors,
@@ -72,6 +73,7 @@ export class RouterServer {
     }
 
     async processError(res: http.ServerResponse, e: Error, request: Request) {
+        captureExceptionEnvelope('backend.request', e);
         const response = this.errorToResponse(e);
 
         // Process response middlewares
