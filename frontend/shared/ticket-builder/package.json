@@ -16,7 +16,7 @@
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
         "buffer": "6.0.3",
-        "pdfkit": "0.20.2",
+        "pdfkit": "0.21.0",
         "qrcode": "1.5.4"
     },
     "devDependencies": {
