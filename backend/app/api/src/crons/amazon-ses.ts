@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { DeleteMessageCommand, ReceiveMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
+import {
+    DeleteMessageCommand,
+    ReceiveMessageCommand,
+    SQSClient,
+    SQSServiceException,
+} from '@aws-sdk/client-sqs';
+import { validate as isUuid } from 'uuid';
 import { registerCron } from '@stamhoofd/crons';
 import { defineWorker } from '@node/observability/workloads';
+import { sendSuccessHeartbeat } from '@node/observability';
 import { Email, EmailAddress } from '@stamhoofd/email';
 import { AuditLog, EmailRecipient, Organization } from '@stamhoofd/models';
 import {
@@ -100,7 +107,10 @@ async function storeEmailStatus({
             .first(false);
 
         if (!emailRecipient) {
-            console.log('[AWS FORWARDING] Invalid email or recipient id in headers', headers);
+            console.warn('[AWS FORWARDING] Invalid email or recipient id in headers', {
+                emailId: isUuid(emailId) ? emailId : undefined,
+                recipientId: isUuid(recipientId) ? recipientId : undefined,
+            });
             return;
         }
 
@@ -130,14 +140,7 @@ async function storeEmailStatus({
             }
         }
 
-        console.log(
-            '[AWS FORWARDING] Marking email recipient ' +
-                recipientId +
-                ' for email ' +
-                emailId +
-                ' as ' +
-                type,
-        );
+        console.log('[AWS FORWARDING] Marking email recipient as ' + type);
         if (await emailRecipient.save()) {
             if (isNew) {
                 await EmailModel.bumpNotificationCount(emailId, type);
@@ -163,11 +166,11 @@ export function readHeaders(message: any): Map<string, string> {
                 }
             }
         } else {
-            console.log('[AWS] Missing mail headers', message);
+            console.log('[AWS] Missing mail headers');
         }
         return headers;
-    } catch (e) {
-        console.log('[AWS] Failed to read headers', e, message);
+    } catch {
+        console.log('[AWS] Failed to read headers');
         return new Map();
     }
 }
@@ -177,7 +180,7 @@ function readRecipientEmail(recipient: { emailAddress: string }): string {
     const addresses = Email.parseEmailStr(recipient.emailAddress);
     if (addresses.length !== 1) {
         // Ambiguous or unparseable: keep the reported value
-        console.warn('[AWS] Could not read recipient email address', recipient.emailAddress);
+        console.warn('[AWS] Could not read recipient email address');
         return recipient.emailAddress;
     }
     return addresses[0];
@@ -185,7 +188,7 @@ function readRecipientEmail(recipient: { emailAddress: string }): string {
 
 export async function handleBounce(message: any) {
     if (message.bounce) {
-        console.log('[AWS BOUNCES] Handling bounce message', message);
+        console.log('[AWS BOUNCES] Handling bounce message');
         const headers = readHeaders(message);
 
         const b = message.bounce;
@@ -258,7 +261,6 @@ export async function handleBounce(message: any) {
                 });
             }
         }
-        console.log('[AWS BOUNCES] For domain ' + source);
     } else {
         console.log("[AWS BOUNCES] 'bounce' field missing in bounce message");
     }
@@ -317,7 +319,6 @@ export async function handleComplaint(message: any) {
 
         if (type === 'virus' || type === 'fraud') {
             console.error('[AWS COMPLAINTS] Received virus / fraud complaint!');
-            console.error('[AWS COMPLAINTS]', message.complaint);
             if (STAMHOOFD.environment !== 'development') {
                 Email.sendWebmaster({
                     subject: 'Received a ' + type + ' email notification',
@@ -366,9 +367,43 @@ function getClient() {
     return sharedClient;
 }
 
-export async function readFromQueue(queueUrl: string) {
-    console.log('[AWS Queue] Checking ' + queueUrl);
+type QueueRole = 'bounce' | 'complaint' | 'reply';
 
+function sourceFrames(error: Error) {
+    // The stack header can repeat a multiline error message containing mail content.
+    const header = `${error.toString()}\n`;
+    if (!error.stack?.startsWith(header)) return [];
+    const frames: string[] = [];
+    for (const line of error.stack.slice(header.length).split('\n')) {
+        const location = /^\s+at .*?\/((?:backend|packages|shared)\/[\w./-]+:\d+:\d+)\)?$/.exec(
+            line,
+        );
+        if (location) frames.push(location[1]);
+    }
+    return frames;
+}
+
+function queueError(queue: QueueRole, operation: 'receive' | 'delete', error: unknown) {
+    const details: string[] = [queue];
+    if (error instanceof SQSServiceException) {
+        const { httpStatusCode, requestId } = error.$metadata;
+        details.push(error.name);
+        if (httpStatusCode) details.push(`HTTP ${httpStatusCode}`);
+        if (requestId && isUuid(requestId)) details.push(`request ${requestId}`);
+    } else if (error instanceof Error) {
+        details.push(error.name);
+        if (
+            'code' in error &&
+            typeof error.code === 'string' &&
+            /^E[A-Z0-9]{2,24}$/.test(error.code)
+        ) {
+            details.push(error.code);
+        }
+    }
+    return new Error(`SES queue ${operation} failed (${details.join(', ')})`);
+}
+
+export async function readFromQueue(queueUrl: string, queue: QueueRole) {
     const client = getClient();
 
     const cmd = new ReceiveMessageCommand({
@@ -376,14 +411,17 @@ export async function readFromQueue(queueUrl: string) {
         QueueUrl: queueUrl,
     });
 
-    const messages = await client.send(cmd);
+    const messages = await client.send(cmd).catch((error: unknown) => {
+        throw queueError(queue, 'receive', error);
+    });
     let didProcess = 0;
+    let healthy = true;
     if (messages.Messages) {
         for (const message of messages.Messages) {
             console.log('[AWS Queue] Received message');
-            console.log('[AWS Queue]', message);
 
             const finish = messageWorker.start();
+            const context = { queue, messageId: message.MessageId, deleted: false };
             if (message.ReceiptHandle) {
                 if (STAMHOOFD.environment !== 'development') {
                     const deleteCmd = new DeleteMessageCommand({
@@ -393,16 +431,21 @@ export async function readFromQueue(queueUrl: string) {
 
                     try {
                         await client.send(deleteCmd);
+                        context.deleted = true;
                     } catch (error) {
                         finish?.('error');
-                        throw error;
+                        throw queueError(queue, 'delete', error);
                     }
                     console.log('[AWS Queue] Deleted from queue');
                 }
+            } else {
+                healthy = false;
+                console.warn('[AWS Queue] Missing receipt handle', context);
             }
             didProcess += 1;
 
             let outcome: 'success' | 'skipped' | 'error' = 'skipped';
+            let step = 'parsing';
             try {
                 if (message.Body) {
                     // decode the JSON value
@@ -410,6 +453,7 @@ export async function readFromQueue(queueUrl: string) {
 
                     if (bounce.Message) {
                         const message = JSON.parse(bounce.Message);
+                        step = 'handler';
 
                         // Docs: https://docs.aws.amazon.com/ses/latest/dg/event-publishing-retrieving-sns-contents.html
                         if (message.bounce) {
@@ -425,23 +469,25 @@ export async function readFromQueue(queueUrl: string) {
                             await handleForward(message);
                             outcome = 'success';
                         } else {
-                            console.log('[AWS Queue] Unsupported message');
+                            console.warn('[AWS Queue] Unsupported notification type', context);
                         }
                     } else {
-                        console.log("[AWS Queue] 'Message' field missing");
+                        console.warn("[AWS Queue] 'Message' field missing", context);
                     }
                 } else {
-                    console.log('[AWS Queue] Message Body missing in bounce');
+                    console.warn('[AWS Queue] Missing message body', context);
                 }
-            } catch (e) {
+            } catch (error) {
                 outcome = 'error';
-                console.log('[AWS Queue] Message processing failed:');
-                console.log('[AWS Queue]', e);
-
-                console.error('[AWS Queue] Message processing failed:');
-                console.error('[AWS Queue]', e);
+                console.error('[AWS Queue] Message processing failed', {
+                    ...context,
+                    step,
+                    errorType: error instanceof Error ? error.constructor.name : 'unknown',
+                    frames: error instanceof Error ? sourceFrames(error) : undefined,
+                });
             } finally {
                 finish?.(outcome);
+                if (outcome !== 'success') healthy = false;
             }
         }
     }
@@ -451,13 +497,15 @@ export async function readFromQueue(queueUrl: string) {
     } else {
         console.log('[AWS Queue] No message to process from queue');
     }
-    return didProcess;
+    return { didProcess, healthy };
 }
 
-async function readAllFromQueue(queueUrl: string) {
+async function readAllFromQueue(queue: QueueRole, queueUrl: string, heartbeat: string | undefined) {
     let readCount = 0;
+    let healthy = true;
     while (readCount < 20) {
-        const didProcess = await readFromQueue(queueUrl);
+        const { didProcess, healthy: batchHealthy } = await readFromQueue(queueUrl, queue);
+        if (!batchHealthy) healthy = false;
         if (!didProcess) {
             break;
         }
@@ -466,29 +514,41 @@ async function readAllFromQueue(queueUrl: string) {
     console.log(
         `[AWS Queue] Finished processing all messages from queue (${readCount} messages processed)`,
     );
-    return true;
+    if (healthy) await sendSuccessHeartbeat(heartbeat);
 }
 
-async function checkBounces() {
+export async function checkBounces() {
     if (!STAMHOOFD.AWS_ACCESS_KEY_ID || !STAMHOOFD.AWS_BOUNCE_QUEUE_URL) {
         return;
     }
 
-    await readAllFromQueue(STAMHOOFD.AWS_BOUNCE_QUEUE_URL);
+    await readAllFromQueue(
+        'bounce',
+        STAMHOOFD.AWS_BOUNCE_QUEUE_URL,
+        STAMHOOFD.SES_BOUNCE_HEARTBEAT_URL,
+    );
 }
 
-async function checkReplies() {
+export async function checkReplies() {
     if (!STAMHOOFD.AWS_ACCESS_KEY_ID || !STAMHOOFD.AWS_FORWARDING_QUEUE_URL) {
         return;
     }
 
-    await readAllFromQueue(STAMHOOFD.AWS_FORWARDING_QUEUE_URL);
+    await readAllFromQueue(
+        'reply',
+        STAMHOOFD.AWS_FORWARDING_QUEUE_URL,
+        STAMHOOFD.SES_REPLY_HEARTBEAT_URL,
+    );
 }
 
-async function checkComplaints() {
+export async function checkComplaints() {
     if (!STAMHOOFD.AWS_ACCESS_KEY_ID || !STAMHOOFD.AWS_COMPLAINTS_QUEUE_URL) {
         return;
     }
 
-    await readAllFromQueue(STAMHOOFD.AWS_COMPLAINTS_QUEUE_URL);
+    await readAllFromQueue(
+        'complaint',
+        STAMHOOFD.AWS_COMPLAINTS_QUEUE_URL,
+        STAMHOOFD.SES_COMPLAINT_HEARTBEAT_URL,
+    );
 }

@@ -130,13 +130,13 @@ it('measures individual SES messages even when processing errors are caught insi
             { Body: '{}' },
         ],
     });
-    expect(await readFromQueue(url)).toBe(3);
+    expect(await readFromQueue(url, 'bounce')).toEqual({ didProcess: 3, healthy: false });
     receive.mockResolvedValueOnce({
         $metadata: {},
         Messages: [{ ReceiptHandle: 'private-handle' }],
     });
     receive.mockRejectedValueOnce(new Error('private-delete-error'));
-    await expect(readFromQueue(url)).rejects.toThrow('private-delete-error');
+    await expect(readFromQueue(url, 'bounce')).rejects.toThrow('SES queue delete failed');
     const text = await scrape();
     for (const [outcome, count] of [
         ['success', 1],

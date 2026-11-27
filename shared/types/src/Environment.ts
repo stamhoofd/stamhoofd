@@ -125,6 +125,9 @@ export type BackendSpecificEnvironment = {
     readonly AWS_BOUNCE_QUEUE_URL?: string | null;
     readonly AWS_COMPLAINTS_QUEUE_URL?: string | null;
     readonly AWS_FORWARDING_QUEUE_URL?: string | null;
+    readonly SES_BOUNCE_HEARTBEAT_URL?: string;
+    readonly SES_COMPLAINT_HEARTBEAT_URL?: string;
+    readonly SES_REPLY_HEARTBEAT_URL?: string;
 
     // DO spaces
     readonly SPACES_ENDPOINT: string;

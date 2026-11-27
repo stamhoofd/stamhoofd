@@ -29,12 +29,7 @@ export class ForwardHandler {
         const from = parsed.from?.value[0]?.address;
 
         if (from && from.endsWith('amazonses.com') && organization) {
-            console.log(
-                'Bounce e-mails from AWS SES for organizations are not forwarded. Received from ' +
-                    from +
-                    ', to ' +
-                    email,
-            );
+            console.log('Bounce e-mails from AWS SES for organizations are not forwarded');
             return;
         }
 
@@ -46,12 +41,7 @@ export class ForwardHandler {
                 const model = await EmailAddress.getByID(id);
 
                 if (model) {
-                    console.log(
-                        '[Unsubscribe] Received an unsubscribe request for ' +
-                            model.email +
-                            ' from ' +
-                            from,
-                    );
+                    console.log('[Unsubscribe] Received an unsubscribe request');
                     if (model.unsubscribedAll) {
                         // Ignore
                         return;
@@ -59,12 +49,7 @@ export class ForwardHandler {
                     model.unsubscribedAll = true;
                     await model.save();
                 } else {
-                    console.error(
-                        '[Unsubscribe] Received an unsubscribe request for unknown ID ' +
-                            id +
-                            ' from ' +
-                            from,
-                    );
+                    console.error('[Unsubscribe] Received an unsubscribe request for unknown ID');
 
                     // Forward
                     return {
@@ -86,15 +71,7 @@ export class ForwardHandler {
             receipt.virusVerdict.status !== 'PASS' ||
             !(receipt.spfVerdict.status == 'PASS' || receipt.dkimVerdict.status == 'PASS')
         ) {
-            console.error(
-                'Received spam or virus e-mail. Ignoring',
-                'to',
-                recipients,
-                'from',
-                email,
-                'subject',
-                parsed.subject,
-            );
+            console.error('Received spam or virus e-mail. Ignoring');
             return;
         }
 
@@ -137,7 +114,7 @@ export class ForwardHandler {
                 if (STAMHOOFD.environment === 'test') {
                     // ignore
                 } else {
-                    console.error('Missing reply emails for organization ' + organization.id);
+                    console.error('Missing reply emails for organization', organization.id);
                 }
                 return doBounce();
             } else {
@@ -146,8 +123,6 @@ export class ForwardHandler {
         } else {
             return doBounce();
         }
-
-        console.log('Forward to', defaultEmail);
 
         let html: string | undefined = undefined;
 
