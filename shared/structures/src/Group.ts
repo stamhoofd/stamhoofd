@@ -409,7 +409,7 @@ export class Group extends AutoEncoder {
         );
     }
 
-    getRecommendedFilter(organization?: GroupOrganization | null): StamhoofdFilter {
+    getRecommendedFilter(organization?: (GroupOrganization & { name: string }) | null): StamhoofdFilter {
         const filter: StamhoofdFilter = [];
 
         const periods = this.getActivePeriods(organization ?? null).map((p) => {
@@ -542,8 +542,12 @@ export class Group extends AutoEncoder {
         }
 
         if (STAMHOOFD.userMode === 'platform') {
+            // Members of a national activity are not required to be registered at the organizing organization
+            const isNationalActivity = this.event !== null && this.event.organizationId === null;
+
             if (
                 organization &&
+                !isNationalActivity &&
                 (!this.settings.requireOrganizationIds.length ||
                     this.settings.requireOrganizationIds.includes(organization.id))
             ) {
@@ -553,7 +557,11 @@ export class Group extends AutoEncoder {
                             $and: [
                                 periodIdFilter,
                                 {
-                                    organizationId: organization.id,
+                                    organizationId: {
+                                        $: '$rel',
+                                        value: organization.id,
+                                        name: organization.name,
+                                    },
                                 },
                             ],
                         },
