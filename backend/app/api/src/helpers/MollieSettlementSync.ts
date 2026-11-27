@@ -141,7 +141,7 @@ export class MollieSettlementSync {
         if (!range) {
             return;
         }
-        await this.#syncTransactionFees({ range, abort });
+        await this.#syncTransactionFees({ range, abort, summary });
     }
 
     /**
@@ -168,17 +168,24 @@ export class MollieSettlementSync {
             const request = await this.#get(url);
 
             if (request.status !== 200) {
+                if (summary) summary.failed++;
                 console.error('Failed to fetch settlements');
                 console.error(request.data);
-                return range;
+                return null;
             }
 
             const settlements = request.data._embedded?.settlements as
                 | MollieSettlement[]
                 | undefined;
-            if (!settlements) {
+            const next = request.data._links?.next?.href as string | undefined;
+            if (
+                !Array.isArray(settlements) ||
+                (request.data._links?.next && (!settlements.length || !next))
+            ) {
+                if (summary) summary.failed++;
                 console.error('Unreadable settlements');
-                return range;
+                // A partial range has no trustworthy lower bound for the subsequent fee walk.
+                return null;
             }
 
             for (const settlement of settlements) {
@@ -192,6 +199,7 @@ export class MollieSettlementSync {
                 const settledAt = new Date(settlement.settledAt);
 
                 if (isNaN(settledAt.getTime())) {
+                    if (summary) summary.failed++;
                     console.error(
                         'Received an invalid settledAt from Mollie',
                         settlement,
@@ -238,8 +246,7 @@ export class MollieSettlementSync {
                 }
             }
 
-            const next = request.data._links?.next?.href as string | undefined;
-            url = settlements.length > 0 && next ? next : null;
+            url = next ?? null;
         }
 
         return range;
@@ -309,14 +316,16 @@ export class MollieSettlementSync {
     async #syncTransactionFees({
         range,
         abort,
+        summary,
     }: {
         range: WalkedSettlementRange;
         abort?: AbortSignal;
+        summary?: SettlementSyncSummary;
     }): Promise<void> {
         const touchedSettlementIds = new Set<string>();
 
         try {
-            await this.#walkTransactionFees({ range, abort }, touchedSettlementIds);
+            await this.#walkTransactionFees({ range, abort, summary }, touchedSettlementIds);
         } catch (e) {
             // Recount what was stored before the walk broke, without hiding what broke it
             await SettlementService.refreshTotalsForIds([...touchedSettlementIds]).catch(
@@ -334,7 +343,11 @@ export class MollieSettlementSync {
      * lookback. Without a previous payout the walk reaches the end of the list.
      */
     async #walkTransactionFees(
-        { range, abort }: { range: WalkedSettlementRange; abort?: AbortSignal },
+        {
+            range,
+            abort,
+            summary,
+        }: { range: WalkedSettlementRange; abort?: AbortSignal; summary?: SettlementSyncSummary },
         touchedSettlementIds: Set<string>,
     ): Promise<void> {
         const oldest = range.previousSettledAt
@@ -349,6 +362,7 @@ export class MollieSettlementSync {
             const request = await this.#get(url);
 
             if (request.status !== 200) {
+                if (summary) summary.failed++;
                 console.error(
                     'Failed to fetch balance transactions for organization',
                     this.token.organizationId,
@@ -360,7 +374,12 @@ export class MollieSettlementSync {
             const transactions = request.data._embedded?.balance_transactions as
                 | MollieBalanceTransaction[]
                 | undefined;
-            if (!transactions) {
+            const next = request.data._links?.next?.href as string | undefined;
+            if (
+                !Array.isArray(transactions) ||
+                (request.data._links?.next && (!transactions.length || !next))
+            ) {
+                if (summary) summary.failed++;
                 console.error('Unreadable balance transactions');
                 return;
             }
@@ -371,6 +390,7 @@ export class MollieSettlementSync {
                 const createdAt = new Date(transaction.createdAt);
 
                 if (isNaN(createdAt.getTime())) {
+                    if (summary) summary.failed++;
                     console.error(
                         'Received an invalid balance transaction createdAt from Mollie',
                         transaction,
@@ -392,8 +412,7 @@ export class MollieSettlementSync {
                 await this.#storeTransactionFee(transaction, createdAt, touchedSettlementIds);
             }
 
-            const next = request.data._links?.next?.href as string | undefined;
-            url = transactions.length > 0 && next ? next : null;
+            url = next ?? null;
         }
     }
 
@@ -487,6 +506,9 @@ export class MollieSettlementSync {
 
         if (request.status === 200) {
             const entries = request.data._embedded[resource] as MollieSettlementEntryJSON[];
+            if (!Array.isArray(entries) || (!entries.length && request.data._links?.next)) {
+                throw new Error('Unreadable Mollie settlement ' + resource);
+            }
 
             for (const entry of entries) {
                 // Between two entries is a safe point to stop: the settlement only claims to be
@@ -497,7 +519,7 @@ export class MollieSettlementSync {
             }
 
             // Check next page
-            if (request.data._links.next && entries.length > 0) {
+            if (request.data._links.next) {
                 await this.#syncResource(
                     settlement,
                     resource,
@@ -506,7 +528,7 @@ export class MollieSettlementSync {
                 );
             }
         } else {
-            console.error(request.data);
+            throw new Error('Failed to fetch Mollie settlement ' + resource);
         }
     }
 

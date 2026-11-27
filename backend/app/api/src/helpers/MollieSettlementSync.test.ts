@@ -8,6 +8,8 @@ import { PaymentMethod, PaymentProvider, PaymentStatus, PaymentType } from '@sta
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { STExpect } from '@stamhoofd/test-utils';
 import { vi } from 'vitest';
+import axios from 'axios';
+import nock from 'nock';
 import type { MollieMockPayment, MollieMockRefund } from '../../tests/helpers/MollieMocker.js';
 import { MollieMocker } from '../../tests/helpers/MollieMocker.js';
 import { SettlementService } from '../services/SettlementService.js';
@@ -629,6 +631,47 @@ describe('Helper.MollieSettlementSync', () => {
         expect(summary.failed).toBe(0);
     });
 
+    test.each(['/v2/settlements', '/v2/balances/primary/transactions'])(
+        'an unreadable second page of %s preserves stored work but fails the walk',
+        async (path) => {
+            const { token, mockPayment } = await init();
+            const settlement = mollieMocker.createSettlement({ payments: [mockPayment] });
+            mollieMocker.createBalanceTransaction({
+                type: 'payment',
+                entryId: mockPayment.id,
+                fee: '0.30',
+            });
+            const next = nock('https://api.mollie.com').get('/incomplete-page').reply(200, {});
+            const hook = axios.interceptors.response.use((response) => {
+                if (response.config.url?.split('?')[0] === 'https://api.mollie.com' + path) {
+                    response.data._links.next = { href: 'https://api.mollie.com/incomplete-page' };
+                }
+                return response;
+            });
+            try {
+                const summary = {
+                    feeMonths: 0,
+                    failedFeeMonths: 0,
+                    synced: 0,
+                    skipped: 0,
+                    failed: 0,
+                };
+                await runCron(token, { summary });
+                expect(next.isDone()).toBe(true);
+                expect(summary).toMatchObject({ synced: 1, failed: 1 });
+                if (path === '/v2/settlements') {
+                    expect(mollieMocker.balanceTransactionRequests).toBe(0);
+                }
+                expect(
+                    (await Settlement.select().where('externalId', settlement.id).first(true))
+                        .syncedAt,
+                ).not.toBeNull();
+            } finally {
+                axios.interceptors.response.eject(hook);
+            }
+        },
+    );
+
     test('An interrupted walk gives up its synced state without counting a failure', async () => {
         const { token, mockPayment, mockRefund } = await init();
 
@@ -688,6 +731,62 @@ describe('Helper.MollieSettlementSync', () => {
         // The walk stopped at the settlement it was in: the next one was never started
         expect(await Settlement.select().where('externalId', untouched.id).count()).toBe(0);
     });
+
+    test('an incomplete payout resource is left unsynced for the next walk', async () => {
+        const { token, mockPayment } = await init();
+        const settlement = mollieMocker.createSettlement({ payments: [mockPayment] });
+        const hook = axios.interceptors.response.use((response) => {
+            if (response.config.url?.includes(`/settlements/${settlement.id}/payments?`)) {
+                response.status = 206;
+            }
+            return response;
+        });
+        try {
+            const summary = { feeMonths: 0, failedFeeMonths: 0, synced: 0, skipped: 0, failed: 0 };
+            await runCron(token, { summary });
+            expect(summary).toMatchObject({ failed: 1, synced: 0 });
+            const row = await Settlement.select().where('externalId', settlement.id).first(true);
+            expect(row.syncedAt).toBeNull();
+        } finally {
+            axios.interceptors.response.eject(hook);
+        }
+    });
+
+    test.each(['settlements', 'balance_transactions', 'payments', 'refunds', 'chargebacks'])(
+        'an empty %s page with a next link is not terminal',
+        async (resource) => {
+            const { token, mockPayment } = await init();
+            const settlement = mollieMocker.createSettlement({ payments: [mockPayment] });
+            const hook = axios.interceptors.response.use((response) => {
+                if (resource in (response.data._embedded ?? {})) {
+                    response.data._embedded[resource] = [];
+                    response.data._links.next = { href: 'https://api.mollie.com/incomplete-page' };
+                }
+                return response;
+            });
+            try {
+                const summary = {
+                    feeMonths: 0,
+                    failedFeeMonths: 0,
+                    synced: 0,
+                    skipped: 0,
+                    failed: 0,
+                };
+                await runCron(token, { summary });
+                expect(summary.failed).toBe(1);
+                if (resource === 'settlements')
+                    expect(mollieMocker.balanceTransactionRequests).toBe(0);
+                else if (resource !== 'balance_transactions') {
+                    expect(
+                        (await Settlement.select().where('externalId', settlement.id).first(true))
+                            .syncedAt,
+                    ).toBeNull();
+                }
+            } finally {
+                axios.interceptors.response.eject(hook);
+            }
+        },
+    );
 
     test('An unlinked refund entry in a settlement is skipped without affecting the known refund', async () => {
         const { token, refundPayment, mockPayment, mockRefund } = await init();

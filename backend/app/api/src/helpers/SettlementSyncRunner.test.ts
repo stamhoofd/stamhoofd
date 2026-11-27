@@ -221,12 +221,13 @@ describe('Helper.SettlementSyncRunner', () => {
             settledAt: new Date(1991, 0, 5),
         });
 
-        await new SettlementSyncRunner().run({
+        const summary = await new SettlementSyncRunner().run({
             start: new Date(2026, 0, 1),
             end: new Date(2026, 0, 31),
             providers: [PaymentProvider.Stripe],
             stripe: { retryUnsynced: true },
         });
+        expect(summary.failed).toBeGreaterThan(0);
 
         // The mocker has no payout with this id: the failed retry is counted on the settlement
         const fresh = await Settlement.getByID(settlement.id);

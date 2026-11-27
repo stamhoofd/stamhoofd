@@ -60,3 +60,18 @@ Customer invoice errors are reported to organization admins and do not interrupt
 the scan. Once the API's worker metrics are ingested in Better Stack, alert on
 an increase in `stamhoofd_worker_outcomes_total{worker="invoice_create",outcome="error"}`
 to detect those failures independently of scan completion.
+
+## Nightly settlement completion
+
+Configure `SETTLEMENT_SYNC_HEARTBEAT_URL` from 1Password only on the production
+deployment responsible for the nightly reconciliation. Use a daily monitor with
+grace past 06:00 Europe/Brussels for queueing, provider calls, reporting and the
+daylight-saving change. A missed window should alert that deployment's owner;
+staging, disabled cron hosts and manual backfills should have no monitor.
+
+A clean walk, even with no new payouts, signals after follow-up reporting.
+Provider, fee-month and old-payout retry failures do not signal. A returned
+partial summary still consumes that day's run; a thrown error or shutdown
+abort leaves it eligible for another tick before 06:00. An undeliverable
+heartbeat does not trigger another reconciliation. Existing problem reports
+remain the source for individual payout discrepancies.

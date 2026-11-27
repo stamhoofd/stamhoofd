@@ -2,6 +2,7 @@
 // skipped, so the windowed re-walk is cheap.
 import { registerCron } from '@stamhoofd/crons';
 import { defineWorker } from '@node/observability/workloads';
+import { sendSuccessHeartbeat } from '@node/observability';
 import { Email } from '@stamhoofd/email';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -60,7 +61,7 @@ export async function syncSettlements() {
     // shutdown aborts this run instead of waiting for the whole window. An aborted run throws, so
     // it is not remembered as the sync of this day: a later tick within the hour runs it again,
     // and otherwise the next day re-walks the same window anyway
-    await QueueHandler.schedule('settlement-sync', async ({ abort }) => {
+    const completed = await QueueHandler.schedule('settlement-sync', async ({ abort }) => {
         const finish = reconciliation.start();
         try {
             const runner = new SettlementSyncRunner();
@@ -71,7 +72,10 @@ export async function syncSettlements() {
                 abort,
             });
             await reportProblemSettlements();
-            finish?.(summary.failed || summary.failedFeeMonths ? 'error' : 'success');
+            abort.throwIfAborted();
+            const clean = summary.failed === 0 && summary.failedFeeMonths === 0;
+            finish?.(clean ? 'success' : 'error');
+            return clean;
         } catch (error) {
             finish?.(abort.wasAbortedWith(error) ? 'aborted' : 'error');
             throw error;
@@ -79,6 +83,7 @@ export async function syncSettlements() {
     });
 
     lastSettlementSync = new Date();
+    if (completed) await sendSuccessHeartbeat(STAMHOOFD.SETTLEMENT_SYNC_HEARTBEAT_URL);
 }
 
 /**

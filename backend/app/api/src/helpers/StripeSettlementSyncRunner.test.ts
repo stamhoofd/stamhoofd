@@ -9,6 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { StripeMocker } from '../../tests/helpers/StripeMocker.js';
 import { SettlementService } from '../services/SettlementService.js';
 import { StripeSettlementSyncRunner } from './StripeSettlementSyncRunner.js';
+import { StripeSettlementSync } from './StripeSettlementSync.js';
+import { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';
 
 describe('Helper.StripeSettlementSyncRunner', () => {
     const stripeMocker = new StripeMocker();
@@ -43,7 +45,7 @@ describe('Helper.StripeSettlementSyncRunner', () => {
 
     const retry = async () => {
         const runner = new StripeSettlementSyncRunner({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY! });
-        await runner.retryUnsyncedSettlements({ windowStart });
+        return await runner.retryUnsyncedSettlements({ windowStart });
     };
 
     test('a retry that cannot retrieve the payout anymore still counts towards the cap', async () => {
@@ -64,6 +66,21 @@ describe('Helper.StripeSettlementSyncRunner', () => {
 
         const fresh = await Settlement.getByID(settlement.id);
         expect(fresh!.syncFailureCount).toBe(5);
+    });
+
+    test('a retry returning payout errors counts as failed without marking it failed a second time', async () => {
+        const settlement = await createUnsyncedSettlement(1);
+        const spy = vi.spyOn(StripeSettlementSync.prototype, 'syncPayoutById').mockResolvedValue({
+            settlement,
+            skipped: false,
+            errors: [SettlementSyncError.fromError(new Error('unresolved payout'))],
+        });
+        try {
+            expect(await retry()).toBeGreaterThan(0);
+            expect((await Settlement.getByID(settlement.id))!.syncFailureCount).toBe(1);
+        } finally {
+            spy.mockRestore();
+        }
     });
 
     test('an interrupted retry does not count towards the cap', async () => {
