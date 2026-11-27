@@ -42,15 +42,18 @@ export type EmailTemplateOptions = {
 };
 
 export async function getEmailTemplate(data: EmailTemplateOptions) {
+    // Always filter on the organization, also when it is null: without the filter the query
+    // would return an arbitrary row and a platform level send could mail the customised
+    // template of an unrelated organization.
+    const organizationId = data.organizationId ?? null;
+
     // Most specific template: for specific group
-    const q = EmailTemplate.select().where('type', data.type);
+    const q = EmailTemplate.select()
+        .where('type', data.type)
+        .where('organizationId', organizationId);
 
     if (data.group) {
         q.where('groupId', data.group.id);
-    }
-
-    if (data.organizationId) {
-        q.where('organizationId', data.organizationId);
     }
 
     if (data.webshop) {
@@ -60,10 +63,10 @@ export async function getEmailTemplate(data: EmailTemplateOptions) {
     let templates = await q.limit(1).fetch();
 
     // Specific for organization
-    if (templates.length == 0 && (data.group?.id || data.webshop?.id) && data.organizationId) {
+    if (templates.length == 0 && (data.group?.id || data.webshop?.id) && organizationId) {
         templates = await EmailTemplate.select()
             .where('type', data.type)
-            .where('organizationId', data.organizationId)
+            .where('organizationId', organizationId)
             .where('groupId', null)
             .where('webshopId', null)
             .limit(1)
@@ -71,7 +74,7 @@ export async function getEmailTemplate(data: EmailTemplateOptions) {
     }
 
     // Default for platform
-    if (templates.length == 0 && (data.group?.id || data.webshop?.id || data.organizationId)) {
+    if (templates.length == 0 && (data.group?.id || data.webshop?.id || organizationId)) {
         templates = await EmailTemplate.select()
             .where('type', data.type)
             .where('organizationId', null)
