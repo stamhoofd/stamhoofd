@@ -95,7 +95,9 @@ export class DatabaseInstance {
 
         this.pool = mysql.createPool({
             host: settings.host,
-            stream: options.connectHost ? () => net.connect(settings.port, options.connectHost!) : undefined,
+            stream: options.connectHost
+                ? () => net.connect(settings.port, options.connectHost!)
+                : undefined,
             user: settings.user,
             password: settings.password,
             port: settings.port,
