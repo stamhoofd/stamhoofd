@@ -16,7 +16,10 @@ let runtime: { shutdown(): Promise<void> } | undefined;
  * automatic request, console, host, or process instrumentation. Credentials are
  * read by the exporters at runtime. Shutdown is idempotent and bounded to 2s.
  */
-export function initializeTelemetry(service: string): { shutdown(): Promise<void> } {
+export function initializeTelemetry(
+    service: string,
+    { ownsMetrics = true } = {},
+): { shutdown(): Promise<void> } {
     if (runtime) return runtime;
     let sdk: NodeSDK | undefined;
     let metrics: ReturnType<typeof initializeMetrics>;
@@ -37,7 +40,7 @@ export function initializeTelemetry(service: string): { shutdown(): Promise<void
             resource[key] = field.slice(separator + 1).trim();
     }
     try {
-        metrics = initializeMetrics(resource['service.name']);
+        if (ownsMetrics) metrics = initializeMetrics(service);
         sdk = new NodeSDK({
             autoDetectResources: false,
             resource: resourceFromAttributes(resource),

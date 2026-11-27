@@ -1,4 +1,5 @@
 import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
+import { initializeMetrics, observeHttpServer } from '@node/observability';
 import { CORSMiddleware, LogMiddleware } from '@stamhoofd/backend-middleware';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { loadLogger } from '@stamhoofd/logging';
@@ -20,6 +21,7 @@ if (new Date().getTimezoneOffset() !== 0) {
 }
 
 const start = async () => {
+    const metrics = initializeMetrics('backup');
     console.log('Started Backup.');
     loadLogger();
     const router = new Router();
@@ -37,6 +39,7 @@ const start = async () => {
     routerServer.addResponseMiddleware(CORSMiddleware);
 
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
+    observeHttpServer(routerServer.server);
 
     if (routerServer.server) {
         // Default timeout is a bit too short
@@ -76,6 +79,8 @@ const start = async () => {
         }
 
         await waitForCrons();
+
+        await metrics?.shutdown();
 
         // Should not be needed, but added for security as sometimes a promise hangs somewhere
         process.exit(0);

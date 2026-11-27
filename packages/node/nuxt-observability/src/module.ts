@@ -15,7 +15,8 @@ const module: NuxtModule = async (_options, nuxt) => {
         if (!nuxt.options.dev) (nitro.options as NitroOptions).entry = fileURLToPath(new URL('./runtime/node-server.js', import.meta.url));
     });
     if (nuxt.options.dev) {
-        const telemetry = initializeTelemetry('docs');
+        // Only Nitro's request-serving worker owns the metrics listener in development.
+        const telemetry = initializeTelemetry('docs', { ownsMetrics: false });
         const lifecycle = new ApplicationLifecycle('docs', () => telemetry.shutdown());
         await devLifecycleModule({ lifecycle }, nuxt);
     }

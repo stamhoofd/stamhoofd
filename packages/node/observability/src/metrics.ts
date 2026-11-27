@@ -2,6 +2,7 @@ import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { channel } from 'node:diagnostics_channel';
+import { enableHttpMetrics, disableHttpMetrics } from './http-metrics.js';
 
 /** A private provider keeps third-party instruments off the scrape endpoint. */
 export function initializeMetrics(service: string) {
@@ -21,7 +22,9 @@ export function initializeMetrics(service: string) {
         withResourceConstantLabels: /^service\.name$/,
     });
     const provider = new MeterProvider({
-        resource: resourceFromAttributes({ 'service.name': service }),
+        resource: resourceFromAttributes({
+            'service.name': process.env.OTEL_SERVICE_NAME || service,
+        }),
         readers: [reader],
     });
     const meter = provider.getMeter('@node/observability');
@@ -44,14 +47,19 @@ export function initializeMetrics(service: string) {
         )
             execute.record(duration, { operation, outcome });
     };
+    enableHttpMetrics(meter, options);
     timings.subscribe(record);
-    const started = reader.startServer().catch(() => {
+    const unsubscribe = () => {
+        disableHttpMetrics();
         timings.unsubscribe(record);
+    };
+    const started = reader.startServer().catch(() => {
+        unsubscribe();
         console.warn('Application metrics listener could not be started.');
     });
     return {
         async shutdown() {
-            timings.unsubscribe(record);
+            unsubscribe();
             await started;
             await provider.shutdown();
         },

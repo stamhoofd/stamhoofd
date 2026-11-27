@@ -1,5 +1,5 @@
 import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
-import type { ApplicationLifecycle } from '@node/observability';
+import { type ApplicationLifecycle, observeHttpServer } from '@node/observability';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { CORSMiddleware, LogMiddleware } from '@stamhoofd/backend-middleware';
 import { loadLogger } from '@stamhoofd/logging';
@@ -46,6 +46,7 @@ export const boot = async (lifecycle: ApplicationLifecycle) => {
     routerServer.addResponseMiddleware(CORSMiddleware);
 
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
+    observeHttpServer(routerServer.server);
 
     // Monitor CPU load and memory so the /health endpoint can report an overloaded renderer as unhealthy.
     if (STAMHOOFD.environment !== 'development' && STAMHOOFD.environment !== 'test') {
