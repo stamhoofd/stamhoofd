@@ -1,4 +1,5 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@common/encoding';
+import { StringCompare } from '@stamhoofd/utility';
 
 // Note: this should extend LoginProviderType
 export enum LoginMethod {
@@ -43,21 +44,20 @@ export class LoginMethodConfig extends AutoEncoder {
     blocklist: string[] = [];
 
     isEnabledForEmail(email: string) {
-        // Validate that the user is allowed to use this method
-        const emailDomain = email.split('@')[1].toLowerCase();
+        const emailDomain = getEmailDomain(email);
         if (!emailDomain) {
             return false;
         }
 
         for (const blocked of this.blocklist) {
-            if (emailDomain === blocked.toLowerCase()) {
+            if (emailDomain === normalizeDomain(blocked)) {
                 return false;
             }
         }
 
         if (this.allowlist.length > 0) {
             for (const allowed of this.allowlist) {
-                if (emailDomain === allowed.toLowerCase()) {
+                if (emailDomain === normalizeDomain(allowed)) {
                     return true;
                 }
             }
@@ -67,4 +67,22 @@ export class LoginMethodConfig extends AutoEncoder {
 
         return true;
     }
+}
+
+/**
+ * Compared the way MySQL compares users.email: case and accent insensitively, and ignoring
+ * surrounding whitespace. An address spelled differently resolves to the same account, so it
+ * may not land on the other side of these lists.
+ */
+function normalizeDomain(domain: string) {
+    return StringCompare.normalizeForEquality(domain.trim());
+}
+
+function getEmailDomain(email: string) {
+    const at = email.lastIndexOf('@');
+    if (at === -1) {
+        return null;
+    }
+
+    return normalizeDomain(email.slice(at + 1));
 }
