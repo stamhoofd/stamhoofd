@@ -23,6 +23,7 @@
         "build:full": "pnpm run clear && pnpm run build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo .cache/*.tsbuildinfo",
         "lint": "oxlint . --quiet --type-aware --threads 2",
+        "test": "vitest run",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js"
     },
     "dependencies": {
@@ -48,6 +49,7 @@
         "mysql2": "3.24.6"
     },
     "devDependencies": {
+        "vitest": "4.1.12",
         "oxlint-plugin-stamhoofd": "workspace:*",
         "@types/formidable": "3.5.1",
         "@types/luxon": "3.7.6",

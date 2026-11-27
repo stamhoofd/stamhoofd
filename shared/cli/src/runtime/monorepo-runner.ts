@@ -120,6 +120,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'vies', path: 'backend/shared/vies', needsDatabase: true },
     { name: 'sql', path: 'backend/shared/sql', needsDatabase: true },
     { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false },
+    { name: 'backup', path: 'backend/app/backup', needsDatabase: false },
     { name: 'redirecter', path: 'backend/app/redirecter', needsDatabase: false },
     { name: 'statistics-syncer', path: 'backend/app/statistics-syncer', needsDatabase: true },
     { name: 'api', path: 'backend/app/api', needsDatabase: true },

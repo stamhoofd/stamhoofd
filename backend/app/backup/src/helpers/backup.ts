@@ -329,9 +329,10 @@ export async function backup() {
     if (QueueHandler.isRunning('backup')) {
         fullBackup.skip();
         console.log('Backup already running');
-        return;
+        return false;
     }
     await fullBackup.run(createFullBackup);
+    return true;
 }
 
 async function createFullBackup() {
@@ -552,6 +553,8 @@ export async function backupBinlogs() {
     LAST_BINARY_BACKUP = {
         date: new Date(),
     };
+    // The active log is always uploaded; older logs may already exist in storage.
+    return lastRow !== undefined;
 }
 
 export async function uploadBinaryLog(

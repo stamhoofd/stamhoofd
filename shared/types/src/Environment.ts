@@ -297,6 +297,10 @@ export type RendererEnvironment = {
  * The environment that is available everywhere: frontend, backend and shared
  */
 export type BackupEnvironment = {
+    /** Independent per-host secret HTTPS URLs for scheduled, stored backups. */
+    readonly FULL_BACKUP_HEARTBEAT_URL?: string;
+    readonly BINLOG_BACKUP_HEARTBEAT_URL?: string;
+
     /**
      * We'll map the value of NODE_ENV to the corresponsing value. But staging value isn't valid for NODE_ENV, hence our own variable
      */
