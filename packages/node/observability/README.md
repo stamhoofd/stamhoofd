@@ -26,6 +26,9 @@ as uncaught errors.
 
 ## Application metrics
 
+See [backend metrics coverage, panel queries and staging verification](../../../contributing/backend/metrics.md)
+for release and operator guidance.
+
 Set `STAM_METRICS_PORT` to an unused TCP port per process to enable a Prometheus
 scrape at `http://127.0.0.1:<port>/metrics`. Vector must scrape from the same
 network namespace. Metrics are off by default and do not enable traces or logs.
