@@ -38,6 +38,9 @@ export type SharedEnvironment = {
 };
 
 export type StatisticsEnvironment = {
+    /** Deployment-specific secret HTTPS URL. Unset disables statistics completion heartbeats. */
+    readonly STATISTICS_SYNC_HEARTBEAT_URL?: string;
+
     /**
      * We'll map the value of NODE_ENV to the corresponsing value. But staging value isn't valid for NODE_ENV, hence our own variable
      */

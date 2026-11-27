@@ -4,3 +4,4 @@ export { runApplication } from './application.js';
 export { observeRequest } from './request.js';
 export { observeHttpServer, observeHttpResponses } from './http-metrics.js';
 export { initializeMetrics } from './metrics.js';
+export { sendSuccessHeartbeat } from './heartbeat.js';
