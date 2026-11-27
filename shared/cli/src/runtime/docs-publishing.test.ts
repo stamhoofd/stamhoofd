@@ -46,7 +46,7 @@ describe('docs publishing configuration', () => {
         );
     });
 
-    it('passes explicit custom environments to the private resolver', async () => {
+    it('discovers shared publishing without passing the deprecated environment selector', async () => {
         const config = {
             registry: 'registry.example.com/team',
             credentials: { username: 'publisher', password: 'secret' },
@@ -58,7 +58,7 @@ describe('docs publishing configuration', () => {
         });
         expect(await resolveDocsPublishingConfig('/repo', 'custom', {})).toEqual(config);
         expect(getOptionalDocsPublishingProvider).toHaveBeenCalledWith('/repo/devops');
-        expect(resolve).toHaveBeenCalledWith('custom');
+        expect(resolve).toHaveBeenCalledWith();
     });
 
     it('uses a supplied credential pair with the provider destination when no registry is set', async () => {

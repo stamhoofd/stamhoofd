@@ -67,13 +67,17 @@ asks "Point the 'latest' tag to this image as well?" with a default of No, befor
 reading credentials. Noninteractive publication requires one of these flags.
 Both pushes share the same authentication scope; a failed version push leaves
 `latest` untouched. An explicitly requested `latest` tag is pushed only once.
-`--environment <name>` resolves publishing configuration through the optional
-DevOps provider when `STAM_DOCS_REGISTRY` is unset. Explicit registry configuration
-bypasses that provider entirely. The provider prompts for an environment in a
-terminal; noninteractive use requires the flag. Custom environment names are accepted.
+The optional DevOps provider discovers the shared artifacts registry and publisher
+when `STAM_DOCS_REGISTRY` is unset, without selecting a deployment environment.
+Explicit registry configuration bypasses that provider entirely. The deprecated
+hidden `--environment` publishing flag is accepted with a warning and ignored;
+old completion scripts receive no environment suggestions. Stable `vX.Y.Z` release
+tags publish the version and `latest` through the public GitHub workflow, using
+the generic **publishing** environment. It never reads infrastructure credentials
+or deploys; runtime apply still resolves the current `latest` digest.
 `STAM_DOCS_REGISTRY_USERNAME` and `STAM_DOCS_REGISTRY_PASSWORD` must be supplied
 together as nonempty values. When the registry is unset, this pair overrides the
-provider's credentials while retaining its selected destination; provider lookup
+provider's credentials while retaining the shared destination; provider lookup
 still requires its infrastructure access. Without the provider, set the registry too.
 Supplied credentials use password stdin and invocation-owned authentication files
 (directory mode `0700`, initial file mode `0600`), removed after success, failure or
@@ -135,26 +139,14 @@ source ~/.config/stam/completion.zsh
 ```
 
 Command and flag suggestions use `@oclif/plugin-autocomplete` with space-separated
-topics. A small shell bridge adds live values for
-`stam docs image publish <tag> --environment <TAB>` (Bash may need two Tabs).
-The equals form, `--environment=<TAB>`, is supported too.
-Suggestions come only from the active checkout's local operator configuration;
-completion does not prompt, read credentials or query infrastructure. An absent
-optional provider gives no environment suggestions. Explicit custom names remain
-valid and do not have to appear in the list. The launcher prepares the CLI and
-optional compiled provider before each request, including from nested directories.
-
-Generated command/flag scripts live in oclif's user-private cache directory
+topics. Generated scripts live in oclif's user-private cache directory
 (`$XDG_CACHE_HOME/@stamhoofd/cli/autocomplete` on Linux, defaulting to
-`~/.cache/@stamhoofd/cli/autocomplete`). Environment names are requested at Tab time,
-not embedded in generated scripts or persisted in a value cache. Regenerate the
-activation file from the checkout after changing commands or flags, then source it
-again; live environment values need no regeneration. Sourcing the saved file works
-from any directory and does not run generation at shell startup. Dynamic
-environment completion supports Bash and Zsh, not Fish or PowerShell. Use
-`stam completion`, rather than the plugin's plain `stam autocomplete` setup, to
-include the live environment bridge. Live environment requests require `stam` on
-PATH and a working directory inside the checkout so its wrapper can locate the repository.
+`~/.cache/@stamhoofd/cli/autocomplete`). Regenerate the activation file after
+command or flag changes, then source it again. Sourcing the saved file works
+from any directory and does not run generation at shell startup. The retained
+legacy environment-completion bridge returns no suggestions from the current
+docs provider: publication no longer selects an environment. Completion never
+reads credentials or queries infrastructure.
 
 ### Commands
 

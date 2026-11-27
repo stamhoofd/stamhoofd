@@ -84,16 +84,25 @@ push succeeds. Omit both flags to be asked interactively (default No);
 noninteractive use requires `--latest` or `--no-latest`. Both pushes share the
 same authentication scope. Requesting the `latest` tag itself never pushes it twice.
 
-The optional private provider supports `--environment <name>` when no explicit
-registry is set. See the [CLI configuration and credential precedence](../shared/cli/README.md#documentation-images).
-For live local environment suggestions, activate
-[Bash or Zsh completion](../shared/cli/README.md#shell-completion), then use
-`stam docs image publish v1.2.3 --environment <TAB>`.
+The optional private provider discovers the shared artifacts registry and publisher
+without environment selection when no explicit registry is set. The deprecated
+`--environment` flag is accepted with a warning and ignored; every runtime uses
+the same image. See the [CLI credential precedence](../shared/cli/README.md#documentation-images).
+
+Stable release tags matching exactly `vX.Y.Z` publish the version and `latest`
+through `.github/workflows/docs-image.yml`. The workflow uses the public checkout,
+Docker and only the GitHub **publishing** environment's registry credentials;
+it never applies infrastructure or deploys. Prereleases are excluded. Runtimes
+still resolve `latest` on a subsequent manual infrastructure apply; explicit
+release/digest promotion is deferred.
 
 The image runs Nuxt's Node server, including Nuxt Content search, as an unprivileged
 user on port 8080. SQLite content is built into the image; local runtime storage is
-ephemeral and contains no authoritative data. The build context excludes DevOps,
-environment files, local content databases and generated outputs.
+ephemeral and contains no authoritative data. Images are publicly downloadable;
+pushes require authentication. The allowlisted build context excludes DevOps,
+environment files, credential stores, local content databases and generated outputs.
+CI supplies credentials only to the publish step, never to image builds. The final
+image copies only the built `.output`. Never put secrets in docs source or build args.
 
 The build command reads the pinned Node version from the root `.nvmrc` and passes
 it to both Docker stages. Update `.nvmrc` to update local setup, CI and the docs

@@ -16,8 +16,8 @@ export default class DocsImagePublish extends BaseCommand {
     static flags = {
         ...this.verbosityFlags(),
         environment: Flags.string({
-            description:
-                'Infrastructure environment from the optional DevOps checkout (required without an interactive terminal)',
+            hidden: true,
+            description: 'Deprecated: all environments use the shared artifacts registry',
         }),
         latest: Flags.boolean({
             allowNo: true,
@@ -28,6 +28,10 @@ export default class DocsImagePublish extends BaseCommand {
 
     async run(): Promise<void> {
         const { args, flags, context } = await this.parseWithContext(DocsImagePublish);
+        if (flags.environment !== undefined)
+            this.warn(
+                '--environment is deprecated and ignored; publication uses the shared artifacts registry.',
+            );
         docsImageReference(args.tag);
         let latest = flags.latest;
         if (latest === undefined) {

@@ -197,7 +197,7 @@ describe('generated oclif completion with live local environments', { timeout: 3
             COMP_CWORD=3
             _stam_local_completion
             printf '%s\\n' "\${COMPREPLY[@]}"
-            COMP_WORDS=(stam docs image publish --en)
+            COMP_WORDS=(stam docs image publish --lat)
             COMP_CWORD=4
             _stam_local_completion
             printf '%s\\n' "\${COMPREPLY[@]}"
@@ -205,7 +205,8 @@ describe('generated oclif completion with live local environments', { timeout: 3
         );
         const { stdout } = await execute('bash', [requestPath], { env });
         expect(stdout).toContain('publish');
-        expect(stdout).toContain('--environment');
+        expect(stdout).toContain('--latest');
+        expect(stdout).not.toContain('--environment');
     });
 
     it('returns all local environments for an empty request', async () => {
@@ -298,7 +299,7 @@ describe('generated oclif completion with live local environments', { timeout: 3
         },
     );
 
-    it('accepts explicit custom names rather than restricting parsing to suggestions', async () => {
+    it('accepts the deprecated environment flag without passing it to shared publication', async () => {
         await fs.writeFile(
             modulePath,
             `export const docsPublishingProvider = {
@@ -321,9 +322,7 @@ describe('generated oclif completion with live local environments', { timeout: 3
                 { env },
             ),
         ).rejects.toMatchObject({
-            stderr: expect.stringContaining(
-                'Reached provider with custom environment: unlisted-custom',
-            ),
+            stderr: expect.stringContaining('Reached provider with custom environment: undefined'),
         });
     });
 });
