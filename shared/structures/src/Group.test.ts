@@ -32,9 +32,9 @@ describe('Group.getRecommendedFilter', () => {
 
     function getOrganizationIdFilters(filter: StamhoofdFilter) {
         return (filter as any[])
-            .flatMap(f => f?.registrations?.$elemMatch?.$and ?? [])
-            .filter(f => f.organizationId !== undefined)
-            .map(f => f.organizationId);
+            .flatMap((f) => f?.registrations?.$elemMatch?.$and ?? [])
+            .filter((f) => f.organizationId !== undefined)
+            .map((f) => f.organizationId);
     }
 
     beforeEach(() => {

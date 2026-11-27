@@ -409,7 +409,9 @@ export class Group extends AutoEncoder {
         );
     }
 
-    getRecommendedFilter(organization?: (GroupOrganization & { name: string }) | null): StamhoofdFilter {
+    getRecommendedFilter(
+        organization?: (GroupOrganization & { name: string }) | null,
+    ): StamhoofdFilter {
         const filter: StamhoofdFilter = [];
 
         const periods = this.getActivePeriods(organization ?? null).map((p) => {
