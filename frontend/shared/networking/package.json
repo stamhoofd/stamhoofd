@@ -28,7 +28,7 @@
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
-        "vue": "3.5.44"
+        "vue": "3.5.45"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "workspace:*",
