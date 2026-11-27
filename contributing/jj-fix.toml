@@ -1,0 +1,6 @@
+[fix.tools.stam-format]
+command = ["node", "$root/shared/eslint/bin/format-file.mjs", "$path"]
+patterns = [
+    "root-glob:'**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,vue}'",
+    "root-glob:'**/*.{json,jsonc,json5,md,mdx,markdown,yaml,yml,toml,css,scss,less,html,graphql,gql}' ~ root-glob:'**/{package-lock.json,pnpm-lock.yaml}'",
+]

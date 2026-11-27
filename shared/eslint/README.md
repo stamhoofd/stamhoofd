@@ -19,6 +19,14 @@ Formatting uses one process and a separate content-based ESLint cache, including
 fingerprint of the local rule implementations. Semantic linting does not use this
 per-file cache because imported types can affect unchanged files.
 
+From the repository root with dependencies installed, use
+`jj --config-file contributing/jj-fix.toml fix -s <change>` to format changed
+source and text files in a change **and its descendants**. The adapter reads
+each revision's contents from stdin and applies the invoking workspace's formatter
+versions and configuration. To restrict formatting to a single branch or use
+each revision's own rules, use `jj run --root -r '<first>::<tip>'` with
+`pnpm stam check format --fix` in the isolated checkout instead.
+
 `@stylistic/indent-binary-ops` is disabled in all presets because it conflicts with
 `@stylistic/indent` on TypeScript unions (upstream issue #676). Keep `indent` enabled.
 
