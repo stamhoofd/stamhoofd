@@ -17,6 +17,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
+        "@node/observability": "workspace:*",
         "@common/errors": "workspace:*"
     },
     "devDependencies": {

@@ -1,4 +1,5 @@
 import { isSimpleError, isSimpleErrors } from '@common/errors';
+import { defineWorker } from '@node/observability/workloads';
 import { registerTenantCron } from './helpers/registerTenantCron.js';
 import type { Invoice } from '@stamhoofd/models';
 import { Organization, Payment } from '@stamhoofd/models';
@@ -17,6 +18,7 @@ import { useSavedIterator } from './helpers/useSavedIterator.js';
 import { OrganizationAdminService } from '../services/OrganizationAdminService.js';
 
 registerTenantCron('invoices', invoices);
+const invoiceWorker = defineWorker('invoice_create');
 
 const iterator = useSavedIterator(
     () => {
@@ -112,6 +114,8 @@ export async function createInvoicesFor(organization: Organization) {
         // Group from last to newest (so we use the last customer details if the address changed during the month)
         payments.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
         const customer = payments[0].customer!.dynamicName;
+        const finish = invoiceWorker.start();
+        let outcome: 'success' | 'skipped' | 'error' = 'error';
         try {
             const generalStructs = await AuthenticatedStructures.paymentsGeneral(payments, false);
 
@@ -130,11 +134,13 @@ export async function createInvoicesFor(organization: Organization) {
                 console.log(
                     'Skipping zero total with items for ' + customer + ' at ' + organization.id,
                 );
+                outcome = 'skipped';
                 continue;
             }
 
             const model = await InvoiceService.createFrom(organization, invoice);
             invoices.push(model);
+            outcome = 'success';
         } catch (e) {
             console.error(
                 payments.map((p) => p.id),
@@ -166,6 +172,8 @@ export async function createInvoicesFor(organization: Organization) {
             } else {
                 errors.push(prefix + Formatter.escapeHtml($t('%1ED')));
             }
+        } finally {
+            finish?.(outcome);
         }
     }
 

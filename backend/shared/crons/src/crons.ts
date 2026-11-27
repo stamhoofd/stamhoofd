@@ -1,4 +1,5 @@
 import { Database } from '@node/database';
+import { defineWorker } from '@node/observability/workloads';
 import { logger, StyledText } from '@node/logging';
 import { sleep } from '@stamhoofd/utility';
 
@@ -9,6 +10,7 @@ export type CronJobDefinition = {
 };
 
 const registeredCronJobs: CronJobDefinition[] = [];
+let dispatch: ReturnType<typeof defineWorker> | undefined;
 
 let areSeedsNotFinished = true;
 
@@ -17,6 +19,7 @@ export function markAllSeedsFinished() {
 }
 
 export function registerCron(name: string, method: () => Promise<void>) {
+    dispatch ??= defineWorker('cron_dispatch');
     registeredCronJobs.push({
         name,
         method,
@@ -25,6 +28,8 @@ export function registerCron(name: string, method: () => Promise<void>) {
 }
 
 async function run(name: string, handler: () => Promise<void>) {
+    const finish = dispatch?.start();
+    let outcome: 'returned' | 'error' = 'returned';
     try {
         await logger.setContext(
             {
@@ -35,12 +40,16 @@ async function run(name: string, handler: () => Promise<void>) {
                 try {
                     await handler();
                 } catch (e) {
+                    outcome = 'error';
                     console.error(new StyledText(e).addClass('error'));
                 }
             },
         );
     } catch (e) {
+        outcome = 'error';
         console.error(new StyledText(e).addClass('error'));
+    } finally {
+        finish?.(outcome);
     }
 }
 
@@ -90,8 +99,10 @@ function areCronsRunning(): string | false {
     return false;
 }
 
-async function crons(options: { allowReadOnly: boolean; allowBeforeSeeds: boolean }) {
+/** Schedule one pass. Launched handlers can outlive the pass; waitForCrons waits for them. */
+export async function runCronJobs(options: { allowReadOnly: boolean; allowBeforeSeeds: boolean }) {
     if (STAMHOOFD.CRONS_DISABLED) {
+        dispatch?.skip(registeredCronJobs.length);
         console.error(
             new StyledText('[CRONS] ').addClass('crons', 'tag'),
             new StyledText(
@@ -102,6 +113,7 @@ async function crons(options: { allowReadOnly: boolean; allowBeforeSeeds: boolea
     }
 
     if (!options.allowReadOnly && (await checkReadOnly())) {
+        dispatch?.skip(registeredCronJobs.length);
         console.error(
             new StyledText('[CRONS] ').addClass('crons', 'tag'),
             new StyledText('MySQL is in read-only mode: crons are disabled.').addClass('error'),
@@ -110,6 +122,7 @@ async function crons(options: { allowReadOnly: boolean; allowBeforeSeeds: boolea
     }
 
     if (!options.allowBeforeSeeds && areSeedsNotFinished) {
+        dispatch?.skip(registeredCronJobs.length);
         console.error(
             new StyledText('[CRONS] ').addClass('crons', 'tag'),
             new StyledText('Not all seeds are finished: crons are disabled.').addClass('error'),
@@ -118,11 +131,13 @@ async function crons(options: { allowReadOnly: boolean; allowBeforeSeeds: boolea
     }
 
     schedulingJobs = true;
-    for (const job of registeredCronJobs) {
+    for (const [index, job] of registeredCronJobs.entries()) {
         if (doStopCrons) {
+            dispatch?.skip(registeredCronJobs.length - index);
             break;
         }
         if (job.running) {
+            dispatch?.skip();
             console.warn(job.name, 'is still running');
             continue;
         }
@@ -141,6 +156,7 @@ async function crons(options: { allowReadOnly: boolean; allowBeforeSeeds: boolea
             await sleep(10 * 1000);
 
             if (!options.allowReadOnly && (await checkReadOnly())) {
+                dispatch?.skip(registeredCronJobs.length - index - 1);
                 console.error(
                     new StyledText('[CRONS] ').addClass('crons', 'tag'),
                     new StyledText('MySQL is in read-only mode: crons are interrupted.').addClass(
@@ -174,11 +190,11 @@ export function startCrons(
 
     cronInterval = setInterval(
         () => {
-            crons(options).catch(console.error);
+            runCronJobs(options).catch(console.error);
         },
         STAMHOOFD.environment === 'development' ? 10 * 1000 : 5 * 60 * 1000,
     );
-    crons(options).catch(console.error);
+    runCronJobs(options).catch(console.error);
 }
 
 export function stopCrons() {

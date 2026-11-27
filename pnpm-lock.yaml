@@ -935,6 +935,9 @@ importers:
       '@node/logging':
         specifier: workspace:*
         version: link:../../../packages/node/logging
+      '@node/observability':
+        specifier: workspace:*
+        version: link:../../../packages/node/observability
       '@stamhoofd/utility':
         specifier: workspace:*
         version: link:../../../shared/utility
@@ -1167,6 +1170,9 @@ importers:
       '@common/errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
+      '@node/observability':
+        specifier: workspace:*
+        version: link:../../../packages/node/observability
     devDependencies:
       '@stamhoofd/types':
         specifier: workspace:*

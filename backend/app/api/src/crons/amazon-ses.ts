@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { DeleteMessageCommand, ReceiveMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { registerCron } from '@stamhoofd/crons';
+import { defineWorker } from '@node/observability/workloads';
 import { Email, EmailAddress } from '@stamhoofd/email';
 import { AuditLog, EmailRecipient, Organization } from '@stamhoofd/models';
 import {
@@ -12,6 +13,7 @@ import {
 import { ForwardHandler } from '../helpers/ForwardHandler.js';
 import { Email as EmailModel } from '@stamhoofd/models';
 
+const messageWorker = defineWorker('ses_message');
 registerCron('checkComplaints', checkComplaints);
 registerCron('checkReplies', checkReplies);
 registerCron('checkBounces', checkBounces);
@@ -364,7 +366,7 @@ function getClient() {
     return sharedClient;
 }
 
-async function readFromQueue(queueUrl: string) {
+export async function readFromQueue(queueUrl: string) {
     console.log('[AWS Queue] Checking ' + queueUrl);
 
     const client = getClient();
@@ -381,6 +383,7 @@ async function readFromQueue(queueUrl: string) {
             console.log('[AWS Queue] Received message');
             console.log('[AWS Queue]', message);
 
+            const finish = messageWorker.start();
             if (message.ReceiptHandle) {
                 if (STAMHOOFD.environment !== 'development') {
                     const deleteCmd = new DeleteMessageCommand({
@@ -388,12 +391,18 @@ async function readFromQueue(queueUrl: string) {
                         ReceiptHandle: message.ReceiptHandle,
                     });
 
-                    await client.send(deleteCmd);
+                    try {
+                        await client.send(deleteCmd);
+                    } catch (error) {
+                        finish?.('error');
+                        throw error;
+                    }
                     console.log('[AWS Queue] Deleted from queue');
                 }
             }
             didProcess += 1;
 
+            let outcome: 'success' | 'skipped' | 'error' = 'skipped';
             try {
                 if (message.Body) {
                     // decode the JSON value
@@ -405,13 +414,16 @@ async function readFromQueue(queueUrl: string) {
                         // Docs: https://docs.aws.amazon.com/ses/latest/dg/event-publishing-retrieving-sns-contents.html
                         if (message.bounce) {
                             await handleBounce(message);
+                            outcome = 'success';
                         } else if (message.complaint) {
                             await handleComplaint(message);
+                            outcome = 'success';
                         }
                         // Read message content
                         // https://docs.aws.amazon.com/ses/latest/dg/receiving-email-notifications-contents.html
                         else if (message.mail && message.content && message.receipt) {
                             await handleForward(message);
+                            outcome = 'success';
                         } else {
                             console.log('[AWS Queue] Unsupported message');
                         }
@@ -422,11 +434,14 @@ async function readFromQueue(queueUrl: string) {
                     console.log('[AWS Queue] Message Body missing in bounce');
                 }
             } catch (e) {
+                outcome = 'error';
                 console.log('[AWS Queue] Message processing failed:');
                 console.log('[AWS Queue]', e);
 
                 console.error('[AWS Queue] Message processing failed:');
                 console.error('[AWS Queue]', e);
+            } finally {
+                finish?.(outcome);
             }
         }
     }

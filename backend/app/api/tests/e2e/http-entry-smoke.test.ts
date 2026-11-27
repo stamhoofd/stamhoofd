@@ -30,6 +30,8 @@ it
                 environment: service === 'backup' ? 'development' : 'test',
                 PORT: app,
                 CACHE_PATH: path.join(dir, 'cache'),
+                HEALTH_ACCESS_KEY: 'smoke',
+                localBackupFolder: 'invalid-before-any-io',
                 DB_PORT: process.env.DB_PORT,
             }),
         );
@@ -74,6 +76,56 @@ it
             expect(text).toMatch(/stamhoofd_http_request_duration_milliseconds_count\{.*\} 1/);
             expect(text).toContain(`status_class="${Math.floor(response.status / 100)}xx"`);
             expect(text).not.toContain('private-smoke');
+            const expected: Record<string, string[]> = {
+                api: [
+                    'in_process',
+                    'throttled_batch',
+                    'cron_dispatch',
+                    'invoice_create',
+                    'settlement_reconciliation',
+                    'ses_message',
+                ],
+                renderer: ['in_process'],
+                backup: ['backup_full'],
+            };
+            if (expected[service]) {
+                await expect
+                    .poll(async () => {
+                        const gauges = (await scrape())
+                            .split('\n')
+                            .filter((line) => line.startsWith('stamhoofd_worker_running{'));
+                        return expected[service].filter(
+                            (worker) => !gauges.some((line) => line.includes(`worker="${worker}"`)),
+                        );
+                    })
+                    .toEqual([]);
+            } else {
+                expect(text).not.toMatch(/worker="(?:backup_full|stats_cycle|ses_message)"/);
+            }
+            const failures = (samples: string, worker: string) =>
+                samples
+                    .split('\n')
+                    .find(
+                        (line) =>
+                            line.startsWith('stamhoofd_worker_outcomes_total{') &&
+                            line.includes(`worker="${worker}"`) &&
+                            line.includes('outcome="error"'),
+                    );
+            if (service === 'api') {
+                // Cron reporters register after runApplication initializes the meter.
+                expect(failures(await scrape(), 'invoice_create')?.endsWith('} 0')).toBe(true);
+            }
+            if (service === 'backup') {
+                // The backup worker module loads before its entry initializes the meter.
+                expect(failures(text, 'backup_full')?.endsWith('} 0')).toBe(true);
+                const scheduled = await fetch(`http://127.0.0.1:${app}/v1/backup?key=smoke`, {
+                    method: 'POST',
+                });
+                expect(scheduled.status).toBe(201);
+                const after = await scrape();
+                expect(failures(after, 'backup_full')?.endsWith('} 1')).toBe(true);
+                expect(after).not.toContain('invalid-before-any-io');
+            }
         } finally {
             nock.disableNetConnect();
             child.kill('SIGKILL');

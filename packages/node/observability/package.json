@@ -4,6 +4,10 @@
     "private": true,
     "type": "module",
     "exports": {
+        "./workloads": {
+            "types": "./dist-types/workloads.d.ts",
+            "import": "./dist/workloads.js"
+        },
         ".": {
             "types": "./dist-types/index.d.ts",
             "import": "./dist/index.js"

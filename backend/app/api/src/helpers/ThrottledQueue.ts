@@ -1,3 +1,8 @@
+import { defineQueue } from '@node/observability/workloads';
+
+const worker = defineQueue('throttled_batch');
+type Pending = NonNullable<ReturnType<typeof worker.enqueue>>;
+
 /**
  * Define an expensive action that needs to run on a list of items.
  * Instead of running the action per item, it will call it on a batch of items or if a certain time has passed.
@@ -5,6 +10,7 @@
  * Note that the handler can be called in parallel in some situations.
  */
 export class ThrottledQueue<T> {
+    private pending?: Pending[];
     items: Set<T> = new Set<T>();
     timeout: NodeJS.Timeout | null = null;
 
@@ -35,20 +41,24 @@ export class ThrottledQueue<T> {
     }
 
     addItems(items: T[]): void {
+        const previousSize = this.items.size;
         for (const item of items) {
             this.items.add(item);
         }
-
-        if (this.items.size >= this.maxBatchSize) {
-            this.flushAll();
-            return;
-        }
-        this.startTimeout();
+        this.afterAdd(this.items.size - previousSize);
     }
 
     addItem(item: T): void {
+        const previousSize = this.items.size;
         this.items.add(item);
+        this.afterAdd(this.items.size - previousSize);
+    }
 
+    private afterAdd(added: number) {
+        if (added) {
+            const pending = worker.enqueue(added);
+            if (pending) (this.pending ??= []).push(pending);
+        }
         if (this.items.size >= this.maxBatchSize) {
             this.flushAll();
             return;
@@ -77,7 +87,7 @@ export class ThrottledQueue<T> {
 
     pendingFlushes: Set<Promise<void>> = new Set<Promise<void>>();
 
-    private async process(items: T[]) {
+    private async process(items: T[], pending?: Pending[]) {
         // Calculate an efficient batch size (not simply using maxBatchSize)
         const batchCount = Math.ceil(items.length / this.maxBatchSize);
         if (batchCount === 0) {
@@ -85,12 +95,24 @@ export class ThrottledQueue<T> {
         }
         const batchSize = Math.ceil(items.length / batchCount);
 
+        let next = 0;
         for (let i = 0; i < items.length; i += batchSize) {
             // Avoid cloning the array if the batch size is larger than the remaining items
             const batch = batchSize < items.length ? items.slice(i, i + batchSize) : items;
+            // Set insertion order matches enqueue order, including across a multi-batch flush.
+            for (let remaining = batch.length; remaining && pending?.[next];) {
+                const token = pending[next];
+                const taken = Math.min(remaining, token.count);
+                token.leave(taken);
+                remaining -= taken;
+                if (!token.count) next++;
+            }
+            const finish = worker.start();
             try {
                 await this.handler(batch);
+                finish?.('success');
             } catch (error) {
+                finish?.('error');
                 console.error('Error processing batch in ThrottledQueue:', error);
             }
         }
@@ -113,8 +135,10 @@ export class ThrottledQueue<T> {
         // Move items, so we can continue adding items while we are processing
         const items = [...this.items];
         this.items.clear();
+        const pending = this.pending;
+        this.pending = undefined;
 
-        const flush = this.process(items)
+        const flush = this.process(items, pending)
             .catch(this.processErrorHandler)
             .finally(() => {
                 this.pendingFlushes.delete(flush);

@@ -1,6 +1,8 @@
 import { registerCron } from '@stamhoofd/crons';
+import { defineWorker } from '@node/observability/workloads';
 import { runStatisticsCycle } from './sync.js';
 
+const cycle = defineWorker('stats_cycle');
 registerCron('syncPlatformStatistics', syncPlatformStatistics);
 
 /**
@@ -35,10 +37,11 @@ let lastRun: Date | null = null;
 
 async function syncPlatformStatistics() {
     if (!shouldRunStatisticsSync({ now: new Date(), lastRun })) {
+        cycle.skip();
         return;
     }
 
-    await runStatisticsCycle();
+    await cycle.run(runStatisticsCycle);
 
     lastRun = new Date();
 }
