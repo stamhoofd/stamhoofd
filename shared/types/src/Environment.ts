@@ -50,11 +50,14 @@ export type StatisticsEnvironment = {
         readonly DB_USER: string;
         readonly DB_PASS: string;
         readonly DB_PORT?: number;
-        // Paths to PEM files. The login is created with REQUIRE X509, so the client certificate is
-        // mandatory on another server.
+        // Paths to PEM files. Remote connections require a CA. Legacy destinations default to mutual
+        // TLS; managed services can explicitly select server-auth TLS with a verified DNS hostname.
         readonly DB_CA?: string;
         readonly DB_CERT?: string;
         readonly DB_KEY?: string;
+        readonly DB_TLS_MODE?: 'mutual' | 'server';
+        /** DNS name on the server certificate; DB_HOST remains the numeric private/overlay route. */
+        readonly DB_TLS_SERVER_NAME?: string;
     };
 
     readonly stamhoofdDatabase: {
