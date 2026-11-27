@@ -11,7 +11,7 @@ import { computed, ref, watch } from 'vue';
 import { EmailStyler } from '../../editor/EmailStyler';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '#overlays/Toast.ts';
-import type { EmailTranslator } from './useEmailTranslator';
+import type { Translator } from '#hooks/useTranslator.ts';
 
 /**
  * The fields shared by the Email and EmailTemplate structures that make up the translatable content.
@@ -130,7 +130,7 @@ export function useEmailContentLanguage(options: {
     /**
      * Required for translateToOtherLanguages
      */
-    translate?: EmailTranslator;
+    translate?: Translator;
 }) {
     /**
      * The language that is being edited. null when no language is set on the content (untranslated).

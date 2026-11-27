@@ -1,14 +1,14 @@
 import type { Decoder } from '@common/encoding';
 import { TranslateResponse } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
 import type { TranslateRequest } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
-import { useContext } from '#hooks/useContext.ts';
+import { useContext } from './useContext.ts';
 
-export type EmailTranslator = (request: TranslateRequest) => Promise<TranslateResponse>;
+export type Translator = (request: TranslateRequest) => Promise<TranslateResponse>;
 
 /**
  * Calls the AI translation endpoint (only available to full platform admins).
  */
-export function useEmailTranslator(): EmailTranslator {
+export function useTranslator(): Translator {
     const context = useContext();
 
     return async (request: TranslateRequest) => {

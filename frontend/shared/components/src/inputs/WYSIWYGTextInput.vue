@@ -38,16 +38,13 @@
 <script lang="ts" setup>
 import { RichText } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
-import Placeholder from '@tiptap/extension-placeholder';
-import Typography from '@tiptap/extension-typography';
-import StarterKit from '@tiptap/starter-kit';
 import type { JSONContent } from '@tiptap/vue-3';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
 import type { Ref } from 'vue';
 
 import { ColorHelper } from '../ColorHelper';
-import { WarningBox } from '../editor/EditorWarningBox';
+import { buildRichTextExtensions } from '../editor/richTextEditor';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
@@ -131,22 +128,10 @@ function buildEditor() {
     }
     return new Editor({
         content,
-        extensions: [
-            StarterKit.configure({
-                heading: {
-                    levels: [props.headingStartLevel as any, props.headingStartLevel + 1 as any],
-                },
-                link: {
-                    openOnClick: false,
-                    protocols: ['mailto'],
-                },
-            }),
-            Placeholder.configure({
-                placeholder: props.placeholder,
-            }),
-            WarningBox.configure({}),
-            Typography.configure({}),
-        ],
+        extensions: buildRichTextExtensions({
+            headingStartLevel: props.headingStartLevel,
+            placeholder: props.placeholder,
+        }),
         onSelectionUpdate: ({ editor: e }) => {
             if (showLinkEditor.value) {
                 if (e.isActive('link')) {
