@@ -1,6 +1,6 @@
 import type { DecodedRequest } from '@node/endpoints';
 import { Response } from '@node/endpoints';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
+import { errorDiagnostics, isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { Organization, Platform, Token, User, Webshop } from '@stamhoofd/models';
 import type { LoginMethod, SessionMetaData, StartOpenIDFlowStruct } from '@stamhoofd/structures';
 import {
@@ -558,7 +558,7 @@ export class SSOService {
             return response;
         } catch (e) {
             const message = isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t('%G0');
-            console.error('Error in openID callback', e);
+            console.error('Error in openID callback', errorDiagnostics(e));
             return SSOServiceWithSession.getErrorRedirectResponse(session, message);
         }
     }
@@ -623,10 +623,7 @@ export class SSOServiceWithSession {
                 },
             );
 
-            console.log('received and validated tokens %j', tokenSet);
-
             const claims = tokenSet.claims();
-            console.log('validated ID Token claims %j', claims);
 
             if (!claims.name) {
                 throw new SimpleError({
@@ -642,15 +639,12 @@ export class SSOServiceWithSession {
             // Get from API
             if (tokenSet.access_token) {
                 const userinfo = await client.userinfo(tokenSet.access_token);
-                console.log('userinfo', userinfo);
 
                 if (userinfo.given_name) {
-                    console.log('userinfo given_name', userinfo.given_name);
                     firstName = userinfo.given_name;
                 }
 
                 if (userinfo.family_name) {
-                    console.log('userinfo family_name', userinfo.family_name);
                     lastName = userinfo.family_name;
                 }
             }
@@ -872,7 +866,7 @@ export class SSOServiceWithSession {
             return response;
         } catch (e) {
             const message = isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t('%G0');
-            console.error('Error in openID callback', e);
+            console.error('Error in openID callback', errorDiagnostics(e));
             return SSOServiceWithSession.getErrorRedirectResponse(session, message);
         }
     }

@@ -1,3 +1,4 @@
+import { errorDiagnostics } from '@common/errors';
 import { MollieToken } from '@stamhoofd/models';
 
 import { SettlementService } from '../services/SettlementService.js';
@@ -33,11 +34,11 @@ export class MollieSettlementSyncRunner implements ProviderSettlementSyncRunner 
                     summary,
                     abort,
                 });
-            } catch (e) {
+            } catch (error) {
                 // An interrupted account is not a failing account
                 abort.throwIfAborted();
 
-                console.error(e);
+                console.error('Platform Mollie settlement sync failed', errorDiagnostics(error));
                 summary.failed += 1;
             }
             onProgress?.();
@@ -61,10 +62,14 @@ export class MollieSettlementSyncRunner implements ProviderSettlementSyncRunner 
                     summary,
                     abort,
                 });
-            } catch (e) {
+            } catch (error) {
                 abort.throwIfAborted();
 
-                console.error(e);
+                console.error(
+                    'Organization Mollie settlement sync failed',
+                    token.organizationId,
+                    errorDiagnostics(error),
+                );
                 summary.failed += 1;
             }
             onProgress?.();

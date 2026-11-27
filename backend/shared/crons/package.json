@@ -15,6 +15,7 @@
         "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
+        "@common/errors": "workspace:*",
         "@node/observability": "workspace:*",
         "@node/database": "workspace:*",
         "@node/logging": "workspace:*",

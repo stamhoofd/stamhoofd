@@ -1,3 +1,4 @@
+import { errorDiagnostics } from '@common/errors';
 import { StripeAccount } from '@stamhoofd/models';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { AbortSignal } from '@stamhoofd/queues';
@@ -73,12 +74,16 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
             try {
                 await platformSync.syncFees({ start: windowStart, end: windowEnd, abort });
                 summary.feeMonths += 1;
-            } catch (e) {
+            } catch (error) {
                 abort.throwIfAborted();
 
                 // syncFees already emailed nothing: it throws an aggregate, the month is retried by
                 // the next run and the month is not invoiced until it completes
-                console.error('Fee sync failed for month ' + currentMonth.toISOString(), e);
+                console.error(
+                    'Stripe application fee sync failed',
+                    currentMonth,
+                    errorDiagnostics(error),
+                );
                 summary.failedFeeMonths += 1;
             }
 
@@ -154,18 +159,16 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
                 ) {
                     // Stripe account no longer in active use
                     console.error(
-                        e,
-                        'marking stripe account',
+                        'Marking Stripe account as inaccessible',
                         account.id,
-                        account.accountId,
-                        'as inaccessible because we do not seem to have access to it any longer',
+                        errorDiagnostics(e),
                     );
                     account.status = 'inaccessible';
                     await account.save();
                     totals.skipped += 1;
                     continue;
                 }
-                console.error('Failed to sync payouts of Stripe account ' + account.accountId, e);
+                console.error('Stripe account payout sync failed', account.id, errorDiagnostics(e));
                 totals.failed += 1;
 
                 WebmasterReport.report(
@@ -228,7 +231,7 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
                 abort.throwIfAborted();
 
                 failures++;
-                console.error('Retry of settlement ' + settlement.externalId + ' failed', e);
+                console.error('Stripe settlement retry failed', settlement.id, errorDiagnostics(e));
 
                 // Errors before the walk (e.g. the payout can't be retrieved anymore) don't pass
                 // markSyncFailed: count them here or the retry cap never triggers

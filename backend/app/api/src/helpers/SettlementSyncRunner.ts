@@ -1,3 +1,4 @@
+import { errorDiagnostics } from '@common/errors';
 import { AbortSignal } from '@stamhoofd/queues';
 import { PaymentProvider } from '@stamhoofd/structures';
 
@@ -64,12 +65,12 @@ export class SettlementSyncRunner {
                 });
                 try {
                     await runner.run({ start, end: rangeEnd, summary, onProgress, abort });
-                } catch (e) {
+                } catch (error) {
                     // An interrupted provider stops the whole run: it didn't fail, and the
                     // providers after it would only be interrupted at their first step too
                     abort.throwIfAborted();
 
-                    console.error('Stripe settlement sync failed', e);
+                    console.error('Stripe settlement sync failed', errorDiagnostics(error));
                     summary.failed += 1;
                 }
             }
@@ -78,10 +79,10 @@ export class SettlementSyncRunner {
                 const runner = new MollieSettlementSyncRunner();
                 try {
                     await runner.run({ start, end: rangeEnd, summary, onProgress, abort });
-                } catch (e) {
+                } catch (error) {
                     abort.throwIfAborted();
 
-                    console.error('Mollie settlement sync failed', e);
+                    console.error('Mollie settlement sync failed', errorDiagnostics(error));
                     summary.failed += 1;
                 }
             }

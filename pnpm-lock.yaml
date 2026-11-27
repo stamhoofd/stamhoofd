@@ -932,6 +932,9 @@ importers:
 
   backend/shared/crons:
     dependencies:
+      '@common/errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
       '@node/database':
         specifier: workspace:*
         version: link:../../../packages/node/database
@@ -1009,6 +1012,9 @@ importers:
 
   backend/shared/env:
     dependencies:
+      '@common/errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
       '@node/logging':
         specifier: workspace:*
         version: link:../../../packages/node/logging

@@ -1,5 +1,6 @@
+import { errorDiagnostics } from '@common/errors';
 import { Database } from '@node/database';
-import { StyledText } from '@node/logging';
+import { backendRecord } from '@node/logging';
 
 class StaticSQLLogger {
     slowQueryThresholdMs: number | null = null;
@@ -12,18 +13,14 @@ class StaticSQLLogger {
             const explainQuery = 'EXPLAIN ' + query;
             const [explainRows] = await Database.select(explainQuery, params, { nestTables: true });
             return explainRows[0]?.[''] ?? null;
-        } catch (e) {
-            console.error('Error running EXPLAIN on slow query', e);
+        } catch (error) {
+            console.error('EXPLAIN failed', errorDiagnostics(error));
+            backendRecord('database.query.failed');
         }
         return null;
     }
 
-    async logInefficientExplainResult(
-        query: string,
-        params: any[],
-        explainResult: any,
-        elapsedTimeMs?: number,
-    ) {
+    async logInefficientExplainResult(explainResult: any, elapsedTimeMs?: number) {
         if (!explainResult) {
             return;
         }
@@ -33,14 +30,11 @@ class StaticSQLLogger {
         }
 
         if (explainResult['type'] === 'ALL') {
-            console.warn(
-                new StyledText('[FULL TABLE SCAN] ').addClass('error').addTag('query'),
-                `Inefficient query detected${elapsedTimeMs !== undefined ? ' (' + elapsedTimeMs.toFixed(0) + 'ms)' : ''}:`,
-                query,
-                params,
-                'EXPLAIN result:',
-                explainResult,
-            );
+            console.warn('Full table scan', {
+                estimatedRows:
+                    typeof explainResult.rows === 'number' ? explainResult.rows : undefined,
+            });
+            backendRecord('database.query.slow', undefined, undefined, elapsedTimeMs);
         }
     }
 
@@ -48,11 +42,7 @@ class StaticSQLLogger {
         if (this.slowQueryThresholdMs === null) {
             if (this.explainAllAndLogInefficient) {
                 const result = await queryPromise;
-                await this.logInefficientExplainResult(
-                    query,
-                    params,
-                    await this.explain(query, params),
-                );
+                await this.logInefficientExplainResult(await this.explain(query, params));
                 return result;
             }
             return queryPromise;
@@ -66,24 +56,19 @@ class StaticSQLLogger {
         const elapsedTimeMs = Number(elapsedTime) / 1000 / 1000;
 
         if (elapsedTimeMs > this.slowQueryThresholdMs) {
-            console.trace(
-                'Slow SQL query (' + elapsedTimeMs.toFixed(2) + 'ms)\nQuery: ' + query,
-                params,
-            );
+            backendRecord('database.query.slow', undefined, undefined, elapsedTimeMs);
         }
 
         for (const logger of this.customLoggers) {
             try {
                 logger(query, params, elapsedTimeMs);
-            } catch (e) {
-                console.error('Error in custom SQL logger', e);
+            } catch (error) {
+                console.error('Error in custom SQL logger', errorDiagnostics(error));
             }
         }
 
         if (this.explainAllAndLogInefficient) {
             await this.logInefficientExplainResult(
-                query,
-                params,
                 await this.explain(query, params),
                 elapsedTimeMs,
             );

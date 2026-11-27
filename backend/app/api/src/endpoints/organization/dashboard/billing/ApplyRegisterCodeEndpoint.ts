@@ -1,3 +1,4 @@
+import { errorDiagnostics } from '@common/errors';
 import type { Decoder } from '@common/encoding';
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
@@ -52,11 +53,10 @@ export class ApplyRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Res
                 const url = new URL(code);
                 const codeParam = url.searchParams.get('code');
                 if (codeParam) {
-                    console.log('Parsed code from URL', codeParam);
                     code = codeParam;
                 }
-            } catch (e) {
-                console.error('Tried parsing code as URL but failed', code);
+            } catch (error) {
+                console.error('Invalid register code URL', errorDiagnostics(error));
             }
         }
 
@@ -77,7 +77,7 @@ export class ApplyRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Res
             // Already bought something: apply credit to other organization immediately
             const code = await UsedRegisterCode.getFor(organization.id);
             if (code && !code.balanceItemId) {
-                console.log('Rewarding code ' + code.id + ' for payment');
+                console.log('Rewarding register code for payment');
 
                 // Deze code werd nog niet beloond
                 await ReferralService.reward(code);

@@ -65,7 +65,7 @@ export async function mergeTwoMembers(
     other: Member,
     options?: { updateDocuments?: boolean },
 ): Promise<void> {
-    console.log('Merging two member', base.id, other.id, base.details.name, other.details.name);
+    console.log('Merging duplicate members', { memberId: base.id, duplicateId: other.id });
 
     if (base.id === other.id) {
         throw new Error('Cannot merge the same member');
@@ -111,7 +111,7 @@ export async function mergeTwoMembers(
     await base.save();
 
     if (other.existsInDatabase) {
-        console.log('Deleting duplicate member', other.id, other.details.name);
+        console.log('Deleting duplicate member', other.id);
 
         // store other member in merged_member table
         const mergedMember = MergedMember.fromMember(other, base.id);

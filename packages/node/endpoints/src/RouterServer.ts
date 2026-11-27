@@ -1,4 +1,10 @@
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
+import {
+    errorDiagnostics,
+    isSimpleError,
+    isSimpleErrors,
+    SimpleError,
+    SimpleErrors,
+} from '@common/errors';
 import http from 'http';
 import https from 'https';
 
@@ -72,8 +78,8 @@ export class RouterServer {
         for (const middleware of this.responseMiddlewares) {
             try {
                 await middleware.handleResponse(request, response, e);
-            } catch (ee) {
-                console.error('Error in response middleware', ee);
+            } catch (error) {
+                console.error('Error in response middleware', errorDiagnostics(error));
             }
         }
 
@@ -97,19 +103,19 @@ export class RouterServer {
                     res.end(encodedResponse.body);
                 }
             }
-        } catch (e) {
-            console.error('Failed to end error response', e);
+        } catch (error) {
+            console.error('Failed to end error response', errorDiagnostics(error));
             try {
                 res.statusCode = 500;
                 res.end('Internal server error');
-            } catch (e2) {
-                console.error('Failed to end error response with body', e2);
+            } catch (error) {
+                console.error('Failed to end error response with body', errorDiagnostics(error));
 
                 // Try to hangup connection
                 try {
                     res.socket?.end();
-                } catch (e3) {
-                    console.error('Failed to hangup connection', e3);
+                } catch (error) {
+                    console.error('Failed to hangup connection', errorDiagnostics(error));
                 }
             }
         }
@@ -141,18 +147,15 @@ export class RouterServer {
             let request: Request;
             try {
                 request = Request.fromHttp(req);
-            } catch (e) {
-                console.error(e);
+            } catch (error) {
+                console.error('Invalid incoming HTTP request', errorDiagnostics(error));
                 res.end();
                 return;
             }
 
             try {
                 if (this.verbose) {
-                    console.log({
-                        headers: request.headers,
-                        body: request.body,
-                    });
+                    console.log('Processing HTTP request');
                 }
 
                 let run = async () => {
@@ -235,18 +238,15 @@ export class RouterServer {
 
                 // Write to logs
                 if (this.verbose) {
-                    console.log({
-                        headers: encodedResponse.headers,
-                        body: encodedResponse.body,
-                    });
+                    console.log('Finished HTTP response');
                 }
             } catch (e) {
                 await this.processError(res, e, request);
                 return;
             }
-        } catch (e2) {
+        } catch (error) {
             // Catch errors in error logic
-            console.error(e2);
+            console.error('Failed to handle HTTP request', errorDiagnostics(error));
         }
     }
 

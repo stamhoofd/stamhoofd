@@ -15,8 +15,8 @@ export class Geolocator {
         }
 
         const text = await readFile(file, { encoding: 'utf-8' });
-        set.addText(text, (line, error) => {
-            console.error(`Failed to parse line: ${line}`, error);
+        set.addText(text, () => {
+            console.error('Failed to parse geolocation range');
         });
     }
 

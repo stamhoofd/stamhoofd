@@ -5,6 +5,7 @@ import {
     SQSClient,
     SQSServiceException,
 } from '@aws-sdk/client-sqs';
+import { errorDiagnostics } from '@common/errors';
 import { validate as isUuid } from 'uuid';
 import { registerCron } from '@stamhoofd/crons';
 import { defineWorker } from '@node/observability/workloads';
@@ -369,20 +370,6 @@ function getClient() {
 
 type QueueRole = 'bounce' | 'complaint' | 'reply';
 
-function sourceFrames(error: Error) {
-    // The stack header can repeat a multiline error message containing mail content.
-    const header = `${error.toString()}\n`;
-    if (!error.stack?.startsWith(header)) return [];
-    const frames: string[] = [];
-    for (const line of error.stack.slice(header.length).split('\n')) {
-        const location = /^\s+at .*?\/((?:backend|packages|shared)\/[\w./-]+:\d+:\d+)\)?$/.exec(
-            line,
-        );
-        if (location) frames.push(location[1]);
-    }
-    return frames;
-}
-
 function queueError(queue: QueueRole, operation: 'receive' | 'delete', error: unknown) {
     const details: string[] = [queue];
     if (error instanceof SQSServiceException) {
@@ -400,7 +387,9 @@ function queueError(queue: QueueRole, operation: 'receive' | 'delete', error: un
             details.push(error.code);
         }
     }
-    return new Error(`SES queue ${operation} failed (${details.join(', ')})`);
+    const failure = new Error(`SES queue ${operation} failed (${details.join(', ')})`);
+    console.error(failure.message);
+    return failure;
 }
 
 export async function readFromQueue(queueUrl: string, queue: QueueRole) {
@@ -482,8 +471,7 @@ export async function readFromQueue(queueUrl: string, queue: QueueRole) {
                 console.error('[AWS Queue] Message processing failed', {
                     ...context,
                     step,
-                    errorType: error instanceof Error ? error.constructor.name : 'unknown',
-                    frames: error instanceof Error ? sourceFrames(error) : undefined,
+                    ...errorDiagnostics(error),
                 });
             } finally {
                 finish?.(outcome);

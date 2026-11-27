@@ -1,8 +1,9 @@
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import { backup } from '../helpers/backup.js';
+import { backendRecord } from '@node/logging';
 
 type Params = Record<string, never>;
 type Body = undefined;
@@ -51,7 +52,10 @@ export class BackupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
             });
         }
 
-        backup().catch(console.error);
+        backup().catch((error) => {
+            console.error('Backup failed', errorDiagnostics(error));
+            backendRecord('worker.failed');
+        });
 
         const response = new Response('Scheduled backup');
         response.status = 201;

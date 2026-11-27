@@ -1,4 +1,10 @@
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
+import {
+    errorDiagnostics,
+    isSimpleError,
+    isSimpleErrors,
+    SimpleError,
+    SimpleErrors,
+} from '@common/errors';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Email as EmailClass } from '@stamhoofd/email';
 import { Email, EmailRecipient, Organization, Platform } from '@stamhoofd/models';
@@ -50,7 +56,9 @@ export class EmailSendService {
         if (waitForSending) {
             return await this.resumeSending(email);
         } else {
-            this.resumeSending(email).catch(console.error);
+            this.resumeSending(email).catch((error) =>
+                console.error('Failed to resume email delivery', errorDiagnostics(error)),
+            );
         }
         return email;
     }
@@ -59,7 +67,7 @@ export class EmailSendService {
         const attachments: Attachment[] = [];
         for (const attachment of email.attachments) {
             if (!attachment.content && !attachment.file) {
-                console.warn('Attachment without content found, skipping', attachment);
+                console.warn('Attachment without content found, skipping');
                 continue;
             }
 
@@ -177,8 +185,8 @@ export class EmailSendService {
                     recipient.lastFailedAt = new Date();
                     await recipient.save();
                 }
-            } catch (e) {
-                console.error(e);
+            } catch (error) {
+                console.error('Failed to save email delivery result', errorDiagnostics(error));
             }
             promiseResolve();
         };
@@ -195,7 +203,9 @@ export class EmailSendService {
             type: email.emailType ? 'transactional' : 'broadcast',
             attachments: data.attachments,
             callback(error: Error | null) {
-                callback(error).catch(console.error);
+                callback(error).catch((error) =>
+                    console.error('Email delivery callback failed', errorDiagnostics(error)),
+                );
             },
             headers: new Map([
                 ['X-Email-Id', email.id],
@@ -652,8 +662,6 @@ export class EmailSendService {
 
                                 let duplicateOfRecipientId: string | null = null;
                                 if (item.email && emailsSet.has(item.email)) {
-                                    console.log('Found duplicate email recipient', item.email);
-
                                     // Try to merge
                                     const existing = await EmailRecipient.select()
                                         .where('emailId', upToDate.id)
@@ -667,11 +675,6 @@ export class EmailSendService {
                                             recipient.replacements,
                                         );
                                         if (merged !== false) {
-                                            console.log(
-                                                'Found mergeable duplicate email recipient',
-                                                item.email,
-                                                other.id,
-                                            );
                                             duplicateOfRecipientId = other.id;
 
                                             other.replacements = merged;
@@ -682,15 +685,6 @@ export class EmailSendService {
                                             recipient.replacements = merged;
 
                                             break;
-                                        } else {
-                                            console.log(
-                                                'Could not merge duplicate email recipient',
-                                                item.email,
-                                                other.id,
-                                                'keeping both',
-                                                other.replacements,
-                                                item.replacements,
-                                            );
                                         }
                                     }
                                 }
@@ -724,8 +718,7 @@ export class EmailSendService {
                     upToDate.membersCount = membersSet.size;
                     await upToDate.save();
                 } catch (e: unknown) {
-                    console.error('Failed to build recipients for email', id);
-                    console.error(e);
+                    console.error('Failed to build email recipients', id, errorDiagnostics(e));
                     upToDate.recipientsStatus = EmailRecipientsStatus.NotCreated;
                     upToDate.recipientsErrors = errorToSimpleErrors(e);
                     await upToDate.save();
@@ -814,9 +807,12 @@ export class EmailSendService {
                 }
 
                 console.warn('No example recipient found for email', id);
-            } catch (e) {
-                console.error('Failed to build example recipient for email', id);
-                console.error(e);
+            } catch (error) {
+                console.error(
+                    'Failed to build example email recipient',
+                    id,
+                    errorDiagnostics(error),
+                );
             }
         });
     }

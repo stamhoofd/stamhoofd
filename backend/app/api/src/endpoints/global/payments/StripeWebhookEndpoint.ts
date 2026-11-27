@@ -58,7 +58,6 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        console.log('Received Stripe Webhook', request.body.type);
         const secret = request.body.account
             ? STAMHOOFD.STRIPE_CONNECT_ENDPOINT_SECRET
             : STAMHOOFD.STRIPE_ENDPOINT_SECRET;
@@ -69,7 +68,6 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
 
         // Verify webhook signature and extract the event.
         // See https://stripe.com/docs/webhooks/signatures for more information.
-        let event;
         try {
             const stripe = StripeHelper.getInstance();
             const sig = request.headers['stripe-signature'];
@@ -80,7 +78,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                     statusCode: 400,
                 });
             }
-            event = await stripe.webhooks.constructEventAsync(
+            await stripe.webhooks.constructEventAsync(
                 await request.request.bodyPromise!,
                 sig,
                 secret,
@@ -96,7 +94,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
         // Check type
         switch (request.body.type) {
             case 'account.updated': {
-                console.log(event);
+                console.log('Received Stripe webhook', request.body.type);
                 const account = request.body.data.object;
                 if (account && account.id) {
                     const id = account.id as string;
@@ -110,7 +108,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                             },
                         );
                     } else {
-                        console.warn('Could not find stripe account with id', id);
+                        console.warn('Stripe webhook account not found');
                     }
                 }
                 break;
@@ -123,6 +121,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
             case 'payment_intent.processing':
             case 'payment_intent.requires_action':
             case 'payment_intent.succeeded': {
+                console.log('Received Stripe webhook', request.body.type);
                 const intentId = request.body.data.object.id;
 
                 if (intentId && typeof intentId === 'string') {
@@ -134,6 +133,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
             case 'checkout.session.async_payment_succeeded':
             case 'checkout.session.completed':
             case 'checkout.session.expired': {
+                console.log('Received Stripe webhook', request.body.type);
                 const checkoutId = request.body.data.object.id;
                 const [model] = await StripeCheckoutSession.where(
                     { stripeSessionId: checkoutId },
@@ -142,7 +142,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                 if (model && model.organizationId) {
                     await this.checkDebounced(model.paymentId, model.organizationId);
                 } else {
-                    console.warn('Could not find stripe checkout session with id', checkoutId);
+                    console.warn('Stripe checkout session not found');
                 }
                 break;
             }
@@ -159,16 +159,17 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
             case 'charge.refund.updated':
             case 'charge.refund.succeeded':
             case 'charge.updated': {
+                console.log('Received Stripe webhook', request.body.type);
                 const intentId = request.body.data.object.payment_intent;
                 if (intentId && typeof intentId === 'string') {
                     await this.updateIntent(intentId);
                 } else {
-                    console.log('Received charge event without payment intent', request.body);
+                    console.warn('Received charge event without payment intent');
                 }
                 break;
             }
             default: {
-                console.log('Unhandled stripe webhook type', request.body.type);
+                console.log('Unhandled Stripe webhook type');
                 break;
             }
         }
@@ -186,7 +187,7 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                     if (organization) {
                         await PaymentService.pollStatus(paymentId, organization);
                     } else {
-                        console.warn('Could not find organization with id', organizationId);
+                        console.warn('Stripe payment organization not found');
                     }
                 },
                 1000,
@@ -194,7 +195,6 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
         } catch (e) {
             if (isDebouncedError(e)) {
                 // Okay, we are debounced (new request came in)
-                console.log('Debounced', paymentId);
                 return;
             }
             throw e;
@@ -202,12 +202,11 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
     }
 
     async updateIntent(intentId: string) {
-        console.log('[Webooks] Updating intent', intentId);
         const [model] = await StripePaymentIntent.where({ stripeIntentId: intentId }, { limit: 1 });
         if (model && model.organizationId) {
             await this.checkDebounced(model.paymentId, model.organizationId);
         } else {
-            console.warn('Could not find stripe payment intent with id', intentId);
+            console.warn('Stripe payment intent not found');
         }
     }
 }

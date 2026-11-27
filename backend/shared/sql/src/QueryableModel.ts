@@ -36,9 +36,6 @@ export class QueryableModel extends Model {
             if (!d) {
                 console.error(
                     'Could not transform row',
-                    row,
-                    'into model',
-                    this.table,
                     'check if the primary key is returned in the query',
                 );
                 throw new Error('Missing data for model ' + this.table);
@@ -130,7 +127,7 @@ export class QueryableModel extends Model {
         if (this.cache) {
             const hit = this.cache.getById(id);
             if (hit) {
-                console.log('Cache hit, get by id', this.name, id);
+                console.log('Cache hit, get by id', this.name);
                 return hit as InstanceType<T>;
             }
         }
@@ -158,7 +155,7 @@ export class QueryableModel extends Model {
             for (const id of ids) {
                 const hit = this.cache.getById(id);
                 if (hit) {
-                    console.log('Cache hit, get by id', this.name, id);
+                    console.log('Cache hit, get by id', this.name);
                     hits.push(hit as InstanceType<T>);
                 } else {
                     remaining.push(id);

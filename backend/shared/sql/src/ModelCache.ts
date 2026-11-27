@@ -25,8 +25,8 @@ export class ModelCache<M extends Model> {
         for (const column of copy.static.columns.values()) {
             try {
                 this[column.name] = structuredClone(model[column.name]);
-            } catch (e) {
-                console.log('Error on clone', copy.static.name, column.name, e);
+            } catch {
+                console.log('Error cloning cached model', copy.static.name, column.name);
                 // structured clone error
                 if (model[column.name] instanceof AutoEncoder) {
                     this[column.name] = model[column.name].clone();
@@ -47,7 +47,7 @@ export class ModelCache<M extends Model> {
         const clone = this.deepClone(model);
         const id = clone.getPrimaryKey();
         if (!id) {
-            console.warn('Could not store in cache: no id found', model);
+            console.warn('Could not store in cache: no id found');
             return;
         }
         this.cache.set(id, model);

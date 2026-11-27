@@ -50,11 +50,7 @@ export async function getPaymentIdForStripeCharge(
         );
 
         if (stripePayments.length === 1) {
-            console.log(
-                'Found missing payment metadata for payment intent',
-                paymentIntentId,
-                stripePayments[0].paymentId,
-            );
+            console.log('Found missing Stripe payment metadata');
             return stripePayments[0].paymentId;
         }
 
@@ -64,7 +60,7 @@ export async function getPaymentIdForStripeCharge(
         });
 
         if (checkoutSessions.data.length !== 1) {
-            console.log('No Stripe Checkout Sessions found for payment intent ' + paymentIntentId);
+            console.log('No checkout sessions found for Stripe payment intent');
             continue;
         }
 
@@ -76,15 +72,11 @@ export async function getPaymentIdForStripeCharge(
         );
 
         if (stripeCheckoutSessions.length === 1) {
-            console.log(
-                'Found missing payment metadata for payment intent',
-                paymentIntentId,
-                stripeCheckoutSessions[0].paymentId,
-            );
+            console.log('Found missing Stripe payment metadata');
             return stripeCheckoutSessions[0].paymentId;
         }
 
-        console.log('No payment found for checkout session ' + checkoutSessions.data[0].id);
+        console.log('No payment found for Stripe checkout session');
     }
 
     return null;

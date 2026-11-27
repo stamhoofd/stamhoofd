@@ -9,7 +9,7 @@ import {
 } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PaymentProvider } from '@stamhoofd/structures';
@@ -117,7 +117,7 @@ export class SettlementsSyncEndpoint extends Endpoint<Params, Query, Body, Respo
                     (queued) => queued !== item,
                 );
             })
-            .catch(console.error);
+            .catch((error) => console.error('Settlement sync failed', errorDiagnostics(error)));
 
         return new Response(undefined);
     }

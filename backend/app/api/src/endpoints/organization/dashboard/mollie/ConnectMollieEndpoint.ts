@@ -1,3 +1,4 @@
+import { errorDiagnostics } from '@common/errors';
 import type { Decoder } from '@common/encoding';
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
@@ -56,7 +57,9 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
             // Check settlements after linking (shouldn't block)
             new MollieSettlementSync({ token: mollieToken })
                 .syncSettlements({ start: organization.createdAt })
-                .catch(console.error);
+                .catch((error) =>
+                    console.error('Mollie settlement sync failed', errorDiagnostics(error)),
+                );
         }
 
         return new Response(await AuthenticatedStructures.organization(organization));

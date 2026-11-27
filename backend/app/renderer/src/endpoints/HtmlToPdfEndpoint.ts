@@ -1,6 +1,6 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import { verifyInternalSignature } from '@stamhoofd/backend-env';
 import { QueueHandler } from '@stamhoofd/queues';
 import formidable from 'formidable';
@@ -147,8 +147,8 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         let pdf: Uint8Array | null = null;
         try {
             pdf = await this.htmlToPdf(html, { retryCount: 2, startDate: new Date() });
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            console.error('PDF rendering failed', errorDiagnostics(error));
         }
         if (!pdf) {
             throw new SimpleError({
@@ -181,8 +181,8 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             if (browser.count > 50 || !browser.browser.connected) {
                 try {
                     await browser.browser.close();
-                } catch (e) {
-                    console.error(e);
+                } catch (error) {
+                    console.error('Renderer browser close failed', errorDiagnostics(error));
                 }
                 this.browsers[this.nextBrowserIndex] = { browser: await puppeteer.launch({}), count: 0 };
             }
@@ -194,8 +194,8 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     static async clearBrowser(browser: Browser) {
         try {
             await browser.close();
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            console.error('Renderer browser close failed', errorDiagnostics(error));
         }
         const i = this.browsers.findIndex(b => b?.browser === browser);
         if (i >= 0) {
@@ -228,8 +228,8 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
                 console.log('Rendered document pdf');
                 return pdf;
-            } catch (e) {
-                console.error('Failed to render document pdf', e);
+            } catch (error) {
+                console.error('Failed to render document pdf', errorDiagnostics(error));
                 return null;
             }
         });

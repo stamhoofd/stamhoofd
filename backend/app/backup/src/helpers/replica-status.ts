@@ -7,8 +7,6 @@ export async function checkReplicaStatus() {
         throw new Error('No replica status found');
     }
 
-    console.log(rows);
-
     const row = rows[0][''];
 
     // Check Replica_SQL_Running = Yes

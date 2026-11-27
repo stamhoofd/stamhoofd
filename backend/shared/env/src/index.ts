@@ -3,7 +3,14 @@ import { BackendApp } from '@stamhoofd/types/BackendApp';
 import chalk from 'chalk';
 import crypto from 'crypto';
 import fs, { promises } from 'fs';
-import { logger } from '@node/logging';
+import { errorDiagnostics } from '@common/errors';
+import { backendRecord, initializeBackendRecords, logger } from '@node/logging';
+
+export function fatalBackendException(boundary: 'startup' | 'rejection', error: unknown): void {
+    console.error('Fatal backend exception', boundary, errorDiagnostics(error));
+    backendRecord(boundary === 'startup' ? 'application.startup.failed' : 'application.unhandled');
+    process.exit(1);
+}
 
 async function fileExists(path: string): Promise<boolean> {
     try {
@@ -20,6 +27,7 @@ async function fileExists(path: string): Promise<boolean> {
  * Only managed development sessions suppress debug; unmanaged processes retain it.
  */
 export async function load(settings?: { path?: string; service?: BackendApp }) {
+    if (settings?.service) initializeBackendRecords(settings.service);
     logger.debugEnabled = !process.env.STAM_DEV_SESSION || process.env.STAM_DEV_VERBOSE === '1';
     let env: any;
 
@@ -86,7 +94,6 @@ export async function load(settings?: { path?: string; service?: BackendApp }) {
 
     if (settings?.service === BackendApp.Api) {
         if (!STAMHOOFD.domains) {
-            console.error('env', env);
             throw new Error('Expected environment variable domains');
         }
 

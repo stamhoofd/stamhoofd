@@ -9,7 +9,7 @@ it('attempts one heartbeat after a completed cycle, never after a failure or a g
     const request = vi.fn().mockRejectedValue(new Error(url));
     vi.stubGlobal('fetch', request);
     const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const errors = vi.spyOn(process.stderr, 'write').mockReturnValue(true);
     const tick = async () => {
         await runCronJobs(statisticsCronOptions);
         await waitForCrons();

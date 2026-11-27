@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import { IPRangeSet } from '@stamhoofd/utility/IPRange.js';
 import fs from 'fs/promises';
 import path from 'path';
@@ -69,8 +69,8 @@ export class TrustedIPWhitelist {
      */
     private parse(text: string): IPRangeSet {
         const set = new IPRangeSet();
-        set.addText(text, (line, error) => {
-            console.error(`[trusted-ips] Failed to parse line: ${line}`, error);
+        set.addText(text, () => {
+            console.error('[trusted-ips] Invalid IP range');
         });
         return set;
     }
@@ -116,7 +116,7 @@ export class TrustedIPWhitelist {
             await fs.mkdir(STAMHOOFD.CACHE_PATH, { recursive: true });
             await fs.writeFile(this.cacheFilePath, text, 'utf-8');
         } catch (error) {
-            console.error('[trusted-ips] Failed to persist whitelist cache', error);
+            console.error('[trusted-ips] Failed to persist whitelist cache', errorDiagnostics(error));
         }
     }
 
@@ -139,13 +139,13 @@ export class TrustedIPWhitelist {
                 // Only install and persist a valid, non-empty list.
                 this.set = set;
                 await this.writeCache(text);
-                console.log(`[trusted-ips] Loaded ${set.size} trusted IP ranges from ${this.url}`);
+                console.log(`[trusted-ips] Loaded ${set.size} remote trusted IP ranges`);
                 return;
             }
 
             console.error('[trusted-ips] Remote whitelist was empty, falling back to local cache');
         } catch (error) {
-            console.error('[trusted-ips] Failed to fetch remote whitelist, falling back to local cache', error);
+            console.error('[trusted-ips] Failed to fetch remote whitelist, falling back to local cache', errorDiagnostics(error));
         }
 
         // Fall back to the last known good copy on disk. We keep the current in-memory set until

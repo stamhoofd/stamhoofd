@@ -1,7 +1,7 @@
 import { column } from '@node/database';
 import type { PlainObject } from '@common/encoding';
 import { ArrayDecoder, StringDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import { MollieRequiredScopes } from '@stamhoofd/structures/MollieScopes.js';
 import type { IncomingMessage } from 'http';
@@ -54,8 +54,6 @@ export class MollieToken extends QueryableModel {
         },
     })
     createdAt: Date;
-
-    static verbose = true;
 
     static knownTokens: Map<string, MollieToken> = new Map();
 
@@ -148,9 +146,6 @@ export class MollieToken extends QueryableModel {
                 jsonData = this.objectToQueryString(data as Record<string, string>);
             }
 
-            if (this.verbose) {
-                console.log(method + ' https://api.mollie.com' + path + '\n' + jsonData);
-            }
             const req = https.request(
                 {
                     hostname: 'api.mollie.com',
@@ -188,11 +183,6 @@ export class MollieToken extends QueryableModel {
                     timeout: 10000,
                 },
                 (response: IncomingMessage) => {
-                    if (this.verbose) {
-                        console.log(`statusCode: ${response.statusCode ?? '/'}`);
-                        console.log(`HEADERS: ${JSON.stringify(response.headers)}`);
-                    }
-
                     const chunks: any[] = [];
 
                     response.on('data', (chunk) => {
@@ -207,10 +197,6 @@ export class MollieToken extends QueryableModel {
                             }
                             const body = Buffer.concat(chunks).toString();
 
-                            if (this.verbose) {
-                                console.log(body);
-                            }
-
                             if (response.statusCode == 204) {
                                 resolve(undefined);
                                 return;
@@ -220,16 +206,19 @@ export class MollieToken extends QueryableModel {
                             try {
                                 json = JSON.parse(body);
                             } catch (error) {
-                                console.error(error);
+                                console.error(
+                                    'Invalid JSON from Mollie',
+                                    method,
+                                    response.statusCode,
+                                    errorDiagnostics(error),
+                                );
 
                                 // invalid json
                                 if (response.statusCode < 200 || response.statusCode >= 300) {
                                     if (body.length == 0) {
-                                        console.error(response.statusCode);
                                         reject(new Error('Status ' + response.statusCode));
                                         return;
                                     }
-                                    console.error(response.statusCode + ' ' + body);
                                     reject(new Error(body));
                                     return;
                                 } else {
@@ -240,7 +229,7 @@ export class MollieToken extends QueryableModel {
                             }
 
                             if (response.statusCode < 200 || response.statusCode >= 300) {
-                                console.error(body);
+                                console.error('Mollie request failed', response.statusCode);
                                 const e = new MollieError(
                                     response.statusCode + ' ' + response.statusMessage,
                                 );
@@ -251,9 +240,6 @@ export class MollieToken extends QueryableModel {
 
                             resolve(json);
                         } catch (error) {
-                            if (this.verbose) {
-                                console.error(error);
-                            }
                             reject(error);
                         }
                     });
@@ -266,9 +252,7 @@ export class MollieToken extends QueryableModel {
             });
 
             req.on('error', (error) => {
-                if (this.verbose) {
-                    console.error(error);
-                }
+                console.error('Mollie connection failed', method, errorDiagnostics(error));
                 reject(error);
             });
 
@@ -341,8 +325,8 @@ export class MollieToken extends QueryableModel {
                 },
                 'urlencoded',
             );
-        } catch (e) {
-            console.error('Failed to revoke token', this.organizationId, e);
+        } catch (error) {
+            console.error('Failed to revoke Mollie token', errorDiagnostics(error));
         }
         await this.delete();
     }

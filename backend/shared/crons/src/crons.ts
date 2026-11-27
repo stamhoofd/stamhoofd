@@ -1,6 +1,7 @@
+import { errorDiagnostics } from '@common/errors';
 import { Database } from '@node/database';
 import { defineWorker } from '@node/observability/workloads';
-import { logger, StyledText } from '@node/logging';
+import { backendRecord, logger, StyledText } from '@node/logging';
 import { sleep } from '@stamhoofd/utility';
 
 export type CronJobDefinition = {
@@ -39,15 +40,17 @@ async function run(name: string, handler: () => Promise<void>) {
             async () => {
                 try {
                     await handler();
-                } catch (e) {
+                } catch (error) {
+                    console.error('Cron failed', name, errorDiagnostics(error));
                     outcome = 'error';
-                    console.error(new StyledText(e).addClass('error'));
+                    backendRecord('worker.failed');
                 }
             },
         );
-    } catch (e) {
+    } catch (error) {
+        console.error('Cron dispatch failed', name, errorDiagnostics(error));
         outcome = 'error';
-        console.error(new StyledText(e).addClass('error'));
+        backendRecord('worker.failed');
     } finally {
         finish?.(outcome);
     }

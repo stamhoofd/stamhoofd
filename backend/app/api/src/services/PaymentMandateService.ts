@@ -4,7 +4,7 @@ import { Platform } from '@stamhoofd/models';
 import { PaymentMandateStatus } from '@stamhoofd/structures/PaymentMandate.js';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { MollieService } from './MollieService.js';
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import { Context } from '../helpers/Context.js';
 import { PaymentProvider } from '@stamhoofd/structures';
 
@@ -126,14 +126,7 @@ export class PaymentMandateService {
             if (payingOrganization.serverMeta.blockedMandates.find((b) => b.id === id)) {
                 continue;
             }
-            console.log(
-                'Blocking mandate ' +
-                    id +
-                    ' for organization ' +
-                    payingOrganization.id +
-                    ' ' +
-                    payingOrganization.name,
-            );
+            console.log('Blocking payment mandate', payingOrganization.id);
             payingOrganization.serverMeta.blockedMandates.push(
                 BlockedPaymentMandate.create({ id, identifier, paymentId }),
             );
@@ -148,12 +141,7 @@ export class PaymentMandateService {
             this.applyBlockedMandates(mandates, payingOrganization);
             const replacement = this.groupByMandate(mandates).mandates.find((m) => !m.isBlocked);
             if (replacement) {
-                console.log(
-                    'Changing default mandate to ' +
-                        replacement.id +
-                        ' for organization ' +
-                        payingOrganization.id,
-                );
+                console.log('Changing default payment mandate', payingOrganization.id);
                 payingOrganization.serverMeta.mollieMandateId = replacement.id;
                 changed = true;
             }
@@ -246,14 +234,7 @@ export class PaymentMandateService {
             return;
         }
 
-        console.log(
-            'Unblocking mandate ' +
-                mandateId +
-                ' for organization ' +
-                payingOrganization.id +
-                ' ' +
-                payingOrganization.name,
-        );
+        console.log('Unblocking payment mandate', payingOrganization.id);
         payingOrganization.serverMeta.blockedMandates = remaining;
         await payingOrganization.save();
     }
@@ -336,8 +317,8 @@ export class PaymentMandateService {
                             payingOrganization,
                             user,
                         });
-                    } catch (e) {
-                        console.error('Failed to delete Mollie mandate', mandateId, e);
+                    } catch (error) {
+                        console.error('Failed to delete Mollie mandate', errorDiagnostics(error));
                     }
                 }
             }
@@ -383,28 +364,13 @@ export class PaymentMandateService {
                         ? await Organization.getByID(payingOrganizationId)
                         : payingOrganizationId;
                 if (payingOrganization) {
-                    console.log(
-                        'Saving ' +
-                            mandateId +
-                            ' as default mandate for organization ' +
-                            payingOrganization.id +
-                            ' ' +
-                            payingOrganization.name,
-                    );
+                    console.log('Saving default payment mandate', payingOrganization.id);
                     payingOrganization.serverMeta.mollieMandateId = mandateId;
                     await payingOrganization.save();
                 }
             }
-        } catch (e) {
-            console.error(
-                'Failed to save default mandate for mandate ' +
-                    mandateId +
-                    ' in organization ' +
-                    (typeof payingOrganizationId === 'string'
-                        ? payingOrganizationId
-                        : payingOrganizationId?.id),
-                { cause: e },
-            );
+        } catch (error) {
+            console.error('Failed to save default payment mandate', errorDiagnostics(error));
 
             throw new SimpleError({
                 code: 'failed',

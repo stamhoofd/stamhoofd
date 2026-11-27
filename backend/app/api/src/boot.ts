@@ -1,3 +1,4 @@
+import { fatalBackendException } from '@stamhoofd/backend-env';
 import { Column, Database, Migration } from '@node/database';
 import { ApplicationLifecycle, observeHttpServer } from '@node/observability';
 import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
@@ -35,11 +36,7 @@ import { UniqueUserService } from './services/UniqueUserService.js';
 import { QueryableModel, SQLLogger } from '@stamhoofd/sql';
 import { WebshopCrowdfundingService } from './services/WebshopCrowdfundingService.js';
 
-process.on('unhandledRejection', (error: Error) => {
-    console.error('unhandledRejection');
-    console.error(error.message, error.stack);
-    process.exit(1);
-});
+process.on('unhandledRejection', (error) => fatalBackendException('rejection', error));
 
 // Set version of saved structures
 Column.setJSONVersion(Version);

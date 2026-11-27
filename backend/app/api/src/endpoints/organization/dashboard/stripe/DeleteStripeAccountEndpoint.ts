@@ -6,7 +6,7 @@ import { AuditLogType } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 import { StripeHelper } from '../../../../helpers/StripeHelper.js';
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import { AuditLogService } from '../../../../services/AuditLogService.js';
 
 type Params = { id: string };
@@ -59,8 +59,8 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
 
         try {
             await stripe.accounts.del(model.accountId);
-        } catch (e) {
-            console.error('Tried deleting account but failed', e);
+        } catch (error) {
+            console.error('Failed to delete Stripe account', errorDiagnostics(error));
         }
 
         // If that succeeded

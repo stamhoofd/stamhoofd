@@ -780,7 +780,7 @@ export class Model /* static implements RowInitiable<Model> */ {
             return false;
         }
 
-        if (Model.debug) console.log('Saving ' + this.constructor.name + ' to...', fields);
+        if (Model.debug) console.log('Saving model', this.constructor.name);
 
         // todo: save here
         if (!this.existsInDatabase) {
@@ -795,13 +795,9 @@ export class Model /* static implements RowInitiable<Model> */ {
                 // Auto increment value
                 this[this.static.primary.name] = result.insertId;
                 fields[this.static.primary.name] = result.insertId; // Also mark saved
-                if (Model.debug) console.log(`New id = ${this[this.static.primary.name]}`);
             }
         } else {
-            if (Model.debug)
-                console.log(
-                    `Updating ${this.constructor.name} where ${this.static.primary.name} = ${id}`,
-                );
+            if (Model.debug) console.log('Updating model', this.constructor.name);
 
             const [result] = await Database.update(
                 'UPDATE `' +
@@ -891,10 +887,7 @@ export class Model /* static implements RowInitiable<Model> */ {
             );
         }
 
-        if (Model.debug)
-            console.log(
-                `Deleting ${this.constructor.name} where ${this.static.primary.name} = ${id}`,
-            );
+        if (Model.debug) console.log('Deleting model', this.constructor.name);
 
         const [result] = await Database.delete(
             'DELETE FROM `' + this.static.table + '` WHERE `' + this.static.primary.name + '` = ?',

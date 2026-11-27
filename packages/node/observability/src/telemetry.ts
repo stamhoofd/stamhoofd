@@ -55,15 +55,18 @@ export function initializeTelemetry(
                       }),
                   ]
                 : [],
-            logRecordProcessors: configured('LOGS')
-                ? [
-                      new BatchLogRecordProcessor({
-                          exporter: sanitizedLogExporter(
-                              new OTLPLogExporter({ timeoutMillis: 1500 }),
-                          ),
-                      }),
-                  ]
-                : [],
+            // The existing docs pilot is separate. Backend log forwarding awaits its own gate;
+            // enabling a trace endpoint must not export backend SDK log records alongside it.
+            logRecordProcessors:
+                service === 'docs' && configured('LOGS')
+                    ? [
+                          new BatchLogRecordProcessor({
+                              exporter: sanitizedLogExporter(
+                                  new OTLPLogExporter({ timeoutMillis: 1500 }),
+                              ),
+                          }),
+                      ]
+                    : [],
         });
         sdk.start();
     } catch {

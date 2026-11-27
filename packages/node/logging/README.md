@@ -22,3 +22,7 @@ the original assignment-style class fields and Chalk 4 dependency.
 
 The Stamhoofd-specific logging wrapper remains `@stamhoofd/logging` in
 `backend/shared/logging`; `pnpm stam test logging` still selects its tests.
+
+`backendRecord` constructs the backend's allowlisted records independently of
+`Logger`, its formatting and the console. See [backend log privacy](../../../contributing/backend/log-privacy.md)
+for the supported fields, dedicated local sink and release gate.

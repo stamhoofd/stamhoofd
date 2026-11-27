@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { errorDiagnostics, SimpleError } from '@common/errors';
 import { Organization, Payment, StripeAccount } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
@@ -170,12 +170,12 @@ export class StripeSettlementSync {
                 } else {
                     result.synced += 1;
                 }
-            } catch (e) {
+            } catch (error) {
                 // An interrupted payout is not a failing payout: counting it would turn every
                 // restart into a wave of problems to look into
                 abort?.throwIfAborted();
 
-                console.error('Failed to sync Stripe payout ' + payout.id, e);
+                console.error('Stripe payout sync failed', payout.id, errorDiagnostics(error));
                 result.failed += 1;
             }
         }
@@ -241,8 +241,9 @@ export class StripeSettlementSync {
                     abort?.throwIfAborted();
 
                     console.error(
-                        'Failed to sync application fee transaction ' + transaction.id,
-                        e,
+                        'Stripe application fee transaction sync failed',
+                        transaction.id,
+                        errorDiagnostics(e),
                     );
                     errors.push(e);
                 }
@@ -252,7 +253,12 @@ export class StripeSettlementSync {
             // update them may not hide what broke the walk
             await SettlementService.updatePaymentSettlementsForApplicationFeeBalanceItems([
                 ...settledApplicationFeeBalanceItems,
-            ]).catch(console.error);
+            ]).catch((error) =>
+                console.error(
+                    'Failed to refresh Stripe settlement totals',
+                    errorDiagnostics(error),
+                ),
+            );
             throw e;
         }
 
@@ -611,11 +617,9 @@ export class StripeSettlementSync {
                     abort.throwIfAborted();
 
                     console.error(
-                        'Failed to sync balance transaction ' +
-                            transaction.id +
-                            ' of Stripe payout ' +
-                            payout.id,
-                        e,
+                        'Stripe payout balance transaction sync failed',
+                        { payoutId: payout.id, transactionId: transaction.id },
+                        errorDiagnostics(e),
                     );
                     errors.push(
                         SettlementSyncError.fromError(e, { transactionId: transaction.id }),
@@ -642,7 +646,12 @@ export class StripeSettlementSync {
             // hide what broke the walk
             await SettlementService.updatePaymentSettlementsForApplicationFeeBalanceItems([
                 ...settledApplicationFeeBalanceItems,
-            ]).catch(console.error);
+            ]).catch((error) =>
+                console.error(
+                    'Failed to refresh Stripe settlement totals',
+                    errorDiagnostics(error),
+                ),
+            );
             throw e;
         }
 

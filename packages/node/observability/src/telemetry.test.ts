@@ -8,6 +8,7 @@ const entry = new URL('../dist/index.js', import.meta.url).href;
 function execute(
     endpoint: string,
     initialize = 'await lifecycle.ready(); await lifecycle.close();',
+    service = 'docs',
 ) {
     return spawn(
         process.execPath,
@@ -16,7 +17,7 @@ function execute(
             '-e',
             `
         import { runApplication } from '${entry}';
-        await runApplication('docs', async lifecycle => { ${initialize} });
+        await runApplication(${JSON.stringify(service)}, async lifecycle => { ${initialize} });
     `,
         ],
         {
@@ -79,4 +80,23 @@ it('exports protobuf traces and correlated lifecycle logs with runtime credentia
 it('preserves successful application work when the receiver is unavailable', async () => {
     const child = execute('http://127.0.0.1:1');
     expect((await once(child, 'close'))[0]).toBe(0);
+});
+
+it('does not export backend logs through a configured trace receiver', async () => {
+    const paths: string[] = [];
+    const receiver = createServer((req, res) => {
+        paths.push(req.url!);
+        req.resume();
+        res.writeHead(200, { 'Content-Type': 'application/x-protobuf' }).end();
+    }).listen(0, '127.0.0.1');
+    await once(receiver, 'listening');
+    try {
+        const addr = receiver.address();
+        if (!addr || typeof addr === 'string') throw new Error('Expected TCP listener');
+        const child = execute(`http://127.0.0.1:${addr.port}`, undefined, 'api');
+        expect((await once(child, 'close'))[0]).toBe(0);
+        expect(paths).toEqual(['/v1/traces']);
+    } finally {
+        await new Promise<void>((resolve) => receiver.close(() => resolve()));
+    }
 });

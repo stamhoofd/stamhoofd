@@ -74,7 +74,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
             if (!u) {
                 // Fail silently because user did exist, and we don't want to expose that the user doesn't exists
                 // eslint-disable-next-line secure-coding/no-log-injection -- NewUser.email is decoded by EmailDecoder, which rejects CR/LF and control characters.
-                console.error("Could not register, but user doesn't exist: " + request.body.email);
+                console.error('Registration failed without an existing user');
 
                 throw new SimpleError({
                     code: 'unexpected_error',
