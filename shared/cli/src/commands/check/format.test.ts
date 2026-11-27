@@ -42,4 +42,40 @@ describe('check format', () => {
         );
         expect(run).toHaveBeenCalledTimes(2);
     });
+
+    it('passes the revision files explicitly when running inside jj run', async () => {
+        vi.stubEnv('JJ_COMMIT_ID', 'abc');
+        try {
+            vi.mocked(run).mockResolvedValueOnce({
+                stdout: [
+                    '100644 package.json',
+                    '100644 file with spaces.md',
+                    '160000 submodule',
+                    '',
+                ].join('\0'),
+                stderr: '',
+                status: 0,
+            });
+            const command = new CheckFormat([], {} as never);
+            (command as any).parse = vi.fn(() =>
+                Parser.parse(['--fix'], { flags: CheckFormat.flags }),
+            );
+            await command.run();
+            expect(run).toHaveBeenCalledWith(
+                'pnpm',
+                [
+                    'exec',
+                    'oxfmt',
+                    '--write',
+                    '--no-error-on-unmatched-pattern',
+                    '--',
+                    'package.json',
+                    'file with spaces.md',
+                ],
+                { cwd: '/repo', verbosity: RunVerbosity.Output },
+            );
+        } finally {
+            vi.unstubAllEnvs();
+        }
+    });
 });

@@ -14,17 +14,42 @@ export default class CheckFormat extends BaseCommand {
 
     async run(): Promise<void> {
         const { flags, context } = await this.parseWithContext(CheckFormat);
-        await run('pnpm', ['exec', 'oxfmt', flags.fix ? '--write' : '--check'], {
-            cwd: context.rootDir,
-            verbosity: RunVerbosity.Output,
-        });
+        const options = { cwd: context.rootDir, verbosity: RunVerbosity.Output };
+        const oxfmt = ['exec', 'oxfmt', flags.fix ? '--write' : '--check'];
+        if (process.env.JJ_COMMIT_ID) {
+            // jj run places the checkout under .jj/, which Oxfmt ignores during discovery.
+            const { stdout } = await run(
+                'git',
+                [
+                    'ls-tree',
+                    '-rz',
+                    '--full-tree',
+                    '--format=%(objectmode) %(path)',
+                    process.env.JJ_COMMIT_ID,
+                ],
+                { cwd: context.rootDir, capture: true, verbosity: RunVerbosity.Quiet },
+            );
+            const files = stdout
+                .split('\0')
+                .filter((entry) => entry.startsWith('100644 ') || entry.startsWith('100755 '))
+                .map((entry) => entry.slice(7));
+            for (let i = 0; i < files.length; i += 250) {
+                await run(
+                    'pnpm',
+                    [...oxfmt, '--no-error-on-unmatched-pattern', '--', ...files.slice(i, i + 250)],
+                    options,
+                );
+            }
+        } else {
+            await run('pnpm', oxfmt, options);
+        }
         await run(
             'node',
             [
                 path.join(context.rootDir, 'shared/eslint/bin/format.mjs'),
                 ...(flags.fix ? ['--fix'] : []),
             ],
-            { cwd: context.rootDir, verbosity: RunVerbosity.Output },
+            options,
         );
     }
 }

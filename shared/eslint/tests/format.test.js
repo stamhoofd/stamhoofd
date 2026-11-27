@@ -68,6 +68,16 @@ describe('formatting without semantic linting', { timeout: 15_000 }, () => {
         expect(await readFile(file, 'utf8')).toBe('const name = "Ada"\n');
     });
 
+    it('keeps fixes when an unfixable layout warning remains', async () => {
+        const file = path.join(cwd, 'example.ts');
+        await writeFile(file, 'function example() { first("one"); second(); }\n');
+        const result = await run(cwd, true);
+        expect(result.stdout).toContain('max-statements-per-line');
+        expect(result.code).toBe(0);
+        expect(await readFile(file, 'utf8')).toContain("first('one')");
+        expect((await run(cwd)).code).toBe(1);
+    });
+
     it('still reports syntax errors', async () => {
         await writeFile(path.join(cwd, 'example.ts'), 'const =');
         const result = await run(cwd);
