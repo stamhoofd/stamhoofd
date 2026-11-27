@@ -1,4 +1,47 @@
-import { Database } from './Database.js';
+import { channel } from 'node:diagnostics_channel';
+import { Database, DatabaseInstance } from './Database.js';
+
+test('times pool acquisition separately from successful and failed driver calls', async () => {
+    const db = new DatabaseInstance();
+    const timings = channel('stamhoofd.database.duration');
+    const events: unknown[] = [];
+    const record = (event: unknown) => {
+        events.push(event);
+    };
+    timings.subscribe(record);
+    try {
+        try {
+            await db.select('SELECT 1');
+            const connection = await db.getConnection();
+            try {
+                await db.statement('SELECT ?', ['synthetic-private'], connection);
+                await expect(
+                    db.select('INVALID synthetic-private', [], { connection, nestTables: false }),
+                ).rejects.toThrow();
+            } finally {
+                connection.release();
+            }
+        } finally {
+            await db.end();
+        }
+        await expect(db.select('SELECT 1')).rejects.toThrow();
+        const sample = (operation: string, outcome: string) => ({
+            operation,
+            outcome,
+            duration: expect.any(Number),
+        });
+        expect(events).toEqual([
+            sample('acquire', 'success'),
+            sample('select', 'success'),
+            sample('acquire', 'success'),
+            sample('statement', 'success'),
+            sample('select', 'error'),
+            sample('acquire', 'error'),
+        ]);
+    } finally {
+        timings.unsubscribe(record);
+    }
+});
 
 describe('Database.beginTransaction', () => {
     // Counter to generate unique names so tests don't interfere with each other.

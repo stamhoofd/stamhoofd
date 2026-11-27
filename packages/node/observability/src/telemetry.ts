@@ -6,6 +6,7 @@ import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-proto';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { randomUUID } from 'node:crypto';
 import { sanitizedLogExporter, sanitizedTraceExporter } from './exporters.js';
+import { initializeMetrics } from './metrics.js';
 
 let runtime: { shutdown(): Promise<void> } | undefined;
 
@@ -18,6 +19,7 @@ let runtime: { shutdown(): Promise<void> } | undefined;
 export function initializeTelemetry(service: string): { shutdown(): Promise<void> } {
     if (runtime) return runtime;
     let sdk: NodeSDK | undefined;
+    let metrics: ReturnType<typeof initializeMetrics>;
     let shutdown: Promise<void> | undefined;
     const configured = (signal: 'TRACES' | 'LOGS') =>
         !!(
@@ -35,6 +37,7 @@ export function initializeTelemetry(service: string): { shutdown(): Promise<void
             resource[key] = field.slice(separator + 1).trim();
     }
     try {
+        metrics = initializeMetrics(resource['service.name']);
         sdk = new NodeSDK({
             autoDetectResources: false,
             resource: resourceFromAttributes(resource),
@@ -69,7 +72,7 @@ export function initializeTelemetry(service: string): { shutdown(): Promise<void
                 let timer: NodeJS.Timeout | undefined;
                 try {
                     await Promise.race([
-                        Promise.resolve().then(() => sdk?.shutdown()),
+                        Promise.all([sdk?.shutdown(), metrics?.shutdown()]),
                         new Promise<void>((resolve) => {
                             timer = setTimeout(resolve, 2000);
                         }),
