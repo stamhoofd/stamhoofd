@@ -52,8 +52,13 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
         const organization = Context.organization;
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
-        // todo: add proper scoping and permission checking
         if (organization) {
+            // Event notifications are only accessible to admins of the organization. Access to an
+            // individual notification is checked per row in buildData.
+            if (!(await Context.auth.hasSomeAccess(organization.id))) {
+                throw Context.auth.error();
+            }
+
             scopeFilter = {
                 organizationId: organization.id,
             };
