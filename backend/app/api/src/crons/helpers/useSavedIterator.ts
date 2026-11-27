@@ -17,14 +17,16 @@ export function useSavedIterator<T extends object = SQLResultNamespacedRow>(
         }
     }
 
-    const iterate = function () {
+    const iterate = async function* () {
         if (savedIterator === null) {
-            savedIterator = start().limit(options.limit).all({
-                nextEachHook: updateStatus,
-            });
+            savedIterator = start().limit(options.limit).all();
         }
-
-        return savedIterator.maxQueries(options.maxQueries ?? 1);
+        try {
+            yield* savedIterator.maxQueries(options.maxQueries ?? 1);
+        } finally {
+            // Includes the empty terminal fetch after an exact multiple of the page size.
+            updateStatus();
+        }
     };
 
     const isHoursAgo = function (hours: number) {

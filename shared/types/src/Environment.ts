@@ -86,6 +86,9 @@ export type StatisticsEnvironment = {
  * The specific backend environment values, only available in the backend services
  */
 export type BackendSpecificEnvironment = {
+    /** Deployment-specific secret HTTPS URL for a clean monthly invoice pass. */
+    readonly MONTHLY_INVOICE_HEARTBEAT_URL?: string;
+
     // Database
     readonly PORT: number;
 
