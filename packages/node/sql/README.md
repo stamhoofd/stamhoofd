@@ -4,7 +4,7 @@ A typed SQL query builder on top of `@stamhoofd/node-database`, plus compilers t
 
 ## Errors
 
-Errors are `SimpleError`s with a `code` and an English `message`, but no `human` message. These codes can reach end users and should be translated in your application. Other codes, such as `empty_sort`, `invalid_filter` and `invalid_field`, indicate a bug in the caller and need no translation.
+Errors that can reach end users are `SimpleError`s with a `code` and an English `message`, but no `human` message. Translate these codes in your application:
 
 | Code                     | Thrown when                                              |
 | ------------------------ | -------------------------------------------------------- |
@@ -13,7 +13,7 @@ Errors are `SimpleError`s with a `code` and an English `message`, but no `human`
 | `too_many_filter_values` | A `$in` filter has more than 1000 values                 |
 | `unknown_filter`         | A filter key has no definition (from `common-filters`)   |
 
-The Stamhoofd API does this in `HumanErrorMessageMiddleware`.
+The Stamhoofd API does this in `HumanErrorMessageMiddleware`. Other codes, such as `empty_sort` and `invalid_filter`, indicate a bug in the caller and need no translation.
 
 ## Tests
 
