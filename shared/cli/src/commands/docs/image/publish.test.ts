@@ -108,6 +108,7 @@ describe('docs image publish command', () => {
 
     it('passes resolved credentials to the isolated publishing lifecycle', async () => {
         const command = Object.create(DocsImagePublish.prototype) as DocsImagePublish;
+        command.warn = vi.fn();
         command.parseWithContext = vi.fn().mockResolvedValue({
             args: { tag: 'v1.2.3' },
             flags: { environment: 'custom', latest: false },
@@ -118,6 +119,9 @@ describe('docs image publish command', () => {
             credentials: { username: 'ci', password: 'secret' },
         });
         await command.run();
+        expect(command.warn).toHaveBeenCalledWith(
+            expect.stringContaining('--environment is deprecated and ignored'),
+        );
         expect(resolveDocsPublishingConfig).toHaveBeenCalledWith('/repo', 'custom');
         expect(publishDocsImage).toHaveBeenCalledWith(
             '/repo',

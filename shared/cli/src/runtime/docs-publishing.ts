@@ -7,7 +7,7 @@ export type DocsPublishingConfig = {
     credentials?: { username: string; password: string };
 };
 
-/** Environment discovery must only read local configuration, without credentials or prompts. */
+/** Publication targets shared artifacts, not an environment. Discovery is retained for old completion scripts. */
 export type DocsPublishingProvider = {
     listEnvironments: () => Promise<{ value: string; name: string }[]>;
     resolve: (environment?: string) => Promise<DocsPublishingConfig>;
@@ -16,7 +16,7 @@ export type DocsPublishingProvider = {
 /** Explicit registry configuration never loads the optional private provider. */
 export async function resolveDocsPublishingConfig(
     rootDir: string,
-    environment?: string,
+    _environment?: string,
     env = process.env,
 ): Promise<DocsPublishingConfig> {
     const username = env.STAM_DOCS_REGISTRY_USERNAME;
@@ -33,9 +33,9 @@ export async function resolveDocsPublishingConfig(
         const provider = await getOptionalDocsPublishingProvider(path.join(rootDir, 'devops'));
         if (!provider)
             throw new Error(
-                'Set STAM_DOCS_REGISTRY to the destination registry host/namespace, or install and build the optional DevOps checkout to use --environment.',
+                'Set STAM_DOCS_REGISTRY to the destination registry host/namespace, or install and build the optional DevOps checkout to discover shared artifacts.',
             );
-        config = await provider.resolve(environment);
+        config = await provider.resolve();
     }
     docsImageReference('config-validation', config.registry);
     return { ...config, ...(username && password ? { credentials: { username, password } } : {}) };
