@@ -4,6 +4,7 @@ import { PatchableArray, PatchMap } from '@stamhoofd/common-encoding';
 import type { Endpoint } from '@stamhoofd/node-endpoints';
 import { Request } from '@stamhoofd/node-endpoints';
 import {
+    AuditLog,
     GroupFactory,
     Member,
     MemberFactory,
@@ -17,6 +18,8 @@ import type { PatchAnswers } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     Address,
+    AuditLogSource,
+    AuditLogType,
     BooleanStatus,
     MemberDetails,
     MemberWithRegistrationsBlob,
@@ -46,6 +49,15 @@ const baseUrl = '/members';
 const endpoint = new PatchUserMembersEndpoint();
 type EndpointType = typeof endpoint;
 type Body = EndpointType extends Endpoint<any, any, infer B, any> ? B : never;
+
+async function getSecurityCodeLogs(memberId: string) {
+    const logs = await AuditLog.select().where('objectId', memberId).fetch();
+    return logs.filter(
+        (l) =>
+            l.type === AuditLogType.MemberSecurityCodeUsed ||
+            l.type === AuditLogType.MemberSecurityCodeFailed,
+    );
+}
 
 const firstName = 'John';
 const lastName = 'Doe';
@@ -265,6 +277,86 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             const response = await testServer.test(endpoint, request);
             expect(response.status).toBe(200);
             expect(response.body.members[0].id).toBe(existingMember.id);
+        });
+
+        test('A wrong security code is refused and written to the audit log', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({}).create();
+            const existingMember = await new MemberFactory({
+                firstName: 'Wrongcode',
+                lastName: 'Member',
+                birthDay,
+                generateData: false,
+                details: MemberDetails.create({ securityCode: 'ABC-123' }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            const put = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName: 'Wrongcode',
+                    lastName: 'Member',
+                    birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
+                    securityCode: 'WRONG-CODE-987',
+                }),
+            });
+            arr.addPut(put);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.simpleError({ code: 'invalid_field', field: 'details.securityCode' }),
+            );
+
+            const logs = await getSecurityCodeLogs(existingMember.id);
+            expect(logs.map((l) => l.type)).toEqual([AuditLogType.MemberSecurityCodeFailed]);
+            expect(logs[0].userId).toBe(user.id);
+            expect(logs[0].source).toBe(AuditLogSource.User);
+            expect(logs[0].organizationId).toBe(existingMember.organizationId);
+            expect(logs[0].replacements.get('m')?.id).toBe(existingMember.id);
+
+            // The entered code is never stored
+            const [stored] = await Database.select('SELECT * FROM `audit_logs` WHERE `id` = ?', [
+                logs[0].id,
+            ]);
+            expect(stored).toHaveLength(1);
+            expect(JSON.stringify(stored)).not.toContain('WRONG-CODE-987');
+        });
+
+        test('A correct security code is written to the audit log', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({}).create();
+            const existingMember = await new MemberFactory({
+                firstName: 'Rightcode',
+                lastName: 'Member',
+                birthDay,
+                generateData: false,
+                details: MemberDetails.create({ securityCode: 'ABC-123' }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const arr: Body = new PatchableArray();
+            const put = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName: 'Rightcode',
+                    lastName: 'Member',
+                    birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
+                    securityCode: 'ABC-123',
+                }),
+            });
+            arr.addPut(put);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.members[0].id).toBe(existingMember.id);
+
+            const logs = await getSecurityCodeLogs(existingMember.id);
+            expect(logs.map((l) => l.type)).toEqual([AuditLogType.MemberSecurityCodeUsed]);
+            expect(logs[0].userId).toBe(user.id);
         });
 
         test('A duplicate member with existing registrations returns those registrations after a merge', async () => {

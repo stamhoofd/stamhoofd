@@ -157,6 +157,7 @@ describe('audit log type filters', () => {
         ]);
         expect(webshopsOnly.types.has(AuditLogType.RegistrationPeriodAdded)).toBe(false);
         expect(webshopsOnly.types.has(AuditLogType.MemberSecurityCodeUsed)).toBe(false);
+        expect(webshopsOnly.types.has(AuditLogType.MemberSecurityCodeFailed)).toBe(false);
         expect(webshopsOnly.types.has(AuditLogType.UserTwoFactorMethodAdded)).toBe(true);
         expect(webshopsOnly.types.has(AuditLogType.StripeAccountAdded)).toBe(true);
         expect(webshopsOnly.types.has(AuditLogType.OrganizationEdited)).toBe(true);
@@ -166,5 +167,6 @@ describe('audit log type filters', () => {
         expect(membersOnly.categories).toContain(name(AuditLogTypeCategory.Members));
         expect(membersOnly.types.has(AuditLogType.RegistrationPeriodAdded)).toBe(true);
         expect(membersOnly.types.has(AuditLogType.MemberSecurityCodeUsed)).toBe(true);
+        expect(membersOnly.types.has(AuditLogType.MemberSecurityCodeFailed)).toBe(true);
     });
 });
