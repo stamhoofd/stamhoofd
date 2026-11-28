@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType } from '@common/encoding';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
 import {
     ArrayDecoder,
     AutoEncoder,
@@ -7,7 +7,7 @@ import {
     field,
     IntegerDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Language } from '@stamhoofd/types/Language';

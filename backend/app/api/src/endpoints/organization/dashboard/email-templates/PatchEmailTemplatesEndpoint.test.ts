@@ -1,6 +1,6 @@
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray, PatchMap } from '@common/encoding';
-import { Request } from '@node/endpoints';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray, PatchMap } from '@stamhoofd/common-encoding';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import {
     EmailTemplate,

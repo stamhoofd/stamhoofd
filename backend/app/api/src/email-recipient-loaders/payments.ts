@@ -10,7 +10,7 @@ import {
     Platform,
     User,
 } from '@stamhoofd/models';
-import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
+import { compileToSQLFilter, SQL } from '@stamhoofd/node-sql';
 import type {
     LimitedFilteredRequest,
     PaymentGeneral,

@@ -1,5 +1,5 @@
-import { Model } from '@node/database';
-import { isSimpleError, SimpleError } from '@common/errors';
+import { Model } from '@stamhoofd/node-database';
+import { isSimpleError, SimpleError } from '@stamhoofd/common-errors';
 import { Order, WebshopUitpasNumber } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import type {

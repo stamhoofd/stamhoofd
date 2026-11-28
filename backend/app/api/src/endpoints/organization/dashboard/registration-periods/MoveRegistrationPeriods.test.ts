@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type {
     Organization,
     OrganizationRegistrationPeriod,
@@ -32,8 +32,8 @@ import {
 import { PatchOrganizationRegistrationPeriodsEndpoint } from './PatchOrganizationRegistrationPeriodsEndpoint.js';
 import { SessionService } from '../../../../services/SessionService.js';
 
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
 
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';

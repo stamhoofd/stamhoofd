@@ -1,8 +1,8 @@
 // Defines STAMHOOFD before @stamhoofd/structures is evaluated, so Version runs at ReleasedVersion + 1
 import '@stamhoofd/test-utils/environment';
 
-import { Column, Database } from '@node/database';
-import { Request } from '@node/endpoints';
+import { Column, Database } from '@stamhoofd/node-database';
+import { Request } from '@stamhoofd/node-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import { Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';

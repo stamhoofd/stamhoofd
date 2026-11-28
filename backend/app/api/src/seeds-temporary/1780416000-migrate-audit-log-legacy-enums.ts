@@ -1,4 +1,4 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 import { AuditLog } from '@stamhoofd/models';
 import {
     AuditLogReplacement,

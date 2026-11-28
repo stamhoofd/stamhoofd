@@ -1,4 +1,4 @@
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 
 const EXPECTED_COLLATION = 'utf8mb4_0900_ai_ci';
 

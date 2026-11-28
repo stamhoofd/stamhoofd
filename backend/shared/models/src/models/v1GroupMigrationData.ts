@@ -1,6 +1,6 @@
-import { column } from '@node/database';
+import { column } from '@stamhoofd/node-database';
 
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/node-sql';
 
 /**
  * Temporary table for the migration from v1 to v2.

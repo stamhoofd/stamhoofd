@@ -1,8 +1,8 @@
-import { Database } from '@node/database';
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray, PatchMap } from '@common/encoding';
-import type { Endpoint } from '@node/endpoints';
-import { Request } from '@node/endpoints';
+import { Database } from '@stamhoofd/node-database';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray, PatchMap } from '@stamhoofd/common-encoding';
+import type { Endpoint } from '@stamhoofd/node-endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import {
     GroupFactory,
     Member,

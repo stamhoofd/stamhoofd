@@ -1,5 +1,5 @@
-import { DatabaseInstance } from '@node/database';
-import { Request } from '@node/endpoints';
+import { DatabaseInstance } from '@stamhoofd/node-database';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory, UserSession } from '@stamhoofd/models';
 import type { SessionType } from '@stamhoofd/models/constants/sessions.js';

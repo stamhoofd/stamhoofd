@@ -1,4 +1,4 @@
-import { Encodeable } from '@common/encoding';
+import { Encodeable } from '@stamhoofd/common-encoding';
 
 import { EncodedResponse } from './EncodedResponse.js';
 import { Endpoint } from './Endpoint.js';

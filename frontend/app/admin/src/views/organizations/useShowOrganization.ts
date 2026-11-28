@@ -1,4 +1,4 @@
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@stamhoofd/browser-navigation';
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
 import { useOrganizationsObjectFetcher } from '@stamhoofd/components/fetchers/useOrganizationsObjectFetcher';
 import { Toast } from '@stamhoofd/components/overlays/Toast';

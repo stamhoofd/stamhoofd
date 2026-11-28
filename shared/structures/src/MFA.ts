@@ -8,7 +8,7 @@ import {
     field,
     IntegerDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 
 import { Token } from './Token.js';
 

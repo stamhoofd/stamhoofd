@@ -1,4 +1,4 @@
-const navigationPackage = '@browser/navigation';
+const navigationPackage = '@stamhoofd/browser-navigation';
 const routeDefiners = new Set(['defineRoute', 'defineRoutes']);
 
 function unwrapExpression(node) {

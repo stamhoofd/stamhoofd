@@ -1,6 +1,6 @@
 import '#nitro-internal-pollyfills';
 import { createServer } from 'node:http';
-import { runApplication } from '@node/observability';
+import { runApplication } from '@stamhoofd/node-observability';
 
 // Nitro's standard node entry does not expose its listener to runtime plugins.
 // Own only the Node listener; reuse Nitro's router and graceful-shutdown machinery.

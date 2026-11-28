@@ -1,4 +1,4 @@
-import { AutoEncoder, StringDecoder, field, IntegerDecoder, ArrayDecoder } from '@common/encoding';
+import { AutoEncoder, StringDecoder, field, IntegerDecoder, ArrayDecoder } from '@stamhoofd/common-encoding';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export class UitpasPriceCheckRequest extends AutoEncoder {

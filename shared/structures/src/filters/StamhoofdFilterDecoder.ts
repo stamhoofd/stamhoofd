@@ -1,11 +1,11 @@
-import type { Data, EncodeContext, PlainObject } from '@common/encoding';
-import { DateDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { Data, EncodeContext, PlainObject } from '@stamhoofd/common-encoding';
+import { DateDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 import type {
     StamhoofdCompareValue,
     StamhoofdFilter,
-} from '@stamhoofd/filters/StamhoofdFilterTypes';
+} from '@stamhoofd/common-filters/StamhoofdFilterTypes';
 
 export class StamhoofdFilterJSONDecoder {
     static encode(filter: StamhoofdFilter, context: EncodeContext): string {

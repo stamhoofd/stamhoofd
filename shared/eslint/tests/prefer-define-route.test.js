@@ -23,7 +23,7 @@ const ruleTester = new RuleTester({
 ruleTester.run('prefer-define-route', preferDefineRoute, {
     valid: [
         `
-            import { defineRoute } from '@browser/navigation';
+            import { defineRoute } from '@stamhoofd/browser-navigation';
             defineRoute({ component: 'self' });
         `,
         // defineRoutes imported from another package is not our concern.
@@ -40,21 +40,21 @@ ruleTester.run('prefer-define-route', preferDefineRoute, {
     invalid: [
         {
             code: `
-                import { defineRoutes } from '@browser/navigation';
+                import { defineRoutes } from '@stamhoofd/browser-navigation';
                 defineRoutes([{ component: 'self' }]);
             `,
             errors: [{ messageId: 'preferDefineRoute' }],
         },
         {
             code: `
-                import { defineRoutes as registerRoutes } from '@browser/navigation';
+                import { defineRoutes as registerRoutes } from '@stamhoofd/browser-navigation';
                 registerRoutes([{ component: 'self' }]);
             `,
             errors: [{ messageId: 'preferDefineRoute' }],
         },
         {
             code: `
-                import { defineRoute, defineRoutes } from '@browser/navigation';
+                import { defineRoute, defineRoutes } from '@stamhoofd/browser-navigation';
                 defineRoute({ component: 'self' });
                 defineRoutes([{ component: 'self' }]);
             `,

@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useShow } from '@browser/navigation';
+import { ComponentWithProperties, useShow } from '@stamhoofd/browser-navigation';
 import { MFAManager } from '@stamhoofd/frontend-application/MFAManager';
 import { computed, ref } from 'vue';
 

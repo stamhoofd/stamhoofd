@@ -1,4 +1,4 @@
-import { ObjectData } from '@common/encoding';
+import { ObjectData } from '@stamhoofd/common-encoding';
 import { SGVLidPatch } from './types.js';
 
 describe('SGVLidPatch persoonsgegevens', () => {

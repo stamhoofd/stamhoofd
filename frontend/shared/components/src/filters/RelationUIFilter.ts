@@ -1,5 +1,5 @@
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import type { ComponentWithProperties } from '@browser/navigation';
+import type { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import type { StamhoofdFilter, StamhoofdMagicRelationFilter, WrapperFilter } from '@stamhoofd/structures';
 import { isMagicRelationFilter, unwrapFilterByPath } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

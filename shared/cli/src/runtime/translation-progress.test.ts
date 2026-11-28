@@ -1,8 +1,8 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { formatTranslationProgress, translationStep } from './translation-progress.js';
-import { log } from '@common/opentelemetry-decorators';
+import { log } from '@stamhoofd/common-opentelemetry-decorators';
 
-vi.mock('@common/opentelemetry-decorators', () => ({
+vi.mock('@stamhoofd/common-opentelemetry-decorators', () => ({
     hasLogSink: () => true,
     log: vi.fn(),
     withSpan: (_name: string, callback: () => unknown) => callback(),

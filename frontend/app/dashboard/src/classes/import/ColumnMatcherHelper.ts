@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray, PatchMap } from '@common/encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray, PatchMap } from '@stamhoofd/common-encoding';
 import type { PatchAnswers, RecordSettings } from '@stamhoofd/structures';
 import { Address, EmergencyContact, Parent, ParentType, RecordAddressAnswer, RecordAnswer, RecordDateAnswer, RecordTextAnswer } from '@stamhoofd/structures';
 import type { ImportMemberResult } from './ImportMemberResult';

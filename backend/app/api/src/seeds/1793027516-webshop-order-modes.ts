@@ -1,4 +1,4 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 import { Webshop } from '@stamhoofd/models';
 import { Webshop as WebshopStruct, WebshopOrderMode } from '@stamhoofd/structures';
 import { SeedTools } from '../helpers/SeedTools.js';

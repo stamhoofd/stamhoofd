@@ -49,8 +49,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { usePop } from '@browser/navigation';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { usePop } from '@stamhoofd/browser-navigation';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';

@@ -5,8 +5,8 @@
  * holds grows with the number of rows it is building, not with the number of items it reads.
  */
 import type { BalanceItem, BalanceItemPaymentWithPrivatePayment } from '../BalanceItem.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
-import { mergeFilters } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
+import { mergeFilters } from '@stamhoofd/common-filters/StamhoofdFilter';
 import type { BreakdownPathItem } from '../PaymentBreakdown.js';
 import {
     BalanceItemBreakdown,

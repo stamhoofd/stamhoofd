@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import type { WebshopField } from '@stamhoofd/structures';

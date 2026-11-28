@@ -1,6 +1,6 @@
-import { column } from '@node/database';
-import { ArrayDecoder } from '@common/encoding';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { Discount, DiscountCode, PrivateDiscountCode } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -1,4 +1,4 @@
-import { ArrayDecoder, field } from '@common/encoding';
+import { ArrayDecoder, field } from '@stamhoofd/common-encoding';
 
 import { MemberPlatformMembershipHelper } from '../helpers/MemberPlatformMembershipHelper.js';
 import { User } from '../User.js';

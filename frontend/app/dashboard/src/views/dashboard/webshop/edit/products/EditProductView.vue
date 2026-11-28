@@ -14,8 +14,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';

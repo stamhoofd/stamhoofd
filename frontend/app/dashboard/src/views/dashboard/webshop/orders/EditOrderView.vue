@@ -190,9 +190,9 @@
     </SaveView>
 </template>
 <script lang="ts" setup>
-import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { ArrayDecoder, PatchableArray, patchContainsChanges } from '@common/encoding';
-import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@browser/navigation';
+import type { Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, PatchableArray, patchContainsChanges } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

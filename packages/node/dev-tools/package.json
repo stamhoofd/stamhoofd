@@ -1,8 +1,11 @@
 {
-    "name": "@node/dev-tools",
+    "name": "@stamhoofd/node-dev-tools",
     "version": "2.158.0",
-    "private": true,
     "type": "module",
+    "files": [
+        "dist",
+        "dist-types"
+    ],
     "exports": {
         "./*": {
             "types": "./dist-types/*.d.ts",
@@ -21,5 +24,8 @@
     "devDependencies": {
         "@nuxt/schema": "4.6.4",
         "vite": "8.3.8"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

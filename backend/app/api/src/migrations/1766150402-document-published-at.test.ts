@@ -1,5 +1,5 @@
 import { DocumentTemplate, DocumentTemplateFactory } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { DocumentStatus } from '@stamhoofd/structures';
 import { initPublishedAtForPublishedDocuments } from './1766150402-document-published-at.js';
 

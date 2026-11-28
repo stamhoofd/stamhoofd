@@ -1,6 +1,6 @@
 import { isModuleImportError } from './isModuleImportError';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
-import { Request } from '@common/networking';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { Request } from '@stamhoofd/common-networking';
 import { reactive } from 'vue';
 
 export type ToastListener = (toast: Toast) => void;

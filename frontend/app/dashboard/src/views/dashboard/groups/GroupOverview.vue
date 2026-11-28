@@ -187,9 +187,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { ArrayDecoder, PatchableArray } from '@common/encoding';
-import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent, useShow } from '@browser/navigation';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, PatchableArray } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, defineRoute, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import PromiseView from '@stamhoofd/components/containers/PromiseView.vue';
@@ -218,7 +218,7 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, GroupType, NamedObject, RichText } from '@stamhoofd/structures';
 
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 import GroupTag from '@stamhoofd/components/auth/components/GroupTag.vue';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';

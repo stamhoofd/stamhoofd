@@ -129,9 +129,9 @@ import GroupPriceDiscountsInput from '#groups/components/GroupPriceDiscountsInpu
 import DateSelection from '#inputs/DateSelection.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import TimeInput from '#inputs/TimeInput.vue';
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { BundleDiscount, Group, GroupPriceDiscount, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { BundleDiscountGroupPriceSettings, GroupPrice } from '@stamhoofd/structures';

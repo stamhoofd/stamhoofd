@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { forwardTurboLine } from '@node/dev-tools/turbo';
+import { forwardTurboLine } from '@stamhoofd/node-dev-tools/turbo';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 it('keeps inspector HTTP discovery and warnings while hiding its normal-mode banner', () => {
-    const supervisor = fileURLToPath(import.meta.resolve('@node/dev-tools/supervise'));
+    const supervisor = fileURLToPath(import.meta.resolve('@stamhoofd/node-dev-tools/supervise'));
     const script = `import inspector from 'node:inspector'; const url = inspector.url(); const response = await fetch(new URL('/json/list', url.replace('ws:', 'http:'))); console.log((await response.json())[0].webSocketDebuggerUrl === url); console.warn('application warning');`;
     for (const verbose of ['0', '1']) {
         const result = spawnSync(
@@ -53,7 +53,7 @@ it('suppresses pnpm script echoes without suppressing child stdout or stderr', a
 });
 
 it('forwards subprocess streams and failure status with pnpm warning-level reporting', () => {
-    const adapter = import.meta.resolve('@node/dev-tools/turbo');
+    const adapter = import.meta.resolve('@stamhoofd/node-dev-tools/turbo');
     const childScript = `console.log(JSON.stringify({ source: 'turbo', level: 'info', text: 'hidden progress' })); console.log(JSON.stringify({ source: 'fixture#dev', level: 'stdout', text: 'useful output' })); console.error('raw stderr warning'); process.exitCode = 7;`;
     const script = `import { runTurbo } from ${JSON.stringify(adapter)}; process.exitCode = await runTurbo(['exec', 'node', '-e', ${JSON.stringify(childScript)}, '--']);`;
     for (const verbose of ['0', '1']) {
@@ -87,13 +87,13 @@ it('uses structured levels while preserving every task message and Turbo warning
     record('turbo', 'info', 'routine progress');
     record('@stamhoofd/backend#dev', 'stdout', 'WARN useful diagnostic');
     record('@stamhoofd/backend#dev', 'stderr', '    at boot (boot.ts:10)');
-    record('@node/logging#build', 'stdout', 'cache hit, suppressing logs abc');
+    record('@stamhoofd/node-logging#build', 'stdout', 'cache hit, suppressing logs abc');
     record('turbo', 'warn', 'configuration warning');
     record('turbo', 'error', 'task failed');
     expect(output).toEqual([
         ['stdout', '[api] WARN useful diagnostic\n'],
         ['stderr', '[api]     at boot (boot.ts:10)\n'],
-        ['stdout', '@node/logging:build: cache hit, suppressing logs abc\n'],
+        ['stdout', '@stamhoofd/node-logging:build: cache hit, suppressing logs abc\n'],
         ['stderr', 'turbo: configuration warning\n'],
         ['stderr', 'turbo: task failed\n'],
     ]);
@@ -101,7 +101,7 @@ it('uses structured levels while preserving every task message and Turbo warning
 
 it('buffers successful shared builds, replays failed builds, and always streams verbose builds', async () => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'stam-buffer-test-'));
-    const adapter = import.meta.resolve('@node/dev-tools/turbo');
+    const adapter = import.meta.resolve('@stamhoofd/node-dev-tools/turbo');
     try {
         for (const [verbose, code] of [
             ['0', 0],

@@ -36,37 +36,37 @@
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true,
         },
-        "@common/errors#build": {
+        "@stamhoofd/common-errors#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true,
         },
-        "@common/encoding#build": {
+        "@stamhoofd/common-encoding#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true,
         },
-        "@common/networking#build": {
+        "@stamhoofd/common-networking#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true,
         },
-        "@node/endpoints#build": {
+        "@stamhoofd/node-endpoints#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true,
         },
-        "@node/logging#build": {
+        "@stamhoofd/node-logging#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true,
         },
-        "@node/database#build": {
+        "@stamhoofd/node-database#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**"],
             "cache": true,
         },
-        "@browser/navigation#build": {
+        "@stamhoofd/browser-navigation#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**"],
             "cache": true,
@@ -104,7 +104,7 @@
         "//#build:stam-devops": {
             "dependsOn": [
                 "@stamhoofd/cli#build",
-                "@node/opentelemetry-process#build",
+                "@stamhoofd/node-opentelemetry-process#build",
                 "@stamhoofd/metabase#build",
                 "@stamhoofd/queues#build",
                 "@stamhoofd/structures#build",
@@ -163,12 +163,12 @@
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true,
         },
-        "@stamhoofd/filters#build": {
+        "@stamhoofd/common-filters#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true,
         },
-        "@stamhoofd/sql#build": {
+        "@stamhoofd/node-sql#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true,

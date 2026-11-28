@@ -60,9 +60,9 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, usePop, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';

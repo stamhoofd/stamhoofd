@@ -1,12 +1,16 @@
 {
-    "name": "@node/database",
+    "name": "@stamhoofd/node-database",
     "version": "1.40.1",
-    "private": true,
     "type": "module",
     "main": "./dist/index.cjs",
     "module": "./dist/index.mjs",
     "types": "./dist-types/index.d.ts",
     "sideEffects": false,
+    "files": [
+        "dist",
+        "dist-types",
+        "migrations"
+    ],
     "exports": {
         ".": {
             "types": "./dist-types/index.d.ts",
@@ -32,18 +36,19 @@
         "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
-        "@node/logging": "workspace:*",
-        "@common/encoding": "workspace:*",
+        "@stamhoofd/node-logging": "workspace:*",
+        "@stamhoofd/common-encoding": "workspace:*",
         "mysql2": "3.24.6",
         "tslib": "2.9.1"
     },
     "devDependencies": {
         "oxlint-plugin-stamhoofd": "workspace:*",
-        "@common/errors": "workspace:*",
-        "@stamhoofd/test-utils": "workspace:*",
-        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/common-errors": "workspace:*",
         "tsdown": "0.23.7",
         "eslint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.12"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

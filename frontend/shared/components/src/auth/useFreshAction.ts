@@ -1,5 +1,5 @@
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, NavigationController, usePresent } from '@stamhoofd/browser-navigation';
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useContext } from '#hooks/useContext.ts';

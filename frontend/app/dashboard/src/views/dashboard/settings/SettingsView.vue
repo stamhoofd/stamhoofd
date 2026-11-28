@@ -326,8 +326,8 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import MollieWarningBox from '@stamhoofd/components/mollie/MollieWarningBox.vue';
 import StripeWarningBox from '@stamhoofd/components/stripe/StripeWarningBox.vue';
 
-import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder } from '@common/encoding';
-import { defineRoutes, useNavigate } from '@browser/navigation';
+import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder } from '@stamhoofd/common-encoding';
+import { defineRoutes, useNavigate } from '@stamhoofd/browser-navigation';
 
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';

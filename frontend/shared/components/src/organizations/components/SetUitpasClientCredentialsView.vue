@@ -20,10 +20,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { Request } from '@common/networking';
-import { usePop } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { Request } from '@stamhoofd/common-networking';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import SaveView from '#navigation/SaveView.vue';

@@ -1,10 +1,10 @@
-import { withSpan, withLogSink } from '@common/opentelemetry-decorators';
-import { TerminalRenderer } from '@node/opentelemetry-terminal';
+import { withSpan, withLogSink } from '@stamhoofd/common-opentelemetry-decorators';
+import { TerminalRenderer } from '@stamhoofd/node-opentelemetry-terminal';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { AlwaysOnSampler, BatchSpanProcessor } from '@opentelemetry/sdk-trace';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { RunVerbosity } from './verbosity.js';
-import { Terminal } from '@node/terminal';
+import { Terminal } from '@stamhoofd/node-terminal';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 const invocation = new AsyncLocalStorage<{

@@ -1,7 +1,7 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3'; // ES Modules import
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { File } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import formidable from 'formidable';
@@ -10,8 +10,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { Decoder } from '@common/encoding';
-import { AutoEncoder, BooleanDecoder, field } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { AutoEncoder, BooleanDecoder, field } from '@stamhoofd/common-encoding';
 import { Context } from '../../../helpers/Context.js';
 import { limiter, organizationLimiter } from './UploadImage.js';
 import type { Organization } from '@stamhoofd/models';

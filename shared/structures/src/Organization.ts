@@ -6,7 +6,7 @@ import {
     EnumDecoder,
     field,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Language } from '@stamhoofd/types/Language';
@@ -15,7 +15,7 @@ import { appToUri, getAppHost } from './AppType.js';
 import { Company } from './Company.js';
 import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
 import { organizationItemInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import { Group } from './Group.js';
 import type { GroupCategoryTree } from './GroupCategory.js';
 import type { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';

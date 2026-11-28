@@ -1,6 +1,6 @@
-import { column } from '@node/database';
-import type { ManyToOneRelation } from '@node/database';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import type { ManyToOneRelation } from '@stamhoofd/node-database';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { City } from './City.js';

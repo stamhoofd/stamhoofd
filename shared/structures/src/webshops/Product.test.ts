@@ -1,4 +1,4 @@
-import { ObjectData } from '@common/encoding';
+import { ObjectData } from '@stamhoofd/common-encoding';
 import { describe, expect, it } from 'vitest';
 
 import { Product } from './Product.js';

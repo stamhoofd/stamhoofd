@@ -1,4 +1,4 @@
-import { Factory } from '@node/database';
+import { Factory } from '@stamhoofd/node-database';
 import type { RecordAnswer } from '@stamhoofd/structures';
 import { EventNotificationStatus } from '@stamhoofd/structures';
 

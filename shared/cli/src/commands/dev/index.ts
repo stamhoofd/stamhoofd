@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { Args } from '@oclif/core';
-import { withSpan } from '@common/opentelemetry-decorators';
+import { withSpan } from '@stamhoofd/common-opentelemetry-decorators';
 import { BaseCommand } from '../../base-command.js';
 import { openFlag, servicesOptionFlag, stripeFlag } from '../../command-flags.js';
 import { getProjectPath } from '../../context/project-path.js';

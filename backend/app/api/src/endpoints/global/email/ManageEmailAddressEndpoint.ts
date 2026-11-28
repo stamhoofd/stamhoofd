@@ -1,13 +1,13 @@
-import type { Decoder } from '@common/encoding';
-import { AutoEncoder, BooleanDecoder, field, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { AutoEncoder, BooleanDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Email, EmailAddress } from '@stamhoofd/email';
 import { Context } from '../../../helpers/Context.js';
 import { SESv2Client, DeleteSuppressedDestinationCommand } from '@aws-sdk/client-sesv2'; // ES Modules import
 import { RateLimiter } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 
 type Params = Record<string, never>;
 type Query = undefined;

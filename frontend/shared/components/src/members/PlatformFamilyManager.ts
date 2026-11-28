@@ -1,8 +1,8 @@
-import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray, patchContainsChanges } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import type { RequestResult } from '@common/networking';
-import { Request } from '@common/networking';
+import type { Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray, patchContainsChanges } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import type { RequestResult } from '@stamhoofd/common-networking';
+import { Request } from '@stamhoofd/common-networking';
 import { useAppContext } from '#context/appContext.ts';
 import { useContext } from '#hooks/useContext.ts';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';

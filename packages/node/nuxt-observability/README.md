@@ -1,8 +1,8 @@
 # Nuxt server observability
 
-Register `@node/nuxt-observability` as a Nuxt module for the docs Node deployment.
+Register `@stamhoofd/node-nuxt-observability` as a Nuxt module for the docs Node deployment.
 The runtime plugin observes server requests in development and production using
-`@node/observability`. Build/reload transitions remain in `@node/dev-tools`.
+`@stamhoofd/node-observability`. Build/reload transitions remain in `@stamhoofd/node-dev-tools`.
 
 Nitro 2.13's standard Node entry does not expose its listening server to plugins.
 This module supplies an HTTP Node entry that owns the listener, reuses Nitro's

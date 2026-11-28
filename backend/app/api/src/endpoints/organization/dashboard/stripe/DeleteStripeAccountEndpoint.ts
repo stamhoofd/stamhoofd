@@ -1,12 +1,12 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { StripeAccount } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { AuditLogType } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 import { StripeHelper } from '../../../../helpers/StripeHelper.js';
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { AuditLogService } from '../../../../services/AuditLogService.js';
 
 type Params = { id: string };

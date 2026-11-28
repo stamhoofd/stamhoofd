@@ -1,5 +1,5 @@
-import type { ComponentWithProperties, PushOptions } from '@browser/navigation';
-import { useDismiss, useNavigationController, usePop, usePresent, useShow } from '@browser/navigation';
+import type { ComponentWithProperties, PushOptions } from '@stamhoofd/browser-navigation';
+import { useDismiss, useNavigationController, usePop, usePresent, useShow } from '@stamhoofd/browser-navigation';
 import type { UnwrapRef } from 'vue';
 
 export type NavigationActions = {

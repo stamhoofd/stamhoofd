@@ -28,8 +28,8 @@
 </template>
 
 <script lang="ts" setup>
-import { encodeObject } from '@common/encoding';
-import { useDismiss } from '@browser/navigation';
+import { encodeObject } from '@stamhoofd/common-encoding';
+import { useDismiss } from '@stamhoofd/browser-navigation';
 import RecordAnswerInput from '#inputs/RecordAnswerInput.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';

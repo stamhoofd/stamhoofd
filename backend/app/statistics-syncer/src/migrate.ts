@@ -1,4 +1,4 @@
-import { Column } from '@node/database';
+import { Column } from '@stamhoofd/node-database';
 import { Version } from '@stamhoofd/structures';
 import { endStatisticsConnection } from './database.js';
 import { runStatisticsMigrations } from './schema.js';

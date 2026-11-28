@@ -1,5 +1,5 @@
-import { EncodableObject, EncodeMedium, encodeObject } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import { EncodableObject, EncodeMedium, encodeObject } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import http from 'http';
 import urlParser from 'url';
 

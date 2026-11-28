@@ -1,5 +1,5 @@
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
+import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/node-sql';
 import { balanceItemPaymentsCompilers } from './balance-item-payments.js';
 import { paymentFilterCompilers } from './payments.js';
 

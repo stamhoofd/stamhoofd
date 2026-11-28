@@ -1,6 +1,6 @@
-import type { Decoder } from '@common/encoding';
-import type { Server } from '@common/networking';
-import { useDismiss } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import type { Server } from '@stamhoofd/common-networking';
+import { useDismiss } from '@stamhoofd/browser-navigation';
 import { Payment, PaymentStatus } from '@stamhoofd/structures';
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 

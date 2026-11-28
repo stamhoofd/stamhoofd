@@ -1,5 +1,5 @@
-import { Request } from '@node/endpoints';
-import { isSimpleError, SimpleError } from '@common/errors';
+import { Request } from '@stamhoofd/node-endpoints';
+import { isSimpleError, SimpleError } from '@stamhoofd/common-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { MFAToken, Organization, Platform, RateLimiter, Token, User } from '@stamhoofd/models';
 import { ApiUserRateLimits } from '@stamhoofd/structures';

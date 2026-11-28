@@ -1,6 +1,6 @@
-import type { Decoder } from '@common/encoding';
-import { AutoEncoder, field, StringDecoder } from '@common/encoding';
-import { UrlHelper } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { AutoEncoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import { UrlHelper } from '@stamhoofd/browser-navigation';
 import { useContext } from '#hooks/useContext.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';

@@ -1,5 +1,5 @@
-import { Factory } from '@node/database';
-import StreetNames from '@node/database/data/streets';
+import { Factory } from '@stamhoofd/node-database';
+import StreetNames from '@stamhoofd/node-database/data/streets';
 import { Address } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 

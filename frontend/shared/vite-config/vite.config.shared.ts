@@ -1,5 +1,5 @@
 import iconConfig from '@stamhoofd/assets/images/icons/icons.font.js';
-import { devLifecyclePlugin } from '@node/dev-tools/vite';
+import { devLifecyclePlugin } from '@stamhoofd/node-dev-tools/vite';
 import { FrontendApp } from '@stamhoofd/types/FrontendApp';
 import type { FrontendEnvironment } from '@stamhoofd/types/Environment';
 import vue from '@vitejs/plugin-vue';
@@ -82,8 +82,8 @@ export async function buildConfig(options: { name: FrontendApp.WebApp | Frontend
             dedupe: [
                 // Linked packages can resolve dependencies from their local node_modules folder.
                 // this can cause type issues because multiple versions of the same package are loaded
-                '@common/encoding',
-                '@node/database',
+                '@stamhoofd/common-encoding',
+                '@stamhoofd/node-database',
             ],
         },
         plugins: [

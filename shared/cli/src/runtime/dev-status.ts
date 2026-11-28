@@ -2,7 +2,7 @@ import { chalkStderr } from 'chalk';
 import type { ChalkInstance } from 'chalk';
 import { stripVTControlCharacters } from 'node:util';
 import { isPortListening } from './port-probe.js';
-import type { DevEvent } from '@node/dev-tools/events';
+import type { DevEvent } from '@stamhoofd/node-dev-tools/events';
 
 export type DevAppId = 'dashboard' | 'api' | 'docs' | 'webshop' | 'renderer' | 'stats';
 export type DevApp = { id: DevAppId; label: string; href?: string; port?: number };

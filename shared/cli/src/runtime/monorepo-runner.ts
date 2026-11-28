@@ -1,4 +1,4 @@
-import { processError } from '@node/opentelemetry-process';
+import { processError } from '@stamhoofd/node-opentelemetry-process';
 import { execResult } from './process.js';
 import { withCliCleanup } from './telemetry.js';
 import { existsSync } from 'node:fs';
@@ -75,7 +75,7 @@ export type UnitTestPackage = {
 
 // The unit-test packages that `stam test unit` runs. To add a package: give it a `test` script that
 // runs vitest, then add it here with the correct `needsDatabase` (true if its vitest setup/tests
-// query `Database` from @node/database).
+// query `Database` from @stamhoofd/node-database).
 export const unitTestPackages: UnitTestPackage[] = [
     {
         name: 'opentelemetry-terminal',
@@ -106,7 +106,7 @@ export const unitTestPackages: UnitTestPackage[] = [
         : []),
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
     { name: 'metabase', path: 'shared/metabase', needsDatabase: false },
-    { name: 'filters', path: 'shared/filters', needsDatabase: false },
+    { name: 'filters', path: 'packages/common/filters', needsDatabase: false },
     { name: 'structures', path: 'shared/structures', needsDatabase: false },
     { name: 'object-differ', path: 'shared/object-differ', needsDatabase: false },
     { name: 'sgv', path: 'shared/sgv', needsDatabase: false },
@@ -118,7 +118,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'logging', path: 'backend/shared/logging', needsDatabase: false },
     { name: 'models', path: 'backend/shared/models', needsDatabase: true },
     { name: 'vies', path: 'backend/shared/vies', needsDatabase: true },
-    { name: 'sql', path: 'backend/shared/sql', needsDatabase: true },
+    { name: 'sql', path: 'packages/node/sql', needsDatabase: true },
     { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false },
     { name: 'redirecter', path: 'backend/app/redirecter', needsDatabase: false },
     { name: 'statistics-syncer', path: 'backend/app/statistics-syncer', needsDatabase: true },

@@ -83,7 +83,7 @@
 <script setup lang="ts">
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 
-import { defineRoutes, useNavigate } from '@browser/navigation';
+import { defineRoutes, useNavigate } from '@stamhoofd/browser-navigation';
 import ExternalAdminsBox from './ExternalAdminsBox.vue';
 import { useAdmins } from './hooks/useAdmins';
 import { useShowInternalAdmins, useCanShowInternalAdmins } from './hooks/useShowInternalAdmins';

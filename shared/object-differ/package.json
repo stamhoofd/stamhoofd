@@ -26,7 +26,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@common/encoding": "workspace:*",
+        "@stamhoofd/common-encoding": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
         "uuid": "14.0.3"

@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, field, StringDecoder } from '@common/encoding';
+import { AutoEncoder, BooleanDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
 
 export class VerifyEmailRequest extends AutoEncoder {
     /**

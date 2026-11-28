@@ -30,7 +30,7 @@ import LoadingButton from '#navigation/LoadingButton.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import type { Server } from '@common/networking';
+import type { Server } from '@stamhoofd/common-networking';
 import type { Payment } from '@stamhoofd/structures';
 
 import { usePayconiqPayment } from './usePayconiqPayment';

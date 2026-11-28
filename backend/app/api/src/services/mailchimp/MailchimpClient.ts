@@ -1,5 +1,5 @@
-import { encodeObject } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import { encodeObject } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { createHash } from 'node:crypto';
 import type { MailchimpExistingContact, MailchimpTagChange } from './planSync.js';
 

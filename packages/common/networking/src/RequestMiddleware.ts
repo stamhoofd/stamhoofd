@@ -1,4 +1,4 @@
-import { SimpleErrors } from '@common/errors';
+import { SimpleErrors } from '@stamhoofd/common-errors';
 
 import { Request } from './Request.js';
 

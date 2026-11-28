@@ -1,4 +1,4 @@
-import { ComponentWithProperties, ModalStackComponent, NavigationController } from '@browser/navigation';
+import { ComponentWithProperties, ModalStackComponent, NavigationController } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import AuthenticatedView from '@stamhoofd/components/containers/AuthenticatedView.vue';
 import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';

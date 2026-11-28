@@ -1,5 +1,5 @@
-import type { Endpoint } from '@node/endpoints';
-import { Request } from '@node/endpoints';
+import type { Endpoint } from '@stamhoofd/node-endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type {
     Group,
     Member,

@@ -1,4 +1,4 @@
-import { ComponentWithProperties, useShow } from '@browser/navigation';
+import { ComponentWithProperties, useShow } from '@stamhoofd/browser-navigation';
 import type { Ref } from 'vue';
 import { computed, getCurrentInstance } from 'vue';
 import { useArrowUpDown } from './useArrowUpDown';

@@ -9,8 +9,8 @@ import {
     IntegerDecoder,
     MapDecoder,
     StringDecoder,
-} from '@common/encoding';
-import { SimpleErrors } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import { SimpleErrors } from '@stamhoofd/common-errors';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -22,7 +22,7 @@ import {
 } from '../endpoints/EmailRequest.js';
 import { EmailContent, getEmailContentForLanguage } from './EmailContent.js';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import { TinyMember } from '../members/Member.js';
 import { BaseOrganization } from '../Organization.js';
 import type { OrganizationMetaData } from '../OrganizationMetaData.js';

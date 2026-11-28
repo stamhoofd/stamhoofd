@@ -5,7 +5,7 @@ import {
     SQL,
     SQLFilterDefinitions,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 
 export const EmailRelationFilterCompilers: SQLFilterDefinitions = new Map([
     [

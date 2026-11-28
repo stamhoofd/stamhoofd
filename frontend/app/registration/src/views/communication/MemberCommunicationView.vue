@@ -45,8 +45,8 @@
 </template>
 
 <script setup lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
-import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@browser/navigation';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useUserEmailsObjectFetcher } from '@stamhoofd/components/fetchers/useUserEmailsObjectFetcher.ts';
 import { useEmailFilterBuilders } from '@stamhoofd/components/filters/filterBuilders.ts';

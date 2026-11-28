@@ -1,6 +1,6 @@
 import { MemberResponsibilityRecord } from '@stamhoofd/models';
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
+import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/node-sql';
 
 const baseTable = SQL.table(MemberResponsibilityRecord.table);
 

@@ -1,5 +1,5 @@
-import type { ConvertArrayToPatchableArray } from '@common/encoding';
-import { PatchMap, patchObject } from '@common/encoding';
+import type { ConvertArrayToPatchableArray } from '@stamhoofd/common-encoding';
+import { PatchMap, patchObject } from '@stamhoofd/common-encoding';
 import type { Ref } from 'vue';
 import { computed, ref, unref } from 'vue';
 

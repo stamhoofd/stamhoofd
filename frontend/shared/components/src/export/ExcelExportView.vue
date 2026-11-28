@@ -42,9 +42,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
-import { ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
-import { usePop } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ObjectData, VersionBox, VersionBoxDecoder } from '@stamhoofd/common-encoding';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { ErrorBox } from '#errors/ErrorBox';
 import { useErrors } from '#errors/useErrors';
 import DataSelector from './DataSelector.vue';

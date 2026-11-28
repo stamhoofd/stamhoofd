@@ -1,4 +1,4 @@
-import { usePresent } from '@browser/navigation';
+import { usePresent } from '@stamhoofd/browser-navigation';
 import type { User } from '@stamhoofd/structures';
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';

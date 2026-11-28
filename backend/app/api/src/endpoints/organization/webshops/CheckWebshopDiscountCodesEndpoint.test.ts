@@ -1,5 +1,5 @@
-import { Database } from '@node/database';
-import { Request } from '@node/endpoints';
+import { Database } from '@stamhoofd/node-database';
+import { Request } from '@stamhoofd/node-endpoints';
 import { OrganizationFactory, WebshopDiscountCode, WebshopFactory } from '@stamhoofd/models';
 import { Discount } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';

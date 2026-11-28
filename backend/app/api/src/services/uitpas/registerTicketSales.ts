@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 export type RegisterTicketSaleRequest = {
     basePrice: number;

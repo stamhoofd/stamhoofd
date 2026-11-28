@@ -1,4 +1,4 @@
-import { Database, Migration } from '@node/database';
+import { Database, Migration } from '@stamhoofd/node-database';
 
 export default new Migration(async () => {
     process.stdout.write('\n');

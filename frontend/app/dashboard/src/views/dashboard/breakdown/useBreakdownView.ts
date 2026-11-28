@@ -1,5 +1,5 @@
-import type { Decoder } from '@common/encoding';
-import { useShow } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';

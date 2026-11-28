@@ -1,4 +1,4 @@
-import { ComponentWithProperties, NavigationController } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import CoverImageContainer from '@stamhoofd/components/containers/CoverImageContainer.vue';
 

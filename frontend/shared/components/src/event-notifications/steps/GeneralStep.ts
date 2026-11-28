@@ -1,4 +1,4 @@
-import { ComponentWithProperties } from '@browser/navigation';
+import { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { ViewStep, ViewStepNavigation } from '#steps/ViewStep.ts';
 import type { EventNotificationViewModel } from '../classes/EventNotificationViewModel';

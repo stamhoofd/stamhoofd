@@ -1,4 +1,4 @@
-import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@stamhoofd/common-encoding';
 
 export class MailchimpAudience extends AutoEncoder {
     @field({ decoder: StringDecoder })

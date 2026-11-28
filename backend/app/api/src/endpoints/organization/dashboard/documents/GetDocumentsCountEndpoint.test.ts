@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import { OrganizationFactory, UserFactory } from '@stamhoofd/models';
 import { CountFilteredRequest, Permissions } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

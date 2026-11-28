@@ -6,7 +6,7 @@ import {
     field,
     IntegerDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 
 import { Address } from '../addresses/Address.js';
 import { File } from '../files/File.js';

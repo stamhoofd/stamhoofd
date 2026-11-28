@@ -1,5 +1,5 @@
-import type { Data, Decoder, EncodableObject, Encodeable, EncodeContext } from '@common/encoding';
-import { encodeObject } from '@common/encoding';
+import type { Data, Decoder, EncodableObject, Encodeable, EncodeContext } from '@stamhoofd/common-encoding';
+import { encodeObject } from '@stamhoofd/common-encoding';
 
 export type IndexedDbIndexValue = string | number | null | undefined;
 export type IndexMap<Key = string> = Map<Key, IndexedDbIndexValue>;

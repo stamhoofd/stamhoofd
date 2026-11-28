@@ -132,7 +132,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@stamhoofd/browser-navigation';
 import { MFAManager } from '@stamhoofd/frontend-application/MFAManager';
 import type { MFAStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

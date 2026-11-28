@@ -1,6 +1,6 @@
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { Request } from '@node/endpoints';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization, StripeAccount, Webshop, Token } from '@stamhoofd/models';
 import { OrganizationFactory, Ticket, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

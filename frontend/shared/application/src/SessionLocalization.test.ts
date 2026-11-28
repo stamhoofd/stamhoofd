@@ -1,4 +1,4 @@
-import { UrlHelper } from '@browser/navigation';
+import { UrlHelper } from '@stamhoofd/browser-navigation';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { ImpersonatedBy, Organization, Platform, UserWithMembers } from '@stamhoofd/structures';

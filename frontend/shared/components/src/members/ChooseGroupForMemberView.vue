@@ -72,7 +72,7 @@ import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
 import { Toast } from '#overlays/Toast.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
-import { usePresent } from '@browser/navigation';
+import { usePresent } from '@stamhoofd/browser-navigation';
 import type { Event, Group, Organization, PlatformMember } from '@stamhoofd/structures';
 import { GroupCategoryTree, GroupType, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

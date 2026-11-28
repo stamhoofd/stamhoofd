@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import { verifyInternalSignature } from '@stamhoofd/backend-env';
 import { Document, OrganizationFactory, UserFactory } from '@stamhoofd/models';
 import { Permissions } from '@stamhoofd/structures';

@@ -1,6 +1,6 @@
 import { context, propagation, SpanStatusCode, trace } from '@opentelemetry/api';
 import type { Span } from '@opentelemetry/api';
-import type { DevEvent } from '@node/dev-tools/events';
+import type { DevEvent } from '@stamhoofd/node-dev-tools/events';
 
 type Operation = {
     generation: bigint;

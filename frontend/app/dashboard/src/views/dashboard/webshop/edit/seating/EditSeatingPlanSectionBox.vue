@@ -78,8 +78,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { SimpleError, SimpleErrors } from '@common/errors';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

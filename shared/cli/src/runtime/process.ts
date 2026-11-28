@@ -1,6 +1,6 @@
-import { hasLogSink } from '@common/opentelemetry-decorators';
-import { formatCommandLine, processError, runProcess } from '@node/opentelemetry-process';
-import type { ProcessOptions, ProcessResult } from '@node/opentelemetry-process';
+import { hasLogSink } from '@stamhoofd/common-opentelemetry-decorators';
+import { formatCommandLine, processError, runProcess } from '@stamhoofd/node-opentelemetry-process';
+import type { ProcessOptions, ProcessResult } from '@stamhoofd/node-opentelemetry-process';
 import { getCliTelemetry, withCliInteractiveOperation, withCliPrompt } from './telemetry.js';
 
 /** env is a complete environment, matching runProcess. Use run() for legacy merged-env callers. */

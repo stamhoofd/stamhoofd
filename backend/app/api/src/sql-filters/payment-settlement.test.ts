@@ -1,4 +1,4 @@
-import { compileToSQLFilter } from '@stamhoofd/sql';
+import { compileToSQLFilter } from '@stamhoofd/node-sql';
 import {
     PaymentMethod,
     PaymentProvider,

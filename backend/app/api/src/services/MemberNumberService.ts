@@ -1,8 +1,8 @@
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@stamhoofd/common-errors';
 import type { Member, MemberPlatformMembership } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { scalarToSQLExpression, SQL, SQLCharLength, SQLWhereLike } from '@stamhoofd/sql';
+import { scalarToSQLExpression, SQL, SQLCharLength, SQLWhereLike } from '@stamhoofd/node-sql';
 import { MemberNumberAlgorithm } from '@stamhoofd/types/MemberNumberAlgorithm';
 
 export class MemberNumberService {

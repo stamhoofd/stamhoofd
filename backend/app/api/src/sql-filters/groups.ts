@@ -1,4 +1,4 @@
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
@@ -6,7 +6,7 @@ import {
     SQL,
     SQLJsonExtract,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 
 export const groupFilterCompilers: SQLFilterDefinitions = new Map([

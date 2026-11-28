@@ -221,24 +221,24 @@ importers:
 
   .:
     dependencies:
-      '@browser/navigation':
-        specifier: workspace:*
-        version: link:packages/browser/navigation
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:packages/common/errors
-      '@common/networking':
-        specifier: workspace:*
-        version: link:packages/common/networking
       '@simplewebauthn/browser':
         specifier: 13.3.0
         version: 13.3.0
       '@simplewebauthn/server':
         specifier: 13.3.3
         version: 13.3.3
+      '@stamhoofd/browser-navigation':
+        specifier: workspace:*
+        version: link:packages/browser/navigation
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:packages/common/errors
+      '@stamhoofd/common-networking':
+        specifier: workspace:*
+        version: link:packages/common/networking
       '@xmldom/xmldom':
         specifier: ^0.9.10
         version: 0.9.12
@@ -492,24 +492,6 @@ importers:
       '@bwip-js/node':
         specifier: 4.11.4
         version: 4.11.4
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@node/database':
-        specifier: workspace:*
-        version: link:../../../packages/node/database
-      '@node/endpoints':
-        specifier: workspace:*
-        version: link:../../../packages/node/endpoints
-      '@node/logging':
-        specifier: workspace:*
-        version: link:../../../packages/node/logging
-      '@node/observability':
-        specifier: workspace:*
-        version: link:../../../packages/node/observability
       '@simplewebauthn/server':
         specifier: 13.3.3
         version: 13.3.3
@@ -522,6 +504,15 @@ importers:
       '@stamhoofd/backend-middleware':
         specifier: workspace:*
         version: link:../../shared/middleware
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
+      '@stamhoofd/common-filters':
+        specifier: workspace:*
+        version: link:../../../packages/common/filters
       '@stamhoofd/crons':
         specifier: workspace:*
         version: link:../../shared/crons
@@ -531,24 +522,33 @@ importers:
       '@stamhoofd/excel-writer':
         specifier: workspace:*
         version: link:../../../shared/excel-writer
-      '@stamhoofd/filters':
-        specifier: workspace:*
-        version: link:../../../shared/filters
       '@stamhoofd/logging':
         specifier: workspace:*
         version: link:../../shared/logging
       '@stamhoofd/models':
         specifier: workspace:*
         version: link:../../shared/models
+      '@stamhoofd/node-database':
+        specifier: workspace:*
+        version: link:../../../packages/node/database
+      '@stamhoofd/node-endpoints':
+        specifier: workspace:*
+        version: link:../../../packages/node/endpoints
+      '@stamhoofd/node-logging':
+        specifier: workspace:*
+        version: link:../../../packages/node/logging
+      '@stamhoofd/node-observability':
+        specifier: workspace:*
+        version: link:../../../packages/node/observability
+      '@stamhoofd/node-sql':
+        specifier: workspace:*
+        version: link:../../../packages/node/sql
       '@stamhoofd/object-differ':
         specifier: workspace:*
         version: link:../../../shared/object-differ
       '@stamhoofd/queues':
         specifier: workspace:*
         version: link:../../shared/queues
-      '@stamhoofd/sql':
-        specifier: workspace:*
-        version: link:../../shared/sql
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -670,33 +670,33 @@ importers:
       '@aws-sdk/lib-storage':
         specifier: 3.1173.0
         version: 3.1173.0(@aws-sdk/client-s3@3.1173.0)
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@node/database':
-        specifier: workspace:*
-        version: link:../../../packages/node/database
-      '@node/endpoints':
-        specifier: workspace:*
-        version: link:../../../packages/node/endpoints
-      '@node/logging':
-        specifier: workspace:*
-        version: link:../../../packages/node/logging
       '@stamhoofd/backend-env':
         specifier: workspace:*
         version: link:../../shared/env
       '@stamhoofd/backend-middleware':
         specifier: workspace:*
         version: link:../../shared/middleware
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
       '@stamhoofd/crons':
         specifier: workspace:*
         version: link:../../shared/crons
       '@stamhoofd/logging':
         specifier: workspace:*
         version: link:../../shared/logging
+      '@stamhoofd/node-database':
+        specifier: workspace:*
+        version: link:../../../packages/node/database
+      '@stamhoofd/node-endpoints':
+        specifier: workspace:*
+        version: link:../../../packages/node/endpoints
+      '@stamhoofd/node-logging':
+        specifier: workspace:*
+        version: link:../../../packages/node/logging
       '@stamhoofd/queues':
         specifier: workspace:*
         version: link:../../shared/queues
@@ -737,21 +737,21 @@ importers:
 
   backend/app/redirecter:
     dependencies:
-      '@node/database':
-        specifier: workspace:*
-        version: link:../../../packages/node/database
-      '@node/endpoints':
-        specifier: workspace:*
-        version: link:../../../packages/node/endpoints
-      '@node/logging':
-        specifier: workspace:*
-        version: link:../../../packages/node/logging
       '@stamhoofd/backend-env':
         specifier: workspace:*
         version: link:../../shared/env
       '@stamhoofd/backend-middleware':
         specifier: workspace:*
         version: link:../../shared/middleware
+      '@stamhoofd/node-database':
+        specifier: workspace:*
+        version: link:../../../packages/node/database
+      '@stamhoofd/node-endpoints':
+        specifier: workspace:*
+        version: link:../../../packages/node/endpoints
+      '@stamhoofd/node-logging':
+        specifier: workspace:*
+        version: link:../../../packages/node/logging
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -783,24 +783,6 @@ importers:
 
   backend/app/renderer:
     dependencies:
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@node/database':
-        specifier: workspace:*
-        version: link:../../../packages/node/database
-      '@node/endpoints':
-        specifier: workspace:*
-        version: link:../../../packages/node/endpoints
-      '@node/logging':
-        specifier: workspace:*
-        version: link:../../../packages/node/logging
-      '@node/observability':
-        specifier: workspace:*
-        version: link:../../../packages/node/observability
       '@stamhoofd/backend-env':
         specifier: workspace:*
         version: link:../../shared/env
@@ -810,9 +792,27 @@ importers:
       '@stamhoofd/backend-middleware':
         specifier: workspace:*
         version: link:../../shared/middleware
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
       '@stamhoofd/logging':
         specifier: workspace:*
         version: link:../../shared/logging
+      '@stamhoofd/node-database':
+        specifier: workspace:*
+        version: link:../../../packages/node/database
+      '@stamhoofd/node-endpoints':
+        specifier: workspace:*
+        version: link:../../../packages/node/endpoints
+      '@stamhoofd/node-logging':
+        specifier: workspace:*
+        version: link:../../../packages/node/logging
+      '@stamhoofd/node-observability':
+        specifier: workspace:*
+        version: link:../../../packages/node/observability
       '@stamhoofd/queues':
         specifier: workspace:*
         version: link:../../shared/queues
@@ -862,24 +862,15 @@ importers:
 
   backend/app/statistics-syncer:
     dependencies:
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@node/database':
-        specifier: workspace:*
-        version: link:../../../packages/node/database
-      '@node/logging':
-        specifier: workspace:*
-        version: link:../../../packages/node/logging
-      '@node/observability':
-        specifier: workspace:*
-        version: link:../../../packages/node/observability
       '@stamhoofd/backend-env':
         specifier: workspace:*
         version: link:../../shared/env
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
       '@stamhoofd/crons':
         specifier: workspace:*
         version: link:../../shared/crons
@@ -889,12 +880,21 @@ importers:
       '@stamhoofd/models':
         specifier: workspace:*
         version: link:../../shared/models
+      '@stamhoofd/node-database':
+        specifier: workspace:*
+        version: link:../../../packages/node/database
+      '@stamhoofd/node-logging':
+        specifier: workspace:*
+        version: link:../../../packages/node/logging
+      '@stamhoofd/node-observability':
+        specifier: workspace:*
+        version: link:../../../packages/node/observability
+      '@stamhoofd/node-sql':
+        specifier: workspace:*
+        version: link:../../../packages/node/sql
       '@stamhoofd/queues':
         specifier: workspace:*
         version: link:../../shared/queues
-      '@stamhoofd/sql':
-        specifier: workspace:*
-        version: link:../../shared/sql
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -923,10 +923,10 @@ importers:
 
   backend/shared/crons:
     dependencies:
-      '@node/database':
+      '@stamhoofd/node-database':
         specifier: workspace:*
         version: link:../../../packages/node/database
-      '@node/logging':
+      '@stamhoofd/node-logging':
         specifier: workspace:*
         version: link:../../../packages/node/logging
       '@stamhoofd/utility':
@@ -945,21 +945,21 @@ importers:
 
   backend/shared/email:
     dependencies:
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@node/database':
-        specifier: workspace:*
-        version: link:../../../packages/node/database
       '@stamhoofd/backend-i18n':
         specifier: workspace:*
         version: link:../i18n
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
+      '@stamhoofd/node-database':
+        specifier: workspace:*
+        version: link:../../../packages/node/database
+      '@stamhoofd/node-sql':
+        specifier: workspace:*
+        version: link:../../../packages/node/sql
       '@stamhoofd/queues':
         specifier: workspace:*
         version: link:../queues
-      '@stamhoofd/sql':
-        specifier: workspace:*
-        version: link:../sql
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
@@ -997,7 +997,7 @@ importers:
 
   backend/shared/env:
     dependencies:
-      '@node/logging':
+      '@stamhoofd/node-logging':
         specifier: workspace:*
         version: link:../../../packages/node/logging
       '@stamhoofd/test-utils':
@@ -1019,15 +1019,15 @@ importers:
 
   backend/shared/i18n:
     dependencies:
-      '@node/endpoints':
-        specifier: workspace:*
-        version: link:../../../packages/node/endpoints
-      '@node/logging':
-        specifier: workspace:*
-        version: link:../../../packages/node/logging
       '@stamhoofd/locales':
         specifier: workspace:*
         version: link:../../../shared/locales
+      '@stamhoofd/node-endpoints':
+        specifier: workspace:*
+        version: link:../../../packages/node/endpoints
+      '@stamhoofd/node-logging':
+        specifier: workspace:*
+        version: link:../../../packages/node/logging
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -1041,7 +1041,7 @@ importers:
 
   backend/shared/logging:
     dependencies:
-      '@node/logging':
+      '@stamhoofd/node-logging':
         specifier: workspace:*
         version: link:../../../packages/node/logging
     devDependencies:
@@ -1057,13 +1057,13 @@ importers:
 
   backend/shared/middleware:
     dependencies:
-      '@common/errors':
+      '@stamhoofd/common-errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@node/endpoints':
+      '@stamhoofd/node-endpoints':
         specifier: workspace:*
         version: link:../../../packages/node/endpoints
-      '@node/logging':
+      '@stamhoofd/node-logging':
         specifier: workspace:*
         version: link:../../../packages/node/logging
       '@stamhoofd/structures':
@@ -1088,27 +1088,27 @@ importers:
       '@bwip-js/node':
         specifier: 4.11.4
         version: 4.11.4
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@node/database':
-        specifier: workspace:*
-        version: link:../../../packages/node/database
-      '@node/endpoints':
-        specifier: workspace:*
-        version: link:../../../packages/node/endpoints
       '@stamhoofd/backend-i18n':
         specifier: workspace:*
         version: link:../i18n
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
+      '@stamhoofd/node-database':
+        specifier: workspace:*
+        version: link:../../../packages/node/database
+      '@stamhoofd/node-endpoints':
+        specifier: workspace:*
+        version: link:../../../packages/node/endpoints
+      '@stamhoofd/node-sql':
+        specifier: workspace:*
+        version: link:../../../packages/node/sql
       '@stamhoofd/queues':
         specifier: workspace:*
         version: link:../queues
-      '@stamhoofd/sql':
-        specifier: workspace:*
-        version: link:../sql
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
@@ -1158,53 +1158,13 @@ importers:
 
   backend/shared/queues:
     dependencies:
-      '@common/errors':
+      '@stamhoofd/common-errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
     devDependencies:
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../../../shared/types
-      oxlint-plugin-stamhoofd:
-        specifier: workspace:*
-        version: link:../../../shared/oxlint
-      vitest:
-        specifier: 4.1.12
-        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@22.20.4)(@vitest/browser-playwright@4.1.12)(@vitest/browser@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.8(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.108.2)(terser@5.51.2)(yaml@2.9.1))
-
-  backend/shared/sql:
-    dependencies:
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@node/database':
-        specifier: workspace:*
-        version: link:../../../packages/node/database
-      '@node/logging':
-        specifier: workspace:*
-        version: link:../../../packages/node/logging
-      '@stamhoofd/filters':
-        specifier: workspace:*
-        version: link:../../../shared/filters
-      '@stamhoofd/utility':
-        specifier: workspace:*
-        version: link:../../../shared/utility
-      lru-cache:
-        specifier: 11.5.3
-        version: 11.5.3
-    devDependencies:
-      '@stamhoofd/test-utils':
-        specifier: workspace:*
-        version: link:../../../shared/test-utils
-      '@stamhoofd/types':
-        specifier: workspace:*
-        version: link:../../../shared/types
-      mysql2:
-        specifier: 3.24.6
-        version: 3.24.6(@types/node@22.20.4)
       oxlint-plugin-stamhoofd:
         specifier: workspace:*
         version: link:../../../shared/oxlint
@@ -1214,10 +1174,10 @@ importers:
 
   backend/shared/vies:
     dependencies:
-      '@common/encoding':
+      '@stamhoofd/common-encoding':
         specifier: workspace:*
         version: link:../../../packages/common/encoding
-      '@common/errors':
+      '@stamhoofd/common-errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
       '@stamhoofd/models':
@@ -1236,12 +1196,12 @@ importers:
         specifier: 3.0.4
         version: 3.0.4
     devDependencies:
-      '@node/database':
-        specifier: workspace:*
-        version: link:../../../packages/node/database
       '@stamhoofd/backend-i18n':
         specifier: workspace:*
         version: link:../i18n
+      '@stamhoofd/node-database':
+        specifier: workspace:*
+        version: link:../../../packages/node/database
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
@@ -1260,18 +1220,18 @@ importers:
 
   docs:
     dependencies:
-      '@node/nuxt-observability':
-        specifier: workspace:*
-        version: link:../packages/node/nuxt-observability
-      '@node/observability':
-        specifier: workspace:*
-        version: link:../packages/node/observability
       '@nuxt/content':
         specifier: 3.17.0
         version: 3.17.0(@nuxt/schema@4.6.4)(@oxc-project/types@0.156.0)(better-sqlite3@12.11.1)(confbox@0.2.4)(dotenv@17.4.2)(esbuild@0.28.2)(giget@3.3.1)(magic-string@1.4.5)(magicast@0.5.5)(mlly@1.8.2)(oxc-parser@0.151.0)(rolldown@1.2.19)(rollup@4.68.2)(supports-color@10.2.2)(vite@8.3.8(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.108.2)(terser@5.51.2)(yaml@2.9.1))
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../frontend/shared/assets
+      '@stamhoofd/node-nuxt-observability':
+        specifier: workspace:*
+        version: link:../packages/node/nuxt-observability
+      '@stamhoofd/node-observability':
+        specifier: workspace:*
+        version: link:../packages/node/observability
       '@stamhoofd/scss':
         specifier: workspace:*
         version: link:../frontend/shared/scss
@@ -1285,7 +1245,7 @@ importers:
         specifier: 4.6.4
         version: 4.6.4(3838517bf0c130723be7b7a20f31785e)
     devDependencies:
-      '@node/dev-tools':
+      '@stamhoofd/node-dev-tools':
         specifier: workspace:*
         version: link:../packages/node/dev-tools
       eslint-plugin-stamhoofd:
@@ -1300,21 +1260,21 @@ importers:
 
   frontend/app/admin:
     dependencies:
-      '@browser/navigation':
-        specifier: workspace:*
-        version: link:../../../packages/browser/navigation
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@common/networking':
-        specifier: workspace:*
-        version: link:../../../packages/common/networking
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../../shared/assets
+      '@stamhoofd/browser-navigation':
+        specifier: workspace:*
+        version: link:../../../packages/browser/navigation
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
+      '@stamhoofd/common-networking':
+        specifier: workspace:*
+        version: link:../../../packages/common/networking
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../../shared/components
@@ -1370,21 +1330,21 @@ importers:
 
   frontend/app/auto:
     dependencies:
-      '@browser/navigation':
-        specifier: workspace:*
-        version: link:../../../packages/browser/navigation
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@common/networking':
-        specifier: workspace:*
-        version: link:../../../packages/common/networking
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../../shared/assets
+      '@stamhoofd/browser-navigation':
+        specifier: workspace:*
+        version: link:../../../packages/browser/navigation
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
+      '@stamhoofd/common-networking':
+        specifier: workspace:*
+        version: link:../../../packages/common/networking
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../../shared/components
@@ -1440,15 +1400,15 @@ importers:
 
   frontend/app/calculator:
     dependencies:
-      '@browser/navigation':
-        specifier: workspace:*
-        version: link:../../../packages/browser/navigation
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../../shared/assets
+      '@stamhoofd/browser-navigation':
+        specifier: workspace:*
+        version: link:../../../packages/browser/navigation
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../../shared/components
@@ -1501,21 +1461,24 @@ importers:
 
   frontend/app/dashboard:
     dependencies:
-      '@browser/navigation':
-        specifier: workspace:*
-        version: link:../../../packages/browser/navigation
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@common/networking':
-        specifier: workspace:*
-        version: link:../../../packages/common/networking
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../../shared/assets
+      '@stamhoofd/browser-navigation':
+        specifier: workspace:*
+        version: link:../../../packages/browser/navigation
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
+      '@stamhoofd/common-filters':
+        specifier: workspace:*
+        version: link:../../../packages/common/filters
+      '@stamhoofd/common-networking':
+        specifier: workspace:*
+        version: link:../../../packages/common/networking
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../../shared/components
@@ -1525,9 +1488,6 @@ importers:
       '@stamhoofd/excel-writer':
         specifier: workspace:*
         version: link:../../../shared/excel-writer
-      '@stamhoofd/filters':
-        specifier: workspace:*
-        version: link:../../../shared/filters
       '@stamhoofd/frontend-application':
         specifier: workspace:*
         version: link:../../shared/application
@@ -1616,9 +1576,6 @@ importers:
 
   frontend/app/mobile:
     dependencies:
-      '@browser/navigation':
-        specifier: workspace:*
-        version: link:../../../packages/browser/navigation
       '@capacitor-community/in-app-review':
         specifier: 8.0.0
         version: 8.0.0(@capacitor/core@8.6.0)
@@ -1664,18 +1621,21 @@ importers:
       '@capgo/capacitor-updater':
         specifier: 8.54.0
         version: 8.54.0(@capacitor/core@8.6.0)
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/networking':
-        specifier: workspace:*
-        version: link:../../../packages/common/networking
       '@plausible-analytics/tracker':
         specifier: 0.4.7
         version: 0.4.7
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../../shared/assets
+      '@stamhoofd/browser-navigation':
+        specifier: workspace:*
+        version: link:../../../packages/browser/navigation
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-networking':
+        specifier: workspace:*
+        version: link:../../../packages/common/networking
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../../shared/components
@@ -1749,18 +1709,18 @@ importers:
 
   frontend/app/registration:
     dependencies:
-      '@browser/navigation':
-        specifier: workspace:*
-        version: link:../../../packages/browser/navigation
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../../shared/assets
+      '@stamhoofd/browser-navigation':
+        specifier: workspace:*
+        version: link:../../../packages/browser/navigation
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../../shared/components
@@ -1804,12 +1764,12 @@ importers:
 
   frontend/app/verify-email:
     dependencies:
-      '@browser/navigation':
-        specifier: workspace:*
-        version: link:../../../packages/browser/navigation
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../../shared/assets
+      '@stamhoofd/browser-navigation':
+        specifier: workspace:*
+        version: link:../../../packages/browser/navigation
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../../shared/components
@@ -1835,15 +1795,6 @@ importers:
 
   frontend/app/web-app:
     dependencies:
-      '@browser/navigation':
-        specifier: workspace:*
-        version: link:../../../packages/browser/navigation
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
       '@plausible-analytics/tracker':
         specifier: 0.4.7
         version: 0.4.7
@@ -1856,6 +1807,15 @@ importers:
       '@stamhoofd/auto':
         specifier: workspace:*
         version: link:../auto
+      '@stamhoofd/browser-navigation':
+        specifier: workspace:*
+        version: link:../../../packages/browser/navigation
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../../shared/components
@@ -1932,18 +1892,18 @@ importers:
 
   frontend/app/webshop:
     dependencies:
-      '@browser/navigation':
-        specifier: workspace:*
-        version: link:../../../packages/browser/navigation
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../../shared/assets
+      '@stamhoofd/browser-navigation':
+        specifier: workspace:*
+        version: link:../../../packages/browser/navigation
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../../shared/components
@@ -1996,18 +1956,18 @@ importers:
 
   frontend/shared/application:
     dependencies:
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@common/networking':
-        specifier: workspace:*
-        version: link:../../../packages/common/networking
       '@simplewebauthn/browser':
         specifier: 13.3.0
         version: 13.3.0
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
+      '@stamhoofd/common-networking':
+        specifier: workspace:*
+        version: link:../../../packages/common/networking
       '@stamhoofd/frontend-i18n':
         specifier: workspace:*
         version: link:../i18n
@@ -2039,7 +1999,7 @@ importers:
         specifier: 3.5.44
         version: 3.5.44(typescript@6.0.3)
     devDependencies:
-      '@browser/navigation':
+      '@stamhoofd/browser-navigation':
         specifier: workspace:*
         version: link:../../../packages/browser/navigation
       '@stamhoofd/vite-config':
@@ -2059,24 +2019,24 @@ importers:
 
   frontend/shared/components:
     dependencies:
-      '@browser/navigation':
-        specifier: workspace:*
-        version: link:../../../packages/browser/navigation
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@common/networking':
-        specifier: workspace:*
-        version: link:../../../packages/common/networking
       '@simplewebauthn/browser':
         specifier: 13.3.0
         version: 13.3.0
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../assets
+      '@stamhoofd/browser-navigation':
+        specifier: workspace:*
+        version: link:../../../packages/browser/navigation
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
+      '@stamhoofd/common-networking':
+        specifier: workspace:*
+        version: link:../../../packages/common/networking
       '@stamhoofd/frontend-application':
         specifier: workspace:*
         version: link:../application
@@ -2228,15 +2188,15 @@ importers:
 
   frontend/shared/document-helper:
     dependencies:
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@common/networking':
-        specifier: workspace:*
-        version: link:../../../packages/common/networking
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../assets
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
+      '@stamhoofd/common-networking':
+        specifier: workspace:*
+        version: link:../../../packages/common/networking
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../components
@@ -2265,10 +2225,10 @@ importers:
 
   frontend/shared/excel-export:
     dependencies:
-      '@browser/navigation':
+      '@stamhoofd/browser-navigation':
         specifier: workspace:*
         version: link:../../../packages/browser/navigation
-      '@common/encoding':
+      '@stamhoofd/common-encoding':
         specifier: workspace:*
         version: link:../../../packages/common/encoding
       '@stamhoofd/excel-writer':
@@ -2290,7 +2250,7 @@ importers:
 
   frontend/shared/i18n:
     dependencies:
-      '@browser/navigation':
+      '@stamhoofd/browser-navigation':
         specifier: workspace:*
         version: link:../../../packages/browser/navigation
       '@stamhoofd/frontend-storage':
@@ -2318,16 +2278,16 @@ importers:
 
   frontend/shared/networking:
     dependencies:
-      '@browser/navigation':
+      '@stamhoofd/browser-navigation':
         specifier: workspace:*
         version: link:../../../packages/browser/navigation
-      '@common/encoding':
+      '@stamhoofd/common-encoding':
         specifier: workspace:*
         version: link:../../../packages/common/encoding
-      '@common/errors':
+      '@stamhoofd/common-errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@common/networking':
+      '@stamhoofd/common-networking':
         specifier: workspace:*
         version: link:../../../packages/common/networking
       '@stamhoofd/frontend-notifications':
@@ -2370,10 +2330,10 @@ importers:
 
   frontend/shared/notifications:
     dependencies:
-      '@common/errors':
+      '@stamhoofd/common-errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@common/networking':
+      '@stamhoofd/common-networking':
         specifier: workspace:*
         version: link:../../../packages/common/networking
       '@stamhoofd/types':
@@ -2423,7 +2383,7 @@ importers:
 
   frontend/shared/platform:
     dependencies:
-      '@browser/navigation':
+      '@stamhoofd/browser-navigation':
         specifier: workspace:*
         version: link:../../../packages/browser/navigation
       '@stamhoofd/structures':
@@ -2460,16 +2420,16 @@ importers:
 
   frontend/shared/session:
     dependencies:
-      '@browser/navigation':
+      '@stamhoofd/browser-navigation':
         specifier: workspace:*
         version: link:../../../packages/browser/navigation
-      '@common/encoding':
+      '@stamhoofd/common-encoding':
         specifier: workspace:*
         version: link:../../../packages/common/encoding
-      '@common/errors':
+      '@stamhoofd/common-errors':
         specifier: workspace:*
         version: link:../../../packages/common/errors
-      '@common/networking':
+      '@stamhoofd/common-networking':
         specifier: workspace:*
         version: link:../../../packages/common/networking
       '@stamhoofd/frontend-notifications':
@@ -2509,21 +2469,21 @@ importers:
 
   frontend/shared/sgv:
     dependencies:
-      '@browser/navigation':
-        specifier: workspace:*
-        version: link:../../../packages/browser/navigation
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../../packages/common/errors
-      '@common/networking':
-        specifier: workspace:*
-        version: link:../../../packages/common/networking
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../assets
+      '@stamhoofd/browser-navigation':
+        specifier: workspace:*
+        version: link:../../../packages/browser/navigation
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../../packages/common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../../packages/common/errors
+      '@stamhoofd/common-networking':
+        specifier: workspace:*
+        version: link:../../../packages/common/networking
       '@stamhoofd/components':
         specifier: workspace:*
         version: link:../components
@@ -2625,15 +2585,15 @@ importers:
 
   frontend/shared/vite-config:
     dependencies:
-      '@node/dev-tools':
-        specifier: workspace:*
-        version: link:../../../packages/node/dev-tools
       '@stamhoofd/assets':
         specifier: workspace:*
         version: link:../assets
       '@stamhoofd/cli':
         specifier: workspace:*
         version: link:../../../shared/cli
+      '@stamhoofd/node-dev-tools':
+        specifier: workspace:*
+        version: link:../../../packages/node/dev-tools
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
@@ -2719,7 +2679,7 @@ importers:
 
   packages/common/encoding:
     dependencies:
-      '@common/errors':
+      '@stamhoofd/common-errors':
         specifier: workspace:*
         version: link:../errors
       tslib:
@@ -2758,12 +2718,31 @@ importers:
         specifier: 4.1.12
         version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@22.20.4)(@vitest/browser-playwright@4.1.12)(@vitest/browser@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.8(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.108.2)(terser@5.51.2)(yaml@2.9.1))
 
-  packages/common/networking:
+  packages/common/filters:
     dependencies:
-      '@common/encoding':
+      '@stamhoofd/common-encoding':
         specifier: workspace:*
         version: link:../encoding
-      '@common/errors':
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../errors
+    devDependencies:
+      eslint-plugin-stamhoofd:
+        specifier: workspace:*
+        version: link:../../../shared/eslint
+      oxlint-plugin-stamhoofd:
+        specifier: workspace:*
+        version: link:../../../shared/oxlint
+      vitest:
+        specifier: 4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@22.20.4)(@vitest/browser-playwright@4.1.12)(@vitest/browser@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.8(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.108.2)(terser@5.51.2)(yaml@2.9.1))
+
+  packages/common/networking:
+    dependencies:
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../encoding
+      '@stamhoofd/common-errors':
         specifier: workspace:*
         version: link:../errors
       tslib:
@@ -2807,10 +2786,10 @@ importers:
 
   packages/node/database:
     dependencies:
-      '@common/encoding':
+      '@stamhoofd/common-encoding':
         specifier: workspace:*
         version: link:../../common/encoding
-      '@node/logging':
+      '@stamhoofd/node-logging':
         specifier: workspace:*
         version: link:../logging
       mysql2:
@@ -2820,15 +2799,9 @@ importers:
         specifier: 2.9.1
         version: 2.9.1
     devDependencies:
-      '@common/errors':
+      '@stamhoofd/common-errors':
         specifier: workspace:*
         version: link:../../common/errors
-      '@stamhoofd/test-utils':
-        specifier: workspace:*
-        version: link:../../../shared/test-utils
-      '@stamhoofd/types':
-        specifier: workspace:*
-        version: link:../../../shared/types
       eslint-plugin-stamhoofd:
         specifier: workspace:*
         version: link:../../../shared/eslint
@@ -2860,10 +2833,10 @@ importers:
 
   packages/node/endpoints:
     dependencies:
-      '@common/encoding':
+      '@stamhoofd/common-encoding':
         specifier: workspace:*
         version: link:../../common/encoding
-      '@common/errors':
+      '@stamhoofd/common-errors':
         specifier: workspace:*
         version: link:../../common/errors
       tslib:
@@ -2901,10 +2874,10 @@ importers:
 
   packages/node/nuxt-observability:
     dependencies:
-      '@node/dev-tools':
+      '@stamhoofd/node-dev-tools':
         specifier: workspace:*
         version: link:../dev-tools
-      '@node/observability':
+      '@stamhoofd/node-observability':
         specifier: workspace:*
         version: link:../observability
     devDependencies:
@@ -2951,12 +2924,12 @@ importers:
 
   packages/node/opentelemetry-process:
     dependencies:
-      '@common/opentelemetry-decorators':
-        specifier: workspace:*
-        version: link:../../common/opentelemetry-decorators
       '@opentelemetry/api':
         specifier: 1.10.0
         version: 1.10.0
+      '@stamhoofd/common-opentelemetry-decorators':
+        specifier: workspace:*
+        version: link:../../common/opentelemetry-decorators
       tslib:
         specifier: 2.9.1
         version: 2.9.1
@@ -2973,18 +2946,18 @@ importers:
 
   packages/node/opentelemetry-terminal:
     dependencies:
-      '@common/opentelemetry-decorators':
-        specifier: workspace:*
-        version: link:../../common/opentelemetry-decorators
-      '@node/terminal':
-        specifier: workspace:*
-        version: link:../terminal
       '@opentelemetry/api':
         specifier: 1.10.0
         version: 1.10.0
       '@opentelemetry/sdk-trace':
         specifier: 3.1.1
         version: 3.1.1(@opentelemetry/api@1.10.0)
+      '@stamhoofd/common-opentelemetry-decorators':
+        specifier: workspace:*
+        version: link:../../common/opentelemetry-decorators
+      '@stamhoofd/node-terminal':
+        specifier: workspace:*
+        version: link:../terminal
       chalk:
         specifier: 5.6.2
         version: 5.6.2
@@ -3004,6 +2977,37 @@ importers:
       vitest:
         specifier: 4.1.12
         version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@22.20.4)(@vitest/browser-playwright@4.1.12)(@vitest/browser@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@24.1.3(supports-color@10.2.2))(vite@8.3.8(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.108.2)(terser@5.51.2)(yaml@2.9.1))
+
+  packages/node/sql:
+    dependencies:
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../common/encoding
+      '@stamhoofd/common-errors':
+        specifier: workspace:*
+        version: link:../../common/errors
+      '@stamhoofd/common-filters':
+        specifier: workspace:*
+        version: link:../../common/filters
+      '@stamhoofd/node-database':
+        specifier: workspace:*
+        version: link:../database
+      '@stamhoofd/node-logging':
+        specifier: workspace:*
+        version: link:../logging
+      lru-cache:
+        specifier: 11.5.3
+        version: 11.5.3
+    devDependencies:
+      mysql2:
+        specifier: 3.24.6
+        version: 3.24.6(@types/node@22.20.4)
+      oxlint-plugin-stamhoofd:
+        specifier: workspace:*
+        version: link:../../../shared/oxlint
+      vitest:
+        specifier: 4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@22.20.4)(@vitest/browser-playwright@4.1.12)(@vitest/browser@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.8(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.108.2)(terser@5.51.2)(yaml@2.9.1))
 
   packages/node/terminal:
     devDependencies:
@@ -3025,24 +3029,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: 3.1173.0
         version: 3.1173.0
-      '@common/opentelemetry-decorators':
-        specifier: workspace:*
-        version: link:../../packages/common/opentelemetry-decorators
       '@inquirer/prompts':
         specifier: 7.10.1
         version: 7.10.1(@types/node@22.20.4)
-      '@node/dev-tools':
-        specifier: workspace:*
-        version: link:../../packages/node/dev-tools
-      '@node/opentelemetry-process':
-        specifier: workspace:*
-        version: link:../../packages/node/opentelemetry-process
-      '@node/opentelemetry-terminal':
-        specifier: workspace:*
-        version: link:../../packages/node/opentelemetry-terminal
-      '@node/terminal':
-        specifier: workspace:*
-        version: link:../../packages/node/terminal
       '@oclif/core':
         specifier: 4.14.0
         version: 4.14.0
@@ -3061,9 +3050,24 @@ importers:
       '@opentelemetry/sdk-trace':
         specifier: 3.1.1
         version: 3.1.1(@opentelemetry/api@1.10.0)
+      '@stamhoofd/common-opentelemetry-decorators':
+        specifier: workspace:*
+        version: link:../../packages/common/opentelemetry-decorators
       '@stamhoofd/metabase':
         specifier: workspace:*
         version: link:../metabase
+      '@stamhoofd/node-dev-tools':
+        specifier: workspace:*
+        version: link:../../packages/node/dev-tools
+      '@stamhoofd/node-opentelemetry-process':
+        specifier: workspace:*
+        version: link:../../packages/node/opentelemetry-process
+      '@stamhoofd/node-opentelemetry-terminal':
+        specifier: workspace:*
+        version: link:../../packages/node/opentelemetry-terminal
+      '@stamhoofd/node-terminal':
+        specifier: workspace:*
+        version: link:../../packages/node/terminal
       '@stamhoofd/stdsync':
         specifier: workspace:*
         version: link:../stdsync
@@ -3153,7 +3157,7 @@ importers:
 
   shared/excel-writer:
     dependencies:
-      '@common/errors':
+      '@stamhoofd/common-errors':
         specifier: workspace:*
         version: link:../../packages/common/errors
       '@stamhoofd/utility':
@@ -3182,25 +3186,6 @@ importers:
         specifier: workspace:*
         version: link:../oxlint
 
-  shared/filters:
-    dependencies:
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../packages/common/encoding
-      '@common/errors':
-        specifier: workspace:*
-        version: link:../../packages/common/errors
-    devDependencies:
-      eslint-plugin-stamhoofd:
-        specifier: workspace:*
-        version: link:../eslint
-      oxlint-plugin-stamhoofd:
-        specifier: workspace:*
-        version: link:../oxlint
-      vitest:
-        specifier: 4.1.12
-        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@22.20.4)(@vitest/browser-playwright@4.1.12)(@vitest/browser@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.8(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.108.2)(terser@5.51.2)(yaml@2.9.1))
-
   shared/locales:
     dependencies:
       '@stamhoofd/types':
@@ -3224,7 +3209,7 @@ importers:
 
   shared/object-differ:
     dependencies:
-      '@common/encoding':
+      '@stamhoofd/common-encoding':
         specifier: workspace:*
         version: link:../../packages/common/encoding
       '@stamhoofd/structures':
@@ -3267,10 +3252,10 @@ importers:
 
   shared/sgv:
     dependencies:
-      '@common/encoding':
+      '@stamhoofd/common-encoding':
         specifier: workspace:*
         version: link:../../packages/common/encoding
-      '@common/errors':
+      '@stamhoofd/common-errors':
         specifier: workspace:*
         version: link:../../packages/common/errors
       '@stamhoofd/structures':
@@ -3295,7 +3280,7 @@ importers:
 
   shared/stdsync:
     dependencies:
-      '@node/terminal':
+      '@stamhoofd/node-terminal':
         specifier: workspace:*
         version: link:../../packages/node/terminal
     devDependencies:
@@ -3308,15 +3293,15 @@ importers:
 
   shared/structures:
     dependencies:
-      '@common/encoding':
+      '@stamhoofd/common-encoding':
         specifier: workspace:*
         version: link:../../packages/common/encoding
-      '@common/errors':
+      '@stamhoofd/common-errors':
         specifier: workspace:*
         version: link:../../packages/common/errors
-      '@stamhoofd/filters':
+      '@stamhoofd/common-filters':
         specifier: workspace:*
-        version: link:../filters
+        version: link:../../packages/common/filters
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../types
@@ -3389,12 +3374,6 @@ importers:
 
   tests/playwright:
     dependencies:
-      '@common/encoding':
-        specifier: workspace:*
-        version: link:../../packages/common/encoding
-      '@node/database':
-        specifier: workspace:*
-        version: link:../../packages/node/database
       '@stamhoofd/backend':
         specifier: workspace:*
         version: link:../../backend/app/api
@@ -3404,15 +3383,21 @@ importers:
       '@stamhoofd/cli':
         specifier: workspace:*
         version: link:../../shared/cli
+      '@stamhoofd/common-encoding':
+        specifier: workspace:*
+        version: link:../../packages/common/encoding
+      '@stamhoofd/common-filters':
+        specifier: workspace:*
+        version: link:../../packages/common/filters
       '@stamhoofd/email':
         specifier: workspace:*
         version: link:../../backend/shared/email
-      '@stamhoofd/filters':
-        specifier: workspace:*
-        version: link:../../shared/filters
       '@stamhoofd/models':
         specifier: workspace:*
         version: link:../../backend/shared/models
+      '@stamhoofd/node-database':
+        specifier: workspace:*
+        version: link:../../packages/node/database
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../shared/structures

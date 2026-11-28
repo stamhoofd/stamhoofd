@@ -1,5 +1,5 @@
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { ComponentWithProperties } from '@browser/navigation';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import { GroupCategory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 
 import { PromiseComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';

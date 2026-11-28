@@ -1,4 +1,4 @@
-import { AutoEncoder, field, IntegerDecoder } from '@common/encoding';
+import { AutoEncoder, field, IntegerDecoder } from '@stamhoofd/common-encoding';
 import { BaseOrganization } from '../Organization.js';
 import { WebshopPreview } from './Webshop.js';
 

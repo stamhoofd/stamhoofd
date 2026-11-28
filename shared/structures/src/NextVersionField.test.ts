@@ -1,4 +1,4 @@
-import { AutoEncoder, field, ObjectData, StringDecoder } from '@common/encoding';
+import { AutoEncoder, field, ObjectData, StringDecoder } from '@stamhoofd/common-encoding';
 import { Language } from '@stamhoofd/types/Language';
 import { TranslatedString } from './TranslatedString.js';
 import { Version } from './Version.js';

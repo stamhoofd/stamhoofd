@@ -78,10 +78,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { ArrayDecoder, PatchableArray } from '@common/encoding';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
-import { usePop } from '@browser/navigation';
+import type { Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, PatchableArray } from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { BalanceItemPaymentDetailed, PaymentGeneral, PaymentProvider, PaymentStatus, PaymentType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';

@@ -1,4 +1,4 @@
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilterTypes';
 import { Version } from '../Version.js';
 import { StamhoofdFilterDecoder } from './StamhoofdFilterDecoder.js';
 

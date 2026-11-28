@@ -1,4 +1,4 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Address } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

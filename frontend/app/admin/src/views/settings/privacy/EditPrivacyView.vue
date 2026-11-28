@@ -23,8 +23,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { usePop, usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { usePop, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';

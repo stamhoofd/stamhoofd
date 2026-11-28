@@ -1,6 +1,6 @@
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
-import type { SimpleError, SimpleErrors } from '@common/errors';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@stamhoofd/common-encoding';
+import type { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import { Checkout, DiscountCode, Version } from '@stamhoofd/structures';
 
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';

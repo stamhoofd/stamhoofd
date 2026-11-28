@@ -1,5 +1,5 @@
-import { isSimpleError, isSimpleErrors } from '@common/errors';
-import { Request } from '@common/networking';
+import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
+import { Request } from '@stamhoofd/common-networking';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';

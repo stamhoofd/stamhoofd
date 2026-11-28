@@ -1,6 +1,6 @@
-import type { Decoder } from '@common/encoding';
-import type { ObjectData } from '@common/encoding';
-import { SimpleError, SimpleErrors } from '@common/errors';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import type { ObjectData } from '@stamhoofd/common-encoding';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 
 /** Error payload shape returned by SGV for validation and business-rule failures. */
 export type SGVErrorResponse = {

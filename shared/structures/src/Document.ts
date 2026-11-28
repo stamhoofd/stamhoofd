@@ -9,7 +9,7 @@ import {
     MapDecoder,
     NumberDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { NamedObject } from './Event.js';
@@ -19,7 +19,7 @@ import {
     createInMemoryFilterCompiler,
 } from './filters/InMemoryFilter.js';
 import { documentInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import type { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
 import type { RecordAnswer } from './members/records/RecordAnswer.js';
 import { RecordAnswerDecoder, RecordAnswerMapDecoder } from './members/records/RecordAnswer.js';

@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { patchObject } from '@common/encoding';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { patchObject } from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@stamhoofd/common-errors';
 import { EmailAddress } from '@stamhoofd/email';
 import type { Organization, User } from '@stamhoofd/models';
 import { Group, Platform } from '@stamhoofd/models';

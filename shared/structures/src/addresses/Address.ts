@@ -1,5 +1,5 @@
-import { AutoEncoder, field, ObjectData, StringDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import { AutoEncoder, field, ObjectData, StringDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { CountryDecoder, CountryHelper } from './CountryDecoder.js';

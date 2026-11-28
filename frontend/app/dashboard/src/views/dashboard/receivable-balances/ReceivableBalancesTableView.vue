@@ -18,9 +18,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { ArrayDecoder, PatchableArray } from '@common/encoding';
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
+import type { Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, PatchableArray } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, NavigationController, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { RecipientChooseOneOption, RecipientMultipleChoiceOption } from '@stamhoofd/components/email/EmailView.vue';
 

@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import { PayconiqAccount, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import nock from 'nock';

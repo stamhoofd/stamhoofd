@@ -216,10 +216,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { isSimpleError, isSimpleErrors } from '@common/errors';
-import { ComponentWithProperties, defineRoutes, useNavigate, usePop, usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, defineRoutes, useNavigate, usePop, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage, CenteredMessageButton } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';

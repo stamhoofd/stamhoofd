@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type {
     AuditLog,
     Document,
@@ -77,7 +77,7 @@ import {
 } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from './Context.js';
 import { fillRecipientReplacements } from './EmailBuilder.js';

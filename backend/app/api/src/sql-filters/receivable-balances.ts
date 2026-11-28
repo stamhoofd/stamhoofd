@@ -1,4 +1,4 @@
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
@@ -7,7 +7,7 @@ import {
     SQLConcat,
     SQLValueType,
     SQLScalar,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { memberFilterCompilers } from './members.js';
 import { organizationFilterCompilers } from './organizations.js';
 import { EmailRelationFilterCompilers } from './shared/EmailRelationFilterCompilers.js';

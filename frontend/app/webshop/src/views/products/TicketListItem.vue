@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';

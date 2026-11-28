@@ -1,4 +1,4 @@
-import { column } from '@node/database';
+import { column } from '@stamhoofd/node-database';
 import {
     EmailRecipient as EmailRecipientStruct,
     Recipient,
@@ -8,9 +8,9 @@ import {
 import type { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ArrayDecoder } from '@common/encoding';
-import { QueryableModel } from '@stamhoofd/sql';
-import { SimpleErrors } from '@common/errors';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { QueryableModel } from '@stamhoofd/node-sql';
+import { SimpleErrors } from '@stamhoofd/common-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { Member } from './Member.js';
 

@@ -1,9 +1,9 @@
-import type { ManyToOneRelation } from '@node/database';
-import { column } from '@node/database';
-import { EnumDecoder, MapDecoder } from '@common/encoding';
+import type { ManyToOneRelation } from '@stamhoofd/node-database';
+import { column } from '@stamhoofd/node-database';
+import { EnumDecoder, MapDecoder } from '@stamhoofd/common-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import type { Invoice } from './Invoice.js';
 import type { BalanceItem } from './BalanceItem.js';
 import type { VATExcemptReason } from '@stamhoofd/structures';

@@ -1,4 +1,4 @@
-import type { Decoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
 import {
     ArrayDecoder,
     AutoEncoder,
@@ -6,10 +6,10 @@ import {
     DateDecoder,
     EnumDecoder,
     field,
-} from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PaymentProvider } from '@stamhoofd/structures';

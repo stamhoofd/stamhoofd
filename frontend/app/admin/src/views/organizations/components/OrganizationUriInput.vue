@@ -24,8 +24,8 @@
 </template>
 
 <script lang="ts" setup>
-import { isSimpleError, isSimpleErrors } from '@common/errors';
-import { Request } from '@common/networking';
+import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
+import { Request } from '@stamhoofd/common-networking';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import PrefixInput from '@stamhoofd/components/inputs/PrefixInput.vue';
 import Spinner from '@stamhoofd/components/Spinner.vue';

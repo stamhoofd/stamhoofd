@@ -1,4 +1,4 @@
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 import { QueueHandler } from '@stamhoofd/queues';
 import { WebshopNumberingType } from '@stamhoofd/structures';
 

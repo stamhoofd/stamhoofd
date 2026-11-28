@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Request } from '@common/networking';
+import { Request } from '@stamhoofd/common-networking';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';

@@ -1,4 +1,4 @@
-import { withLogSink } from '@common/opentelemetry-decorators';
+import { withLogSink } from '@stamhoofd/common-opentelemetry-decorators';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';

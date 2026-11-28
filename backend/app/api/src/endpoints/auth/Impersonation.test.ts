@@ -1,7 +1,7 @@
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { Request } from '@node/endpoints';
-import type { SimpleError } from '@common/errors';
-import { isSimpleError, isSimpleErrors } from '@common/errors';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { Request } from '@stamhoofd/node-endpoints';
+import type { SimpleError } from '@stamhoofd/common-errors';
+import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
 import type { Organization } from '@stamhoofd/models';
 import {
     AuditLog,

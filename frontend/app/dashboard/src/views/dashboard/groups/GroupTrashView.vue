@@ -38,8 +38,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import Spinner from '@stamhoofd/components/Spinner.vue';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';

@@ -1,4 +1,4 @@
-import { ObjectData } from '@common/encoding';
+import { ObjectData } from '@stamhoofd/common-encoding';
 import { Token, Version } from '#/index.ts';
 
 const MINUTE = 60 * 1000;

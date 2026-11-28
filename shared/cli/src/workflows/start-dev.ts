@@ -1,8 +1,8 @@
-import { hasLogSink, log, markSpanFailed, withSpan } from '@common/opentelemetry-decorators';
+import { hasLogSink, log, markSpanFailed, withSpan } from '@stamhoofd/common-opentelemetry-decorators';
 import { context as otelContext, propagation } from '@opentelemetry/api';
 import { openDevEventChannel } from '../runtime/dev-event-channel.js';
 import { DevLifecycle } from '../runtime/dev-lifecycle.js';
-import { processError } from '@node/opentelemetry-process';
+import { processError } from '@stamhoofd/node-opentelemetry-process';
 import { execResult } from '../runtime/process.js';
 import { getCliTelemetry, withCliCleanup } from '../runtime/telemetry.js';
 import { buildBackendEnv, buildDomains } from '../config/build-config.js';

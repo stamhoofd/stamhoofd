@@ -108,7 +108,7 @@
 </template>
 
 <script lang="ts" setup>
-import { usePop } from '@browser/navigation';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatchPlatform } from '@stamhoofd/components/hooks/usePatchPlatform.ts';

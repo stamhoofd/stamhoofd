@@ -1,4 +1,4 @@
-import type { Decoder, ObjectData } from '@common/encoding';
+import type { Decoder, ObjectData } from '@stamhoofd/common-encoding';
 import {
     AnyDecoder,
     ArrayDecoder,
@@ -8,8 +8,8 @@ import {
     IntegerDecoder,
     NumberDecoder,
     StringDecoder,
-} from '@common/encoding';
-import { SimpleError, SimpleErrors } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import type { Member, MemberWithRegistrationsBlob } from '@stamhoofd/structures';

@@ -24,7 +24,7 @@ export class ApplicationLifecycle {
         readonly service: string,
         private readonly flush?: () => Promise<void>,
     ) {
-        this.startup = trace.getTracer('@node/observability').startSpan('application.startup');
+        this.startup = trace.getTracer('@stamhoofd/node-observability').startSpan('application.startup');
         this.notify('starting');
     }
 
@@ -73,7 +73,7 @@ export class ApplicationLifecycle {
     }
 
     private record(body: string): void {
-        logs.getLogger('@node/observability').emit({
+        logs.getLogger('@stamhoofd/node-observability').emit({
             body,
             severityNumber: this.phase === 'failed' ? SeverityNumber.ERROR : SeverityNumber.INFO,
             context:

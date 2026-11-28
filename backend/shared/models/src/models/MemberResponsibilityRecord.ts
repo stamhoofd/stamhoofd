@@ -1,5 +1,5 @@
-import { column } from '@node/database';
-import { QueryableModel, SQL } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import { QueryableModel, SQL } from '@stamhoofd/node-sql';
 import type { Group as GroupStruct } from '@stamhoofd/structures';
 import {
     MemberResponsibilityRecordBase,

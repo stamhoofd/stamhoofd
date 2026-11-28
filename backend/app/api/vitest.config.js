@@ -24,10 +24,10 @@ export default defineConfig({
         server: {
             deps: {
                 inline: [
-                    // @node/endpoints and @node/database do async imports inside the package
+                    // @stamhoofd/node-endpoints and @stamhoofd/node-database do async imports inside the package
                     // we need to make sure Vitest also adds .ts support there
-                    '@node/endpoints',
-                    '@node/database',
+                    '@stamhoofd/node-endpoints',
+                    '@stamhoofd/node-database',
                 ],
             },
         },

@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import {
@@ -10,7 +10,7 @@ import {
     SQLSelectAs,
     SQLSum,
     SQLWhereSign,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { ChargeMembershipsSummary, ChargeMembershipsTypeSummary } from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context.js';
 

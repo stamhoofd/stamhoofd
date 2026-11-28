@@ -1,4 +1,4 @@
-import { Model } from '@node/database';
+import { Model } from '@stamhoofd/node-database';
 import type { Organization } from '@stamhoofd/models';
 import {
     BalanceItem,
@@ -10,7 +10,7 @@ import {
     Webshop,
 } from '@stamhoofd/models';
 import { DocumentService } from './DocumentService.js';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import {
     AuditLogSource,
     BalanceItemStatus,

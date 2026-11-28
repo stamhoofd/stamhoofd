@@ -5,8 +5,8 @@ import {
     EnumDecoder,
     field,
     StringDecoder,
-} from '@common/encoding';
-import { SimpleError } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ResolutionRequest } from '../../files/ResolutionRequest.js';

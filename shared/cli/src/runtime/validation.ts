@@ -1,5 +1,5 @@
 import { context as telemetryContext, trace } from '@opentelemetry/api';
-import { log, withSpan } from '@common/opentelemetry-decorators';
+import { log, withSpan } from '@stamhoofd/common-opentelemetry-decorators';
 import type { CliContext } from '../context/create-context.js';
 import { run, RunVerbosity } from './command-runner.js';
 import { formatTestCounts, openTestEventChannel } from './test-events.js';

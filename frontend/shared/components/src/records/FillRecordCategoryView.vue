@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts" generic="T extends ObjectWithRecords">
-import { PatchMap, patchObject } from '@common/encoding';
+import { PatchMap, patchObject } from '@stamhoofd/common-encoding';
 import type { ObjectWithRecords, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';

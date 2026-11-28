@@ -22,6 +22,7 @@ import hrOnOwnLine from './rules/hr-on-own-line.js';
 import noPackageSelfImport from './rules/no-package-self-import.js';
 import noTRouteUrl from './rules/no-t-route-url.js';
 import preferDefineRoute from './rules/prefer-define-route.js';
+import standalonePackageImports from './rules/standalone-package-imports.js';
 import { eslintOwnership } from './ownership.js';
 
 const rules = {
@@ -31,6 +32,7 @@ const rules = {
     'no-package-self-import': noPackageSelfImport,
     'no-t-route-url': noTRouteUrl,
     'prefer-define-route': preferDefineRoute,
+    'standalone-package-imports': standalonePackageImports,
 };
 const stamhoofdPlugin = {
     rules,
@@ -106,6 +108,8 @@ const baseRules = [
             // "exports" (the built dist for some packages), which duplicates modules and
             // breaks tsc project references. Use a relative or '#' subpath import instead.
             'stamhoofd/no-package-self-import': 'error',
+            // Libraries in /packages are standalone and published, so they can only depend on each other.
+            'stamhoofd/standalone-package-imports': 'error',
         },
     },
 

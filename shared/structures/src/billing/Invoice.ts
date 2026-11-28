@@ -7,8 +7,8 @@ import {
     field,
     IntegerDecoder,
     StringDecoder,
-} from '@common/encoding';
-import { SimpleError } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import type { BalanceItem } from '../BalanceItem.js';

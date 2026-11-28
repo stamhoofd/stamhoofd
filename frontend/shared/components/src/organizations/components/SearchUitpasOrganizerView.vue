@@ -28,8 +28,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Decoder } from '@common/encoding';
-import { Request } from '@common/networking';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { Request } from '@stamhoofd/common-networking';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import Spinner from '#Spinner.vue';

@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType } from '@common/encoding';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
 import {
     AutoEncoder,
     field,
@@ -6,7 +6,7 @@ import {
     EnumDecoder,
     ArrayDecoder,
     PatchMap,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { AccessRightHelper } from './AccessRight.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

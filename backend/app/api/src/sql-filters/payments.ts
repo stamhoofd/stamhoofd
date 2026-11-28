@@ -1,5 +1,5 @@
 import { Payment } from '@stamhoofd/models';
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
@@ -11,7 +11,7 @@ import {
     SQLJsonUnquote,
     SQLScalar,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { TransferSettings } from '@stamhoofd/structures';
 import { balanceItemPaymentsCompilers } from './balance-item-payments.js';

@@ -1,6 +1,6 @@
-import { column } from '@node/database';
-import { SimpleError } from '@common/errors';
-import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/node-sql';
 import {
     RegistrationPeriodBase,
     RegistrationPeriodSettings,

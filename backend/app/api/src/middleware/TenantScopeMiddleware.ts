@@ -1,4 +1,4 @@
-import type { Request, RequestMiddleware } from '@node/endpoints';
+import type { Request, RequestMiddleware } from '@stamhoofd/node-endpoints';
 import { ROOT_TENANT_ID } from '@stamhoofd/models';
 
 import { TenantContext } from '../helpers/TenantContext.js';

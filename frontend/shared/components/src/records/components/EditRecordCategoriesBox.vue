@@ -16,9 +16,9 @@
 </template>
 
 <script setup lang="ts">
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { ComponentWithProperties, usePresent } from '@browser/navigation';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { RecordCategory } from '@stamhoofd/structures';
 import type { RecordEditorSettings } from '#records/RecordEditorSettings.ts';

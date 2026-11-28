@@ -69,7 +69,7 @@ import {
     useCanDismiss,
     useCanPop,
     usePresent,
-} from '@browser/navigation';
+} from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useMembersObjectFetcher } from '@stamhoofd/components/fetchers/useMembersObjectFetcher.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';

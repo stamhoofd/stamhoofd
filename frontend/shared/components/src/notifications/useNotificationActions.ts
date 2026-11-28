@@ -1,5 +1,5 @@
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { CountFilteredRequest, CountResponse } from '@stamhoofd/structures';
 import { NotificationChannel } from '@stamhoofd/structures/notifications/NotificationChannel.js';

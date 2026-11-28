@@ -1,4 +1,4 @@
-import type { Data, Decoder } from '@common/encoding';
+import type { Data, Decoder } from '@stamhoofd/common-encoding';
 
 export class StringArrayDecoder<T> implements Decoder<T[]> {
     decoder: Decoder<T>;

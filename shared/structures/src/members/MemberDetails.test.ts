@@ -1,4 +1,4 @@
-import { ObjectData } from '@common/encoding';
+import { ObjectData } from '@stamhoofd/common-encoding';
 import { Address } from '../addresses/Address.js';
 import { Group } from '../Group.js';
 import { GroupSettings } from '../GroupSettings.js';

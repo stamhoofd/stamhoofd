@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { SessionService } from '../../../../services/SessionService.js';
 
@@ -16,7 +16,7 @@ import {
     UserPermissions,
 } from '@stamhoofd/structures';
 import { CreateApiUserEndpoint } from './CreateApiUserEndpoint.js';
-import { PatchMap } from '@common/encoding';
+import { PatchMap } from '@stamhoofd/common-encoding';
 
 describe('Endpoint.PatchApiUserEndpoint', () => {
     // Test endpoint

@@ -8,11 +8,11 @@ import {
     IntegerDecoder,
     MapDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItemRelation, BalanceItemRelationType } from './BalanceItem.js';
 import { StamhoofdFilterDecoder } from './filters/FilteredRequest.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import { TranslatedString } from './TranslatedString.js';
 
 /**

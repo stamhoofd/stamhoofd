@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     DetailedReceivableBalance,
@@ -21,8 +21,8 @@ import {
 } from '@stamhoofd/models';
 import { Context } from '../../../../helpers/Context.js';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
-import type { SQLWhere } from '@stamhoofd/sql';
-import { SQL } from '@stamhoofd/sql';
+import type { SQLWhere } from '@stamhoofd/node-sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 

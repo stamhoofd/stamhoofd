@@ -5,7 +5,7 @@ import {
     createInMemoryFilterCompiler,
     createInMemoryWildcardCompilerSelector,
 } from './InMemoryFilter.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 
 function testError({
     filter,

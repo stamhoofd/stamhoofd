@@ -81,10 +81,10 @@
 </template>
 
 <script setup lang="ts">
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
-import { Request } from '@common/networking';
-import { defineRoutes, useNavigate } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { Request } from '@stamhoofd/common-networking';
+import { defineRoutes, useNavigate } from '@stamhoofd/browser-navigation';
 import Spinner from '@stamhoofd/components/Spinner.vue';
 import PlatformFooter from '@stamhoofd/components/auth/PlatformFooter.vue';
 import ContextLogo from '@stamhoofd/components/context/ContextLogo.vue';

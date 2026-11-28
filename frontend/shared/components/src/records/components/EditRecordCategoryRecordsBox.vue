@@ -43,9 +43,9 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useDraggableArray } from '#hooks/useDraggableArray.ts';
 import { usePatchMoveUpDown } from '#hooks/usePatchMoveUpDown.ts';

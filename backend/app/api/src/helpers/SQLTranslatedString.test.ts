@@ -1,13 +1,13 @@
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 import { I18n } from '@stamhoofd/backend-i18n';
-import type { NormalizedSQLQuery, SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { NormalizedSQLQuery, SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     compileToSQLFilter,
     createColumnFilter,
     SQL,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';

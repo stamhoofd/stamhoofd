@@ -4,7 +4,7 @@ import { mount } from '@vue/test-utils';
 import { describe, expect, test, vi } from 'vitest';
 import TestAppWithModalStackComponent from '../../tests/helpers/TestAppWithModalStackComponent.vue';
 
-import { ComponentWithProperties } from '@browser/navigation';
+import { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import type { Locator } from 'vitest/browser';
 import { page } from 'vitest/browser';
 import { ref } from 'vue';

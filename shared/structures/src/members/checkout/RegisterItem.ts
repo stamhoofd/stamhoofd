@@ -7,14 +7,14 @@ import {
     IntegerDecoder,
     patchObject,
     StringDecoder,
-} from '@common/encoding';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from '../../BalanceItem.js';
 import { compileToInMemoryFilter } from '../../filters/InMemoryFilter.js';
 import { registerItemInMemoryFilterCompilers } from '../../filters/inMemoryFilterDefinitions.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import type { Group } from '../../Group.js';
 import type { GroupCategory } from '../../GroupCategory.js';
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';

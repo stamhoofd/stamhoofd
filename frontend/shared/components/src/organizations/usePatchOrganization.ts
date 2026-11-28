@@ -1,6 +1,6 @@
 import { useOrganization } from '#hooks/useOrganization';
-import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { Organization } from '@stamhoofd/structures';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';

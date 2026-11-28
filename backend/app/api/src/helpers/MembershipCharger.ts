@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import {
     BalanceItem,
     Member,
@@ -6,7 +6,7 @@ import {
     Platform,
     RegistrationPeriod,
 } from '@stamhoofd/models';
-import { SQL, SQLOrderBy, SQLWhereSign } from '@stamhoofd/sql';
+import { SQL, SQLOrderBy, SQLWhereSign } from '@stamhoofd/node-sql';
 import {
     BalanceItemRelation,
     BalanceItemRelationType,

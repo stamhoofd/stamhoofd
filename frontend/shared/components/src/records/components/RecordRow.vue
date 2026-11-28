@@ -27,8 +27,8 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { computed } from 'vue';

@@ -41,9 +41,9 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@common/encoding": "workspace:*",
-        "@common/errors": "workspace:*",
-        "@stamhoofd/filters": "workspace:*",
+        "@stamhoofd/common-encoding": "workspace:*",
+        "@stamhoofd/common-errors": "workspace:*",
+        "@stamhoofd/common-filters": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
         "uuid": "14.0.3"

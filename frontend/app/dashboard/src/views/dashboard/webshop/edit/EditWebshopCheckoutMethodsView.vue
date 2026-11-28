@@ -41,8 +41,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { ComponentWithProperties, usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

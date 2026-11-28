@@ -1,6 +1,6 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 import { DocumentTemplate, Group } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { Formatter } from '@stamhoofd/utility';
 import { SeedTools } from '../helpers/SeedTools.js';
 

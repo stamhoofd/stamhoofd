@@ -1,6 +1,6 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Token, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

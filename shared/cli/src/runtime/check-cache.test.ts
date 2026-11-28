@@ -15,7 +15,7 @@ const typecheckPackages = [
     'shared/metabase',
     'shared/structures',
     'backend/shared/models',
-    'backend/shared/sql',
+    'packages/node/sql',
     'backend/shared/vies',
     'backend/app/api',
     'backend/app/redirecter',

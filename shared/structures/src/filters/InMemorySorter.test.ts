@@ -1,4 +1,4 @@
-import { SortItemDirection } from '@stamhoofd/filters/SortList';
+import { SortItemDirection } from '@stamhoofd/common-filters/SortList';
 import type { InMemorySortDefinitions } from './InMemorySorter.js';
 import { compileToInMemorySorter } from './InMemorySorter.js';
 

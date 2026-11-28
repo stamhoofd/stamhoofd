@@ -1,7 +1,7 @@
-import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
-import { ArrayDecoder, ObjectData } from '@common/encoding';
-import { isSimpleErrors } from '@common/errors';
-import { Request } from '@common/networking';
+import type { AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, ObjectData } from '@stamhoofd/common-encoding';
+import { isSimpleErrors } from '@stamhoofd/common-errors';
+import { Request } from '@stamhoofd/common-networking';
 import { EventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import { fetchAll } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';

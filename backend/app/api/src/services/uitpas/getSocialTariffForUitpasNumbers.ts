@@ -1,4 +1,4 @@
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import { UitpasNumberAndPrice } from '@stamhoofd/structures';
 
 type SocialTariffReponse = {

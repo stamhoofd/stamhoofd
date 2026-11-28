@@ -1,6 +1,6 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 import { Payment } from '@stamhoofd/models';
-import { QueryableModel, scalarToSQLExpression, SQL, SQLWhereLike } from '@stamhoofd/sql';
+import { QueryableModel, scalarToSQLExpression, SQL, SQLWhereLike } from '@stamhoofd/node-sql';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 
 import { ApplicationFeeInvoicer } from '../helpers/ApplicationFeeInvoicer.js';

@@ -1,4 +1,4 @@
-import { AutoEncoder, field, IntegerDecoder } from '@common/encoding';
+import { AutoEncoder, field, IntegerDecoder } from '@stamhoofd/common-encoding';
 
 import type { PlatformMember } from './members/PlatformMember.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';

@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { isSimpleError } from '@common/errors';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { isSimpleError } from '@stamhoofd/common-errors';
 import { MemberDetails } from '@stamhoofd/structures';
 import { throwIfDrasticMemberDetailsChange } from './throwIfDrasticMemberDetailsChange.js';
 

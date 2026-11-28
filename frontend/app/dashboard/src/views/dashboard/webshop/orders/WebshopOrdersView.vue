@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Request } from '@common/networking';
+import { Request } from '@stamhoofd/common-networking';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { getWebshopOrderUIFilterBuilders } from '@stamhoofd/components/filters/filter-builders/orders.ts';
 import type { UIFilterBuilders } from '@stamhoofd/components/filters/UIFilter.ts';
@@ -34,8 +34,8 @@ import type { CheckoutMethod, PaymentGeneral, PrivateOrder, TicketPrivate } from
 import { CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentMethod, PaymentMethodHelper, PrivateOrderWithTickets, SortItemDirection, WebshopNumberingType, WebshopOrderMode, WebshopTimeSlot } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@browser/navigation';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';

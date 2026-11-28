@@ -1,4 +1,4 @@
-import type { ComponentWithProperties } from '@browser/navigation';
+import type { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import { SGVLid } from '@stamhoofd/sgv';
 import { MemberDetails, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 import { describe, expect, test, vi } from 'vitest';

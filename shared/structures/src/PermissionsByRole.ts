@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, field } from '@stamhoofd/common-encoding';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { getPermissionLevelNumber } from './PermissionLevel.js';
 import { PermissionRole } from './PermissionRole.js';

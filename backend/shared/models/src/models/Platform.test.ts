@@ -5,7 +5,7 @@ import {
     PlatformPrivateConfig,
 } from '@stamhoofd/structures';
 import { Platform } from './Platform.js';
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { QueueHandler } from '@stamhoofd/queues';
 

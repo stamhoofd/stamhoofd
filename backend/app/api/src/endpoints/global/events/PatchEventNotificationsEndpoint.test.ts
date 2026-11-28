@@ -1,6 +1,6 @@
-import { PatchableArray, PatchMap, patchObject } from '@common/encoding';
-import type { Endpoint } from '@node/endpoints';
-import { Request } from '@node/endpoints';
+import { PatchableArray, PatchMap, patchObject } from '@stamhoofd/common-encoding';
+import type { Endpoint } from '@stamhoofd/node-endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { User } from '@stamhoofd/models';
 import {

@@ -1,6 +1,6 @@
 import type XLSX from 'xlsx';
 
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { BaseColumnMatcher } from '../ColumnMatcher';
 import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
 import type { ImportMemberBaseResult } from '../ImportMemberBaseResult';

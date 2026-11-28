@@ -1,4 +1,4 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {

@@ -1,7 +1,7 @@
-import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { CpuService } from '@stamhoofd/logging/CpuService';
 import { MemoryService } from '@stamhoofd/logging/MemoryService';
 import { StartupHealthService } from '../../services/StartupHealthService.js';

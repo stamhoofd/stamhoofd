@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { User } from '@stamhoofd/models';
 import { UserFactory } from '@stamhoofd/models';
 import { Notification } from '@stamhoofd/models/models/Notification.js';

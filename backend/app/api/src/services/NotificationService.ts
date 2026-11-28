@@ -1,10 +1,10 @@
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 import type { Member, User } from '@stamhoofd/models';
 import { Notification } from '@stamhoofd/models/models/Notification.js';
 import { NotificationPreference } from '@stamhoofd/models/models/NotificationPreference.js';
 import { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
 import { QueueHandler } from '@stamhoofd/queues';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import type { NamedObject } from '@stamhoofd/structures';
 import type { NotificationPreference as NotificationPreferenceStruct } from '@stamhoofd/structures/notifications/NotificationPreference.js';
 import { NotificationChannel } from '@stamhoofd/structures/notifications/NotificationChannel.js';

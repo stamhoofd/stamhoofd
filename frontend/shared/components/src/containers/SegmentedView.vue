@@ -9,8 +9,8 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, ReactiveUrl } from '@browser/navigation';
-import { defineRoutes, FramedComponent, HistoryManager, useCurrentComponent, useUrl } from '@browser/navigation';
+import { ComponentWithProperties, ReactiveUrl } from '@stamhoofd/browser-navigation';
+import { defineRoutes, FramedComponent, HistoryManager, useCurrentComponent, useUrl } from '@stamhoofd/browser-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, markRaw, onBeforeUnmount, ref, toRaw, unref } from 'vue';

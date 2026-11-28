@@ -113,7 +113,7 @@ import Typography from '@tiptap/extension-typography';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 import { Focus } from '@tiptap/extensions';
-import { useCanPop, useCanDismiss, useDismiss, usePop } from '@browser/navigation';
+import { useCanPop, useCanDismiss, useDismiss, usePop } from '@stamhoofd/browser-navigation';
 import { DataValidator } from '@stamhoofd/utility';
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue';
 import UploadButton from '../inputs/UploadButton.vue';

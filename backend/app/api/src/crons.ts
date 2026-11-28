@@ -1,7 +1,7 @@
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 import { registerCron } from '@stamhoofd/crons';
 import { Group, Organization, Payment, Registration, STPackage, Webshop } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 import { GroupService } from './services/GroupService.js';
 import { OrganizationDNSService } from './services/OrganizationDNSService.js';

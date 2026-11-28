@@ -5,7 +5,7 @@ import {
     MapDecoder,
     NumberDecoder,
     field,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { SetupStepReview } from './SetupStepReview.js';
 import { SetupStepType } from './SetupStepType.js';

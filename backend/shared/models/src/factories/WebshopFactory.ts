@@ -1,5 +1,5 @@
-import { Factory } from '@node/database';
-import type { AutoEncoderPatchType } from '@common/encoding';
+import { Factory } from '@stamhoofd/node-database';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
 import type { Product, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { WebshopMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

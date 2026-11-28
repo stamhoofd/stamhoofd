@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Group, Member, Organization, User } from '@stamhoofd/models';
 import {
     GroupFactory,

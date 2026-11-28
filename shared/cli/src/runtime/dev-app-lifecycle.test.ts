@@ -3,13 +3,13 @@ import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
 import http from 'node:http';
 import { expect, it, vi } from 'vitest';
-import type { DevEvent } from '@node/dev-tools/events';
-import { devLifecycleModule } from '@node/dev-tools/nuxt';
-import { devLifecyclePlugin } from '@node/dev-tools/vite';
+import type { DevEvent } from '@stamhoofd/node-dev-tools/events';
+import { devLifecycleModule } from '@stamhoofd/node-dev-tools/nuxt';
+import { devLifecyclePlugin } from '@stamhoofd/node-dev-tools/vite';
 import { openDevEventChannel } from './dev-event-channel.js';
 
 it.each(['api', 'stats', 'renderer'])('uses the allocated debugger port for %s', async (app) => {
-    const supervisor = fileURLToPath(import.meta.resolve('@node/dev-tools/supervise'));
+    const supervisor = fileURLToPath(import.meta.resolve('@stamhoofd/node-dev-tools/supervise'));
     const child = spawn(
         process.execPath,
         [supervisor, app, process.execPath, '-e', 'console.log(JSON.stringify(process.execArgv))'],
@@ -35,8 +35,8 @@ it.each(['api', 'stats', 'renderer'])('uses the allocated debugger port for %s',
 it('reports readiness and crashes with the same supervised identity, then assigns a new incarnation', async () => {
     const events: DevEvent[] = [];
     const channel = await openDevEventChannel((event) => events.push(event));
-    const supervisor = fileURLToPath(import.meta.resolve('@node/dev-tools/supervise'));
-    const emitter = import.meta.resolve('@node/dev-tools/events');
+    const supervisor = fileURLToPath(import.meta.resolve('@stamhoofd/node-dev-tools/supervise'));
+    const emitter = import.meta.resolve('@stamhoofd/node-dev-tools/events');
     try {
         for (let run = 0; run < 2; run++) {
             const child = spawn(
@@ -90,7 +90,7 @@ it('emits Vite readiness only when its HTTP listener opens', async () => {
 it('preloads lifecycle observation without an application dependency on the CLI', async () => {
     const events: DevEvent[] = [];
     const channel = await openDevEventChannel((event) => events.push(event));
-    const supervisor = fileURLToPath(import.meta.resolve('@node/dev-tools/supervise'));
+    const supervisor = fileURLToPath(import.meta.resolve('@stamhoofd/node-dev-tools/supervise'));
     const application = new URL(
         '../../../../packages/node/observability/dist/index.js',
         import.meta.url,
@@ -128,8 +128,8 @@ it('preloads lifecycle observation without an application dependency on the CLI'
 it('reports supervised cancellation without a process failure', async () => {
     const events: DevEvent[] = [];
     const channel = await openDevEventChannel((event) => events.push(event));
-    const supervisor = fileURLToPath(import.meta.resolve('@node/dev-tools/supervise'));
-    const emitter = import.meta.resolve('@node/dev-tools/events');
+    const supervisor = fileURLToPath(import.meta.resolve('@stamhoofd/node-dev-tools/supervise'));
+    const emitter = import.meta.resolve('@stamhoofd/node-dev-tools/events');
     const child = spawn(
         process.execPath,
         [

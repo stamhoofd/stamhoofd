@@ -1,4 +1,4 @@
-import { UrlHelper } from '@browser/navigation';
+import { UrlHelper } from '@stamhoofd/browser-navigation';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';

@@ -1,6 +1,6 @@
-import type { ModelEvent } from '@node/database';
-import { Model } from '@node/database';
-import { ArrayDecoder, EnumDecoder, MapDecoder, SymbolDecoder } from '@common/encoding';
+import type { ModelEvent } from '@stamhoofd/node-database';
+import { Model } from '@stamhoofd/node-database';
+import { ArrayDecoder, EnumDecoder, MapDecoder, SymbolDecoder } from '@stamhoofd/common-encoding';
 import { getAuditLogEnumDecoderObject, getAuditLogEnumType } from '@stamhoofd/structures';
 import type { AuditLogSource } from '@stamhoofd/structures';
 import { AsyncLocalStorage } from 'node:async_hooks';

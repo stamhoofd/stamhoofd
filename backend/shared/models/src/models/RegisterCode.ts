@@ -1,5 +1,5 @@
-import { column } from '@node/database';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import basex from 'base-x';
 import crypto from 'crypto';
 

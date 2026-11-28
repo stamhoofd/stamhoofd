@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import { signInternal } from '@stamhoofd/backend-env';
 import { promises as fs } from 'node:fs';
 import type { IncomingMessage } from 'node:http';

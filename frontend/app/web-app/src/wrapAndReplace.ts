@@ -1,4 +1,4 @@
-import { ComponentWithProperties, ModalStackComponent } from '@browser/navigation';
+import { ComponentWithProperties, ModalStackComponent } from '@stamhoofd/browser-navigation';
 import AccountSwitcher from '@stamhoofd/components/context/AccountSwitcher.vue';
 import ContextNavigationBar from '@stamhoofd/components/context/ContextNavigationBar.vue';
 import ContextProvider from '@stamhoofd/components/containers/ContextProvider.vue';

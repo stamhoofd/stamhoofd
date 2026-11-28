@@ -50,10 +50,10 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, usePop, usePresent } from '@stamhoofd/browser-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useDraggableArrayIds } from '@stamhoofd/components/hooks/useDraggableArray.ts';

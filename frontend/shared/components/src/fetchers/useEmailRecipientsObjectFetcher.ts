@@ -1,5 +1,5 @@
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
 import type { CountFilteredRequest, SortList } from '@stamhoofd/structures';
 import { assertSort, CountResponse, EmailRecipient, LimitedFilteredRequest, PaginatedResponseDecoder } from '@stamhoofd/structures';
 import { useContext } from '#hooks/useContext.ts';

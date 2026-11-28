@@ -29,9 +29,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
-import { isSimpleError, isSimpleErrors } from '@common/errors';
-import type { Server } from '@common/networking';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
+import type { Server } from '@stamhoofd/common-networking';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Address, CountryHelper, ValidatedAddress } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

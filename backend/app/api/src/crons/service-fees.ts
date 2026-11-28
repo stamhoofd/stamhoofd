@@ -1,6 +1,6 @@
 import { registerRootTenantCron } from './helpers/registerTenantCron.js';
 import { BalanceItem, Organization, Payment, Platform } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import {
     BalanceItemStatus,
     BalanceItemType,

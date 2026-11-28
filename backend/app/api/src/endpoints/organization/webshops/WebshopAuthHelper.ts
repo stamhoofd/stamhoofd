@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { Order, Webshop } from '@stamhoofd/models';
 import { WebshopAuthType } from '@stamhoofd/structures';
 

@@ -1,13 +1,13 @@
 // Requests use middleware to extend its behaviour
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 
 import { RequestBag } from './RequestBag.js';
 import { RequestMiddleware } from './RequestMiddleware.js';
 import { Server } from './Server.js';
 
 // We still support an older version of simple-encoding, so we stub EncodeMedium here
-import * as simpleEncoding from '@common/encoding';
-import { type EncodableObject, type Decoder } from '@common/encoding';
+import * as simpleEncoding from '@stamhoofd/common-encoding';
+import { type EncodableObject, type Decoder } from '@stamhoofd/common-encoding';
 
 let EncodeMedium: typeof simpleEncoding.EncodeMedium;
 

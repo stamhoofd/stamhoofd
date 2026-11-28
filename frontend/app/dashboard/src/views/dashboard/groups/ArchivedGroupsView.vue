@@ -36,8 +36,8 @@
 </template>
 
 <script lang="ts" setup>
-import { Request } from '@common/networking';
-import { ComponentWithProperties, useShow } from '@browser/navigation';
+import { Request } from '@stamhoofd/common-networking';
+import { ComponentWithProperties, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import GroupAvatar from '@stamhoofd/components/GroupAvatar.vue';
 import Spinner from '@stamhoofd/components/Spinner.vue';

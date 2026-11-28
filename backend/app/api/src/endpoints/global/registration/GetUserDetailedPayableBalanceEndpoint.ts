@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { BalanceItemPayment, Payment } from '@stamhoofd/models';
 import { BalanceItem, Member, Organization } from '@stamhoofd/models';
 import {
@@ -11,7 +11,7 @@ import {
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
-import { SQL, SQLWhereExists } from '@stamhoofd/sql';
+import { SQL, SQLWhereExists } from '@stamhoofd/node-sql';
 
 type Params = Record<string, never>;
 type Query = undefined;

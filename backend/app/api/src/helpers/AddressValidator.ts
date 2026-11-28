@@ -1,7 +1,7 @@
-import { Database } from '@node/database';
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import { Database } from '@stamhoofd/node-database';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { City, PostalCode, Street } from '@stamhoofd/models';
 import type { Address } from '@stamhoofd/structures';
 import { ValidatedAddress } from '@stamhoofd/structures';

@@ -77,10 +77,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { ArrayDecoder, PatchableArray } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { usePop } from '@browser/navigation';
+import type { Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, PatchableArray } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';

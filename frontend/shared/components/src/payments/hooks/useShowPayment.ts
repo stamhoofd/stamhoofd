@@ -1,4 +1,4 @@
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import { usePaymentsObjectFetcher } from '#fetchers/usePaymentsObjectFetcher.ts';

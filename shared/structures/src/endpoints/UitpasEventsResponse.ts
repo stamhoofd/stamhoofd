@@ -5,7 +5,7 @@ import {
     IntegerDecoder,
     ArrayDecoder,
     DateDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 
 export class UitpasEventResponse extends AutoEncoder {
     @field({ decoder: StringDecoder })

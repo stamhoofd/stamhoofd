@@ -1,8 +1,8 @@
-import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
-import { isPatch } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type { AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
+import { isPatch } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Platform, Token, User } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { ApiUser, UserMeta, UserPermissions } from '@stamhoofd/structures';

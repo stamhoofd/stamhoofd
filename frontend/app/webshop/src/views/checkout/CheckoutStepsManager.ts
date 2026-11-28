@@ -1,6 +1,6 @@
-import type { SimpleErrors } from '@common/errors';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
-import { ComponentWithProperties, ReactiveUrl } from '@browser/navigation';
+import type { SimpleErrors } from '@stamhoofd/common-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, ReactiveUrl } from '@stamhoofd/browser-navigation';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
@@ -11,7 +11,7 @@ import { customerFieldKeys } from '@stamhoofd/structures/webshops/CustomerSettin
 import { Formatter } from '@stamhoofd/utility';
 import { getUnitName } from '@stamhoofd/components/helpers/webshopWording.ts';
 
-import { patchObject } from '@common/encoding';
+import { patchObject } from '@stamhoofd/common-encoding';
 import type { CheckoutManager } from '../../classes/CheckoutManager';
 
 export enum CheckoutStepType {

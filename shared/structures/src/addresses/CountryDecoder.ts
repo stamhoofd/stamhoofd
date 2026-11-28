@@ -1,4 +1,4 @@
-import { EnumDecoder } from '@common/encoding';
+import { EnumDecoder } from '@stamhoofd/common-encoding';
 import type { CountryCode } from '@stamhoofd/types/Country';
 import { Country } from '@stamhoofd/types/Country';
 

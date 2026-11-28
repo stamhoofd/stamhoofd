@@ -1,4 +1,4 @@
-import { AutoEncoder, EncodeMedium, ObjectData } from '@common/encoding';
+import { AutoEncoder, EncodeMedium, ObjectData } from '@stamhoofd/common-encoding';
 import { PaymentMethod } from './PaymentMethod.js';
 import { StripeAccount, StripeMetaData } from '#StripeAccount.ts';
 import { Version } from './Version.js';

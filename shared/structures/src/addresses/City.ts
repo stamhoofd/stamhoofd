@@ -1,4 +1,4 @@
-import { AutoEncoder, field, StringDecoder } from '@common/encoding';
+import { AutoEncoder, field, StringDecoder } from '@stamhoofd/common-encoding';
 
 import type { Country } from '@stamhoofd/types/Country';
 import { CountryDecoder } from './CountryDecoder.js';

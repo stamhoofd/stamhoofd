@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, it } from 'vitest';
-import type { DevEvent } from '@node/dev-tools/events';
+import type { DevEvent } from '@stamhoofd/node-dev-tools/events';
 import { openDevEventChannel } from './dev-event-channel.js';
 import { buildPorts } from '../context/ports.js';
 import type { CliContext } from '../context/create-context.js';
@@ -29,7 +29,7 @@ it('reports real TypeScript watch failures and recovery without parsing compiler
         }),
     );
     await fs.writeFile(path.join(directory, 'index.ts'), 'export const value: string = 123;');
-    const script = fileURLToPath(import.meta.resolve('@node/dev-tools/watch-typescript'));
+    const script = fileURLToPath(import.meta.resolve('@stamhoofd/node-dev-tools/watch-typescript'));
     const child = spawn(process.execPath, [script, 'api'], {
         cwd: directory,
         env: { ...process.env, ...channel.env },

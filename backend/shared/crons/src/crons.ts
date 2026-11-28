@@ -1,5 +1,5 @@
-import { Database } from '@node/database';
-import { logger, StyledText } from '@node/logging';
+import { Database } from '@stamhoofd/node-database';
+import { logger, StyledText } from '@stamhoofd/node-logging';
 import { sleep } from '@stamhoofd/utility';
 
 export type CronJobDefinition = {

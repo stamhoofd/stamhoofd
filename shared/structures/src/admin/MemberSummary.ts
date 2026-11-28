@@ -5,7 +5,7 @@ import {
     EnumDecoder,
     field,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address.js';

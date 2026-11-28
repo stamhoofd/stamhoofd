@@ -1,4 +1,4 @@
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 import {
     Member,
     MemberFactory,
@@ -7,7 +7,7 @@ import {
     User,
     UserFactory,
 } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { BooleanStatus, MemberDetails, Parent, UserPermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { MemberUserSyncer } from './MemberUserSyncer.js';

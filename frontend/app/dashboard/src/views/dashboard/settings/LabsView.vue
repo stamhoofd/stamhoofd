@@ -352,11 +352,11 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoder, AutoEncoderPatchType, Decoder } from '@common/encoding';
-import { ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from '@common/encoding';
-import { isSimpleError, SimpleError, SimpleErrors } from '@common/errors';
-import { Request } from '@common/networking';
-import { useDismiss, usePresent, useShow } from '@browser/navigation';
+import type { AutoEncoder, AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
+import { ObjectData, patchContainsChanges, VersionBox, VersionBoxDecoder } from '@stamhoofd/common-encoding';
+import { isSimpleError, SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { Request } from '@stamhoofd/common-networking';
+import { useDismiss, usePresent, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

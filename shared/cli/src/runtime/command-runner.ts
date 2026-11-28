@@ -1,5 +1,5 @@
-import { formatCommandLine, processError } from '@node/opentelemetry-process';
-import type { ProcessOptions } from '@node/opentelemetry-process';
+import { formatCommandLine, processError } from '@stamhoofd/node-opentelemetry-process';
+import type { ProcessOptions } from '@stamhoofd/node-opentelemetry-process';
 import { command as formatCommand, warning } from './ux.js';
 import { writeOutputLine } from './output-target.js';
 import { RunVerbosity } from './verbosity.js';

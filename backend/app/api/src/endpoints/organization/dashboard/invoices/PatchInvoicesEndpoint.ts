@@ -1,13 +1,13 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
 import {
     AutoEncoder,
     BooleanDecoder,
     field,
     PatchableArrayDecoder,
     StringDecoder,
-} from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+} from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { Invoice as InvoiceStruct } from '@stamhoofd/structures';
 
 import { Invoice } from '@stamhoofd/models';

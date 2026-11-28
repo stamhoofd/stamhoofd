@@ -1,6 +1,6 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Notification } from '@stamhoofd/models/models/Notification.js';
 import { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
 import type { UserNotification } from '@stamhoofd/structures/notifications/UserNotification.js';

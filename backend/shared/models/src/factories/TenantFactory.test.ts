@@ -1,4 +1,4 @@
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 import { PlatformConfig, PlatformMembershipType } from '@stamhoofd/structures';
 
 import { Platform, ROOT_TENANT_ID } from '../models/Platform.js';

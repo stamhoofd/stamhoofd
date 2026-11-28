@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';
 import { MailchimpService } from '../../../../services/mailchimp/MailchimpService.js';
 

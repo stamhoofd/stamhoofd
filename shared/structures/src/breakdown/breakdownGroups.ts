@@ -1,6 +1,6 @@
 import type { BalanceItem, BalanceItemRelation, BalanceItemRelationType } from '../BalanceItem.js';
 import { getBalanceItemTypeIcon, getBalanceItemTypeName } from '../BalanceItem.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import type { PaymentAccount } from '../PaymentAccount.js';
 import {
     BreakdownAmountType,

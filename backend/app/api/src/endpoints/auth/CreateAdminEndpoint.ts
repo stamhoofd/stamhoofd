@@ -1,7 +1,7 @@
-import type { Decoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Platform, User } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../../helpers/EmailBuilder.js';
 import type { UserWithMembers } from '@stamhoofd/structures';

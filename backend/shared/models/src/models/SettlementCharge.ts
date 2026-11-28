@@ -1,5 +1,5 @@
-import { column } from '@node/database';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import type { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { v4 as uuidv4 } from 'uuid';
 

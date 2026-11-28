@@ -1,7 +1,7 @@
-import type { Endpoint } from '@node/endpoints';
-import { Request } from '@node/endpoints';
-import type { SimpleError } from '@common/errors';
-import { isSimpleError, isSimpleErrors } from '@common/errors';
+import type { Endpoint } from '@stamhoofd/node-endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
+import type { SimpleError } from '@stamhoofd/common-errors';
+import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
 import { EmailMocker } from '@stamhoofd/email';
 import type { Organization } from '@stamhoofd/models';
 import {

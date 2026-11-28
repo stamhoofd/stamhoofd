@@ -1,4 +1,4 @@
-import type { ComponentWithProperties } from '@browser/navigation';
+import type { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import { markRaw } from 'vue';
 
 export interface ContextMenuLike {

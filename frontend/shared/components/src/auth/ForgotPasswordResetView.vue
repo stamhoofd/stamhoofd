@@ -49,8 +49,8 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError, SimpleErrors } from '@common/errors';
-import { ComponentWithProperties, NavigationController, useDismiss, usePresent, useShow } from '@browser/navigation';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, NavigationController, useDismiss, usePresent, useShow } from '@stamhoofd/browser-navigation';
 import EmailInput from '#inputs/EmailInput.vue';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import CustomHooksContainer from '#containers/CustomHooksContainer.vue';

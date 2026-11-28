@@ -1,4 +1,4 @@
-import { defineRoute, useNavigate } from '@browser/navigation';
+import { defineRoute, useNavigate } from '@stamhoofd/browser-navigation';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import type { SGVSyncWarning } from '@stamhoofd/components/members/sgvSync';

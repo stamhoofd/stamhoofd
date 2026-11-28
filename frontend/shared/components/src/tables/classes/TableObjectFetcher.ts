@@ -1,9 +1,9 @@
-import { Request } from '@common/networking';
+import { Request } from '@stamhoofd/common-networking';
 import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { CountFilteredRequest, LimitedFilteredRequest, isEmptyFilter, isEqualFilter, mergeFilters } from '@stamhoofd/structures';
 import { onBeforeUnmount, reactive } from 'vue';
 import type { ObjectFetcher } from './ObjectFetcher';
-import { AutoEncoder } from '@common/encoding';
+import { AutoEncoder } from '@stamhoofd/common-encoding';
 import { isUpdatableObject } from '@stamhoofd/structures/UpdatableObject.js';
 
 export function useTableObjectFetcher<O extends { id: string }, OF extends ObjectFetcher<O> = ObjectFetcher<O>>(objectFetcher: OF): TableObjectFetcher<O> {

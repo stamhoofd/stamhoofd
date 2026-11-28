@@ -1,5 +1,5 @@
-import type { Server } from '@common/networking';
-import { ComponentWithProperties } from '@browser/navigation';
+import type { Server } from '@stamhoofd/common-networking';
+import { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { BaseOrganization, Organization, Payment, TransferSettings } from '@stamhoofd/structures';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';

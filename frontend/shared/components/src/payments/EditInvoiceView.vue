@@ -155,7 +155,7 @@
 
 <script lang="ts" setup>
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { useDismiss, usePresent } from '@browser/navigation';
+import { useDismiss, usePresent } from '@stamhoofd/browser-navigation';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useAuth } from '#hooks/useAuth.ts';
@@ -172,8 +172,8 @@ import PaymentCustomerSelectionBox from '#payments/components/PaymentCustomerSel
 import type { Company, PaymentCustomer } from '@stamhoofd/structures';
 import { Invoice, InvoiceTypeHelper } from '@stamhoofd/structures';
 
-import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { ArrayDecoder, PatchableArray } from '@common/encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, PatchableArray } from '@stamhoofd/common-encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { computed, ref } from 'vue';
 import InvoiceItemsBox from './InvoiceItemsBox.vue';

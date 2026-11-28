@@ -29,7 +29,7 @@
         "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
-        "@common/errors": "workspace:*",
+        "@stamhoofd/common-errors": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
         "luxon": "3.7.2",
         "uuid": "14.0.3"

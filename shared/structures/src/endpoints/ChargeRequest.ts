@@ -7,10 +7,10 @@ import {
     IntegerDecoder,
     NumberDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { VATExcemptReason } from '../BalanceItem.js';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 
 export class ChargeRequest extends AutoEncoder {
     @field({ decoder: StringDecoder, field: 'description' })

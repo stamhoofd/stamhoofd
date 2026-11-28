@@ -22,8 +22,8 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@common/errors';
-import { useDismiss } from '@browser/navigation';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { useDismiss } from '@stamhoofd/browser-navigation';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import PasswordStrength from '#inputs/PasswordStrength.vue';
 import SaveView from '#navigation/SaveView.vue';

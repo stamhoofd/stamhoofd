@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
+import type { AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { savePlatformToStorage } from '@stamhoofd/frontend-session/loadPlatform';
 import { Platform } from '@stamhoofd/structures';

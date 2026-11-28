@@ -1,5 +1,5 @@
-import { Database } from '@node/database';
-import { Request } from '@node/endpoints';
+import { Database } from '@stamhoofd/node-database';
+import { Request } from '@stamhoofd/node-endpoints';
 import { OrderFactory, OrganizationFactory, Payment, WebshopFactory } from '@stamhoofd/models';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';

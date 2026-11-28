@@ -1,5 +1,5 @@
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
-import { mergeFilters } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
+import { mergeFilters } from '@stamhoofd/common-filters/StamhoofdFilter';
 
 /**
  * Selects the balance item payments that are about these balance items, and that came in with one of

@@ -1,4 +1,4 @@
-import { Factory } from '@node/database';
+import { Factory } from '@stamhoofd/node-database';
 
 import type { Group } from '../models/Group.js';
 import type { Member } from '../models/Member.js';

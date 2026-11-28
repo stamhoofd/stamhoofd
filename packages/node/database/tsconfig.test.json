@@ -10,7 +10,6 @@
         }
     ],
     "include": [
-        "../../../backend/stamhoofd.d.ts",
         "src/**/*.test.ts",
         "src/**/*.spec.ts",
         "tests/**/*.ts"

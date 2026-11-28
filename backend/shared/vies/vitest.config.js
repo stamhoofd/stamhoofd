@@ -12,7 +12,7 @@ export default defineConfig({
         maxWorkers: 1,
         server: {
             deps: {
-                inline: ['@node/database'],
+                inline: ['@stamhoofd/node-database'],
             },
         },
     },

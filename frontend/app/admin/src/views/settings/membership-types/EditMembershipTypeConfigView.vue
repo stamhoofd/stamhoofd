@@ -73,10 +73,10 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { usePop } from '@browser/navigation';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';

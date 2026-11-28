@@ -242,9 +242,9 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@stamhoofd/browser-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';

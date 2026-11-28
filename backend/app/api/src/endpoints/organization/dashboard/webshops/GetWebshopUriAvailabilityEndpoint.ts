@@ -1,7 +1,7 @@
-import type { Decoder } from '@common/encoding';
-import { AutoEncoder, field, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { AutoEncoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { Webshop } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { WebshopUriAvailabilityResponse } from '@stamhoofd/structures';

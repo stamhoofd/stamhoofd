@@ -31,8 +31,8 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { usePop } from '@browser/navigation';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { usePop } from '@stamhoofd/browser-navigation';
 import type { AccessRight } from '@stamhoofd/types/AccessRight';
 import type { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import type { PermissionRoleDetailed, PermissionRoleForResponsibility } from '@stamhoofd/structures';

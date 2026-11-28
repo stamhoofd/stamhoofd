@@ -1,5 +1,5 @@
-import { PatchMap } from '@common/encoding';
-import { Request } from '@node/endpoints';
+import { PatchMap } from '@stamhoofd/common-encoding';
+import { Request } from '@stamhoofd/node-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type {
     MemberWithUsersRegistrationsAndGroups,

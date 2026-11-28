@@ -1,4 +1,4 @@
-import { Database, Migration } from '@node/database';
+import { Database, Migration } from '@stamhoofd/node-database';
 
 export default new Migration(async () => {
     // A tenant charges its own fees until it is explicitly made a child of another one.

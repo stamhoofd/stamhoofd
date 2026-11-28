@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
-import { ArrayDecoder, PatchableArray } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, PatchableArray } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Event, Platform } from '@stamhoofd/structures';
 import { BaseOrganization, EventNotification, EventNotificationType } from '@stamhoofd/structures';

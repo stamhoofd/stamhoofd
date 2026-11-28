@@ -1,10 +1,10 @@
-import type { Decoder } from '@common/encoding';
-import { AutoEncoder, field, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { AutoEncoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { Organization } from '@stamhoofd/models';
-import type { SQLWhere } from '@stamhoofd/sql';
-import { scalarToSQLExpression, SQL, SQLMatch, SQLWhereLike } from '@stamhoofd/sql';
+import type { SQLWhere } from '@stamhoofd/node-sql';
+import { scalarToSQLExpression, SQL, SQLMatch, SQLWhereLike } from '@stamhoofd/node-sql';
 import type { Organization as OrganizationStruct } from '@stamhoofd/structures';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 

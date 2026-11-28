@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@stamhoofd/common-errors';
 import { ref, watch } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';

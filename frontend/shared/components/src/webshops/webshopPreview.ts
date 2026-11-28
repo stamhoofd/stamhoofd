@@ -1,5 +1,5 @@
-import type { Decoder } from '@common/encoding';
-import { ObjectData } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ObjectData } from '@stamhoofd/common-encoding';
 import { Version, Webshop, WebshopStatus } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 

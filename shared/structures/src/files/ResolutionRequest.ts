@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder } from '@common/encoding';
+import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder } from '@stamhoofd/common-encoding';
 
 export enum ResolutionFit {
     Contain = 'contain',

@@ -5,13 +5,13 @@ import {
     EnumDecoder,
     field,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { Event, NamedObject } from './Event.js';
 import { EventNotificationStatus } from './EventNotificationStatus.js';
 import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
 import { eventNotificationsInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import type { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
 import type { RecordAnswer } from './members/records/RecordAnswer.js';
 import { RecordAnswerMapDecoder } from './members/records/RecordAnswer.js';

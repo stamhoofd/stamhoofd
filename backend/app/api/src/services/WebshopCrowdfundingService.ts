@@ -1,6 +1,6 @@
 import { BalanceItem, Order, Webshop } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { SQL, SQLAlias, SQLSelectAs, SQLSum } from '@stamhoofd/sql';
+import { SQL, SQLAlias, SQLSelectAs, SQLSum } from '@stamhoofd/node-sql';
 import { BalanceItemStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

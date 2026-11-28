@@ -1,4 +1,4 @@
-import { ArrayDecoder, EnumDecoder } from '@common/encoding';
+import { ArrayDecoder, EnumDecoder } from '@stamhoofd/common-encoding';
 import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, BaseOrganization, EventNotification, EventNotificationStatus, MemberDetails, Parent } from '@stamhoofd/structures';
 import { ObjectDiffer } from './ObjectDiffer.js';
 

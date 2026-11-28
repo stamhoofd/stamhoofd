@@ -1,6 +1,6 @@
-import type { SimpleErrors } from '@common/errors';
-import type { Request, RequestMiddleware } from '@common/networking';
-import { Server } from '@common/networking';
+import type { SimpleErrors } from '@stamhoofd/common-errors';
+import type { Request, RequestMiddleware } from '@stamhoofd/common-networking';
+import { Server } from '@stamhoofd/common-networking';
 import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { Version } from '@stamhoofd/structures';
 

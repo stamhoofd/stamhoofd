@@ -1,5 +1,5 @@
-import type { ManyToOneRelation } from '@node/database';
-import { column } from '@node/database';
+import type { ManyToOneRelation } from '@stamhoofd/node-database';
+import { column } from '@stamhoofd/node-database';
 import type { RecordAnswer } from '@stamhoofd/structures';
 import {
     AppliedRegistrationDiscount,
@@ -11,8 +11,8 @@ import {
 } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ArrayDecoder, MapDecoder, StringDecoder } from '@common/encoding';
-import { QueryableModel } from '@stamhoofd/sql';
+import { ArrayDecoder, MapDecoder, StringDecoder } from '@stamhoofd/common-encoding';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import type { Group } from './Group.js';
 
 export class Registration extends QueryableModel {

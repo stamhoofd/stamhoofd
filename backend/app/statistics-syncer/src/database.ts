@@ -1,4 +1,4 @@
-import { DatabaseInstance } from '@node/database';
+import { DatabaseInstance } from '@stamhoofd/node-database';
 import type { StatisticsEnvironment } from '@stamhoofd/types/Environment';
 
 export type StatisticsDatabaseConfig = StatisticsEnvironment['statisticsDatabase'];

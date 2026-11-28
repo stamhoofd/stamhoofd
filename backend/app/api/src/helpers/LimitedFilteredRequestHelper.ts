@@ -1,5 +1,5 @@
-import { SimpleError } from '@common/errors';
-import type { SQLSortDefinitions } from '@stamhoofd/sql';
+import { SimpleError } from '@stamhoofd/common-errors';
+import type { SQLSortDefinitions } from '@stamhoofd/node-sql';
 import { getSortFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 
 export class LimitedFilteredRequestHelper {

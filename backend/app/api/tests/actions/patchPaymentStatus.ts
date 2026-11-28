@@ -1,8 +1,8 @@
-import { PatchableArray } from '@common/encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
 import { PaymentStatus, PaymentGeneral } from '@stamhoofd/structures';
 import { PatchPaymentsEndpoint } from '../../src/endpoints/organization/dashboard/payments/PatchPaymentsEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { initAdmin } from '../init/initAdmin.js';
 

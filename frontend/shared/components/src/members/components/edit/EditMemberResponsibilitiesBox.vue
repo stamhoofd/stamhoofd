@@ -88,9 +88,9 @@
 import type { Group, MemberResponsibility, Organization, PlatformMember } from '@stamhoofd/structures';
 import { LoadedPermissions, MemberResponsibilityRecord } from '@stamhoofd/structures';
 
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { SimpleErrors } from '@common/errors';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { SimpleErrors } from '@stamhoofd/common-errors';
 import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';

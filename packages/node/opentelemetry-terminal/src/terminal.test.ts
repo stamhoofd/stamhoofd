@@ -2,9 +2,9 @@ import { PassThrough } from 'node:stream';
 import { afterEach, expect, it, vi } from 'vitest';
 import { stripVTControlCharacters } from 'node:util';
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { withSpan, log, withLogSink } from '@common/opentelemetry-decorators';
+import { withSpan, log, withLogSink } from '@stamhoofd/common-opentelemetry-decorators';
 import { TerminalRenderer } from './terminal.js';
-import { Terminal } from '@node/terminal';
+import { Terminal } from '@stamhoofd/node-terminal';
 
 afterEach(() => vi.unstubAllEnvs());
 

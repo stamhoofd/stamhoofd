@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { SGVLid, SGVMemberError } from '@stamhoofd/sgv';
 import {
     MemberDetails,

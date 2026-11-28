@@ -10,7 +10,7 @@ import {
     MapDecoder,
     StringDecoder,
     URLDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { CreateMandateSettings } from './CreateMandateSettings.js';
 import type { BalanceItem } from '../BalanceItem.js';
 

@@ -1,7 +1,7 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { ArrayDecoder, PatchableArray } from '@common/encoding';
-import type { usePresent } from '@browser/navigation';
-import { ComponentWithProperties, NavigationController } from '@browser/navigation';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, PatchableArray } from '@stamhoofd/common-encoding';
+import type { usePresent } from '@stamhoofd/browser-navigation';
+import { ComponentWithProperties, NavigationController } from '@stamhoofd/browser-navigation';
 import { AsyncComponent, LoadComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { RecipientChooseOneOption } from '@stamhoofd/components/email/EmailView.vue';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';

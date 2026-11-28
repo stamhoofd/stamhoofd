@@ -7,12 +7,12 @@ import {
     IntegerDecoder,
     MapDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { AppliedRegistrationDiscount } from '../AppliedRegistrationDiscount.js';
 import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
 import { registrationInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import { GenericBalance } from '../GenericBalance.js';
 import { Group } from '../Group.js';
 import { GroupPrice } from '../GroupSettings.js';

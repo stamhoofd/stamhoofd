@@ -1,5 +1,5 @@
-import { column } from '@node/database';
-import { SimpleError } from '@common/errors';
+import { column } from '@stamhoofd/node-database';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { MemberDetails, Parent, RecordAnswer } from '@stamhoofd/structures';
 import {
@@ -22,7 +22,7 @@ import {
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { countDays } from '../helpers/countDays.js';
 import { BalanceItem } from './BalanceItem.js';
 import { Document } from './Document.js';

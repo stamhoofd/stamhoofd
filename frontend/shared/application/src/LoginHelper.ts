@@ -1,9 +1,9 @@
 import { startAuthentication } from '@simplewebauthn/browser';
 import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/browser';
-import type { AutoEncoderPatchType, Decoder, EncodableObject } from '@common/encoding';
-import { ObjectData } from '@common/encoding';
-import { isSimpleError, isSimpleErrors } from '@common/errors';
-import type { RequestResult } from '@common/networking';
+import type { AutoEncoderPatchType, Decoder, EncodableObject } from '@stamhoofd/common-encoding';
+import { ObjectData } from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
+import type { RequestResult } from '@stamhoofd/common-networking';
 import type { Organization } from '@stamhoofd/structures';
 import { CreateOrganization, CreateOrganizationResponse, MFAChallengeRequest, MFAChallengeResponse, MFAMethodType, MFASetupResponse, NewUser, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 

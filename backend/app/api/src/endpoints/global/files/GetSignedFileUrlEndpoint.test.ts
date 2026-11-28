@@ -1,5 +1,5 @@
 import { S3Client } from '@aws-sdk/client-s3';
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import {
     MemberFactory,

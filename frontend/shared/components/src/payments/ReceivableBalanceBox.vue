@@ -174,8 +174,8 @@ import InvoiceRow from '#payments/components/InvoiceRow.vue';
 import PaymentRow from '#payments/components/PaymentRow.vue';
 
 import GroupedBalanceList from '#payments/GroupedBalanceList.vue';
-import type { Decoder } from '@common/encoding';
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, NavigationController, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { BaseOrganization, PlatformMember, ReceivableBalance } from '@stamhoofd/structures';

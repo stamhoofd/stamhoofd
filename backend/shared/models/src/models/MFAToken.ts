@@ -1,11 +1,11 @@
-import { column } from '@node/database';
+import { column } from '@stamhoofd/node-database';
 import {
     QueryableModel,
     SQLCalculation,
     SQLColumnExpression,
     SQLScalar,
     SQLWhereSign,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { SessionLoginMethod } from '@stamhoofd/structures';
 import crypto from 'crypto';
 

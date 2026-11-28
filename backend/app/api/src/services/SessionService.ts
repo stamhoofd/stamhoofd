@@ -1,5 +1,5 @@
-import { Database } from '@node/database';
-import { SimpleError } from '@common/errors';
+import { Database } from '@stamhoofd/node-database';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Token, User, UserSession } from '@stamhoofd/models';
 import type { SessionDurations, SessionType } from '@stamhoofd/models/constants/sessions.js';
 import {
@@ -7,7 +7,7 @@ import {
     SESSION_DURATIONS,
     SSO_HANDOFF_TOKEN_DURATION,
 } from '@stamhoofd/models/constants/sessions.js';
-import { SQLWhereSign } from '@stamhoofd/sql';
+import { SQLWhereSign } from '@stamhoofd/node-sql';
 import {
     SessionClientType,
     SessionDeviceType,

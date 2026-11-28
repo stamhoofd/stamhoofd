@@ -16,9 +16,9 @@
         "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
-        "@common/errors": "workspace:*",
-        "@node/endpoints": "workspace:*",
-        "@node/logging": "workspace:*",
+        "@stamhoofd/common-errors": "workspace:*",
+        "@stamhoofd/node-endpoints": "workspace:*",
+        "@stamhoofd/node-logging": "workspace:*",
         "@stamhoofd/structures": "workspace:*"
     },
     "devDependencies": {

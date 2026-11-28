@@ -1,5 +1,5 @@
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
+import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/node-sql';
 
 export const auditLogFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,

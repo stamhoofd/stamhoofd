@@ -1,5 +1,5 @@
-import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchType } from '@common/encoding';
-import { patchContainsChanges } from '@common/encoding';
+import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchType } from '@stamhoofd/common-encoding';
+import { patchContainsChanges } from '@stamhoofd/common-encoding';
 import { Version } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref, unref } from 'vue';

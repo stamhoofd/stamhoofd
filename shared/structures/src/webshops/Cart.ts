@@ -1,5 +1,5 @@
-import { ArrayDecoder, AutoEncoder, field } from '@common/encoding';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
+import { ArrayDecoder, AutoEncoder, field } from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ProductType } from './Product.js';

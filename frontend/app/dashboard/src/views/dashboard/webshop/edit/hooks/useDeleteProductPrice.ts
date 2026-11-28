@@ -2,7 +2,7 @@ import type { ProductPrice } from '@stamhoofd/structures';
 import { Product } from '@stamhoofd/structures';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import type { AutoEncoderPatchType } from '@common/encoding';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
 
 export function useDeleteProductPrice() {
     const deleteProductPrice = async (product: Product, productPrice: ProductPrice): Promise<AutoEncoderPatchType<Product> | undefined> => {

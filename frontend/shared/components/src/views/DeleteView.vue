@@ -18,8 +18,8 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleError, SimpleErrors } from '@common/errors';
-import { usePop } from '@browser/navigation';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';

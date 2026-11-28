@@ -65,9 +65,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';

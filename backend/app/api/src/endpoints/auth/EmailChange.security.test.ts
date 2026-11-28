@@ -1,5 +1,5 @@
-import { DatabaseInstance } from '@node/database';
-import { Request } from '@node/endpoints';
+import { DatabaseInstance } from '@stamhoofd/node-database';
+import { Request } from '@stamhoofd/node-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { Organization, Token, User } from '@stamhoofd/models';
 import {

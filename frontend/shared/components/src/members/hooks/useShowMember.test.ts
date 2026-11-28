@@ -1,4 +1,4 @@
-import type { ComponentWithProperties, PushOptions } from '@browser/navigation';
+import type { ComponentWithProperties, PushOptions } from '@stamhoofd/browser-navigation';
 import { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 import { mount } from '@vue/test-utils';
 import { expect, test, vi } from 'vitest';

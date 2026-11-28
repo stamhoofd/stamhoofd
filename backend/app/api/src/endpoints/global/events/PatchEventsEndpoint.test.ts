@@ -1,7 +1,7 @@
-import { Database } from '@node/database';
-import { PatchableArray } from '@common/encoding';
-import type { Endpoint } from '@node/endpoints';
-import { Request } from '@node/endpoints';
+import { Database } from '@stamhoofd/node-database';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import type { Endpoint } from '@stamhoofd/node-endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { User } from '@stamhoofd/models';
 import {
     Event as EventModel,

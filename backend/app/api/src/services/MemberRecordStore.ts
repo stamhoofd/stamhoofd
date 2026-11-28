@@ -1,4 +1,4 @@
-import { Model } from '@node/database';
+import { Model } from '@stamhoofd/node-database';
 import { Organization, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { RecordSettings } from '@stamhoofd/structures';

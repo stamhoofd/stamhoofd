@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
 import { Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import type { Group } from './Group.js';

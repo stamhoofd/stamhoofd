@@ -1,6 +1,6 @@
 import { Country } from '@stamhoofd/types/Country';
 import { DataValidator } from '@stamhoofd/utility';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 
 export type ParsePhoneNumber = (
     search: string,

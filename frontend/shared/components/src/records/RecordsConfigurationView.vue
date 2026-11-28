@@ -58,8 +58,8 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import { usePop } from '@browser/navigation';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useAppContext } from '#context/appContext.ts';

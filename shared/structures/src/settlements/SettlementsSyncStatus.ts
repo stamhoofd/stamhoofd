@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder } from '@common/encoding';
+import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder } from '@stamhoofd/common-encoding';
 
 /**
  * Progress of a running settlements sync (see SettlementsSyncEndpoint).

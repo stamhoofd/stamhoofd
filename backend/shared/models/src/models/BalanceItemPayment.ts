@@ -1,11 +1,11 @@
-import type { ManyToOneRelation } from '@node/database';
-import { column } from '@node/database';
+import type { ManyToOneRelation } from '@stamhoofd/node-database';
+import { column } from '@stamhoofd/node-database';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { BalanceItem } from './BalanceItem.js';
 import type { Payment } from './Payment.js';
 
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/node-sql';
 
 /**
  * Keeps track of all the created payments of a balance item, which contains the (tries) to pay a balance item.

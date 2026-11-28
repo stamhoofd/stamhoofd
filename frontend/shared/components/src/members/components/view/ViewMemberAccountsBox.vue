@@ -13,8 +13,8 @@
 </template>
 
 <script setup lang="ts">
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
 import type { PlatformMember, User } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { MemberWithRegistrationsBlob } from '@stamhoofd/structures';

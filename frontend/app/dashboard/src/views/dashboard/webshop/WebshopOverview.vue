@@ -462,10 +462,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { ArrayDecoder, PatchableArray } from '@common/encoding';
-import { Request } from '@common/networking';
-import { ComponentWithProperties, defineRoute, NavigationController, useCanPop, useNavigate, usePop, useSplitViewController } from '@browser/navigation';
+import type { Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, PatchableArray } from '@stamhoofd/common-encoding';
+import { Request } from '@stamhoofd/common-networking';
+import { ComponentWithProperties, defineRoute, NavigationController, useCanPop, useNavigate, usePop, useSplitViewController } from '@stamhoofd/browser-navigation';
 
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';

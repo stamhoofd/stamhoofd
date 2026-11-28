@@ -1,12 +1,15 @@
 {
-    "name": "@common/errors",
+    "name": "@stamhoofd/common-errors",
     "version": "1.5.0",
-    "private": true,
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist-types/index.d.ts",
     "license": "UNLICENCED",
     "sideEffects": false,
+    "files": [
+        "dist",
+        "dist-types"
+    ],
     "exports": {
         ".": {
             "types": "./dist-types/index.d.ts",
@@ -29,5 +32,8 @@
         "oxlint-plugin-stamhoofd": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.12"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

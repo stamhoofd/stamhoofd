@@ -1,9 +1,12 @@
 {
-    "name": "@common/opentelemetry-decorators",
+    "name": "@stamhoofd/common-opentelemetry-decorators",
     "version": "0.1.0",
-    "private": true,
     "type": "module",
     "sideEffects": false,
+    "files": [
+        "dist",
+        "dist-types"
+    ],
     "main": "./dist/index.js",
     "types": "./dist-types/index.d.ts",
     "exports": {
@@ -29,5 +32,8 @@
         "@opentelemetry/sdk-trace": "3.1.1",
         "vitest": "4.1.12",
         "eslint-plugin-stamhoofd": "workspace:*"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

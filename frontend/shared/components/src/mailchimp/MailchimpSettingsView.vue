@@ -144,10 +144,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
-import { Request } from '@common/networking';
-import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { Request } from '@stamhoofd/common-networking';
+import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { RecordType } from '@stamhoofd/structures';

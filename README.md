@@ -18,8 +18,10 @@ Documentation and code is located in the backend folder.
 ## Shared
 
 Reusable libraries live under `packages/`, grouped by runtime (`common`, `node`,
-and `browser`). Their private workspace names mirror these locations, such as
-`@common/errors` and `@common/encoding`. Each library owns its README and guides.
+and `browser`). Their published names mirror these locations, such as
+`@stamhoofd/common-errors` and `@stamhoofd/common-encoding`. Each library owns its README and guides.
+These libraries are standalone: they can only depend on other libraries in `packages/`, never on
+other `@stamhoofd` packages. The `stamhoofd/standalone-package-imports` lint rule enforces this.
 
 We have some packages that are shared between the frontend and backend. The most important one is `structures`. This package contains all the data structures (communication in the API, stored in the backend, in an encrytped blob or in localstorage) and how they should be encoded and decoded. The data structures are versioned: when an old client communicates with an updated backend, everything will work as usual. If you need to add some new data, you'll probably need to make some changes in this package. Read the documantation about encoding, decoding, structures, patching, and versioning [here](https://github.com/SimonBackx/simple-encoding/blob/master/README.md#encoding--decoding-structures).
 

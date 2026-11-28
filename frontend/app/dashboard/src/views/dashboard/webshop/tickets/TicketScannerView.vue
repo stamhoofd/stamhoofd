@@ -53,8 +53,8 @@
 </template>
 
 <script lang="ts" setup>
-import { Request } from '@common/networking';
-import { useDismiss, useShow } from '@browser/navigation';
+import { Request } from '@stamhoofd/common-networking';
+import { useDismiss, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';

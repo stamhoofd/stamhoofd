@@ -43,8 +43,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import { usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useCheckoutInMemoryFilterBuilders } from '@stamhoofd/components/filters/filter-builders/checkout.ts';

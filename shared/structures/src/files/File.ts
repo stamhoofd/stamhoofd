@@ -1,6 +1,6 @@
-import type { Data, Encodeable, EncodeContext } from '@common/encoding';
-import { EncodeMedium } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { Data, Encodeable, EncodeContext } from '@stamhoofd/common-encoding';
+import { EncodeMedium } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { AuditLogReplacement, AuditLogReplacementType } from '../AuditLogReplacement.js';
 
 export type FileTypeDefinition = {

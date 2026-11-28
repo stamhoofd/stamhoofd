@@ -63,7 +63,7 @@ import {
     useCanDismiss,
     useCanPop,
     useDismiss,
-} from '@browser/navigation';
+} from '@stamhoofd/browser-navigation';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';

@@ -1,4 +1,4 @@
-import type { SimpleErrors } from '@common/errors';
+import type { SimpleErrors } from '@stamhoofd/common-errors';
 
 export type NetworkingConfiguration = {
     getRequestHeaders(): Promise<Record<string, string>>;

@@ -1,4 +1,4 @@
-import type { Data, Decoder, EncodeContext } from '@common/encoding';
+import type { Data, Decoder, EncodeContext } from '@stamhoofd/common-encoding';
 import {
     addPropertyField,
     ArrayDecoder,
@@ -12,8 +12,8 @@ import {
     NullableDecoder,
     PatchMapDecoder,
     StringDecoder,
-} from '@common/encoding';
-import { isSimpleError, SimpleError } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import { isSimpleError, SimpleError } from '@stamhoofd/common-errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 

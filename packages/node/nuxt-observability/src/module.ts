@@ -1,8 +1,8 @@
 import type { NuxtModule } from '@nuxt/schema';
 import type { NitroOptions } from 'nitropack/types';
 import { fileURLToPath } from 'node:url';
-import { devLifecycleModule } from '@node/dev-tools/nuxt';
-import { ApplicationLifecycle, initializeTelemetry } from '@node/observability';
+import { devLifecycleModule } from '@stamhoofd/node-dev-tools/nuxt';
+import { ApplicationLifecycle, initializeTelemetry } from '@stamhoofd/node-observability';
 
 /** Node-server instrumentation shared by Nuxt development and production runtime. */
 const module: NuxtModule = async (_options, nuxt) => {

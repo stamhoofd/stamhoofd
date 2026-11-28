@@ -1,4 +1,4 @@
-import type { PartialWithoutMethods } from '@common/encoding';
+import type { PartialWithoutMethods } from '@stamhoofd/common-encoding';
 import type {
     SGVAdres,
     SGVContact,

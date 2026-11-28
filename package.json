@@ -31,10 +31,10 @@
         "typecheck": "pnpm exec turbo run typecheck"
     },
     "dependencies": {
-        "@common/encoding": "workspace:*",
-        "@common/errors": "workspace:*",
-        "@common/networking": "workspace:*",
-        "@browser/navigation": "workspace:*",
+        "@stamhoofd/common-encoding": "workspace:*",
+        "@stamhoofd/common-errors": "workspace:*",
+        "@stamhoofd/common-networking": "workspace:*",
+        "@stamhoofd/browser-navigation": "workspace:*",
         "@simplewebauthn/browser": "13.3.0",
         "@simplewebauthn/server": "13.3.3",
         "@xmldom/xmldom": "^0.9.10",

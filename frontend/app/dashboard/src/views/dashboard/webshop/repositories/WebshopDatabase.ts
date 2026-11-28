@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { Version } from '@stamhoofd/structures';
 import { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';

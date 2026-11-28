@@ -1,4 +1,4 @@
-import { AutoEncoder, EnumDecoder, StringDecoder, field } from '@common/encoding';
+import { AutoEncoder, EnumDecoder, StringDecoder, field } from '@stamhoofd/common-encoding';
 import { UitpasClientCredentialsStatus } from '../UitpasClientCredentialsStatus.js';
 
 export class UitpasSetClientCredentialsResponse extends AutoEncoder {

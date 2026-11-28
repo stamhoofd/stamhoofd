@@ -305,7 +305,7 @@ Shared builds consume Turbo's documented `--json` output: only Turbo-owned
 unknown records are forwarded. Turbo strips ANSI styling in this mode; verbose
 sessions retain native tool output. pnpm uses `PNPM_CONFIG_LOGLEVEL=warn` and
 Consola uses `CONSOLA_LEVEL=1`, preserving warnings and errors. Backend environment
-loading disables `@node/logging` debug output before migrations and boot; verbose
+loading disables `@stamhoofd/node-logging` debug output before migrations and boot; verbose
 and unmanaged processes retain it. Routine startup/cron messages use debug at source.
 Nuxt components that override Consola's level or write directly also retain their
 banners; neither is suppressed through rendered-text matching.
@@ -327,8 +327,8 @@ Trace/span IDs remain in telemetry. Failures include command, exit code and
 redacted stderr; empty or truncated stderr is marked.
 
 The CLI only wires the SDK, verbosity and grouping. Reusable rendering and process
-instrumentation live in `@node/opentelemetry-terminal` and
-`@node/opentelemetry-process`. The optional DevOps bootstrap depends on their
+instrumentation live in `@stamhoofd/node-opentelemetry-terminal` and
+`@stamhoofd/node-opentelemetry-process`. The optional DevOps bootstrap depends on their
 builds through the CLI and its explicit process-library task dependency.
 
 The command creates an OpenTelemetry trace and allows up to two seconds for exporter
@@ -339,7 +339,7 @@ Remote export is opt-in: set `OTEL_EXPORTER_OTLP_ENDPOINT` or
 `OTEL_EXPORTER_OTLP_HEADERS`. Without an endpoint, traces remain local and operation
 diagnostics still work. Legacy DevOps deployment commands retain their existing logger.
 
-One `@node/terminal` coordinator owns progress for each invocation.
+One `@stamhoofd/node-terminal` coordinator owns progress for each invocation.
 `withCliPrompt` suspends progress during confirmation/account selection, retaining
 updates and buffering coordinated diagnostics (up to 64 KiB). `infra tf` suspends
 progress around native OpenTofu stdio so interactive input and machine-readable
@@ -479,9 +479,9 @@ All builds use `^build` over the acyclic workspace dependency graph. Internal bu
 
 Shared builds in `stam build`, tests, migrations, and development sessions call the root `build:shared` Turbo graph. The development watcher ignores runtime and declaration outputs, and marks the shared build ready only after success; failed compilations can recover on the next edit. App startup waits for that ready marker. Use `stam dev` instead of the removed `build:shared:watch` script. `stam clean build` removes runtime/declaration outputs and TypeScript metadata without deleting other package caches or the local Turbo cache; use `pnpm run clear:shared && pnpm run build:shared --force` for a fresh compilation.
 
-Development sessions launch the API, renderer, statistics syncer, web app, and webshop directly through `@node/dev-tools` and the framework executables. `stam` owns app selection and passes its environment, including allocated debugger ports and Stripe values, to each process. Backend compiler/runtime watchers run together; a failed watcher stops its siblings. Use `stam dev` instead of application `dev`/`dev:*` scripts. The docs target prepares its small observability dependency graph and starts Nuxt without waiting for the full shared build.
+Development sessions launch the API, renderer, statistics syncer, web app, and webshop directly through `@stamhoofd/node-dev-tools` and the framework executables. `stam` owns app selection and passes its environment, including allocated debugger ports and Stripe values, to each process. Backend compiler/runtime watchers run together; a failed watcher stops its siblings. Use `stam dev` instead of application `dev`/`dev:*` scripts. The docs target prepares its small observability dependency graph and starts Nuxt without waiting for the full shared build.
 
-Application command construction lives in `src/runtime/dev-commands.ts` and `src/workflows/start-dev.ts`. Tool executables, shared watch directories, and frontend environment files resolve from `CliContext.rootDir`; only application-local inputs and outputs depend on the application's working directory. `@node/dev-tools` owns lifecycle transport and executable adapters, whose TSDoc documents environment and shutdown contracts.
+Application command construction lives in `src/runtime/dev-commands.ts` and `src/workflows/start-dev.ts`. Tool executables, shared watch directories, and frontend environment files resolve from `CliContext.rootDir`; only application-local inputs and outputs depend on the application's working directory. `@stamhoofd/node-dev-tools` owns lifecycle transport and executable adapters, whose TSDoc documents environment and shutdown contracts.
 
 `pnpm stam build` uses those same five executable app owners after the shared build. Dashboard and registration are source packages bundled by web-app. The root backend build explicitly selects API, renderer, backup, redirecter, and statistics syncer. Database migrations invoke the API and statistics-syncer owners serially.
 

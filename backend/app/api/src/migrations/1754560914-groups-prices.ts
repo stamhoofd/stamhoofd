@@ -1,4 +1,4 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 import { Group, OrganizationRegistrationPeriod } from '@stamhoofd/models';
 import type { GroupCategory } from '@stamhoofd/structures';
 import {

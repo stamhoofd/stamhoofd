@@ -1,4 +1,4 @@
-import type { Data, Decoder } from '@common/encoding';
+import type { Data, Decoder } from '@stamhoofd/common-encoding';
 import {
     ArrayDecoder,
     AutoEncoder,
@@ -6,8 +6,8 @@ import {
     field,
     MapDecoder,
     StringDecoder,
-} from '@common/encoding';
-import { SimpleError } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Language } from '@stamhoofd/types/Language';
 
 /**

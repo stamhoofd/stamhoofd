@@ -17,11 +17,11 @@
         "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
-        "@common/errors": "workspace:*",
-        "@node/database": "workspace:*",
+        "@stamhoofd/common-errors": "workspace:*",
+        "@stamhoofd/node-database": "workspace:*",
         "@stamhoofd/backend-i18n": "workspace:*",
         "@stamhoofd/queues": "workspace:*",
-        "@stamhoofd/sql": "workspace:*",
+        "@stamhoofd/node-sql": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",

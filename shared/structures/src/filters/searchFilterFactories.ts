@@ -1,6 +1,6 @@
 import type { ParsePhoneNumber } from './SearchFilterFactory.js';
 import { SearchFilterFactory } from './SearchFilterFactory.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 
 export function getOrderSearchFilter(
     search: string | null,

@@ -1,4 +1,4 @@
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 
 export async function checkReplicaStatus() {
     const [rows] = await Database.select('SHOW REPLICA STATUS');

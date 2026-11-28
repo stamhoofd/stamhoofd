@@ -13,8 +13,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { ComponentWithProperties, usePresent } from '@browser/navigation';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import type { WebshopField } from '@stamhoofd/structures';

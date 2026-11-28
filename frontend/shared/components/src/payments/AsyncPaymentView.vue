@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Payment } from '@stamhoofd/structures';
 import { PaymentGeneral } from '@stamhoofd/structures';

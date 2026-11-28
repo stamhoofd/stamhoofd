@@ -1,11 +1,11 @@
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
     createJoinedRelationFilter,
     SQL,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { organizationFilterCompilers } from './organizations.js';
 
 export const organizationJoin = SQL.join('organizations').where(

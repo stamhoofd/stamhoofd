@@ -1,1 +1,1 @@
-export { UrlHelper } from '@browser/navigation';
+export { UrlHelper } from '@stamhoofd/browser-navigation';

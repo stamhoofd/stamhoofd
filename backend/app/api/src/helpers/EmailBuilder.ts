@@ -20,7 +20,7 @@ import {
 import type { Language } from '@stamhoofd/types/Language';
 import { Formatter } from '@stamhoofd/utility';
 
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { Group, Organization, Webshop } from '@stamhoofd/models';
 import {

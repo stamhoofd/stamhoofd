@@ -2,7 +2,7 @@ import { confirm as confirmPrompt } from './prompts.js';
 import chalk from 'chalk';
 import { spawn } from 'node:child_process';
 import { createTerminalOutput } from './terminal-output.js';
-import { hasLogSink, withSpan, log } from '@common/opentelemetry-decorators';
+import { hasLogSink, withSpan, log } from '@stamhoofd/common-opentelemetry-decorators';
 import terminalLink from 'terminal-link';
 import { stripVTControlCharacters } from 'node:util';
 import { successSymbol } from '../config/shared-service-config.js';

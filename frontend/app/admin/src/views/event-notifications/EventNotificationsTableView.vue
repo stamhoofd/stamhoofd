@@ -19,8 +19,8 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, NavigationController, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import { EventNotificationViewModel } from '@stamhoofd/components/event-notifications/classes/EventNotificationViewModel.ts';

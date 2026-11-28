@@ -1,4 +1,4 @@
-import { EncodeMedium } from '@common/encoding';
+import { EncodeMedium } from '@stamhoofd/common-encoding';
 import { PaymentMethod, Version } from '@stamhoofd/structures';
 import { StripeAccount } from './StripeAccount.js';
 

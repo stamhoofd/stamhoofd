@@ -1,5 +1,5 @@
 import { ModalStackEventBus } from '#overlays/ModalStackEventBus.ts';
-import { ComponentWithProperties } from '@browser/navigation';
+import { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import type { ObjectDirective, Ref } from 'vue';
 import { ref } from 'vue';
 import Tooltip from '../overlays/Tooltip.vue';

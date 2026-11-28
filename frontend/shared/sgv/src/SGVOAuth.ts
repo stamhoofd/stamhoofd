@@ -1,7 +1,7 @@
-import { AutoEncoder, encodeObject, field, IntegerDecoder, ObjectData, StringDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import type { RequestResult } from '@common/networking';
-import { Server } from '@common/networking';
+import { AutoEncoder, encodeObject, field, IntegerDecoder, ObjectData, StringDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import type { RequestResult } from '@stamhoofd/common-networking';
+import { Server } from '@stamhoofd/common-networking';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import type { SGVTokenResponse } from '@stamhoofd/sgv';
 import {

@@ -1,6 +1,6 @@
-import type { Decoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     CountFilteredRequest,
@@ -16,7 +16,7 @@ import type { BalanceItem } from '@stamhoofd/models';
 import { Organization, Platform, User } from '@stamhoofd/models';
 import { CachedBalance } from '@stamhoofd/models';
 import { PaymentService } from '../../../../services/PaymentService.js';
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { PaymentMandateService } from '../../../../services/PaymentMandateService.js';
 import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 import { QueueHandler } from '@stamhoofd/queues';

@@ -1,6 +1,6 @@
-import { PatchableArray } from '@common/encoding';
-import type { Endpoint } from '@node/endpoints';
-import { Request } from '@node/endpoints';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import type { Endpoint } from '@stamhoofd/node-endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
 import {
     DocumentTemplate,
@@ -9,7 +9,7 @@ import {
     RegistrationPeriodFactory,
     UserFactory,
 } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     DocumentPrivateSettings,

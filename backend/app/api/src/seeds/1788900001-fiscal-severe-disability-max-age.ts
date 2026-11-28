@@ -1,5 +1,5 @@
-import { Migration } from '@node/database';
-import { logger } from '@node/logging';
+import { Migration } from '@stamhoofd/node-database';
+import { logger } from '@stamhoofd/node-logging';
 import { DocumentTemplate } from '@stamhoofd/models';
 import { SeedTools } from '../helpers/SeedTools.js';
 

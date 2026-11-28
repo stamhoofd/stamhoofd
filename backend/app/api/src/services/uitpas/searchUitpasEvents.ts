@@ -1,5 +1,5 @@
 import { UitpasEventResponse, UitpasEventsResponse } from '@stamhoofd/structures';
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 /* Pick a translated string, prefer 'nl' */
 function pickTranslation(value: unknown): string {

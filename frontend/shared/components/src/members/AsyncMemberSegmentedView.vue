@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useDismiss } from '@browser/navigation';
+import { useDismiss } from '@stamhoofd/browser-navigation';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { PlatformFamily } from '@stamhoofd/structures';
 import { ref } from 'vue';

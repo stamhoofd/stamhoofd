@@ -1,4 +1,4 @@
-import { ComponentWithProperties } from '@browser/navigation';
+import { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { ViewStep, ViewStepNavigation } from '@stamhoofd/components/steps/ViewStep';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';

@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
-import { ArrayDecoder, deepSetArray } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, deepSetArray } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { GlobalEventBus } from './EventBus';
 import { Group, LimitedFilteredRequest, Organization, OrganizationAdmins, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriod, RegistrationPeriodList, SortItemDirection } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';

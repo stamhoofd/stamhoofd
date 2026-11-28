@@ -1,9 +1,9 @@
-import type { Decoder } from '@common/encoding';
-import { ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
-import type { SimpleErrors } from '@common/errors';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
-import type { RequestMiddleware } from '@common/networking';
-import { Request } from '@common/networking';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ObjectData, VersionBox, VersionBoxDecoder } from '@stamhoofd/common-encoding';
+import type { SimpleErrors } from '@stamhoofd/common-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@stamhoofd/common-errors';
+import type { RequestMiddleware } from '@stamhoofd/common-networking';
+import { Request } from '@stamhoofd/common-networking';
 import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { getSessionPresentation } from './SessionPresentation';
 import type { LoginProviderType } from '@stamhoofd/structures';
@@ -16,7 +16,7 @@ import { ManagedToken } from './ManagedToken';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import { QueueHandler } from './QueueHandler';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
-import { UrlHelper } from '@browser/navigation';
+import { UrlHelper } from '@stamhoofd/browser-navigation';
 
 type AuthenticationStateListener = (changed: 'user' | 'organization' | 'platform' | 'token' | 'preventComplete') => void;
 

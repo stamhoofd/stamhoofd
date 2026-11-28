@@ -4,7 +4,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "prepare:observability": "pnpm --filter @node/nuxt-observability... run build:types && pnpm --filter @node/nuxt-observability... run build",
+        "prepare:observability": "pnpm --filter @stamhoofd/node-nuxt-observability... run build:types && pnpm --filter @stamhoofd/node-nuxt-observability... run build",
         "build": "pnpm run prepare:observability && nuxt build",
         "generate": "pnpm run prepare:observability && nuxt generate",
         "preview": "nuxt preview",
@@ -12,8 +12,8 @@
         "typecheck": "pnpm run prepare:observability && nuxt typecheck --checker vue-tsc"
     },
     "dependencies": {
-        "@node/nuxt-observability": "workspace:*",
-        "@node/observability": "workspace:*",
+        "@stamhoofd/node-nuxt-observability": "workspace:*",
+        "@stamhoofd/node-observability": "workspace:*",
         "@nuxt/content": "3.17.0",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/scss": "workspace:*",
@@ -22,7 +22,7 @@
         "nuxt": "4.6.4"
     },
     "devDependencies": {
-        "@node/dev-tools": "workspace:*",
+        "@stamhoofd/node-dev-tools": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
         "sass": "1.108.2",
         "vite-svg-2-webfont": "8.7.0"

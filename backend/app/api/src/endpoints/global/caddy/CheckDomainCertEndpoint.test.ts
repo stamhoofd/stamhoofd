@@ -1,5 +1,5 @@
-import { Database } from '@node/database';
-import { Request } from '@node/endpoints';
+import { Database } from '@stamhoofd/node-database';
+import { Request } from '@stamhoofd/node-endpoints';
 import { OrganizationFactory, Platform, ROOT_TENANT_ID } from '@stamhoofd/models';
 import { Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';

@@ -1,5 +1,5 @@
-import { SimpleError } from '@common/errors';
-import { Request } from '@node/endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { Request } from '@stamhoofd/node-endpoints';
 import { Platform } from '@stamhoofd/models';
 import {
     LoginMethod,

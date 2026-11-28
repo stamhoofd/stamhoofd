@@ -1,4 +1,4 @@
-import { ComponentWithProperties, usePresent } from '@browser/navigation';
+import { ComponentWithProperties, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 

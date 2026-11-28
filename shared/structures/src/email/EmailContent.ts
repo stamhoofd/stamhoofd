@@ -1,5 +1,5 @@
-import { AnyDecoder, AutoEncoder, field, StringDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import { AnyDecoder, AutoEncoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { Language } from '@stamhoofd/types/Language';
 
 /**

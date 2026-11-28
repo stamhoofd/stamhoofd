@@ -1,10 +1,10 @@
-import { AutoEncoder, field, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import { AutoEncoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import jwt from 'jsonwebtoken';
 
 import { Context } from '../../../../helpers/Context.js';
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 type Params = Record<string, never>;
 type Query = undefined;

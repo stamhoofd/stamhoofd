@@ -24,22 +24,22 @@ ruleTester.run('no-t-route-url', noTRouteUrl, {
     valid: [
         // The recommended alternative.
         `
-            import { defineRoute } from '@browser/navigation';
+            import { defineRoute } from '@stamhoofd/browser-navigation';
             defineRoute({ url: buildTranslatedUrl({ nl: 'activiteiten', fr: 'activites', en: 'activities' }), component: 'self' });
         `,
         // A plain string url is fine.
         `
-            import { defineRoute } from '@browser/navigation';
+            import { defineRoute } from '@stamhoofd/browser-navigation';
             defineRoute({ url: 'reset-password', component: 'self' });
         `,
         // $t used for another property (name) is not our concern.
         `
-            import { defineRoute } from '@browser/navigation';
+            import { defineRoute } from '@stamhoofd/browser-navigation';
             defineRoute({ url: 'events', name: $t('Activiteiten'), component: 'self' });
         `,
         // defineRoutes with translated urls is fine.
         `
-            import { defineRoutes } from '@browser/navigation';
+            import { defineRoutes } from '@stamhoofd/browser-navigation';
             defineRoutes([{ url: buildTranslatedUrl({ nl: 'activiteiten', fr: 'activites', en: 'activities' }), component: 'self' }]);
         `,
         // A defineRoute imported from another package is not our concern.
@@ -56,7 +56,7 @@ ruleTester.run('no-t-route-url', noTRouteUrl, {
     invalid: [
         {
             code: `
-                import { defineRoute } from '@browser/navigation';
+                import { defineRoute } from '@stamhoofd/browser-navigation';
                 defineRoute({ url: $t('activiteiten'), component: 'self' });
             `,
             errors: [{ messageId: 'noTranslateInUrl' }],
@@ -64,7 +64,7 @@ ruleTester.run('no-t-route-url', noTRouteUrl, {
         // Aliased import.
         {
             code: `
-                import { defineRoute as registerRoute } from '@browser/navigation';
+                import { defineRoute as registerRoute } from '@stamhoofd/browser-navigation';
                 registerRoute({ url: $t('%uB'), component: 'self' });
             `,
             errors: [{ messageId: 'noTranslateInUrl' }],
@@ -72,7 +72,7 @@ ruleTester.run('no-t-route-url', noTRouteUrl, {
         // defineRoutes: every offending route object is reported.
         {
             code: `
-                import { defineRoutes } from '@browser/navigation';
+                import { defineRoutes } from '@stamhoofd/browser-navigation';
                 defineRoutes([
                     { url: $t('activiteiten'), component: 'self' },
                     { url: 'plain', component: 'self' },
@@ -87,7 +87,7 @@ ruleTester.run('no-t-route-url', noTRouteUrl, {
         // The url expression starts with a $t(...) call.
         {
             code: `
-                import { defineRoute } from '@browser/navigation';
+                import { defineRoute } from '@stamhoofd/browser-navigation';
                 defineRoute({ url: $t('activiteiten') + '/detail', component: 'self' });
             `,
             errors: [{ messageId: 'noTranslateInUrl' }],
@@ -95,7 +95,7 @@ ruleTester.run('no-t-route-url', noTRouteUrl, {
         // TS type assertions around the argument and the url value are unwrapped.
         {
             code: `
-                import { defineRoute } from '@browser/navigation';
+                import { defineRoute } from '@stamhoofd/browser-navigation';
                 defineRoute(({ url: $t('activiteiten') as string, component: 'self' }) as any);
             `,
             errors: [{ messageId: 'noTranslateInUrl' }],

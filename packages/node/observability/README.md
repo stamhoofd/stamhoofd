@@ -1,6 +1,6 @@
 # Application observability
 
-`@node/observability` is the shared Node lifecycle and server telemetry boundary.
+`@stamhoofd/node-observability` is the shared Node lifecycle and server telemetry boundary.
 Executable entry points use `runApplication(service, initialize)` before loading
 application configuration. The callback receives an `ApplicationLifecycle`:
 
@@ -41,5 +41,5 @@ host, or process capture is enabled. This is not a sanitizer for arbitrary exist
 application logging; broader instrumentation requires extending and testing the
 explicit export contract.
 
-Run `pnpm stam test observability`, `pnpm stam check lint --filter @node/observability`, and
-`pnpm stam check typecheck --filter @node/observability` from the repository root.
+Run `pnpm stam test observability`, `pnpm stam check lint --filter @stamhoofd/node-observability`, and
+`pnpm stam check typecheck --filter @stamhoofd/node-observability` from the repository root.

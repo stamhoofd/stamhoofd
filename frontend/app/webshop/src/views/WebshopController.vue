@@ -23,8 +23,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { ComponentWithProperties, NavigationController } from '@browser/navigation';
-import { FramedComponent } from '@browser/navigation';
+import type { ComponentWithProperties, NavigationController } from '@stamhoofd/browser-navigation';
+import { FramedComponent } from '@stamhoofd/browser-navigation';
 import { getWebshopSquareLogo } from '@stamhoofd/components/helpers/webshopIdentity.ts';
 import { useProvidePreviewColumnWidths } from '@stamhoofd/components/layout/usePreviewPanel.ts';
 import { WebshopOrderMode } from '@stamhoofd/structures';

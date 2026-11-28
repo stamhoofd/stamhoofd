@@ -14,9 +14,9 @@
         "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
-        "@common/encoding": "workspace:*",
-        "@common/errors": "workspace:*",
-        "@common/networking": "workspace:*",
+        "@stamhoofd/common-encoding": "workspace:*",
+        "@stamhoofd/common-errors": "workspace:*",
+        "@stamhoofd/common-networking": "workspace:*",
         "@simplewebauthn/browser": "13.3.0",
         "@stamhoofd/frontend-i18n": "workspace:*",
         "@stamhoofd/frontend-notifications": "workspace:*",
@@ -30,7 +30,7 @@
         "vue": "3.5.44"
     },
     "devDependencies": {
-        "@browser/navigation": "workspace:*",
+        "@stamhoofd/browser-navigation": "workspace:*",
         "@stamhoofd/vite-config": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
         "vite": "8.3.8",

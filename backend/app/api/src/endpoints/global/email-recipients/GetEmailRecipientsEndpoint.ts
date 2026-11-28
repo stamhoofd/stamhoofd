@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import type {
     CountFilteredRequest,
     EmailRecipient as EmailRecipientStruct,
@@ -13,11 +13,11 @@ import {
     PaginatedResponse,
 } from '@stamhoofd/structures';
 
-import type { Decoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { EmailRecipient } from '@stamhoofd/models';
-import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
-import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/node-sql';
+import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/node-sql';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { emailRecipientsFilterCompilers } from '../../../sql-filters/email-recipients.js';

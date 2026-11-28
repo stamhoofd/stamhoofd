@@ -1,5 +1,5 @@
-import type { Response, Request, RequestMiddleware, ResponseMiddleware } from '@node/endpoints';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
+import type { Response, Request, RequestMiddleware, ResponseMiddleware } from '@stamhoofd/node-endpoints';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@stamhoofd/common-errors';
 import { Version } from '@stamhoofd/structures';
 import os from 'os';
 

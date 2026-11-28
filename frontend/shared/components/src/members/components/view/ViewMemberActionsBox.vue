@@ -40,9 +40,9 @@
 </template>
 
 <script setup lang="ts">
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { ComponentWithProperties, useDismiss, usePresent } from '@browser/navigation';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, useDismiss, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { MemberWithRegistrationsBlob, PlatformMember } from '@stamhoofd/structures';
 

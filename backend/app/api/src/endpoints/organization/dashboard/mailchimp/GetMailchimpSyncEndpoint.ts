@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { MailchimpSync } from '@stamhoofd/models/models/MailchimpSync.js';
 import type { MailchimpSync as MailchimpSyncStruct } from '@stamhoofd/structures/mailchimp/MailchimpSync.js';
 import { Context } from '../../../../helpers/Context.js';

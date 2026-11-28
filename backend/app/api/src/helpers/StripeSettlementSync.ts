@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Organization, Payment, StripeAccount } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';

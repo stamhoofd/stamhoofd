@@ -51,9 +51,9 @@
 import { useContext } from '#hooks/useContext.ts';
 import STGridItem from '#layout/STGridItem.vue';
 
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { ArrayDecoder, PatchableArray } from '@common/encoding';
+import { ComponentWithProperties, NavigationController, usePresent } from '@stamhoofd/browser-navigation';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, PatchableArray } from '@stamhoofd/common-encoding';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';

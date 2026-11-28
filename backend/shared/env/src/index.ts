@@ -3,7 +3,7 @@ import { BackendApp } from '@stamhoofd/types/BackendApp';
 import chalk from 'chalk';
 import crypto from 'crypto';
 import fs, { promises } from 'fs';
-import { logger } from '@node/logging';
+import { logger } from '@stamhoofd/node-logging';
 
 async function fileExists(path: string): Promise<boolean> {
     try {

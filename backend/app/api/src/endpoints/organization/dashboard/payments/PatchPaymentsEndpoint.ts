@@ -1,8 +1,8 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArrayDecoder, patchObject, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArrayDecoder, patchObject, StringDecoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { Organization } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, Payment, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';

@@ -1,5 +1,5 @@
 import { Email, Member } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import type {
     EmailRecipient,
     LimitedFilteredRequest,

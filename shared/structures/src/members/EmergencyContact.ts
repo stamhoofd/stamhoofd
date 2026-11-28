@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, field, StringDecoder } from '@common/encoding';
+import { AutoEncoder, DateDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 

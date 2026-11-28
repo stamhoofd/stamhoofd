@@ -1,4 +1,4 @@
-import { Request, TestServer } from '@node/endpoints';
+import { Request, TestServer } from '@stamhoofd/node-endpoints';
 import { CpuService } from '@stamhoofd/logging/CpuService';
 import { MemoryService } from '@stamhoofd/logging/MemoryService';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';

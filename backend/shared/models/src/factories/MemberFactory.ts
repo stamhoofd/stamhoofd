@@ -1,4 +1,4 @@
-import { Factory } from '@node/database';
+import { Factory } from '@stamhoofd/node-database';
 import { Gender, MemberDetails, ParentType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

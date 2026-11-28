@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
 import {
     cloneObject,
     isPatchableArray,
@@ -7,10 +7,10 @@ import {
     PatchableArray,
     PatchMap,
     patchObject,
-} from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError, SimpleErrors } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import {
     Organization,
     OrganizationRegistrationPeriod,

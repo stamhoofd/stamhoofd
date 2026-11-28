@@ -1,7 +1,7 @@
-import { AutoEncoder, field, NumberDecoder, StringDecoder } from '@common/encoding';
+import { AutoEncoder, field, NumberDecoder, StringDecoder } from '@stamhoofd/common-encoding';
 import type { InMemoryFilterDefinitions } from '@stamhoofd/structures/filters/InMemoryFilter.js';
-import type { SortDefinition, SortDefinitions } from '@stamhoofd/filters/Sorters';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
+import type { SortDefinition, SortDefinitions } from '@stamhoofd/common-filters/Sorters';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilterTypes';
 import type { PrivateOrder } from '@stamhoofd/structures/webshops/Order.js';
 import { baseInMemoryFilterCompilers, createInMemoryFilterCompiler } from '@stamhoofd/structures/filters/InMemoryFilter.js';
 import type { IndexedDbIndexValue } from './IndexBox';

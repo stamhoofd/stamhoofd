@@ -1,6 +1,6 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Email, Member, MemberUser } from '@stamhoofd/models';
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
@@ -15,7 +15,7 @@ import {
     SQLJsonExtract,
     SQLScalar,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { Context } from '../helpers/Context.js';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';

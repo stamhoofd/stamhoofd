@@ -1,8 +1,8 @@
-import { column } from '@node/database';
-import type { PlainObject } from '@common/encoding';
-import { ArrayDecoder, StringDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import type { PlainObject } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, StringDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { MollieRequiredScopes } from '@stamhoofd/structures/MollieScopes.js';
 import type { IncomingMessage } from 'http';
 import https from 'https';

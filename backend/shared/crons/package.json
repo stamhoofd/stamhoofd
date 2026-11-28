@@ -15,8 +15,8 @@
         "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
-        "@node/database": "workspace:*",
-        "@node/logging": "workspace:*",
+        "@stamhoofd/node-database": "workspace:*",
+        "@stamhoofd/node-logging": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
         "mysql2": "3.24.6"
     },

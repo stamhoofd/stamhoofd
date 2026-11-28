@@ -1,5 +1,5 @@
-import { AutoEncoder, BooleanDecoder, field, StringDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import { AutoEncoder, BooleanDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { v4 as uuidv4 } from 'uuid';
 
 export class WebshopField extends AutoEncoder {

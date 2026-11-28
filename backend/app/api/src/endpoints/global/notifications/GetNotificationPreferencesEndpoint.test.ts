@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { User } from '@stamhoofd/models';
 import { UserFactory } from '@stamhoofd/models';
 import { NotificationPreference as NotificationPreferenceModel } from '@stamhoofd/models/models/NotificationPreference.js';

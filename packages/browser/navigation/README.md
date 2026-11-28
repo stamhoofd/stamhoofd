@@ -6,10 +6,10 @@ Navigation library for Vue for web apps that need to feel and work like native a
 
 After installing, follow the [first-view guide](docs/getting-started.md).
 
-Declare `"@browser/navigation": "workspace:*"` in consuming workspaces.
-Import `@browser/navigation/dist/main.css` for the navigation styles.
-Run `pnpm stam test navigation`, `pnpm stam check lint @browser/navigation`, and
-`pnpm stam check typecheck @browser/navigation` from the repository root.
+Declare `"@stamhoofd/browser-navigation": "workspace:*"` in consuming workspaces.
+Import `@stamhoofd/browser-navigation/dist/main.css` for the navigation styles.
+Run `pnpm stam test navigation`, `pnpm stam check lint @stamhoofd/browser-navigation`, and
+`pnpm stam check typecheck @stamhoofd/browser-navigation` from the repository root.
 
 Vite retains the library's Vue/CSS bundle. `vue-tsc` prepares declarations in
 `dist-types` before consumer checks, using the existing strict bundler settings.

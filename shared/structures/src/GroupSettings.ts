@@ -1,4 +1,4 @@
-import type { Decoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
 import {
     ArrayDecoder,
     AutoEncoder,
@@ -9,11 +9,11 @@ import {
     IntegerDecoder,
     MapDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { BundleDiscountGroupPriceSettings } from './BundleDiscountGroupPriceSettings.js';
 import { Group } from './Group.js';
 import { GroupGenderType } from './GroupGenderType.js';

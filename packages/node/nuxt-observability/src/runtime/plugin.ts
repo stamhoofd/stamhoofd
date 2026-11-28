@@ -1,5 +1,5 @@
 import type { NitroApp } from 'nitropack/types';
-import { initializeTelemetry, observeRequest } from '@node/observability';
+import { initializeTelemetry, observeRequest } from '@stamhoofd/node-observability';
 
 declare global {
     interface ImportMeta { prerender?: boolean; dev?: boolean }

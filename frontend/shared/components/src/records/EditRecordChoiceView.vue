@@ -97,9 +97,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray, patchContainsChanges } from '@common/encoding';
-import { usePop } from '@browser/navigation';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray, patchContainsChanges } from '@stamhoofd/common-encoding';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { ErrorBox } from '#errors/ErrorBox.ts';
 import Radio from '#inputs/Radio.vue';

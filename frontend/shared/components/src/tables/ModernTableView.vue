@@ -159,10 +159,10 @@ import type { TableAction, TableActionSelection } from '#tables/classes/TableAct
 import { AsyncTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import type { TableObjectFetcher } from '#tables/classes/TableObjectFetcher.ts';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@common/encoding';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
-import { ComponentWithProperties, defineRoute, NavigationController, useCanPop, useNavigate, usePop, usePresent } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, NumberDecoder, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, defineRoute, NavigationController, useCanPop, useNavigate, usePop, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import type { StamhoofdFilter } from '@stamhoofd/structures';

@@ -23,7 +23,7 @@ import {
     RegistrationPeriodFactory,
     UserFactory,
 } from '@stamhoofd/models';
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { SessionService } from '../../../services/SessionService.js';
 import { vi } from 'vitest';

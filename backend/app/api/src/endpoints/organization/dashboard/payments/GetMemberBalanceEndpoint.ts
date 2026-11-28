@@ -1,7 +1,7 @@
-import type { DecodedRequest, Request, Response } from '@node/endpoints';
-import { Endpoint } from '@node/endpoints';
+import type { DecodedRequest, Request, Response } from '@stamhoofd/node-endpoints';
+import { Endpoint } from '@stamhoofd/node-endpoints';
 
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 type Params = { id: string };
 type Query = undefined;

@@ -1,4 +1,4 @@
-import { logger } from '@node/logging';
+import { logger } from '@stamhoofd/node-logging';
 
 export function loadLogger() {
     logger.infectConsole();

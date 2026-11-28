@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { User, Token } from '@stamhoofd/models';
 import {

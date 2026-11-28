@@ -1,5 +1,5 @@
-import { column } from '@node/database';
-import { SimpleError } from '@common/errors';
+import { column } from '@stamhoofd/node-database';
+import { SimpleError } from '@stamhoofd/common-errors';
 import {
     STPackageMeta,
     STPackageStatus,
@@ -9,7 +9,7 @@ import {
 } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/node-sql';
 
 export class STPackage extends QueryableModel {
     static table = 'stamhoofd_packages';

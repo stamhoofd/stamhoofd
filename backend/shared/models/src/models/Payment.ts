@@ -1,4 +1,4 @@
-import { column } from '@node/database';
+import { column } from '@stamhoofd/node-database';
 import {
     BalanceItemDetailed,
     BalanceItemPaymentDetailed,
@@ -19,7 +19,7 @@ import type { Settlement as SettlementModel } from './Settlement.js';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import type { BalanceItem } from './BalanceItem.js';
 import type { BalanceItemPayment } from './BalanceItemPayment.js';

@@ -14,9 +14,9 @@
 </template>
 
 <script setup lang="ts">
-import type { Decoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { Request } from '@common/networking';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { Request } from '@stamhoofd/common-networking';
 import { Image, ResolutionRequest, Version } from '@stamhoofd/structures';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { computed, ref } from 'vue';

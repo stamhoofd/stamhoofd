@@ -5,7 +5,7 @@ import {
     field,
     MapDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 
 import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@common/encoding';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';

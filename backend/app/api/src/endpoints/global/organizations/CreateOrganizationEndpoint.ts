@@ -1,8 +1,8 @@
-import type { Model } from '@node/database';
-import type { Decoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type { Model } from '@stamhoofd/node-database';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { EmailInterfaceBase } from '@stamhoofd/email';
 import { Email } from '@stamhoofd/email';
 import {

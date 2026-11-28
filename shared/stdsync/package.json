@@ -23,7 +23,7 @@
         "test": "vitest run"
     },
     "dependencies": {
-        "@node/terminal": "workspace:*"
+        "@stamhoofd/node-terminal": "workspace:*"
     },
     "devDependencies": {
         "oxlint-plugin-stamhoofd": "workspace:*",

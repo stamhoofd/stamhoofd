@@ -1,4 +1,4 @@
-const navigationPackage = '@browser/navigation';
+const navigationPackage = '@stamhoofd/browser-navigation';
 const asyncComponentImportNames = new Set([
     '#containers/AsyncComponent.ts',
     '@stamhoofd/components/containers/AsyncComponent.ts',

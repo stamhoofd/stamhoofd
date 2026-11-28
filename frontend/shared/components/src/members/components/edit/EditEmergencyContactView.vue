@@ -42,8 +42,8 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleError, SimpleErrors } from '@common/errors';
-import { usePop } from '@browser/navigation';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { usePop } from '@stamhoofd/browser-navigation';
 import type { EmergencyContact, PlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, nextTick, ref } from 'vue';

@@ -9,7 +9,7 @@ import {
     MapDecoder,
     NumberDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Language } from '@stamhoofd/types/Language';

@@ -1,4 +1,4 @@
-import { Factory } from '@node/database';
+import { Factory } from '@stamhoofd/node-database';
 import { EventMeta } from '@stamhoofd/structures';
 
 import { Event } from '../models/Event.js';

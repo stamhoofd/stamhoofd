@@ -1,5 +1,5 @@
-import { Database } from '@node/database';
-import { Request } from '@node/endpoints';
+import { Database } from '@stamhoofd/node-database';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
 import { OrganizationFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

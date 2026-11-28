@@ -1,4 +1,4 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 import { DocumentTemplate } from '@stamhoofd/models';
 import { SeedTools } from '../helpers/SeedTools.js';
 

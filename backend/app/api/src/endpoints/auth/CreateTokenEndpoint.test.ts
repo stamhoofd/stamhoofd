@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, Token, User, UserFactory, UserSession } from '@stamhoofd/models';
 import { SESSION_DURATIONS } from '@stamhoofd/models/constants/sessions.js';

@@ -93,7 +93,7 @@ it('accepts an already-listening server and non-HTTP initialization', async () =
 });
 
 it('exports only approved fields and fixed messages, retaining real SDK span timing', async () => {
-    const tracer = trace.getTracer('@node/observability');
+    const tracer = trace.getTracer('@stamhoofd/node-observability');
     const span = tracer.startSpan('http.server.request', {
         attributes: {
             'http.request.method': 'GET',
@@ -108,14 +108,14 @@ it('exports only approved fields and fixed messages, retaining real SDK span tim
     span.setStatus({ code: SpanStatusCode.ERROR, message: 'synthetic-secret' });
     span.end();
     tracer.startSpan('synthetic-secret').end();
-    logs.getLogger('@node/observability').emit({
+    logs.getLogger('@stamhoofd/node-observability').emit({
         body: 'application.ready',
         eventName: 'synthetic-secret',
         severityText: 'synthetic-secret',
         severityNumber: SeverityNumber.INFO,
         attributes: { authorization: 'synthetic-secret' },
     });
-    logs.getLogger('@node/observability').emit({ body: 'synthetic-secret' });
+    logs.getLogger('@stamhoofd/node-observability').emit({ body: 'synthetic-secret' });
     await spanProcessor.forceFlush();
     await logProcessor.forceFlush();
     const exported = spans.getFinishedSpans().at(-1)!;

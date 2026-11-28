@@ -1,9 +1,9 @@
-import { SimpleError } from '@common/errors';
-import { Request } from '@common/networking';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { Request } from '@stamhoofd/common-networking';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 import { useContext } from '#hooks/useContext.ts';
-import type { Decoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
 
 export function useGetOfficialUitpasSocialTariff() {
     const owner = useRequestOwner();

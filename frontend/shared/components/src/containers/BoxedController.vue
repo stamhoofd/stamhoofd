@@ -9,8 +9,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { ComponentWithProperties } from '@browser/navigation';
-import { FramedComponent } from '@browser/navigation';
+import type { ComponentWithProperties } from '@stamhoofd/browser-navigation';
+import { FramedComponent } from '@stamhoofd/browser-navigation';
 
 const props = defineProps<{
     root: ComponentWithProperties;

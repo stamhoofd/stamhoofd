@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Email } from '@stamhoofd/models';
 import type { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';

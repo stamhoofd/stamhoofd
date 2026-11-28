@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import { OrganizationFactory } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/structures';
 

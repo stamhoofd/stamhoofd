@@ -17,7 +17,7 @@ a wrapper, while an options object (or no argument) creates a decorator.
 It replaces the former `instrumentFunction` export.
 
 ```ts
-import { instrument, withSpan, log } from '@common/opentelemetry-decorators';
+import { instrument, withSpan, log } from '@stamhoofd/common-opentelemetry-decorators';
 
 class Service {
     @instrument('service.sync', { fields: ([name]: [string]) => ({ environment: name }) })

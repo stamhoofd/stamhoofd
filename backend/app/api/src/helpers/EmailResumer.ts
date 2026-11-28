@@ -1,5 +1,5 @@
 import { Email, Organization, User } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { EmailStatus } from '@stamhoofd/structures';
 import { ContextInstance } from './Context.js';
 import { EmailSendService } from '../services/EmailSendService.js';

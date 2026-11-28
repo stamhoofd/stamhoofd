@@ -1,4 +1,4 @@
-import { ArrayDecoder, field } from '@common/encoding';
+import { ArrayDecoder, field } from '@stamhoofd/common-encoding';
 import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { Group, Member, MemberResponsibilityRecord, Platform } from '@stamhoofd/models';
 import type {

@@ -1,4 +1,4 @@
-import { Factory } from '@node/database';
+import { Factory } from '@stamhoofd/node-database';
 import { MemberResponsibility } from '@stamhoofd/structures';
 
 import { Platform } from '../models/Platform.js';

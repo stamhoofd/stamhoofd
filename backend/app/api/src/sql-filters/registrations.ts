@@ -1,5 +1,5 @@
 import { Group, Member, Organization, Registration } from '@stamhoofd/models';
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
@@ -7,7 +7,7 @@ import {
     createJoinedRelationFilter,
     SQL,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';
 import { memberFilterCompilers } from './members.js';

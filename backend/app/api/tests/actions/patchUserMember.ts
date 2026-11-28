@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { Request } from '@node/endpoints';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { Token } from '@stamhoofd/models';
 import type { MemberWithRegistrationsBlob } from '@stamhoofd/structures';

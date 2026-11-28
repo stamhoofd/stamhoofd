@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useShow } from '@browser/navigation';
+import { useShow } from '@stamhoofd/browser-navigation';
 import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
 import type { MFAChallengeResponse } from '@stamhoofd/structures';
 import { MFAMethodType } from '@stamhoofd/structures';

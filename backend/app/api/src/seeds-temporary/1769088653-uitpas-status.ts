@@ -1,8 +1,8 @@
-import { Migration } from '@node/database';
-import { isSimpleError } from '@common/errors';
-import { logger } from '@node/logging';
+import { Migration } from '@stamhoofd/node-database';
+import { isSimpleError } from '@stamhoofd/common-errors';
+import { logger } from '@stamhoofd/node-logging';
 import { Member } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 import { updateMemberDetailsUitpasNumber } from '../helpers/updateMemberDetailsUitpasNumber.js';

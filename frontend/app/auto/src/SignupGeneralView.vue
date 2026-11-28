@@ -109,10 +109,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
-import { Request } from '@common/networking';
-import { ComponentWithProperties, useCanDismiss, useCanPop, useDismiss, usePop, useShow } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@stamhoofd/common-errors';
+import { Request } from '@stamhoofd/common-networking';
+import { ComponentWithProperties, useCanDismiss, useCanPop, useDismiss, usePop, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import bikeIllustration from '@stamhoofd/assets/images/illustrations/bike.svg';
 import charityIllustration from '@stamhoofd/assets/images/illustrations/charity.svg';

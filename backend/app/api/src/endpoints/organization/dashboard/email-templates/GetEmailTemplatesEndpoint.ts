@@ -1,12 +1,12 @@
-import type { Decoder } from '@common/encoding';
-import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { EmailTemplate, Platform } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { StringArrayDecoder } from '../../../../decoders/StringArrayDecoder.js';
 import { StringNullableDecoder } from '../../../../decoders/StringNullableDecoder.js';
 import { Context } from '../../../../helpers/Context.js';

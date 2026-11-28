@@ -108,9 +108,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, NavigationController, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useAllRegistrationPeriods, useFetchAllRegistrationPeriods } from '#hooks/networking/useFetchRegistrationPeriods';
 import type { PlatformMember, RegistrationPeriod } from '@stamhoofd/structures';
@@ -128,7 +128,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 const props = defineProps<{
     member: PlatformMember;

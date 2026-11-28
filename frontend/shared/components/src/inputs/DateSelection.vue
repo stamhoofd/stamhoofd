@@ -32,7 +32,7 @@
 
 <script lang="ts" setup>
 import { useIsMobile } from '#hooks/useIsMobile.ts';
-import { ComponentWithProperties, usePresent } from '@browser/navigation';
+import { ComponentWithProperties, usePresent } from '@stamhoofd/browser-navigation';
 import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
 import type { ComputedRef, Ref } from 'vue';

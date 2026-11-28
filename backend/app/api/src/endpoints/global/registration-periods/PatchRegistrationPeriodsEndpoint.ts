@@ -2,16 +2,16 @@ import type {
     ConvertArrayToPatchableArray,
     Decoder,
     PatchableArrayAutoEncoder,
-} from '@common/encoding';
-import { PatchableArrayDecoder, StringDecoder, patchObject } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+} from '@stamhoofd/common-encoding';
+import { PatchableArrayDecoder, StringDecoder, patchObject } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Group, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { RegistrationPeriodService } from '@stamhoofd/models/services/RegistrationPeriodService.js';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { Context } from '../../../helpers/Context.js';
 import { PeriodHelper } from '../../../helpers/PeriodHelper.js';
 

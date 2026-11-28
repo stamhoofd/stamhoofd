@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type XLSX from 'xlsx';
 import type { ColumnMatcher } from '../ColumnMatcher';
 import type { ImportMemberResult } from '../ImportMemberResult';

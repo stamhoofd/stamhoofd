@@ -1,4 +1,4 @@
-import type { Data } from '@common/encoding';
+import type { Data } from '@stamhoofd/common-encoding';
 
 export class PasswordTokenGrantStruct {
     grantType: 'password_token';

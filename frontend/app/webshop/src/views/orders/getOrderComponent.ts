@@ -1,4 +1,4 @@
-import type { ComponentWithProperties } from '@browser/navigation';
+import type { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 /**

@@ -1,10 +1,10 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import type { DetailedPayableBalanceCollection } from '@stamhoofd/structures';
 import { PaymentStatus } from '@stamhoofd/structures';
 
 import { BalanceItem, Payment, Platform } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { Context } from '../../../../helpers/Context.js';
 import { GetUserDetailedPayableBalanceEndpoint } from '../../../global/registration/GetUserDetailedPayableBalanceEndpoint.js';
 

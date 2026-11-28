@@ -1,4 +1,4 @@
-import { Encodeable } from '@common/encoding';
+import { Encodeable } from '@stamhoofd/common-encoding';
 import http from 'http';
 import { Readable } from 'node:stream';
 

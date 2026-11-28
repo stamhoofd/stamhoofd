@@ -1,4 +1,4 @@
-import type { ComponentWithProperties } from '@browser/navigation';
+import type { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 
 import type { LimitedFilteredRequest } from '@stamhoofd/structures';
 import type { FetchAllOptions, FetchLimitSettings, ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';

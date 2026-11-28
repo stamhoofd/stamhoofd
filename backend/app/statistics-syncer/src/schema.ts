@@ -1,4 +1,4 @@
-import { DatabaseInstance, Migration } from '@node/database';
+import { DatabaseInstance, Migration } from '@stamhoofd/node-database';
 import path from 'node:path';
 import {
     getStatisticsConnection,

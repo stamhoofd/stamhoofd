@@ -42,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, usePresent } from '@browser/navigation';
+import { ComponentWithProperties, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import { Toast } from '@stamhoofd/components/overlays/Toast';

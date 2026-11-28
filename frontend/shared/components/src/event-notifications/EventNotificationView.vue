@@ -217,8 +217,8 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, usePop, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useEventViewLoaders } from '#events/eventViewLoaders.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';

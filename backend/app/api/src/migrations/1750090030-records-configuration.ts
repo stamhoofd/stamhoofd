@@ -1,7 +1,7 @@
-import { column, Migration } from '@node/database';
-import { AutoEncoder, field } from '@common/encoding';
+import { column, Migration } from '@stamhoofd/node-database';
+import { AutoEncoder, field } from '@stamhoofd/common-encoding';
 import { Organization } from '@stamhoofd/models';
-import { QueryableModel, SQL } from '@stamhoofd/sql';
+import { QueryableModel, SQL } from '@stamhoofd/node-sql';
 import { DataPermissionsSettings, FinancialSupportSettings, Version } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { SeedTools } from '../helpers/SeedTools.js';

@@ -46,7 +46,7 @@ declare global {
     const NextVersion: { version: number };
 }
 
-import { AutoEncoder } from '@common/encoding';
+import { AutoEncoder } from '@stamhoofd/common-encoding';
 AutoEncoder.skipDefaultValuesVersion = 10000; // todo
 
 /**

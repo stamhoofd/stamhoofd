@@ -5,7 +5,7 @@ import {
     field,
     IntegerDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 
 import { SecurityCodeSendMethod } from '../members/SecurityCodeSendMethod.js';
 

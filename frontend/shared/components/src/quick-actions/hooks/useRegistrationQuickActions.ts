@@ -1,5 +1,5 @@
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { MemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
@@ -21,7 +21,7 @@ import { getAllMemberSteps } from '#members/classes/steps/getAllMemberSteps.ts';
 import { useNavigationActions } from '../../types/NavigationActions';
 import type { QuickAction, QuickActions } from '../classes/QuickActions';
 
-import { ComponentWithProperties, NavigationController, useNavigate, useShow } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController, useNavigate, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg';
 import emailWarningSvg from '@stamhoofd/assets/images/illustrations/email-warning.svg';

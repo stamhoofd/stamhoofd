@@ -1,4 +1,4 @@
-import { defineRoute, useNavigate } from '@browser/navigation';
+import { defineRoute, useNavigate } from '@stamhoofd/browser-navigation';
 import type { Ref } from 'vue';
 
 export function useForgotPassword({ email }: { email: Ref<string> }) {

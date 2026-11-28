@@ -138,7 +138,7 @@ function wrapFunction<This, Args extends unknown[], Result>(
                 ...(context.active().getValue(fieldsKey) as Attributes | undefined),
                 ...options.fields?.(args),
             };
-            span = trace.getTracer('@common/opentelemetry-decorators').startSpan(name, {
+            span = trace.getTracer('@stamhoofd/common-opentelemetry-decorators').startSpan(name, {
                 attributes: {
                     ...fields,
                     ...(options.label ? { [operationLabel]: options.label } : {}),

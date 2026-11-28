@@ -7,8 +7,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import type { WebshopField } from '@stamhoofd/structures';
 

@@ -1,4 +1,4 @@
-import type { SQLResultNamespacedRow } from '@node/database';
+import type { SQLResultNamespacedRow } from '@stamhoofd/node-database';
 import {
     Group,
     Member,
@@ -9,7 +9,7 @@ import {
     Registration,
     RegistrationPeriod,
 } from '@stamhoofd/models';
-import { SQL, SQLSelect, SQLWhereSign } from '@stamhoofd/sql';
+import { SQL, SQLSelect, SQLWhereSign } from '@stamhoofd/node-sql';
 import { getStatisticsConnection } from './database.js';
 import {
     applyImportedCutoff,

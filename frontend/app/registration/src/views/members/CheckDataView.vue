@@ -96,7 +96,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, usePresent } from '@browser/navigation';
+import { ComponentWithProperties, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import MemberIcon from '@stamhoofd/components/members/components/MemberIcon.vue';

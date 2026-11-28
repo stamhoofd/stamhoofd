@@ -1,13 +1,13 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { MemberPlatformMembership } from '@stamhoofd/models';
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
     createJoinedRelationFilter,
     SQL,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { Context } from '../helpers/Context.js';
 import { memberFilterCompilers } from './members.js';
 import { organizationFilterCompilers } from './organizations.js';

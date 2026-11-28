@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType } from '@common/encoding';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
 import type { MemberDetails } from '@stamhoofd/structures';
 
 /**

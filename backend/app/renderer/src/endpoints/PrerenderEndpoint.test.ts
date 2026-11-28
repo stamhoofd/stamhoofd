@@ -1,4 +1,4 @@
-import { Request, TestServer } from '@node/endpoints';
+import { Request, TestServer } from '@stamhoofd/node-endpoints';
 import { PrerenderEndpoint } from './PrerenderEndpoint.js';
 import nock from 'nock';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';

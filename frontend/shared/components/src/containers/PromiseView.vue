@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, ComponentWithPropertiesInstance, useAnimateHeightChange, useContentState, useCurrentComponent } from '@browser/navigation';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, useAnimateHeightChange, useContentState, useCurrentComponent } from '@stamhoofd/browser-navigation';
 import { nextTick, onMounted, ref, shallowRef } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';

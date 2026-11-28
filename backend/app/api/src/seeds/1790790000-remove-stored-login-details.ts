@@ -1,6 +1,6 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 import { EmailRecipient } from '@stamhoofd/models';
-import { QueryableModel, scalarToSQLExpression, SQL, SQLWhereLike } from '@stamhoofd/sql';
+import { QueryableModel, scalarToSQLExpression, SQL, SQLWhereLike } from '@stamhoofd/node-sql';
 
 import { SeedTools } from '../helpers/SeedTools.js';
 

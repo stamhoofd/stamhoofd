@@ -1,4 +1,4 @@
-import type { Decoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
 import { setFavicon } from '@stamhoofd/components/helpers/favicon.ts';
 import { forceWebshopOpenForPreview } from '@stamhoofd/components/webshops/webshopPreview.ts';

@@ -1,6 +1,6 @@
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import type { Company } from '@stamhoofd/structures';
 import {
     BalanceItemRelation,

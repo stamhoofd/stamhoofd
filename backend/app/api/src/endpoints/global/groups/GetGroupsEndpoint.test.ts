@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import {
     GroupFactory,
@@ -18,7 +18,7 @@ import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initAdmin, initBundleDiscount, initPlatformAdmin } from '../../../../tests/init/index.js';
 import { GetGroupsEndpoint } from './GetGroupsEndpoint.js';
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = '/groups';

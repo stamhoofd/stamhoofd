@@ -1,6 +1,6 @@
-import { column } from '@node/database';
-import { SimpleError } from '@common/errors';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import type { PayconiqAccount } from '@stamhoofd/structures';
 import { PaymentStatus, Version } from '@stamhoofd/structures';
 import type { IncomingMessage } from 'http';

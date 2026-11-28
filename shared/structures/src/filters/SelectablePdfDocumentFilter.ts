@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@stamhoofd/common-encoding';
 
 export class SelectablePdfDataFilter extends AutoEncoder {
     @field({ decoder: StringDecoder })

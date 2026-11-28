@@ -1,9 +1,9 @@
-import { Request } from '@common/networking';
+import { Request } from '@stamhoofd/common-networking';
 import { UitpasNumberDetails, UitpasNumbersGetDetailsRequest } from '@stamhoofd/structures';
 
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { useContext } from '#hooks/useContext.ts';
 

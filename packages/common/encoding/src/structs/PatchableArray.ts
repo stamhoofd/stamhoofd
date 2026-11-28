@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 import { Cloneable, cloneObject } from '../classes/Cloneable.js';
 import { Data } from '../classes/Data.js';

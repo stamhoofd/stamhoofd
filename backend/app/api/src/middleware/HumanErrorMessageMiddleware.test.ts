@@ -1,6 +1,6 @@
-import type { DecodedRequest } from '@node/endpoints';
-import { Endpoint, Request, Response } from '@node/endpoints';
-import { SimpleError, SimpleErrors } from '@common/errors';
+import type { DecodedRequest } from '@stamhoofd/node-endpoints';
+import { Endpoint, Request, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -85,6 +85,21 @@ describe('HumanErrorMessageMiddleware', () => {
                     }),
                 ],
             }),
+        );
+    });
+
+    test.each([
+        ['invalid_sort', 'Sorteren op dit veld is hier niet mogelijk'],
+        ['sorter_join_overlap', 'Deze combinatie van sorteringen is niet mogelijk'],
+        [
+            'too_many_filter_values',
+            'Te veel individueel geselecteerde waarden in jouw filter (het maximum is 1000). Probeer om alles in één keer te selecteren en daarna eventueel sommige rijen uit te sluiten, of gebruik een filter en selecteer alles.',
+        ],
+    ])('adds a human message to a %s error from @stamhoofd/node-sql', async (code, human) => {
+        const endpoint = new ThrowingEndpoint(new SimpleError({ code, message: 'Internal message' }));
+
+        await expect(testServer.test(endpoint, request())).rejects.toThrow(
+            expect.objectContaining({ code, human }),
         );
     });
 

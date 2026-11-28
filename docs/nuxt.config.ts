@@ -35,7 +35,7 @@ export default defineNuxtConfig({
         },
     },
     modules: [
-        '@node/nuxt-observability',
+        '@stamhoofd/node-nuxt-observability',
         (_, nuxt) => {
             nuxt.hook('vite:extendConfig', (config) => {
                 if (config.optimizeDeps?.include) {

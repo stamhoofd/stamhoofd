@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, NumberDecoder, StringDecoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, field, NumberDecoder, StringDecoder } from '@stamhoofd/common-encoding';
 
 export class GraphData extends AutoEncoder {
     @field({ decoder: StringDecoder })

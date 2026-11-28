@@ -1,6 +1,6 @@
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { Request } from '@node/endpoints';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Token } from '@stamhoofd/models';
 import { BlockedPaymentMandate, Organization, OrganizationFactory } from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';

@@ -1,5 +1,5 @@
-import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
-import type { ApplicationLifecycle } from '@node/observability';
+import { CORSPreflightEndpoint, Router, RouterServer } from '@stamhoofd/node-endpoints';
+import type { ApplicationLifecycle } from '@stamhoofd/node-observability';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { CORSMiddleware, LogMiddleware } from '@stamhoofd/backend-middleware';
 import { loadLogger } from '@stamhoofd/logging';

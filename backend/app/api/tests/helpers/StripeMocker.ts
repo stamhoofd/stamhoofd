@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import { StripeAccount } from '@stamhoofd/models';
 import nock from 'nock';
 import qs from 'qs';

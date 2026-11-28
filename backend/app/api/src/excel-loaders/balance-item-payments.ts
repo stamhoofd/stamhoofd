@@ -1,6 +1,6 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { BalanceItemPayment, Payment } from '@stamhoofd/models';
-import { applySQLSorter, compileToSQLFilter, SQL } from '@stamhoofd/sql';
+import { applySQLSorter, compileToSQLFilter, SQL } from '@stamhoofd/node-sql';
 import type { IPaginatedResponse, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { assertSort, ExcelExportType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

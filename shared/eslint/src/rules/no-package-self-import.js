@@ -40,7 +40,7 @@ function findOwnPackageName(startDir) {
     return name;
 }
 
-function getImportedPackageName(specifier) {
+export function getImportedPackageName(specifier) {
     if (specifier.startsWith('.') || specifier.startsWith('/') || specifier.startsWith('#')) {
         // Relative, absolute or subpath ("imports") specifiers never target a package by name.
         return null;

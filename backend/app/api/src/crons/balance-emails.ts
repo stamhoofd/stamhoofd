@@ -1,7 +1,7 @@
 import { registerTenantCron } from './helpers/registerTenantCron.js';
 import { CachedBalance, Email, EmailRecipient, Organization, User } from '@stamhoofd/models';
-import type { IterableSQLSelect } from '@stamhoofd/sql';
-import { readDynamicSQLExpression, SQL } from '@stamhoofd/sql';
+import type { IterableSQLSelect } from '@stamhoofd/node-sql';
+import { readDynamicSQLExpression, SQL } from '@stamhoofd/node-sql';
 import type { OrganizationEmail, StamhoofdFilter } from '@stamhoofd/structures';
 import {
     EmailRecipientFilter,

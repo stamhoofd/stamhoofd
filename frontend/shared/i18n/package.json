@@ -20,7 +20,7 @@
     },
     "dependencies": {
         "@stamhoofd/frontend-storage": "workspace:*",
-        "@browser/navigation": "workspace:*",
+        "@stamhoofd/browser-navigation": "workspace:*",
         "@stamhoofd/locales": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",

@@ -1,4 +1,4 @@
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
@@ -9,7 +9,7 @@ import {
     SQLJsonUnquote,
     SQLScalar,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { invoicedBalanceItemCompilers } from './invoiced-balance-items.js';
 
 /**

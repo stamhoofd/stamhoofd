@@ -1,4 +1,4 @@
-import { ComponentWithProperties, ReactiveUrl } from '@browser/navigation';
+import { ComponentWithProperties, ReactiveUrl } from '@stamhoofd/browser-navigation';
 import { importWithRetry } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 /**

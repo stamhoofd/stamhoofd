@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import {
     FilterWrapperMarker,
