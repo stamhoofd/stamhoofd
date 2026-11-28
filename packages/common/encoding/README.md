@@ -6,7 +6,7 @@ Encoding and decoding can get customized, and that's the whole point of this lib
 
 ## Installation
 
-This is a private workspace. Declare `"@stamhoofd/common-encoding": "workspace:*"` in
+Inside this repository, declare `"@stamhoofd/common-encoding": "workspace:*"` in
 consuming packages. Run `pnpm stam test encoding` and
 `pnpm stam check typecheck @stamhoofd/common-encoding` from the repository root.
 

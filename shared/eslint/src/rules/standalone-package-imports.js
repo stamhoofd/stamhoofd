@@ -1,9 +1,6 @@
 import path from 'node:path';
 import { repositoryRoot } from '../ownership.js';
-import { getImportedPackageName } from './no-package-self-import.js';
-
-// Libraries in /packages are published under these name prefixes.
-const standalonePackageName = /^@stamhoofd\/(common|node|browser)-/;
+import { getImportedPackageName, isAllowedStandaloneDependency } from './helpers/package-name.js';
 
 function isInStandalonePackage(filename) {
     const relative = path.relative(repositoryRoot, filename);
@@ -33,7 +30,7 @@ export default {
             }
 
             const packageName = getImportedPackageName(source.value);
-            if (packageName?.startsWith('@stamhoofd/') && !standalonePackageName.test(packageName)) {
+            if (packageName && !isAllowedStandaloneDependency(packageName)) {
                 context.report({
                     node: source,
                     messageId: 'standalonePackageImport',
@@ -54,6 +51,19 @@ export default {
             },
             ImportExpression(node) {
                 checkSource(node.source);
+            },
+            // type Foo = import('@stamhoofd/x').Foo
+            TSImportType(node) {
+                checkSource(node.source ?? node.argument?.literal);
+            },
+            // import x = require('@stamhoofd/x')
+            TSExternalModuleReference(node) {
+                checkSource(node.expression);
+            },
+            CallExpression(node) {
+                if (node.callee.type === 'Identifier' && node.callee.name === 'require') {
+                    checkSource(node.arguments[0]);
+                }
             },
         };
     },

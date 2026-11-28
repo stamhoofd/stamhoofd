@@ -85,5 +85,20 @@ ruleTester.run('standalone-package-imports', standalonePackageImports, {
             code: `const structures = await import('@stamhoofd/structures');`,
             errors: [{ messageId: 'standalonePackageImport' }],
         },
+        {
+            filename: databaseFile,
+            code: `type Group = import('@stamhoofd/structures').Group;`,
+            errors: [{ messageId: 'standalonePackageImport' }],
+        },
+        {
+            filename: databaseFile,
+            code: `import utility = require('@stamhoofd/utility');`,
+            errors: [{ messageId: 'standalonePackageImport' }],
+        },
+        {
+            filename: databaseFile,
+            code: `const utility = require('@stamhoofd/utility');`,
+            errors: [{ messageId: 'standalonePackageImport' }],
+        },
     ],
 });

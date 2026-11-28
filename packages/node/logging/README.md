@@ -2,7 +2,7 @@
 
 Helper library for nice, styleable and context aware logging.
 
-This is the private Node.js workspace `@stamhoofd/node-logging`. Declare it as
+This is the Node.js library `@stamhoofd/node-logging`. Inside this repository, declare it as
 `"@stamhoofd/node-logging": "workspace:*"` in consuming packages. It uses Node's
 `AsyncLocalStorage` and process streams; it is not a browser library.
 

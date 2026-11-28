@@ -25,6 +25,18 @@
         "@nuxt/schema": "4.6.4",
         "vite": "8.3.8"
     },
+    "peerDependencies": {
+        "@nuxt/schema": "4.6.4",
+        "vite": "8.3.8"
+    },
+    "peerDependenciesMeta": {
+        "@nuxt/schema": {
+            "optional": true
+        },
+        "vite": {
+            "optional": true
+        }
+    },
     "publishConfig": {
         "access": "public"
     }

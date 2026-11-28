@@ -50,6 +50,7 @@ describe('$in', () => {
             },
             filters,
             error: 'Too many values in $in filter, maximum is 1000',
+            code: 'too_many_filter_values',
         });
     });
 

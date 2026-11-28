@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { getImportedPackageName } from './helpers/package-name.js';
 
 // Directory → name of the nearest package.json with a "name" field (null if none).
 const packageNameCache = new Map();
@@ -38,19 +39,6 @@ function findOwnPackageName(startDir) {
     }
 
     return name;
-}
-
-export function getImportedPackageName(specifier) {
-    if (specifier.startsWith('.') || specifier.startsWith('/') || specifier.startsWith('#')) {
-        // Relative, absolute or subpath ("imports") specifiers never target a package by name.
-        return null;
-    }
-
-    const parts = specifier.split('/');
-    if (specifier.startsWith('@')) {
-        return parts.length >= 2 ? `${parts[0]}/${parts[1]}` : null;
-    }
-    return parts[0];
 }
 
 export default {

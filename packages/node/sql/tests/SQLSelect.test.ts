@@ -37,7 +37,6 @@ describe('SQLSelect', () => {
 
         afterAll(async () => {
             await Database.statement('DROP TABLE IF EXISTS `' + table + '`');
-            await Database.end();
         });
 
         function select() {

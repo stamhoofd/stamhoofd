@@ -49,11 +49,38 @@ describe('SQL sorter registries', () => {
                     [{ key, order: SortItemDirection.ASC }],
                     definitions,
                 ),
-            ).rejects.toThrow('Unknown sort key ' + key);
+            ).rejects.toMatchObject({ code: 'invalid_sort', message: 'Unknown sort key ' + key });
         }
         await expect(applySQLSorter(SQL.select().from('items'), [], definitions)).rejects.toThrow(
             'No sort passed',
         );
+    });
+
+    it('rejects two sorters that join the same table differently', async () => {
+        const definition = (column: string) => ({
+            getValue: (value: string) => value,
+            toSQL: (direction: SortItemDirection) =>
+                new SQLOrderBy({ column: SQL.column('related', column), direction }),
+            join: SQL.join(SQL.table('related')).where(
+                SQL.column('related', 'id'),
+                SQL.column('items', 'relatedId'),
+            ),
+        });
+        const definitions: SQLSortDefinitions<string> = new Map([
+            ['related.name', definition('name')],
+            ['related.date', definition('date')],
+        ]);
+
+        await expect(
+            applySQLSorter(
+                SQL.select().from('items'),
+                [
+                    { key: 'related.name', order: SortItemDirection.ASC },
+                    { key: 'related.date', order: SortItemDirection.ASC },
+                ],
+                definitions,
+            ),
+        ).rejects.toMatchObject({ code: 'sorter_join_overlap' });
     });
 
     it('accepts explicitly registered special names', async () => {

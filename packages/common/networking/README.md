@@ -2,7 +2,7 @@
 
 Simple and extendable frontend for simple-endpoints
 
-Use the private `@stamhoofd/common-networking` workspace with `workspace:*` dependencies.
+Inside this repository, depend on `@stamhoofd/common-networking` with `workspace:*`.
 Run `pnpm stam test common-networking`, `pnpm stam check lint @stamhoofd/common-networking`,
 and `pnpm stam check typecheck @stamhoofd/common-networking` from the repository root.
 The `networking` test selector still belongs to the frontend service suite.

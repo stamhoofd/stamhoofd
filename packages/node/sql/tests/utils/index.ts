@@ -13,12 +13,17 @@ export async function testError({
     filter,
     filters,
     error,
+    code,
 }: {
     filter: StamhoofdFilter;
     filters: SQLFilterDefinitions;
     error: string;
+    code?: string;
 }) {
     await expect(compileToSQLFilter(filter, filters)).rejects.toThrow(error);
+    if (code) {
+        await expect(compileToSQLFilter(filter, filters)).rejects.toMatchObject({ code });
+    }
 }
 
 /**

@@ -3477,7 +3477,10 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 });
 
                 await expect(testServer.test(endpoint, request)).rejects.toThrow(
-                    STExpect.errorWithCode('invalid_sort'),
+                    expect.objectContaining({
+                        code: 'invalid_sort',
+                        human: 'Sorteren op dit veld is hier niet mogelijk',
+                    }),
                 );
             });
         });
