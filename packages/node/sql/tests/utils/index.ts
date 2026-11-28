@@ -20,10 +20,10 @@ export async function testError({
     error: string;
     code?: string;
 }) {
-    await expect(compileToSQLFilter(filter, filters)).rejects.toThrow(error);
-    if (code) {
-        await expect(compileToSQLFilter(filter, filters)).rejects.toMatchObject({ code });
-    }
+    await expect(compileToSQLFilter(filter, filters)).rejects.toMatchObject({
+        message: expect.stringContaining(error),
+        ...(code ? { code } : {}),
+    });
 }
 
 /**

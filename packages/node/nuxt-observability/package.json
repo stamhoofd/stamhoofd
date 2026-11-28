@@ -27,9 +27,9 @@
         "h3": "1.15.11"
     },
     "peerDependencies": {
-        "@nuxt/schema": "4.6.4",
-        "h3": "1.15.11",
-        "nitropack": "2.13.6"
+        "@nuxt/schema": "^4.0.0",
+        "h3": "^1.15.0",
+        "nitropack": "^2.13.0"
     },
     "publishConfig": {
         "access": "public"

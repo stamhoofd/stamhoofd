@@ -9,7 +9,7 @@ Errors are `SimpleError`s with a `code` and an English `message`, but no `human`
 | Code                     | Thrown when                                              |
 | ------------------------ | -------------------------------------------------------- |
 | `invalid_sort`           | A sort key has no definition                             |
-| `sorter_join_overlap`    | Two sorters join the same table in a different way       |
+| `sorter_join_overlap`    | Two sorters use separate joins on the same table         |
 | `too_many_filter_values` | A `$in` filter has more than 1000 values                 |
 | `unknown_filter`         | A filter key has no definition (from `common-filters`)   |
 

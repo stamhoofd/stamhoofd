@@ -61,6 +61,7 @@ describe('Special filter cases', () => {
             },
             filters,
             error: 'Unknown filter name',
+            code: 'unknown_filter',
         });
     });
 
@@ -93,6 +94,7 @@ describe('Special filter cases', () => {
             },
             filters,
             error: 'Unknown filter age',
+            code: 'unknown_filter',
         });
     });
 

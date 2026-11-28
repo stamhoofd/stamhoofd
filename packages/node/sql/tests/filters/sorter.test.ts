@@ -56,7 +56,7 @@ describe('SQL sorter registries', () => {
         );
     });
 
-    it('rejects two sorters that join the same table differently', async () => {
+    it('rejects two sorters with separate joins on the same table', async () => {
         const definition = (column: string) => ({
             getValue: (value: string) => value,
             toSQL: (direction: SortItemDirection) =>
