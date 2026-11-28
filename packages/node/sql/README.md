@@ -4,7 +4,7 @@ A typed SQL query builder on top of `@stamhoofd/node-database`, plus compilers t
 
 ## Errors
 
-Errors are `SimpleError`s with a `code` and an English `message`, but no `human` message. Translate these codes in your application before showing them to users:
+Errors are `SimpleError`s with a `code` and an English `message`, but no `human` message. These codes can reach end users and should be translated in your application. Other codes, such as `empty_sort`, `invalid_filter` and `invalid_field`, indicate a bug in the caller and need no translation.
 
 | Code                     | Thrown when                                              |
 | ------------------------ | -------------------------------------------------------- |

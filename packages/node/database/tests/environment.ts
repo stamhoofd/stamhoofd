@@ -1,7 +1,7 @@
 /**
  * Points the Database connection at the test database. `stam test` provides DB_PORT.
  * Keep these values in sync with shared/test-utils (env.json and loadEnvironment.ts), which the other backend
- * packages use, and with the copy in packages/node/{database,sql}/tests/environment.ts.
+ * packages use, and with the identical copy in packages/node/sql/tests/environment.ts.
  */
 export function setTestDatabaseEnvironment() {
     process.env.DB_DATABASE = 'stamhoofd-tests';
