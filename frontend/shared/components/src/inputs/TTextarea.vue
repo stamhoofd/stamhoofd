@@ -12,6 +12,7 @@
                     :placeholder="placeholder"
                     :value="getForLanguage(language)"
                     @input="setForLanguage(($event.currentTarget as HTMLTextAreaElement).value, language)"
+                    @blur="dropEmptyLanguage(language)"
                 />
                 <span v-if="language">
                     {{ language.toUpperCase() }}
@@ -32,7 +33,6 @@ import { Language } from '@stamhoofd/types/Language';
 import { computed } from 'vue';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
 import { registerTranslateableComponent } from './hooks/useEditorContext';
-import { useEditorLanguage } from './hooks/useEditorLanguage';
 import TInputButton from './TInputButton.vue';
 
 const value = defineModel<TranslatedString>({ required: true });
@@ -41,9 +41,10 @@ if (typeof value.value === 'string') {
     throw new Error('TInput must be used with a TranslatedString');
 }
 
-const editorLanguage = useEditorLanguage();
 const { hasLanguages } = useSwitchLanguage();
 registerTranslateableComponent(value);
+
+const editedLanguages = new Set<Language>();
 
 withDefaults(
     defineProps<{
@@ -79,15 +80,29 @@ function setForLanguage(val: string, lang: Language | null) {
         return;
     }
 
+    // An emptied language is only dropped on blur, so its field stays while retyping
+    editedLanguages.add(lang);
     value.value = value.value.patch({
-        [lang]: val || null,
+        [lang]: val,
     });
 }
 
-const textValue = computed({
-    get: () => getForLanguage(editorLanguage.value ?? Language.English),
-    set: (val: string) => {
-        setForLanguage(val, editorLanguage.value ?? Language.English);
-    },
-});
+function dropEmptyLanguage(lang: Language | null) {
+    if (lang === null || !hasLanguages) {
+        return;
+    }
+
+    // Only a language the user emptied themselves is dropped, not one TInputButton just added
+    const wasEdited = editedLanguages.delete(lang);
+    if (!wasEdited || value.value.getIfExists(lang)) {
+        return;
+    }
+
+    const patched = value.value.patch({
+        [lang]: null,
+    });
+
+    // Nothing left to translate, so drop back to an untranslated value like TInputButton does
+    value.value = patched.languages.length === 0 ? value.value.patch('') : patched;
+}
 </script>
