@@ -7,7 +7,12 @@ import { stripVTControlCharacters } from 'node:util';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { constants } from 'node:os';
-import { diagnostic, instrument, log, markSpanFailed } from '@stamhoofd/common-opentelemetry-decorators';
+import {
+    diagnostic,
+    instrument,
+    log,
+    markSpanFailed,
+} from '@stamhoofd/common-opentelemetry-decorators';
 import type { LogSink } from '@stamhoofd/common-opentelemetry-decorators';
 import { trace } from '@opentelemetry/api';
 

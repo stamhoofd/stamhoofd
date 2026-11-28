@@ -1,5 +1,9 @@
 import type { PlainObject } from '@stamhoofd/common-encoding';
-import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/node-sql';
+import type {
+    SQLOrderByDirection,
+    SQLSortDefinition,
+    SQLSortDefinitions,
+} from '@stamhoofd/node-sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/node-sql';
 import type { PlatformMembership } from '@stamhoofd/structures';
 

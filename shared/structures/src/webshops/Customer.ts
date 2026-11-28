@@ -1,4 +1,10 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import {
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    StringDecoder,
+} from '@stamhoofd/common-encoding';
 import { SimpleError } from '@stamhoofd/common-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { Address } from '../addresses/Address.js';

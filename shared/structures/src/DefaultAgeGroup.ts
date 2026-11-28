@@ -1,4 +1,10 @@
-import { ArrayDecoder, AutoEncoder, IntegerDecoder, StringDecoder, field } from '@stamhoofd/common-encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    IntegerDecoder,
+    StringDecoder,
+    field,
+} from '@stamhoofd/common-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';

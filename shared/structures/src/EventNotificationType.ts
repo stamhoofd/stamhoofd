@@ -1,4 +1,10 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    DateDecoder,
+    field,
+    StringDecoder,
+} from '@stamhoofd/common-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { RecordCategory } from './members/records/RecordCategory.js';
 

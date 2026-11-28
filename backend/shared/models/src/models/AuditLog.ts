@@ -1,6 +1,11 @@
 import { column } from '@stamhoofd/node-database';
 import type { Decoder } from '@stamhoofd/common-encoding';
-import { ArrayDecoder, MapDecoder, StringDecoder, StringOrNumberDecoder } from '@stamhoofd/common-encoding';
+import {
+    ArrayDecoder,
+    MapDecoder,
+    StringDecoder,
+    StringOrNumberDecoder,
+} from '@stamhoofd/common-encoding';
 import { QueryableModel } from '@stamhoofd/node-sql';
 import {
     AuditLogPatchItem,

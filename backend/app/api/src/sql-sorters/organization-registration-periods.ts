@@ -1,5 +1,9 @@
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/node-sql';
+import type {
+    SQLOrderByDirection,
+    SQLSortDefinition,
+    SQLSortDefinitions,
+} from '@stamhoofd/node-sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/node-sql';
 
 export const organizationRegistrationPeriodSorters: SQLSortDefinitions<OrganizationRegistrationPeriod> =

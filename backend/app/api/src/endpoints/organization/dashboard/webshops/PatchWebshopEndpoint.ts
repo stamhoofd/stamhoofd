@@ -1,4 +1,8 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import type {
+    AutoEncoderPatchType,
+    Decoder,
+    PatchableArrayAutoEncoder,
+} from '@stamhoofd/common-encoding';
 import { PatchableArray } from '@stamhoofd/common-encoding';
 import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
 import { Endpoint, Response } from '@stamhoofd/node-endpoints';

@@ -1,5 +1,9 @@
 import { Group, Member, Organization } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/node-sql';
+import type {
+    SQLOrderByDirection,
+    SQLSortDefinition,
+    SQLSortDefinitions,
+} from '@stamhoofd/node-sql';
 import { SQL, SQLIfNull, SQLOrderBy } from '@stamhoofd/node-sql';
 import type {
     MemberWithRegistrationsBlob,

@@ -1,4 +1,9 @@
-import type { Response, Request, RequestMiddleware, ResponseMiddleware } from '@stamhoofd/node-endpoints';
+import type {
+    Response,
+    Request,
+    RequestMiddleware,
+    ResponseMiddleware,
+} from '@stamhoofd/node-endpoints';
 import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
 import { logger, StyledText } from '@stamhoofd/node-logging';
 let requestCounter = 0;

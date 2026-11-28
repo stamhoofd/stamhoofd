@@ -11,7 +11,11 @@ import {
     Version,
 } from '@stamhoofd/structures';
 
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import type {
+    AutoEncoderPatchType,
+    Decoder,
+    PatchableArrayAutoEncoder,
+} from '@stamhoofd/common-encoding';
 import { PatchableArrayDecoder, StringDecoder } from '@stamhoofd/common-encoding';
 import { SimpleError } from '@stamhoofd/common-errors';
 import {

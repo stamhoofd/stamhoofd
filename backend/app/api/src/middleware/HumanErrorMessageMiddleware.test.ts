@@ -96,7 +96,9 @@ describe('HumanErrorMessageMiddleware', () => {
             'Te veel individueel geselecteerde waarden in jouw filter (het maximum is 1000). Probeer om alles in één keer te selecteren en daarna eventueel sommige rijen uit te sluiten, of gebruik een filter en selecteer alles.',
         ],
     ])('adds a human message to a %s error from @stamhoofd/node-sql', async (code, human) => {
-        const endpoint = new ThrowingEndpoint(new SimpleError({ code, message: 'Internal message' }));
+        const endpoint = new ThrowingEndpoint(
+            new SimpleError({ code, message: 'Internal message' }),
+        );
 
         await expect(testServer.test(endpoint, request())).rejects.toThrow(
             expect.objectContaining({ code, human }),

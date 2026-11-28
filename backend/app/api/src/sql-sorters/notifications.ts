@@ -1,5 +1,9 @@
 import type { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
-import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/node-sql';
+import type {
+    SQLOrderByDirection,
+    SQLSortDefinition,
+    SQLSortDefinitions,
+} from '@stamhoofd/node-sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/node-sql';
 
 /**

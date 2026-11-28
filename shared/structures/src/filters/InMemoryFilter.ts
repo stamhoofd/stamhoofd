@@ -11,7 +11,10 @@ import {
     compileFilter,
     filterDefinitionsToSelector,
 } from '@stamhoofd/common-filters/FilterCompilers';
-import type { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
+import type {
+    StamhoofdCompareValue,
+    StamhoofdFilter,
+} from '@stamhoofd/common-filters/StamhoofdFilter';
 
 export type InMemoryFilterRunner = (object: any) => boolean;
 

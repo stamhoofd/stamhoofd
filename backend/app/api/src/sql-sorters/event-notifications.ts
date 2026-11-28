@@ -1,5 +1,9 @@
 import type { SQLResultNamespacedRow } from '@stamhoofd/node-database';
-import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/node-sql';
+import type {
+    SQLOrderByDirection,
+    SQLSortDefinition,
+    SQLSortDefinitions,
+} from '@stamhoofd/node-sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/node-sql';
 import { Formatter } from '@stamhoofd/utility';
 import { organizationJoin } from '../sql-filters/event-notifications.js';

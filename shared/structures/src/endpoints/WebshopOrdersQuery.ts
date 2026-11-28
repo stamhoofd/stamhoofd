@@ -1,4 +1,10 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder } from '@stamhoofd/common-encoding';
+import {
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+} from '@stamhoofd/common-encoding';
 
 export enum SortDirection {
     Ascending = 'Ascending',

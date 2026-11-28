@@ -1,5 +1,9 @@
 import type { AuditLog } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/node-sql';
+import type {
+    SQLOrderByDirection,
+    SQLSortDefinition,
+    SQLSortDefinitions,
+} from '@stamhoofd/node-sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/node-sql';
 
 export const auditLogSorters: SQLSortDefinitions<AuditLog> = new Map<

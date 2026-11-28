@@ -6,9 +6,5 @@
         "noEmit": true
     },
     "references": [{ "path": "./tsconfig.types.json" }],
-    "include": [
-        "./src/**/*.spec.ts",
-        "./src/**/*.test.ts",
-        "./tests"
-    ]
+    "include": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "./tests"]
 }

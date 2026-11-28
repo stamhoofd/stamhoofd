@@ -1,4 +1,10 @@
-import type { Data, Decoder, EncodableObject, Encodeable, EncodeContext } from '@stamhoofd/common-encoding';
+import type {
+    Data,
+    Decoder,
+    EncodableObject,
+    Encodeable,
+    EncodeContext,
+} from '@stamhoofd/common-encoding';
 import { encodeObject } from '@stamhoofd/common-encoding';
 
 export class IPaginatedResponse<Result, Query> {

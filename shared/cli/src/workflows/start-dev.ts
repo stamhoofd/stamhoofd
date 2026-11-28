@@ -1,4 +1,9 @@
-import { hasLogSink, log, markSpanFailed, withSpan } from '@stamhoofd/common-opentelemetry-decorators';
+import {
+    hasLogSink,
+    log,
+    markSpanFailed,
+    withSpan,
+} from '@stamhoofd/common-opentelemetry-decorators';
 import { context as otelContext, propagation } from '@opentelemetry/api';
 import { openDevEventChannel } from '../runtime/dev-event-channel.js';
 import { DevLifecycle } from '../runtime/dev-lifecycle.js';

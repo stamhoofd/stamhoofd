@@ -1,4 +1,9 @@
-import { column, ManyToManyRelation, ManyToOneRelation, OneToManyRelation } from '@stamhoofd/node-database';
+import {
+    column,
+    ManyToManyRelation,
+    ManyToOneRelation,
+    OneToManyRelation,
+} from '@stamhoofd/node-database';
 import { QueryableModel, SQL } from '@stamhoofd/node-sql';
 import {
     MemberDetails,

@@ -1,4 +1,10 @@
-import type { Data, Decoder, Encodeable, EncodeContext, PlainObject } from '@stamhoofd/common-encoding';
+import type {
+    Data,
+    Decoder,
+    Encodeable,
+    EncodeContext,
+    PlainObject,
+} from '@stamhoofd/common-encoding';
 import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@stamhoofd/common-encoding';
 
 import type { SortList } from '@stamhoofd/common-filters/SortList';

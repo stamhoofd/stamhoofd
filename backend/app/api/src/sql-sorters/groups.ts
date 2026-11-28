@@ -1,5 +1,9 @@
 import type { Group } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/node-sql';
+import type {
+    SQLOrderByDirection,
+    SQLSortDefinition,
+    SQLSortDefinitions,
+} from '@stamhoofd/node-sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/node-sql';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 

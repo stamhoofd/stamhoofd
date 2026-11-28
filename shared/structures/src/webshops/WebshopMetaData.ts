@@ -1,4 +1,9 @@
-import type { AutoEncoderPatchType, Data, Decoder, PatchableDecoder } from '@stamhoofd/common-encoding';
+import type {
+    AutoEncoderPatchType,
+    Data,
+    Decoder,
+    PatchableDecoder,
+} from '@stamhoofd/common-encoding';
 import {
     ArrayDecoder,
     AutoEncoder,

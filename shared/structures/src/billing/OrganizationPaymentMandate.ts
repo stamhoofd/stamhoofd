@@ -1,4 +1,10 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    field,
+    StringDecoder,
+} from '@stamhoofd/common-encoding';
 
 /**
  * @deprecated

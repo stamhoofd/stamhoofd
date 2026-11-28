@@ -1,5 +1,8 @@
 import { SimpleError } from '@stamhoofd/common-errors';
-import { compileFilter, filterDefinitionsToCompiler } from '@stamhoofd/common-filters/FilterCompilers';
+import {
+    compileFilter,
+    filterDefinitionsToCompiler,
+} from '@stamhoofd/common-filters/FilterCompilers';
 import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilterTypes';
 import type { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression.js';
 import { SQLSafeValue } from '../SQLExpressions.js';

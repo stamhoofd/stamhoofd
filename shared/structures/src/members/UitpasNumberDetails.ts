@@ -1,4 +1,10 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import {
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    StringDecoder,
+} from '@stamhoofd/common-encoding';
 import { DataValidator } from '@stamhoofd/utility';
 
 /**

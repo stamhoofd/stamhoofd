@@ -24,7 +24,9 @@ export class ApplicationLifecycle {
         readonly service: string,
         private readonly flush?: () => Promise<void>,
     ) {
-        this.startup = trace.getTracer('@stamhoofd/node-observability').startSpan('application.startup');
+        this.startup = trace
+            .getTracer('@stamhoofd/node-observability')
+            .startSpan('application.startup');
         this.notify('starting');
     }
 

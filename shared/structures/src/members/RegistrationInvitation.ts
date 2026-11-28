@@ -1,4 +1,10 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import {
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    StringDecoder,
+} from '@stamhoofd/common-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { GroupType } from '../GroupType.js';
 import { TranslatedString } from '../TranslatedString.js';

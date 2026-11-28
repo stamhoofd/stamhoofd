@@ -1,4 +1,10 @@
-import { AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    EnumDecoder,
+    field,
+    StringDecoder,
+} from '@stamhoofd/common-encoding';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
 import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 
