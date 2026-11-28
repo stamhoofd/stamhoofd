@@ -1,6 +1,6 @@
-import { Column, Database, Migration } from '@node/database';
-import { ApplicationLifecycle } from '@node/observability';
-import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
+import { Column, Database, Migration } from '@stamhoofd/node-database';
+import { ApplicationLifecycle } from '@stamhoofd/node-observability';
+import { CORSPreflightEndpoint, Router, RouterServer } from '@stamhoofd/node-endpoints';
 import { CORSMiddleware, LogMiddleware, VersionMiddleware } from '@stamhoofd/backend-middleware';
 import { checkReadOnly } from '@stamhoofd/crons';
 import { Email } from '@stamhoofd/email';
@@ -10,9 +10,9 @@ import { MemoryService } from '@stamhoofd/logging/MemoryService';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 
-import { AutoEncoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { logger, StyledText } from '@node/logging';
+import { AutoEncoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { logger, StyledText } from '@stamhoofd/node-logging';
 import { markAllSeedsFinished, startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -32,7 +32,7 @@ import { PlatformMembershipService } from './services/PlatformMembershipService.
 import { UitpasService } from './services/uitpas/UitpasService.js';
 import { UniqueMemberNumberService } from './services/UniqueMemberNumberService.js';
 import { UniqueUserService } from './services/UniqueUserService.js';
-import { QueryableModel, SQLLogger } from '@stamhoofd/sql';
+import { QueryableModel, SQLLogger } from '@stamhoofd/node-sql';
 import { WebshopCrowdfundingService } from './services/WebshopCrowdfundingService.js';
 
 process.on('unhandledRejection', (error: Error) => {

@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
 import {
     OrganizationFactory,
@@ -21,7 +21,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { SessionService } from '../../../services/SessionService.js';
 
-import type { AutoEncoderPatchType } from '@common/encoding';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { testServer } from '../../../../tests/helpers/TestServer.js';

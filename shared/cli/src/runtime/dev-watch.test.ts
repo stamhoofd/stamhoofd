@@ -3,7 +3,7 @@ import { once } from 'node:events';
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { backendDevCommand } from './dev-commands.js';
-import type { DevEvent } from '@node/dev-tools/events';
+import type { DevEvent } from '@stamhoofd/node-dev-tools/events';
 import { expect, it } from 'vitest';
 import { openDevEventChannel } from './dev-event-channel.js';
 

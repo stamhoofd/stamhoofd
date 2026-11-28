@@ -1,9 +1,9 @@
 // first import nock
 import nock from 'nock';
 
-import { Column, Database } from '@node/database';
-import { Request } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import { Column, Database } from '@stamhoofd/node-database';
+import { Request } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Email, EmailMocker } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Version } from '@stamhoofd/structures';

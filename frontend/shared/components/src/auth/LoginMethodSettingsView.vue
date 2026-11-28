@@ -303,9 +303,9 @@ import type {
     ConvertArrayToPatchableArray,
     Decoder,
     PartialWithoutMethods,
-} from '@common/encoding';
-import { SimpleError, SimpleErrors } from '@common/errors';
-import { usePop } from '@browser/navigation';
+} from '@stamhoofd/common-encoding';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { LoginMethod } from '@stamhoofd/structures';
 import {

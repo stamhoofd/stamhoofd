@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useDismiss } from '@browser/navigation';
+import { useDismiss } from '@stamhoofd/browser-navigation';
 import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
 import type { Webshop } from '@stamhoofd/structures';
 import { ref } from 'vue';

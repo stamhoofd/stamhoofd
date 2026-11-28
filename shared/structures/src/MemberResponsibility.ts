@@ -6,7 +6,7 @@ import {
     IntegerDecoder,
     StringDecoder,
     field,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { PermissionRoleForResponsibility } from './PermissionRole.js';
 import { ResourcePermissions } from './ResourcePermissions.js';

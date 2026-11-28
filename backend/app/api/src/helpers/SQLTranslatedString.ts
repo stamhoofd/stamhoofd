@@ -3,8 +3,8 @@ import type {
     SQLExpression,
     SQLExpressionOptions,
     SQLQuery,
-} from '@stamhoofd/sql';
-import { SQL } from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { Language } from '@stamhoofd/types/Language';
 
 export class SQLTranslatedString implements SQLExpression {

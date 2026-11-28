@@ -16,8 +16,8 @@ try {
 }
 ```
 
-Imports come from `@node/opentelemetry-terminal`, `@opentelemetry/sdk-node`, and
-`@common/opentelemetry-decorators`. Add an exporter processor alongside the
+Imports come from `@stamhoofd/node-opentelemetry-terminal`, `@opentelemetry/sdk-node`, and
+`@stamhoofd/common-opentelemetry-decorators`. Add an exporter processor alongside the
 renderer for remote traces. Progress requires recording spans; a sampler that
 drops spans also removes their progress notifications.
 
@@ -55,7 +55,7 @@ warnings and errors. Errors thrown by the application are reported by its comman
 boundary; the renderer only marks failed progress lines.
 
 Output defaults to stderr, or the supplied `stream`. Inject a shared `terminal`
-from `@node/terminal` to coordinate multiple renderers and prompts. The renderer
+from `@stamhoofd/node-terminal` to coordinate multiple renderers and prompts. The renderer
 disposes only its own region; the application disposes the injected coordinator.
 `TerminalRendererOptions` accepts either `terminal` or `stream`, not both. Color
 detection uses the actual destination, including when a terminal is injected.

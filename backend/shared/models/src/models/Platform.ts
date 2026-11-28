@@ -1,7 +1,7 @@
-import { column } from '@node/database';
-import { SimpleError } from '@common/errors';
+import { column } from '@stamhoofd/node-database';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import {
     AuditLogReplacementDependencies,
     PlatformConfig,

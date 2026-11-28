@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import type {
     CountFilteredRequest,
     EmailWithRecipients,
@@ -14,13 +14,13 @@ import {
     PaginatedResponse,
 } from '@stamhoofd/structures';
 
-import type { Decoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import { Email, Member } from '@stamhoofd/models';
 import type { Language } from '@stamhoofd/types/Language';
-import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
-import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/node-sql';
+import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/node-sql';
 import { Context } from '../../../helpers/Context.js';
 import { EmailPreviewService } from '../../../services/EmailPreviewService.js';
 import { emailFilterCompilers, userEmailFilterCompilers } from '../../../sql-filters/emails.js';

@@ -1,5 +1,5 @@
 import { BalanceItem, BalanceItemPayment, CachedBalance, Payment, User } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import type { ReceivableBalanceType } from '@stamhoofd/structures';
 import {
     BalanceItemStatus,

@@ -1,5 +1,5 @@
-import { ObjectData } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import { ObjectData } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 import { Group } from './Group.js';
 import { GroupGenderType } from './GroupGenderType.js';

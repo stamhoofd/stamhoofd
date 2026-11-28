@@ -3,16 +3,16 @@ import type {
     Data,
     Decoder,
     PatchableArrayAutoEncoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import {
     ArrayDecoder,
     PatchableArray,
     PatchableArrayDecoder,
     StringDecoder,
-} from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import {
     BalanceItem,
     BalanceItemPayment,

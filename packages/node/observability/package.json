@@ -1,8 +1,11 @@
 {
-    "name": "@node/observability",
+    "name": "@stamhoofd/node-observability",
     "version": "2.158.0",
-    "private": true,
     "type": "module",
+    "files": [
+        "dist",
+        "dist-types"
+    ],
     "exports": {
         ".": {
             "types": "./dist-types/index.d.ts",
@@ -28,5 +31,8 @@
     "devDependencies": {
         "oxlint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.12"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

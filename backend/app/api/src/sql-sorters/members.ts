@@ -1,6 +1,10 @@
 import type { MemberWithUsersRegistrationsAndGroups } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
-import { SQL, SQLIfNull, SQLOrderBy } from '@stamhoofd/sql';
+import type {
+    SQLOrderByDirection,
+    SQLSortDefinition,
+    SQLSortDefinitions,
+} from '@stamhoofd/node-sql';
+import { SQL, SQLIfNull, SQLOrderBy } from '@stamhoofd/node-sql';
 import { Formatter } from '@stamhoofd/utility';
 import { memberCachedBalanceJoinForOrganization } from '../helpers/outstandingBalanceJoin.js';
 import { throwIfNoFinancialReadAccess } from '../sql-filters/members.js';

@@ -1,0 +1,39 @@
+{
+    "name": "@stamhoofd/common-filters",
+    "version": "2.159.0",
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        "./*": {
+            "types": "./dist-types/*.d.ts",
+            "import": "./dist/*.js",
+            "require": "./dist/*.js"
+        }
+    },
+    "files": [
+        "dist",
+        "dist-types",
+        "package.json"
+    ],
+    "scripts": {
+        "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage"
+    },
+    "dependencies": {
+        "@stamhoofd/common-encoding": "workspace:*",
+        "@stamhoofd/common-errors": "workspace:*"
+    },
+    "devDependencies": {
+        "eslint-plugin-stamhoofd": "workspace:*",
+        "oxlint-plugin-stamhoofd": "workspace:*",
+        "vitest": "4.1.12"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
+    }
+}

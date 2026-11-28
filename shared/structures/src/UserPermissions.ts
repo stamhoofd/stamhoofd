@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { AutoEncoder, field, MapDecoder, StringDecoder } from '@common/encoding';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { AutoEncoder, field, MapDecoder, StringDecoder } from '@stamhoofd/common-encoding';
 
 import { AccessRightHelper } from './AccessRight.js';
 import { LoadedPermissions } from './LoadedPermissions.js';

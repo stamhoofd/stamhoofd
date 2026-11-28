@@ -47,10 +47,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoder, AutoEncoderPatchType } from '@common/encoding';
-import { patchContainsChanges } from '@common/encoding';
-import { SimpleErrors } from '@common/errors';
-import { useDismiss } from '@browser/navigation';
+import type { AutoEncoder, AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { patchContainsChanges } from '@stamhoofd/common-encoding';
+import { SimpleErrors } from '@stamhoofd/common-errors';
+import { useDismiss } from '@stamhoofd/browser-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';

@@ -29,7 +29,7 @@
         "test": "vitest"
     },
     "dependencies": {
-        "@node/logging": "workspace:*"
+        "@stamhoofd/node-logging": "workspace:*"
     },
     "license": "UNLICENCED",
     "publishConfig": {

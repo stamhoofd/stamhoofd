@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';

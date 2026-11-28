@@ -1,6 +1,6 @@
-import type { Data, Decoder } from '@common/encoding';
-import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { Data, Decoder } from '@stamhoofd/common-encoding';
+import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 import { LegacyRecordType, OldRecordType } from './LegacyRecordType.js';
 

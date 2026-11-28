@@ -1,7 +1,7 @@
-import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
-import { isPatchableArray, patchObject } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
+import { isPatchableArray, patchObject } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import type {
     EventNotificationType,
@@ -11,7 +11,7 @@ import type {
 import { Platform as PlatformStruct, PlatformConfig } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { isAbortedError, isCanceledError, QueueHandler } from '@stamhoofd/queues';
 import { Context } from '../../../helpers/Context.js';
 import { MembershipCharger } from '../../../helpers/MembershipCharger.js';

@@ -20,8 +20,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { DetailedPayableBalance } from '@stamhoofd/structures';
 import { Invoice } from '@stamhoofd/structures';

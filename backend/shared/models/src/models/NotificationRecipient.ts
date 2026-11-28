@@ -1,5 +1,5 @@
-import { column } from '@node/database';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { UserNotification } from '@stamhoofd/structures/notifications/UserNotification.js';
 import { v7 as uuidv7 } from 'uuid';
 import type { Notification } from './Notification.js';

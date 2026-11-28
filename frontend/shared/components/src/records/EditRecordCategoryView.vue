@@ -74,10 +74,10 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { usePop, usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { usePop, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { ObjectWithRecords, PatchAnswers } from '@stamhoofd/structures';
 import { PropertyFilter, RecordCategory, TranslatedString } from '@stamhoofd/structures';

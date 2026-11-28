@@ -1,7 +1,7 @@
-import { column } from '@node/database';
+import { column } from '@stamhoofd/node-database';
 import { v4 as uuidv4 } from 'uuid';
 
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/node-sql';
 
 /**
  * Invitation to register for a group. If an invitation exists the member can always register even if he does not meet the requirements of the group.

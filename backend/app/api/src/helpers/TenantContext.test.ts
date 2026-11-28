@@ -1,4 +1,4 @@
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 import { Platform, ROOT_TENANT_ID } from '@stamhoofd/models';
 import { PlatformConfig, PlatformMembershipType } from '@stamhoofd/structures';
 import { STExpect } from '@stamhoofd/test-utils';

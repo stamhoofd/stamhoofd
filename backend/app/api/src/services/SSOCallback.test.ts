@@ -1,4 +1,4 @@
-import { DecodedRequest, Request } from '@node/endpoints';
+import { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
 import { OrganizationFactory, Platform, Token, User, UserFactory } from '@stamhoofd/models';
 import {
     LoginMethod,

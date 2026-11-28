@@ -1,9 +1,9 @@
-import type { ManyToOneRelation } from '@node/database';
-import { column } from '@node/database';
-import { SimpleError } from '@common/errors';
+import type { ManyToOneRelation } from '@stamhoofd/node-database';
+import { column } from '@stamhoofd/node-database';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Language } from '@stamhoofd/types/Language';
-import { QueryableModel, SQL } from '@stamhoofd/sql';
+import { QueryableModel, SQL } from '@stamhoofd/node-sql';
 import type { TransferSettings, WebshopTimeSlot } from '@stamhoofd/structures';
 import {
     BalanceItemPaymentWithPayment,

@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { PatchableDecoder } from '../classes/AutoEncoder.js';
 import { Field } from '../classes/Field.js';
 

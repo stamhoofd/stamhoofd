@@ -206,8 +206,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { defineRoutes, useNavigate } from '@browser/navigation';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { defineRoutes, useNavigate } from '@stamhoofd/browser-navigation';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';

@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { computed, ref, watch } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';

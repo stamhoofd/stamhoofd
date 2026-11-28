@@ -1,5 +1,5 @@
-import { SimpleError } from '@common/errors';
-import type { ComponentWithProperties } from '@browser/navigation';
+import { SimpleError } from '@stamhoofd/common-errors';
+import type { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import type { PropertyFilter, StamhoofdFilter, StamhoofdNotFilter, WrapperFilter } from '@stamhoofd/structures';
 import { isEmptyFilter, unwrapFilter, wrapFilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';

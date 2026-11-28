@@ -19,7 +19,7 @@ import {
     PaymentStatus,
     SettlementReference,
 } from '@stamhoofd/structures';
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';

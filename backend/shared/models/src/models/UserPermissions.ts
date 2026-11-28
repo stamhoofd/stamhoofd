@@ -1,6 +1,6 @@
-import type { ManyToOneRelation } from '@node/database';
-import { column } from '@node/database';
-import { QueryableModel } from '@stamhoofd/sql';
+import type { ManyToOneRelation } from '@stamhoofd/node-database';
+import { column } from '@stamhoofd/node-database';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { Permissions } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 

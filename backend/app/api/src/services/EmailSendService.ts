@@ -1,4 +1,4 @@
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Email as EmailClass } from '@stamhoofd/email';
 import { Email, EmailRecipient, Organization, Platform } from '@stamhoofd/models';
@@ -11,7 +11,7 @@ import {
 } from '../helpers/EmailBuilder.js';
 import { errorToSimpleErrors } from '@stamhoofd/models/helpers/errorToSimpleErrors.js';
 import { isAbortedError, QueueHandler } from '@stamhoofd/queues';
-import { SQL, SQLWhereSign } from '@stamhoofd/sql';
+import { SQL, SQLWhereSign } from '@stamhoofd/node-sql';
 import {
     EmailRecipientsStatus,
     EmailStatus,

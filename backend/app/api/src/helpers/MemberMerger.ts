@@ -10,7 +10,7 @@ import {
     User,
 } from '@stamhoofd/models';
 import { DocumentService } from '../services/DocumentService.js';
-import { QueryableModel, SQL } from '@stamhoofd/sql';
+import { QueryableModel, SQL } from '@stamhoofd/node-sql';
 import type {
     Address,
     BooleanStatus,

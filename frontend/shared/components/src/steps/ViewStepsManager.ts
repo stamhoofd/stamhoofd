@@ -1,4 +1,4 @@
-import { ComponentWithProperties, NavigationController } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController } from '@stamhoofd/browser-navigation';
 import type { DisplayOptions, NavigationActions } from '../types/NavigationActions';
 import { glueNavigationActions, runDisplayOptions } from '../types/NavigationActions';
 import type { ViewStep, ViewStepNavigation } from './ViewStep';

@@ -1,6 +1,11 @@
-import type { Response, Request, RequestMiddleware, ResponseMiddleware } from '@node/endpoints';
-import { isSimpleError, isSimpleErrors } from '@common/errors';
-import { logger, StyledText } from '@node/logging';
+import type {
+    Response,
+    Request,
+    RequestMiddleware,
+    ResponseMiddleware,
+} from '@stamhoofd/node-endpoints';
+import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
+import { logger, StyledText } from '@stamhoofd/node-logging';
 let requestCounter = 0;
 
 function removePII(object: unknown) {

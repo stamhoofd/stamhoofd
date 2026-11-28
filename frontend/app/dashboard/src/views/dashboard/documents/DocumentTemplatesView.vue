@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePresent } from '@browser/navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, useNavigate, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useDocumentTemplatesObjectFetcher } from '@stamhoofd/components/fetchers/useDocumentTemplatesObjectFetcher.ts';
 import type { UIFilter } from '@stamhoofd/components/filters/UIFilter.ts';

@@ -10,8 +10,8 @@
     "dependencies": {
         "@stamhoofd/frontend-session": "workspace:*",
         "@stamhoofd/frontend-platform": "workspace:*",
-        "@common/errors": "workspace:*",
-        "@common/networking": "workspace:*",
+        "@stamhoofd/common-errors": "workspace:*",
+        "@stamhoofd/common-networking": "workspace:*",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/components": "workspace:*",
         "@stamhoofd/networking": "workspace:*",

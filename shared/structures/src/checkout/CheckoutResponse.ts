@@ -1,4 +1,4 @@
-import { AutoEncoder, field, StringDecoder } from '@common/encoding';
+import { AutoEncoder, field, StringDecoder } from '@stamhoofd/common-encoding';
 
 import { Invoice } from '../billing/Invoice.js';
 import { PaymentGeneral } from '../members/PaymentGeneral.js';

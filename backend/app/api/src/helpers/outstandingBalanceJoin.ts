@@ -1,6 +1,6 @@
 import { CachedBalance, Member, Registration } from '@stamhoofd/models';
-import type { SQLNamedExpression } from '@stamhoofd/sql';
-import { SQL, SQLAlias, SQLSelectAs, SQLSum } from '@stamhoofd/sql';
+import type { SQLNamedExpression } from '@stamhoofd/node-sql';
+import { SQL, SQLAlias, SQLSelectAs, SQLSum } from '@stamhoofd/node-sql';
 
 type SQLJoin = ReturnType<typeof SQL.leftJoin>;
 

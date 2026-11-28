@@ -1,8 +1,8 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import { OrganizationFactory, Platform } from '@stamhoofd/models';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { SearchOrganizationEndpoint } from './SearchOrganizationEndpoint.js';
 

@@ -1,4 +1,4 @@
-import { column } from '@node/database';
+import { column } from '@stamhoofd/node-database';
 import {
     Company,
     File,
@@ -8,8 +8,8 @@ import {
 } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ArrayDecoder } from '@common/encoding';
-import { QueryableModel } from '@stamhoofd/sql';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
 import { Formatter } from '@stamhoofd/utility';
 

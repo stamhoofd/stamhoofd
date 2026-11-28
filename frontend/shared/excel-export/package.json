@@ -19,8 +19,8 @@
         "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
-        "@common/encoding": "workspace:*",
-        "@browser/navigation": "workspace:*",
+        "@stamhoofd/common-encoding": "workspace:*",
+        "@stamhoofd/browser-navigation": "workspace:*",
         "@stamhoofd/excel-writer": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/utility": "workspace:*",

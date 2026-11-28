@@ -11,8 +11,8 @@
 <script setup lang="ts">
 import { useAuth } from '#hooks/useAuth.ts';
 import { useContext } from '#hooks/useContext.ts';
-import { ArrayDecoder } from '@common/encoding';
-import type { Decoder } from '@common/encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { StripeAccount } from '@stamhoofd/structures';

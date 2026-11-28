@@ -1,6 +1,6 @@
 import nock from 'nock';
-import { Column } from '@node/database';
-import { Request } from '@node/endpoints';
+import { Column } from '@stamhoofd/node-database';
+import { Request } from '@stamhoofd/node-endpoints';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Version } from '@stamhoofd/structures';

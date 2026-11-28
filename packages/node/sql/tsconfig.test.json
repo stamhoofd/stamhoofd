@@ -1,0 +1,10 @@
+{
+    "extends": "../../../tsconfig.test.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "outDir": "dist",
+        "noEmit": true
+    },
+    "references": [{ "path": "./tsconfig.types.json" }],
+    "include": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "./tests"]
+}

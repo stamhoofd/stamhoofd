@@ -5,8 +5,8 @@ import {
     field,
     PatchMap,
     StringDecoder,
-} from '@common/encoding';
-import { isSimpleError, isSimpleErrors, SimpleErrors } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors, SimpleErrors } from '@stamhoofd/common-errors';
 import { v4 as uuidv4 } from 'uuid';
 
 import { PropertyFilter } from '../../filters/PropertyFilter.js';

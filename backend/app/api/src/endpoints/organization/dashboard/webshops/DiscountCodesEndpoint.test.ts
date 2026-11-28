@@ -1,7 +1,7 @@
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { Database } from '@node/database';
-import { Request } from '@node/endpoints';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { Database } from '@stamhoofd/node-database';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization, User, Webshop } from '@stamhoofd/models';
 import type { Token } from '@stamhoofd/models';
 import {

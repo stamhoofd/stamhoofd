@@ -1,4 +1,4 @@
-import { usePresent } from '@browser/navigation';
+import { usePresent } from '@stamhoofd/browser-navigation';
 import type { PlatformMember } from '@stamhoofd/structures';
 
 import { useContext } from '#hooks/useContext.ts';

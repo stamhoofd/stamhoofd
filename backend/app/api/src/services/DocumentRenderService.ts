@@ -1,4 +1,4 @@
-import { isSimpleError, isSimpleErrors } from '@common/errors';
+import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
 import type { Document, Organization } from '@stamhoofd/models';
 import { DocumentTemplate, Platform } from '@stamhoofd/models';
 import { render } from '@stamhoofd/models/helpers/Handlebars.js';

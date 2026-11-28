@@ -1,6 +1,3 @@
-// First dotenv
-import { TestUtils } from '@stamhoofd/test-utils';
-
 function getDirname(): string {
     // CJS environment
     if (typeof __dirname !== 'undefined') {
@@ -15,12 +12,12 @@ function getDirname(): string {
     throw new Error('Cannot determine __dirname');
 }
 
-// Continue
 import { Database } from '../src/classes/Database.js';
 import { Migration } from '../src/classes/Migration.js';
+import { setTestDatabaseEnvironment } from './environment.js';
 
 export async function setup() {
-    TestUtils.globalSetup();
+    setTestDatabaseEnvironment();
     await Migration.runAll(getDirname() + '/test-migrations');
 
     await Database.delete('DELETE FROM `_testModels_testModels`');

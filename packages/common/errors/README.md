@@ -1,12 +1,12 @@
 # Simple errors
 
-`@common/errors` contains the error classes shared by the browser and backend.
+`@stamhoofd/common-errors` contains the error classes shared by the browser and backend.
 
 ```ts
-import { SimpleError, SimpleErrors } from '@common/errors';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 ```
 
-Run `pnpm stam test errors` for tests and `pnpm stam check typecheck @common/errors`
+Run `pnpm stam test errors` for tests and `pnpm stam check typecheck @stamhoofd/common-errors`
 for production and test typechecking. Shared builds produce JavaScript in `dist`
 and declarations in `dist-types`.
 

@@ -7,7 +7,7 @@ import {
     IntegerDecoder,
     MapDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { OpenIDClientConfiguration } from '@stamhoofd/structures';
 
 export class DripEmail extends AutoEncoder {

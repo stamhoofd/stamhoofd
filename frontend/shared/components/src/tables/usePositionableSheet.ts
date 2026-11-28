@@ -1,5 +1,5 @@
-import type { PushOptions } from '@browser/navigation';
-import { usePresent } from '@browser/navigation';
+import type { PushOptions } from '@stamhoofd/browser-navigation';
+import { usePresent } from '@stamhoofd/browser-navigation';
 
 export type PositionableSheetOptions = {
     innerPadding?: number; // Padding inside the sheet

@@ -112,7 +112,7 @@
 <script setup lang="ts">
 import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
 import { useShowMemberLanguage } from '#members/hooks/useShowMemberLanguage.ts';
-import { SimpleError, SimpleErrors } from '@common/errors';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { Gender, LanguageHelper } from '@stamhoofd/structures';

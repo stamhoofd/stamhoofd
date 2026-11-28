@@ -1,5 +1,5 @@
 import { Payment, Ticket } from '@stamhoofd/models';
-import type { SQLExpression, SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLExpression, SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
@@ -16,7 +16,7 @@ import {
     SQLScalar,
     SQLSum,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { PaymentStatus } from '@stamhoofd/structures';
 import { paymentFilterCompilers } from './payments.js';
 

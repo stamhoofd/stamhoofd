@@ -1,4 +1,4 @@
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
@@ -6,7 +6,7 @@ import {
     SQLConcat,
     SQLScalar,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 
 export const emailRecipientsFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,

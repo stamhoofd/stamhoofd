@@ -18,8 +18,8 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@common/errors';
-import { Request } from '@common/networking';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { Request } from '@stamhoofd/common-networking';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { File } from '@stamhoofd/structures';
 import { ref } from 'vue';

@@ -1,8 +1,11 @@
 {
-    "name": "@node/nuxt-observability",
+    "name": "@stamhoofd/node-nuxt-observability",
     "version": "2.158.0",
-    "private": true,
     "type": "module",
+    "files": [
+        "dist",
+        "dist-types"
+    ],
     "exports": {
         ".": {
             "types": "./dist-types/module.d.ts",
@@ -15,12 +18,20 @@
         "lint": "eslint . --quiet"
     },
     "dependencies": {
-        "@node/observability": "workspace:*",
-        "@node/dev-tools": "workspace:*"
+        "@stamhoofd/node-observability": "workspace:*",
+        "@stamhoofd/node-dev-tools": "workspace:*"
     },
     "devDependencies": {
         "@nuxt/schema": "4.6.4",
         "nitropack": "2.13.6",
         "h3": "1.15.11"
+    },
+    "peerDependencies": {
+        "@nuxt/schema": "^4.0.0",
+        "h3": "^1.15.0",
+        "nitropack": "~2.13.0"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

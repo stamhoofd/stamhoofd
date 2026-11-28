@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import {
@@ -11,9 +11,13 @@ import {
     Version,
 } from '@stamhoofd/structures';
 
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArrayDecoder, StringDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type {
+    AutoEncoderPatchType,
+    Decoder,
+    PatchableArrayAutoEncoder,
+} from '@stamhoofd/common-encoding';
+import { PatchableArrayDecoder, StringDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import {
     Event,
     Group,
@@ -24,7 +28,7 @@ import {
     RegistrationInvitation,
     RegistrationPeriod,
 } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
 import { RecordAnswerHelper } from '../../../../helpers/RecordAnswerHelper.js';

@@ -1,4 +1,4 @@
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 import { EventFactory } from '../factories/EventFactory.js';
 import { OrganizationFactory } from '../factories/OrganizationFactory.js';
 import { Organization } from './Organization.js';

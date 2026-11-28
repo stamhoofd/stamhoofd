@@ -17,7 +17,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@common/errors": "workspace:*"
+        "@stamhoofd/common-errors": "workspace:*"
     },
     "devDependencies": {
         "oxlint-plugin-stamhoofd": "workspace:*",

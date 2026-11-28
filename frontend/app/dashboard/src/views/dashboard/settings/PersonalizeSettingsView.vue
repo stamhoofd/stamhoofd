@@ -96,10 +96,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods } from '@common/encoding';
-import { patchContainsChanges } from '@common/encoding';
-import { SimpleErrors } from '@common/errors';
-import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@browser/navigation';
+import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods } from '@stamhoofd/common-encoding';
+import { patchContainsChanges } from '@stamhoofd/common-encoding';
+import { SimpleErrors } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';

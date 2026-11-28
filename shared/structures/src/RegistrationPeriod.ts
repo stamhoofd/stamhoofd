@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, StringDecoder, field } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, StringDecoder, field } from '@stamhoofd/common-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { BundleDiscount } from './BundleDiscount.js';
 import { Group, GroupStatus } from './Group.js';

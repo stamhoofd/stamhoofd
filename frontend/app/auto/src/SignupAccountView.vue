@@ -58,8 +58,8 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError, SimpleErrors } from '@common/errors';
-import { useDismiss } from '@browser/navigation';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { useDismiss } from '@stamhoofd/browser-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors';

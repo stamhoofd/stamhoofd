@@ -1,4 +1,4 @@
-import type { Data, Encodeable, EncodeContext } from '@common/encoding';
+import type { Data, Encodeable, EncodeContext } from '@stamhoofd/common-encoding';
 
 import { File } from './File.js';
 

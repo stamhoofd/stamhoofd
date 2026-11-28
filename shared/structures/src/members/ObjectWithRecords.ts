@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType, PatchMap } from '@common/encoding';
+import type { AutoEncoderPatchType, PatchMap } from '@stamhoofd/common-encoding';
 
 import type { RecordAnswer } from './records/RecordAnswer.js';
 import type { Filterable } from '../filters/Filterable.js';

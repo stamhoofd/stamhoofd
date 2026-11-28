@@ -139,10 +139,10 @@ import GroupPriceDiscountsInput from '#groups/components/GroupPriceDiscountsInpu
 import { useContext } from '#hooks/useContext.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
-import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, usePop, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useGroupViewLoaders } from '#groups/groupViewLoaders.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';

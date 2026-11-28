@@ -1,9 +1,9 @@
-import type { Decoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Organization } from '@stamhoofd/models';
-import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
+import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/node-sql';
 import type {
     CountFilteredRequest,
     Organization as OrganizationStruct,
@@ -18,7 +18,7 @@ import {
     getSortFilter,
 } from '@stamhoofd/structures';
 
-import type { SQLResultNamespacedRow } from '@node/database';
+import type { SQLResultNamespacedRow } from '@stamhoofd/node-database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { organizationFilterCompilers } from '../../../sql-filters/organizations.js';

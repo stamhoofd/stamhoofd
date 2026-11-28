@@ -1,5 +1,5 @@
-import { Request } from '@common/networking';
-import { injectHooks, useCurrentComponent, useUrl } from '@browser/navigation';
+import { Request } from '@stamhoofd/common-networking';
+import { injectHooks, useCurrentComponent, useUrl } from '@stamhoofd/browser-navigation';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { CountryHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

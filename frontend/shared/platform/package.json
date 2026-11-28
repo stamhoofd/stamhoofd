@@ -14,7 +14,7 @@
         "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
     "dependencies": {
-        "@browser/navigation": "workspace:*",
+        "@stamhoofd/browser-navigation": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "file-saver": "2.0.5"
     },

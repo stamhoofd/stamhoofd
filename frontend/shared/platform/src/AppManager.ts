@@ -1,4 +1,4 @@
-import { UrlHelper } from '@browser/navigation';
+import { UrlHelper } from '@stamhoofd/browser-navigation';
 import { SessionDeviceType, SessionOS } from '@stamhoofd/structures';
 import type { SessionMetaData } from '@stamhoofd/structures';
 

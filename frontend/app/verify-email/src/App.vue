@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, ComponentWithPropertiesInstance, useCurrentComponent } from '@browser/navigation';
+import { ComponentWithProperties, ComponentWithPropertiesInstance, useCurrentComponent } from '@stamhoofd/browser-navigation';
 import BoxedController from '@stamhoofd/components/containers/BoxedController.vue';
 import VerifyEmailView from './VerifyEmailView.vue';
 

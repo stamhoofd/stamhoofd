@@ -1,5 +1,5 @@
-import { column, Database, Migration } from '@node/database';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column, Database, Migration } from '@stamhoofd/node-database';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { Country } from '@stamhoofd/types/Country';
 import { StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';

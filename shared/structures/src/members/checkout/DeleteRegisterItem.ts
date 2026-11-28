@@ -1,5 +1,5 @@
-import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { RegisterContext } from './RegisterCheckout.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
 

@@ -1,4 +1,4 @@
-import type { Decoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
 import {
     ArrayDecoder,
     AutoEncoder,
@@ -7,7 +7,7 @@ import {
     IntegerDecoder,
     MapDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 
 import { PropertyFilter } from '../filters/PropertyFilter.js';
 import type { Group } from '../Group.js';

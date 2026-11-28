@@ -12,8 +12,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { ComponentWithProperties } from '@browser/navigation';
-import { ComponentWithPropertiesInstance } from '@browser/navigation';
+import type { ComponentWithProperties } from '@stamhoofd/browser-navigation';
+import { ComponentWithPropertiesInstance } from '@stamhoofd/browser-navigation';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { onBeforeUnmount, ref } from 'vue';
 

@@ -85,9 +85,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
-import { SimpleError, SimpleErrors } from '@common/errors';
-import { usePop, useShow } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { usePop, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';

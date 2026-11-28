@@ -1,4 +1,4 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 import { MollieToken, Organization } from '@stamhoofd/models';
 
 import { SeedTools } from '../helpers/SeedTools.js';

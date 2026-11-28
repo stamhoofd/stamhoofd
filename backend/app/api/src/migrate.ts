@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-import { Column, Database, DatabaseInstance, Migration } from '@node/database';
+import { Column, Database, DatabaseInstance, Migration } from '@stamhoofd/node-database';
 import { Version } from '@stamhoofd/structures';
 import path from 'path';
 
@@ -9,7 +9,7 @@ process.env.TZ = 'UTC';
 
 // Polyfill require.resolve, since import.meta.resolve is not supported by vitest
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { createRequire } from 'node:module';
 import { GlobalHelper } from './helpers/GlobalHelper.js';
 import { withMigrationOutput } from './helpers/migrationOutput.js';

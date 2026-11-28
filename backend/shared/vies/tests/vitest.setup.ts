@@ -1,7 +1,7 @@
 // Defines STAMHOOFD before @stamhoofd/structures is evaluated, so Version runs at ReleasedVersion + 1
 import '@stamhoofd/test-utils/environment';
 
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { TestUtils } from '@stamhoofd/test-utils';
 import nock from 'nock';

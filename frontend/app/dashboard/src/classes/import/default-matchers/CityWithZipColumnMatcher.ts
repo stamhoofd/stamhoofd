@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type XLSX from 'xlsx';
 
 import { Formatter } from '@stamhoofd/utility';

@@ -1,5 +1,5 @@
 import { compileToInMemoryFilter } from './InMemoryFilter.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import { privateOrderWithTicketsFilterCompilers } from './inMemoryFilterDefinitions.js';
 
 function makeOrder(overrides: Record<string, any> = {}) {

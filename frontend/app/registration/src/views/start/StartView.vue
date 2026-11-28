@@ -164,7 +164,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoute, useNavigate } from '@browser/navigation';
+import { defineRoute, useNavigate } from '@stamhoofd/browser-navigation';
 import { buildTranslatedUrl, getUrls } from '@stamhoofd/components/containers/TranslatedUrl.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext';

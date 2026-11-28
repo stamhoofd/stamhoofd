@@ -1,4 +1,4 @@
-import type { Request, RequestMiddleware } from '@node/endpoints';
+import type { Request, RequestMiddleware } from '@stamhoofd/node-endpoints';
 
 import { ContextInstance } from '../helpers/Context.js';
 

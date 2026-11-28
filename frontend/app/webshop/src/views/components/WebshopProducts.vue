@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { useDismiss } from '@browser/navigation';
+import type { useDismiss } from '@stamhoofd/browser-navigation';
 import CategoryBox from '@stamhoofd/components/views/CategoryBox.vue';
 import ProductGrid from '@stamhoofd/components/views/ProductGrid.vue';
 import type { CartItem, Category, Checkout, Product, Webshop } from '@stamhoofd/structures';

@@ -45,8 +45,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
-import { useDismiss } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { useDismiss } from '@stamhoofd/browser-navigation';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

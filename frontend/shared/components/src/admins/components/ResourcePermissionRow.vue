@@ -39,8 +39,8 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { PatchMap } from '@common/encoding';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { PatchMap } from '@stamhoofd/common-encoding';
 import { ContextMenu, ContextMenuItem } from '#overlays/ContextMenu.ts';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useEmitPatch } from '#hooks/useEmitPatch.ts';

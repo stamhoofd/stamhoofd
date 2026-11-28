@@ -1,4 +1,4 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 import { Member, Organization } from '@stamhoofd/models';
 import type { Address, RecordAnswer, RecordCategory, RecordSettings } from '@stamhoofd/structures';
 import {

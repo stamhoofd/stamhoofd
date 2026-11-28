@@ -6,7 +6,7 @@ import { context, logs, SeverityNumber, SpanKind, SpanStatusCode, trace } from '
  * idempotent because Node may emit both finish and close for the same response.
  */
 export function observeRequest(method: string): { finish(status: number, route?: string): void } {
-    const span = trace.getTracer('@node/observability').startSpan('http.server.request', {
+    const span = trace.getTracer('@stamhoofd/node-observability').startSpan('http.server.request', {
         kind: SpanKind.SERVER,
         attributes: {
             'http.request.method': [
@@ -33,7 +33,7 @@ export function observeRequest(method: string): { finish(status: number, route?:
             span.setAttribute('http.route', route ?? '(unmatched)');
             if (status >= 500) {
                 span.setStatus({ code: SpanStatusCode.ERROR });
-                logs.getLogger('@node/observability').emit({
+                logs.getLogger('@stamhoofd/node-observability').emit({
                     body: 'http.server.failed',
                     severityNumber: SeverityNumber.ERROR,
                     context: trace.setSpan(context.active(), span),

@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, field } from '@common/encoding';
+import { AutoEncoder, BooleanDecoder, field } from '@stamhoofd/common-encoding';
 
 export class CreateMandateSettings extends AutoEncoder {
     /**

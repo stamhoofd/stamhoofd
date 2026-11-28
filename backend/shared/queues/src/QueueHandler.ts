@@ -1,4 +1,4 @@
-import { isSimpleError, SimpleError } from '@common/errors';
+import { isSimpleError, SimpleError } from '@stamhoofd/common-errors';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 class Queue {

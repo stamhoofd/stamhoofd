@@ -1,7 +1,7 @@
-import { column } from '@node/database';
-import type { Decoder } from '@common/encoding';
-import { AnyDecoder, EnumDecoder, MapDecoder } from '@common/encoding';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { AnyDecoder, EnumDecoder, MapDecoder } from '@stamhoofd/common-encoding';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import type { EmailTemplateType } from '@stamhoofd/structures';
 import { EmailContent, EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';

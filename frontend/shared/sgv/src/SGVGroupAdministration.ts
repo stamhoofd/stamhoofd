@@ -1,11 +1,11 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type {
     RequestInitializer,
     RequestMiddleware,
     RequestResult,
-} from '@common/networking';
-import { Request, Server } from '@common/networking';
-import type { ComponentWithProperties, PushOptions } from '@browser/navigation';
+} from '@stamhoofd/common-networking';
+import { Request, Server } from '@stamhoofd/common-networking';
+import type { ComponentWithProperties, PushOptions } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { MemberManager } from '@stamhoofd/frontend-application/MemberManager';
@@ -42,9 +42,9 @@ import {
     schrappen,
 } from './SGVSyncReport.ts';
 
-import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { isSimpleError, isSimpleErrors } from '@common/errors';
+import type { Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
 import { Sorter } from '@stamhoofd/utility';
 
 export { SGVOldMemberAction } from './SGVOldMemberAction.ts';

@@ -1,11 +1,11 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { runProcess } from '@node/opentelemetry-process';
+import { runProcess } from '@stamhoofd/node-opentelemetry-process';
 import { exec, execResult } from './process.js';
 import { getCliTelemetry, withCliTelemetry } from './telemetry.js';
 import { RunVerbosity } from './verbosity.js';
 
-vi.mock('@node/opentelemetry-process', async (importOriginal) => ({
-    ...(await importOriginal<typeof import('@node/opentelemetry-process')>()),
+vi.mock('@stamhoofd/node-opentelemetry-process', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@stamhoofd/node-opentelemetry-process')>()),
     runProcess: vi.fn(async () => ({ code: 0, stdout: '', stderr: '', signal: null })),
 }));
 afterEach(() => vi.clearAllMocks());

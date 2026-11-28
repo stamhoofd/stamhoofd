@@ -2,8 +2,8 @@ import type {
     AutoEncoderPatchType,
     PartialWithoutMethods,
     PatchableArrayAutoEncoder,
-} from '@common/encoding';
-import { deepSetArray, PatchableArray } from '@common/encoding';
+} from '@stamhoofd/common-encoding';
+import { deepSetArray, PatchableArray } from '@stamhoofd/common-encoding';
 
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import type { Group } from '../Group.js';
@@ -19,7 +19,7 @@ import type { Platform } from '../Platform.js';
 import type { UserWithMembers } from '../UserWithMembers.js';
 import type { Address } from '../addresses/Address.js';
 import type { PropertyFilter } from '../filters/PropertyFilter.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import { getActivePeriodIds } from '../getActivePeriods.js';
 import { MemberPlatformMembershipHelper } from '../helpers/MemberPlatformMembershipHelper.js';
 import type { EmergencyContact } from './EmergencyContact.js';

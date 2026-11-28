@@ -1,4 +1,4 @@
-import { Database, Factory } from '@node/database';
+import { Database, Factory } from '@stamhoofd/node-database';
 
 import { Ticket } from '../models/index.js';
 import type { Order } from '../models/index.js';

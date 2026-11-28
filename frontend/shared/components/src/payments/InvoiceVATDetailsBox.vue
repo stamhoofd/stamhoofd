@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-import { usePopup } from '@browser/navigation';
+import { usePopup } from '@stamhoofd/browser-navigation';
 import STGrid from '#layout/STGrid.vue';
 import STGridItem from '#layout/STGridItem.vue';
 import type { Invoice } from '@stamhoofd/structures';

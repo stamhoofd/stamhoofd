@@ -1,9 +1,9 @@
-import type { Data, Encodeable, EncodeContext, PlainObject } from '@common/encoding';
-import { cloneObject } from '@common/encoding';
+import type { Data, Encodeable, EncodeContext, PlainObject } from '@stamhoofd/common-encoding';
+import { cloneObject } from '@stamhoofd/common-encoding';
 
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
-import { isEmptyFilter, mergeFilters } from '@stamhoofd/filters/StamhoofdFilter';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
+import { isEmptyFilter, mergeFilters } from '@stamhoofd/common-filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilterTypes';
 import type { Filterable } from './Filterable.js';
 import { isEqualFilter } from './isEqualFilter.js';
 import { StamhoofdFilterDecoder } from './StamhoofdFilterDecoder.js';

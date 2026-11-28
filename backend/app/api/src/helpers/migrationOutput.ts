@@ -1,4 +1,4 @@
-import { logger } from '@node/logging';
+import { logger } from '@stamhoofd/node-logging';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 export async function withMigrationOutput(

@@ -5,8 +5,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Decoder } from '@common/encoding';
-import { ComponentWithProperties, useDismiss, useShow } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, useDismiss, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';

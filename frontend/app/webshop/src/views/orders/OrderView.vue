@@ -375,9 +375,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
-import { ComponentWithProperties, NavigationController, ReactiveUrl, setUrl, usePop, usePresent, useUrl } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, NavigationController, ReactiveUrl, setUrl, usePop, usePresent, useUrl } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import CartItemRow from '@stamhoofd/components/views/CartItemRow.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';

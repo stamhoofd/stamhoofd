@@ -16,8 +16,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu.ts';
 import { useEmitPatchArray } from '@stamhoofd/components/hooks/useEmitPatchArray.ts';
 import { getOrganizationTagTypeName, getOrganizationTagTypePluralName, OrganizationTag, TagHelper } from '@stamhoofd/structures';

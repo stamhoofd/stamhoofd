@@ -1,6 +1,6 @@
-import { column, Migration } from '@node/database';
+import { column, Migration } from '@stamhoofd/node-database';
 import { User } from '@stamhoofd/models';
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions, UserPermissions } from '@stamhoofd/structures';
 

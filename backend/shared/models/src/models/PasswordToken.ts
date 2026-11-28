@@ -1,11 +1,11 @@
-import type { ManyToOneRelation } from '@node/database';
-import { column, Database } from '@node/database';
-import { QueryableModel } from '@stamhoofd/sql';
+import type { ManyToOneRelation } from '@stamhoofd/node-database';
+import { column, Database } from '@stamhoofd/node-database';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import basex from 'base-x';
 import crypto from 'crypto';
 
 import { User } from './User.js';
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const bs58 = basex(ALPHABET);
 

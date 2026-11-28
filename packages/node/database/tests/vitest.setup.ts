@@ -1,6 +1,6 @@
-import { TestUtils } from '@stamhoofd/test-utils';
 import { afterAll } from 'vitest';
 import { Database } from '../src/classes/Database.js';
+import { setTestDatabaseEnvironment } from './environment.js';
 
-TestUtils.setup();
+setTestDatabaseEnvironment();
 afterAll(() => Database.end());

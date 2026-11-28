@@ -1,4 +1,10 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    DateDecoder,
+    field,
+    StringDecoder,
+} from '@stamhoofd/common-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
 

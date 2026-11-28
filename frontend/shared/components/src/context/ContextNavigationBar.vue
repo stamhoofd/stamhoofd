@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { useInheritCheckRoutes } from '@browser/navigation';
+import { useInheritCheckRoutes } from '@stamhoofd/browser-navigation';
 import InheritComponent from '../containers/InheritComponent.vue';
 useInheritCheckRoutes();
 

@@ -1,10 +1,10 @@
-import { diagnosticKind, operationLabel } from '@common/opentelemetry-decorators';
-import type { LogSink } from '@common/opentelemetry-decorators';
+import { diagnosticKind, operationLabel } from '@stamhoofd/common-opentelemetry-decorators';
+import type { LogSink } from '@stamhoofd/common-opentelemetry-decorators';
 import { SpanStatusCode } from '@opentelemetry/api';
 import type { Attributes } from '@opentelemetry/api';
 import type { ReadableSpan, Span, SpanProcessor } from '@opentelemetry/sdk-trace';
-import { Terminal } from '@node/terminal';
-import type { TerminalRegion } from '@node/terminal';
+import { Terminal } from '@stamhoofd/node-terminal';
+import type { TerminalRegion } from '@stamhoofd/node-terminal';
 import chalk, { Chalk, chalkStderr } from 'chalk';
 import type { ChalkInstance } from 'chalk';
 

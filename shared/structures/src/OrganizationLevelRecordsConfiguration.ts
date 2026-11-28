@@ -1,5 +1,5 @@
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, field } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, AutoEncoder, field } from '@stamhoofd/common-encoding';
 import { RecordCategory } from './members/records/RecordCategory.js';
 import type { ObjectWithRecords } from './members/ObjectWithRecords.js';
 

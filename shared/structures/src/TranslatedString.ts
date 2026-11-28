@@ -5,9 +5,9 @@ import type {
     EncodeContext,
     Patchable,
     PatchType,
-} from '@common/encoding';
-import { EnumDecoder, ObjectData, StringDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import { EnumDecoder, ObjectData, StringDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { StringLikeObject } from '@stamhoofd/utility/StringLikeObject.js';
 import type { LanguageMap } from '@stamhoofd/types/LanguageMap';
 import { Language } from '@stamhoofd/types/Language';

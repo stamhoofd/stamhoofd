@@ -1,5 +1,5 @@
-import type { NavigationMixin } from '@browser/navigation';
-import { ComponentWithProperties } from '@browser/navigation';
+import type { NavigationMixin } from '@stamhoofd/browser-navigation';
+import { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 
 import GeneralContextMenuView from './GeneralContextMenuView.vue';
 import { ModalStackEventBus } from './ModalStackEventBus';

@@ -1,6 +1,12 @@
-import { AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    EnumDecoder,
+    field,
+    StringDecoder,
+} from '@stamhoofd/common-encoding';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 
 export enum MailchimpSyncType {
     Members = 'Members',

@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { Email, Platform } from '@stamhoofd/models';
 import type { EmailPreview } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
@@ -10,9 +10,9 @@ import {
     validateEmailTranslations,
 } from '@stamhoofd/structures';
 
-import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
-import { patchObject } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
+import { patchObject } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Context } from '../../../helpers/Context.js';
 import { EmailPreviewService } from '../../../services/EmailPreviewService.js';
 import { EmailSendService } from '../../../services/EmailSendService.js';

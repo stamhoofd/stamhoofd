@@ -1,6 +1,6 @@
-import { column, Database } from '@node/database';
+import { column, Database } from '@stamhoofd/node-database';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
-import { QueryableModel, SQL, SQLJSONNull } from '@stamhoofd/sql';
+import { QueryableModel, SQL, SQLJSONNull } from '@stamhoofd/node-sql';
 import type { LoginProviderType, NewUser } from '@stamhoofd/structures';
 import {
     Permissions,
@@ -14,7 +14,7 @@ import argon2 from 'argon2';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { QueueHandler } from '@stamhoofd/queues';
 
 export class User extends QueryableModel {

@@ -1,11 +1,11 @@
-import type { SQLResultNamespacedRow } from '@node/database';
-import type { Decoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type { SQLResultNamespacedRow } from '@stamhoofd/node-database';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Notification } from '@stamhoofd/models/models/Notification.js';
 import { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
-import { SQL, SQLSelect, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
+import { SQL, SQLSelect, applySQLSorter, compileToSQLFilter } from '@stamhoofd/node-sql';
 import type { CountFilteredRequest } from '@stamhoofd/structures';
 import {
     LimitedFilteredRequest,

@@ -7,14 +7,14 @@ import {
     IntegerDecoder,
     NumberDecoder,
     StringDecoder,
-} from '@common/encoding';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@stamhoofd/common-errors';
 import { Formatter } from '@stamhoofd/utility';
 
 import { ValidatedAddress } from '../addresses/Address.js';
 import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
 import { checkoutInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import type { I18n } from '../I18nInterface.js';
 import type { ObjectWithRecords, PatchAnswers } from '../members/ObjectWithRecords.js';
 import type { RecordAnswer } from '../members/records/RecordAnswer.js';

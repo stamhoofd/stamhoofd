@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
+import type { AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
 import { useContext } from '#hooks/useContext.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Email } from '@stamhoofd/structures';

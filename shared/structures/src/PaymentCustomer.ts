@@ -1,4 +1,4 @@
-import { AutoEncoder, field, StringDecoder, BooleanDecoder } from '@common/encoding';
+import { AutoEncoder, field, StringDecoder, BooleanDecoder } from '@stamhoofd/common-encoding';
 import { Company } from './Company.js';
 
 /**

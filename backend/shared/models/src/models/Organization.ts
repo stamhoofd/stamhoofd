@@ -1,9 +1,9 @@
-import { column, Database } from '@node/database';
-import { SimpleError } from '@common/errors';
+import { column, Database } from '@stamhoofd/node-database';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
-import { QueryableModel, SQL, SQLWhereExists } from '@stamhoofd/sql';
+import { QueryableModel, SQL, SQLWhereExists } from '@stamhoofd/node-sql';
 import type { OrganizationEmail, PrivatePaymentConfiguration } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import {

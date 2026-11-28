@@ -1,4 +1,4 @@
-import { AutoEncoder, StringDecoder, field } from '@common/encoding';
+import { AutoEncoder, StringDecoder, field } from '@stamhoofd/common-encoding';
 
 export class UitpasClientIdAndSecret extends AutoEncoder {
     @field({ decoder: StringDecoder })

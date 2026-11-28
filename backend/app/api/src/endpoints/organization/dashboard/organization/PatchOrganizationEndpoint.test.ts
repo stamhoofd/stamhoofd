@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization, User, Webshop, Token } from '@stamhoofd/models';
 import {
     EventFactory,
@@ -32,8 +32,8 @@ import {
 } from '@stamhoofd/structures';
 import { SessionService } from '../../../../services/SessionService.js';
 
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray, PatchMap } from '@common/encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray, PatchMap } from '@stamhoofd/common-encoding';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';

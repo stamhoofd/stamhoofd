@@ -1,11 +1,11 @@
-import type { SQLFilterCompiler, SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterCompiler, SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
     createExistsFilter,
     SQL,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { BalanceItemRelationType } from '@stamhoofd/structures';
 import { paymentSettlementFilterCompilers } from './payment-settlement.js';
 

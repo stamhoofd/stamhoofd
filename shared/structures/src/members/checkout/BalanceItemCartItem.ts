@@ -1,5 +1,5 @@
-import { AutoEncoder, field, IntegerDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import { AutoEncoder, field, IntegerDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { BalanceItem } from '../../BalanceItem.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../../upgradePriceFrom2To4DecimalPlaces.js';
 

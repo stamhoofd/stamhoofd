@@ -236,9 +236,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
-import { ArrayDecoder, PatchableArray } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, PatchableArray } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import listIllustrationSrc from '@stamhoofd/assets/images/illustrations/list.svg';
 import scannerIllustrationSrc from '@stamhoofd/assets/images/illustrations/scanner.svg';
 import teamIllustrationSrc from '@stamhoofd/assets/images/illustrations/team.svg';

@@ -1,4 +1,9 @@
-import type { AutoEncoderPatchType, Data, Decoder, PatchableDecoder } from '@common/encoding';
+import type {
+    AutoEncoderPatchType,
+    Data,
+    Decoder,
+    PatchableDecoder,
+} from '@stamhoofd/common-encoding';
 import {
     ArrayDecoder,
     AutoEncoder,
@@ -8,8 +13,8 @@ import {
     field,
     IntegerDecoder,
     StringDecoder,
-} from '@common/encoding';
-import { SimpleError } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 

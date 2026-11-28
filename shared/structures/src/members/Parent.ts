@@ -7,7 +7,7 @@ import {
     field,
     StringDecoder,
     SymbolDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -70,8 +70,8 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { usePop } from '@browser/navigation';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { usePop } from '@stamhoofd/browser-navigation';
 import type { Group, GroupOption, GroupOptionMenu } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { useErrors } from '../../errors/useErrors';

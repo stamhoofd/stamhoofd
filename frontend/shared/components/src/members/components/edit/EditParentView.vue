@@ -88,8 +88,8 @@
 <script setup lang="ts">
 import { usePatch } from '#hooks/usePatch.ts';
 import { useIsAllOptional, useIsPropertyEnabled, useIsPropertyRequired } from '#members/hooks/useIsPropertyRequired.ts';
-import { SimpleError, SimpleErrors } from '@common/errors';
-import { usePop } from '@browser/navigation';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { usePop } from '@stamhoofd/browser-navigation';
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import type { Address, Parent, ParentType, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { NationalRegisterNumberOptOut, ParentTypeHelper } from '@stamhoofd/structures';

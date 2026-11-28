@@ -1,9 +1,15 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    EnumDecoder,
+    field,
+    StringDecoder,
+} from '@stamhoofd/common-encoding';
 import { STPackageBundle, STPackageBundleHelper } from '../billing/STPackageBundle.js';
 import { Checkoutable } from './Checkoutable.js';
 import type { OrganizationPackagesStatus } from '../billing/OrganizationPackagesStatus.js';
 import type { STPackage } from '../billing/STPackage.js';
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 /**
  * Checkout flow between organizations

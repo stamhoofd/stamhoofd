@@ -1,4 +1,4 @@
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     compileToSQLFilter,
@@ -14,7 +14,7 @@ import {
     SQLWhereEqual,
     SQLWhereOr,
     SQLWhereSign,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { SetupStepType } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';

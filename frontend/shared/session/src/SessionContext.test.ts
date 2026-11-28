@@ -1,4 +1,4 @@
-import { UrlHelper } from '@browser/navigation';
+import { UrlHelper } from '@stamhoofd/browser-navigation';
 import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { Platform } from '@stamhoofd/structures';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';

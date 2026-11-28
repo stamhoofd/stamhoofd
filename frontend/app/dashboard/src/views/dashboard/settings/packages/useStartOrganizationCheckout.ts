@@ -1,6 +1,6 @@
-import type { Decoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { ComponentWithProperties } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization';

@@ -1,5 +1,5 @@
-import type { ModelEvent } from '@node/database';
-import { Model } from '@node/database';
+import type { ModelEvent } from '@stamhoofd/node-database';
+import { Model } from '@stamhoofd/node-database';
 import { AuditLog } from '@stamhoofd/models';
 import { ObjectDiffer } from '@stamhoofd/object-differ';
 import type { AuditLogType } from '@stamhoofd/structures';

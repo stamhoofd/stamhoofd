@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, field } from '@stamhoofd/common-encoding';
 
 import { GenericBalance } from '../GenericBalance.js';
 import type { Group } from '../Group.js';
@@ -8,7 +8,7 @@ import { User } from '../User.js';
 import { EmailRecipient } from '../email/Email.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
 import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import { memberWithRegistrationsBlobInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
 import { Member } from './Member.js';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';

@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoute, useNavigate } from '@browser/navigation';
+import { defineRoute, useNavigate } from '@stamhoofd/browser-navigation';
 import type { Payment } from '@stamhoofd/structures';
 import { PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper } from '@stamhoofd/structures';
 

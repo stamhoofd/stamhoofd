@@ -6,13 +6,13 @@ import {
     field,
     IntegerDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Formatter } from '@stamhoofd/utility';
 import type { AppType } from './AppType.js';
 import type { Event } from './Event.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import { getActivePeriodIds, getActivePeriods } from './getActivePeriods.js';
 import type { GroupCategory } from './GroupCategory.js';
 import { GroupGenderType } from './GroupGenderType.js';

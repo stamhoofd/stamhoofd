@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePop } from '@browser/navigation';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import type { Ref } from 'vue';
 

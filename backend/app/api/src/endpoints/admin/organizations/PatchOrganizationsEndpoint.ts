@@ -1,8 +1,12 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArrayDecoder, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type {
+    AutoEncoderPatchType,
+    Decoder,
+    PatchableArrayAutoEncoder,
+} from '@stamhoofd/common-encoding';
+import { PatchableArrayDecoder, StringDecoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import {
     BalanceItem,
     Invoice,
@@ -20,7 +24,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { TagHelper } from '../../../helpers/TagHelper.js';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { isAbortedError, isCanceledError } from '@stamhoofd/queues';
 
 type Params = Record<string, never>;

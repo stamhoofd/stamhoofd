@@ -1,12 +1,12 @@
-import { Column } from '@node/database';
-import type { ResponseMiddleware, RouterServer } from '@node/endpoints';
-import { EncodedResponse, Router } from '@node/endpoints';
-import { logger } from '@node/logging';
+import { Column } from '@stamhoofd/node-database';
+import type { ResponseMiddleware, RouterServer } from '@stamhoofd/node-endpoints';
+import { EncodedResponse, Router } from '@stamhoofd/node-endpoints';
+import { logger } from '@stamhoofd/node-logging';
 import { requestPrefix } from '@stamhoofd/backend-middleware';
 
-import { AutoEncoder } from '@common/encoding';
-import type { Request, Response } from '@node/endpoints';
-import { SQLLogger } from '@stamhoofd/sql';
+import { AutoEncoder } from '@stamhoofd/common-encoding';
+import type { Request, Response } from '@stamhoofd/node-endpoints';
+import { SQLLogger } from '@stamhoofd/node-sql';
 import { ContextInstance } from './helpers/Context.js';
 
 export function loadDebugFunctions({ routerServer }: { routerServer: RouterServer }) {

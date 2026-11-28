@@ -1,5 +1,5 @@
-import { ManyToOneRelation } from '@node/database';
-import { encodeObject } from '@common/encoding';
+import { ManyToOneRelation } from '@stamhoofd/node-database';
+import { encodeObject } from '@stamhoofd/common-encoding';
 import {
     BalanceItem,
     Document,

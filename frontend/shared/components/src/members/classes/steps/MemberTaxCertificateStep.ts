@@ -1,5 +1,5 @@
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import type { ComponentWithProperties } from '@browser/navigation';
+import type { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { markRaw } from 'vue';
 import type { NavigationActions } from '../../../types/NavigationActions';

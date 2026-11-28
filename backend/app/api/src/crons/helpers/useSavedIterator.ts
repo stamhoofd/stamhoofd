@@ -1,5 +1,5 @@
-import type { SQLResultNamespacedRow } from '@node/database';
-import type { IterableSQLSelect, SQLSelect } from '@stamhoofd/sql';
+import type { SQLResultNamespacedRow } from '@stamhoofd/node-database';
+import type { IterableSQLSelect, SQLSelect } from '@stamhoofd/node-sql';
 
 export function useSavedIterator<T extends object = SQLResultNamespacedRow>(
     start: () => SQLSelect<T>,

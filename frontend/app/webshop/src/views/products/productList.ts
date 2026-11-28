@@ -1,4 +1,4 @@
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { Product, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

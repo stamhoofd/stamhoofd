@@ -1,4 +1,4 @@
-import type { Model } from '@node/database';
+import type { Model } from '@stamhoofd/node-database';
 import {
     BalanceItem,
     BalanceItemPayment,
@@ -16,7 +16,7 @@ import {
     User,
 } from '@stamhoofd/models';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import type { STInvoiceItem, STInvoiceMeta } from '@stamhoofd/structures';
 import {
     BalanceItemRelation,

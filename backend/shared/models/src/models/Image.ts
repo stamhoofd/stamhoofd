@@ -1,8 +1,8 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
-import { column } from '@node/database';
-import { ArrayDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import type { ResolutionRequest } from '@stamhoofd/structures';
 import { File, Resolution, ResolutionFit, supportedImageTypes } from '@stamhoofd/structures';
 import type { OutputInfo } from 'sharp';

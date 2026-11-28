@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@browser/navigation';
+import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useAppContext } from '@stamhoofd/components/context/appContext.ts';
 import EventRow from '@stamhoofd/components/events/components/EventRow.vue';

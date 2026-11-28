@@ -1,4 +1,4 @@
-import type { Decoder, Data } from '@common/encoding';
+import type { Decoder, Data } from '@stamhoofd/common-encoding';
 
 export class StringNullableDecoder<T> implements Decoder<T | null> {
     decoder: Decoder<T>;

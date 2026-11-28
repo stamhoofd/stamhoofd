@@ -1,5 +1,5 @@
-import { column } from '@node/database';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import type { NotificationChannel } from '@stamhoofd/structures/notifications/NotificationChannel.js';
 import { NotificationPreference as NotificationPreferenceStruct } from '@stamhoofd/structures/notifications/NotificationPreference.js';
 import type { NotificationType } from '@stamhoofd/structures/notifications/NotificationType.js';

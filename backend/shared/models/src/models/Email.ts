@@ -1,4 +1,4 @@
-import { column } from '@node/database';
+import { column } from '@stamhoofd/node-database';
 import type {
     EmailRecipient as EmailRecipientStruct,
     EmailTemplateType,
@@ -20,9 +20,9 @@ import type { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 import type { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
-import type { Decoder } from '@common/encoding';
-import { AnyDecoder, ArrayDecoder, EnumDecoder, MapDecoder } from '@common/encoding';
-import { SimpleError, SimpleErrors } from '@common/errors';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { AnyDecoder, ArrayDecoder, EnumDecoder, MapDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import type { QueueHandlerOptions } from '@stamhoofd/queues';
@@ -34,7 +34,7 @@ import {
     SQLAlias,
     SQLCount,
     SQLSelectAs,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { errorToSimpleErrors } from '../helpers/errorToSimpleErrors.js';
 import { EmailRecipient } from './EmailRecipient.js';
 import { EmailTemplate } from './EmailTemplate.js';

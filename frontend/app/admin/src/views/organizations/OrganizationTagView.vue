@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineRoute, useNavigate } from '@browser/navigation';
+import { defineRoute, useNavigate } from '@stamhoofd/browser-navigation';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';

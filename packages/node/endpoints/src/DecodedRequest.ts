@@ -1,9 +1,9 @@
-import { Decoder, EncodeMedium, ObjectData } from '@common/encoding';
+import { Decoder, EncodeMedium, ObjectData } from '@stamhoofd/common-encoding';
 import http from 'http';
 import { parse } from 'querystring';
 
 import { HttpMethod, Request } from './Request.js';
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 export class DecodedRequest<Params, Query, Body> {
     method: HttpMethod;

@@ -44,7 +44,7 @@
 
 <script lang="ts" setup>
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { useShow } from '@browser/navigation';
+import { useShow } from '@stamhoofd/browser-navigation';
 
 import { computed } from 'vue';
 import Dropdown from '../../inputs/Dropdown.vue';

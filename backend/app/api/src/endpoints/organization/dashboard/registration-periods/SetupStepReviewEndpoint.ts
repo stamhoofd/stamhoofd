@@ -1,11 +1,11 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import type { OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct } from '@stamhoofd/structures';
 import { SetupStepType } from '@stamhoofd/structures';
 
-import type { Decoder } from '@common/encoding';
-import { AutoEncoder, BooleanDecoder, EnumDecoder, field } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { AutoEncoder, BooleanDecoder, EnumDecoder, field } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/models';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';

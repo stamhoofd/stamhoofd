@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@common/errors';
-import { ComponentWithProperties, defineRoute, UrlHelper, useNavigate } from '@browser/navigation';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, defineRoute, UrlHelper, useNavigate } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
 import { provideAppNavigate } from '@stamhoofd/components/hooks/useAppNavigate';
@@ -343,7 +343,7 @@ if (orgInDomain) {
 // We need to include the component styling of vue-app-navigation first
 @use "@stamhoofd/scss/main";
 @use "@stamhoofd/scss/base/dark-modus";
-@use "@browser/navigation/dist/main.css" as VueAppNavigation;
+@use "@stamhoofd/browser-navigation/dist/main.css" as VueAppNavigation;
 
 html {
     -webkit-touch-callout:none;

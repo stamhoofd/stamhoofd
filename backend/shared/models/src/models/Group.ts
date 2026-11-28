@@ -1,4 +1,4 @@
-import { column } from '@node/database';
+import { column } from '@stamhoofd/node-database';
 import type { GroupCategory, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import {
     GroupPrivateSettings,
@@ -10,9 +10,9 @@ import {
 } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ArrayDecoder } from '@common/encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/node-sql';
 
 export interface GroupRegistrationPeriod {
     id: string;

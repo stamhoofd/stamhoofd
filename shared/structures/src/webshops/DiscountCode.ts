@@ -7,7 +7,7 @@ import {
     BooleanDecoder,
     DateDecoder,
     EmailDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { Discount } from './Discount.js';
 import { v4 as uuidv4 } from 'uuid';
 

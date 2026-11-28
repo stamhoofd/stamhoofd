@@ -1,5 +1,5 @@
-import type { Data } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { Data } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 import { ChallengeGrantStruct } from './ChallengeGrantStruct.js';
 import { MFAGrantStruct } from './MFAGrantStruct.js';

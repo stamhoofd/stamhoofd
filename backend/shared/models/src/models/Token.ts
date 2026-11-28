@@ -1,6 +1,6 @@
-import type { ManyToOneRelation } from '@node/database';
-import { column, Database } from '@node/database';
-import { QueryableModel } from '@stamhoofd/sql';
+import type { ManyToOneRelation } from '@stamhoofd/node-database';
+import { column, Database } from '@stamhoofd/node-database';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { ApiUser } from '@stamhoofd/structures';
 
 import { User } from './User.js';

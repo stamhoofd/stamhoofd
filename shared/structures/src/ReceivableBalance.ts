@@ -7,7 +7,7 @@ import {
     field,
     IntegerDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem, BalanceItemWithPayments } from './BalanceItem.js';
 import { Invoice } from './billing/Invoice.js';

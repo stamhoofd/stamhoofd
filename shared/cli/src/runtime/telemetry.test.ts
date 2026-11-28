@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { TerminalRenderer } from '@node/opentelemetry-terminal';
-import { withLogSink } from '@common/opentelemetry-decorators';
+import { TerminalRenderer } from '@stamhoofd/node-opentelemetry-terminal';
+import { withLogSink } from '@stamhoofd/common-opentelemetry-decorators';
 import { RunVerbosity } from './command-runner.js';
 import { getCliTelemetry, withCliCleanup, withCliPrompt, withCliTelemetry } from './telemetry.js';
 
@@ -19,7 +19,7 @@ vi.mock('@opentelemetry/sdk-node', () => ({
         },
     ),
 }));
-vi.mock('@node/opentelemetry-terminal', () => ({
+vi.mock('@stamhoofd/node-opentelemetry-terminal', () => ({
     TerminalRenderer: vi.fn(
         class {
             log = mocks.log;
@@ -27,7 +27,7 @@ vi.mock('@node/opentelemetry-terminal', () => ({
         },
     ),
 }));
-vi.mock('@common/opentelemetry-decorators', () => ({
+vi.mock('@stamhoofd/common-opentelemetry-decorators', () => ({
     instrument: (_name: string, callback: (...args: unknown[]) => unknown) => callback,
     withSpan: (_name: string, callback: () => unknown) => callback(),
     withLogSink: vi.fn((_sink: unknown, callback: () => unknown) => callback()),

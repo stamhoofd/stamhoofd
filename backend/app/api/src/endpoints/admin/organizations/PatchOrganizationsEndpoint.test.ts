@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { User } from '@stamhoofd/models';
 import {
     BalanceItemFactory,
@@ -11,8 +11,8 @@ import {
 } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
-import { PatchableArray } from '@common/encoding';
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';

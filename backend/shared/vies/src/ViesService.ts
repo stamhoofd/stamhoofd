@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@stamhoofd/common-errors';
 import { ViesCachedResult } from '@stamhoofd/models/models/ViesCachedResult.js';
 import type { Company } from '@stamhoofd/structures';
 import { PeppolScheme } from '@stamhoofd/structures';

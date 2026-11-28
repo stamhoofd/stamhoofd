@@ -1,8 +1,8 @@
 import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { Toast } from '#overlays/Toast.ts';
-import type { Decoder } from '@common/encoding';
-import { usePop } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { User } from '@stamhoofd/structures';
 import { OrganizationAdmins } from '@stamhoofd/structures';

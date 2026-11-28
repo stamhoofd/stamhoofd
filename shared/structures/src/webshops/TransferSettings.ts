@@ -1,4 +1,4 @@
-import { AutoEncoder, EnumDecoder, StringDecoder, field } from '@common/encoding';
+import { AutoEncoder, EnumDecoder, StringDecoder, field } from '@stamhoofd/common-encoding';
 
 import { Country } from '@stamhoofd/types/Country';
 

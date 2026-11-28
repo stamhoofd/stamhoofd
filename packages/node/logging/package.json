@@ -1,7 +1,10 @@
 {
-    "name": "@node/logging",
-    "private": true,
+    "name": "@stamhoofd/node-logging",
     "type": "module",
+    "files": [
+        "dist",
+        "dist-types"
+    ],
     "main": "./dist/index.js",
     "types": "./dist-types/index.d.ts",
     "version": "1.0.1",
@@ -27,5 +30,8 @@
         "oxlint-plugin-stamhoofd": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.12"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

@@ -5,7 +5,7 @@ import {
     field,
     NumberDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { DataValidator } from '@stamhoofd/utility';
 import wordDictionary from './data/audit-log-words.js';
 

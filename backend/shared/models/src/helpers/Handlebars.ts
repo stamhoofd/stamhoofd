@@ -1,5 +1,5 @@
 import bwipjs from '@bwip-js/node';
-import { ObjectData } from '@common/encoding';
+import { ObjectData } from '@stamhoofd/common-encoding';
 import { Image } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import Handlebars from 'handlebars';

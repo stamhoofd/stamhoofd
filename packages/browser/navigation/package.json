@@ -1,13 +1,16 @@
 {
-    "name": "@browser/navigation",
+    "name": "@stamhoofd/browser-navigation",
     "version": "2.25.1",
-    "private": true,
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist-types/index.d.ts",
     "sideEffects": [
         "*.vue",
         "*.css"
+    ],
+    "files": [
+        "dist",
+        "dist-types"
     ],
     "exports": {
         ".": {
@@ -39,5 +42,8 @@
         "vue-tsc": "3.3.11",
         "eslint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.12"
+    },
+    "publishConfig": {
+        "access": "public"
     }
 }

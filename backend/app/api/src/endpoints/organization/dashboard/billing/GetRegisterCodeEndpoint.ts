@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { BalanceItem, Organization, RegisterCode, UsedRegisterCode } from '@stamhoofd/models';
 import {
     RegisterCodeStatus,

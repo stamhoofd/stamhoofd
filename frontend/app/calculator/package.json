@@ -16,8 +16,8 @@
     },
     "dependencies": {
         "@stamhoofd/frontend-platform": "workspace:*",
-        "@common/errors": "workspace:*",
-        "@browser/navigation": "workspace:*",
+        "@stamhoofd/common-errors": "workspace:*",
+        "@stamhoofd/browser-navigation": "workspace:*",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/components": "workspace:*",
         "@stamhoofd/document-helper": "workspace:*",

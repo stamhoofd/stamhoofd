@@ -1,5 +1,5 @@
-import { SimpleError, SimpleErrors } from '@common/errors';
-import { Request } from '@common/networking';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { Request } from '@stamhoofd/common-networking';
 import { afterEach, expect, test, vi } from 'vitest';
 import { isReactive } from 'vue';
 import { Toast, ToastButton } from './Toast';

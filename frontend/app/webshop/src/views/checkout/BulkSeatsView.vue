@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { getSeatSelectionDescription, getSeatSelectionTitle } from '@stamhoofd/components/helpers/seatSelectionText.ts';

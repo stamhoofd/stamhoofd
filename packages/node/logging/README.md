@@ -2,8 +2,8 @@
 
 Helper library for nice, styleable and context aware logging.
 
-This is the private Node.js workspace `@node/logging`. Declare it as
-`"@node/logging": "workspace:*"` in consuming packages. It uses Node's
+This is the Node.js library `@stamhoofd/node-logging`. Inside this repository, declare it as
+`"@stamhoofd/node-logging": "workspace:*"` in consuming packages. It uses Node's
 `AsyncLocalStorage` and process streams; it is not a browser library.
 
 `Logger` writes to injected streams and isolates prefixes and tags through
@@ -15,8 +15,8 @@ before formatting with `logger.debugEnabled = false`. It defaults to enabled for
 compatibility. `infectConsole()` routes `console.debug` through this setting;
 ordinary logs, warnings and errors are unaffected.
 
-Run `pnpm stam test node-logging`, `pnpm stam check lint @node/logging`, and
-`pnpm stam check typecheck @node/logging` from the repository root. Builds emit
+Run `pnpm stam test node-logging`, `pnpm stam check lint @stamhoofd/node-logging`, and
+`pnpm stam check typecheck @stamhoofd/node-logging` from the repository root. Builds emit
 runtime JavaScript into `dist` and declarations into `dist-types`, retaining
 the original assignment-style class fields and Chalk 4 dependency.
 

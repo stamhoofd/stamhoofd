@@ -1,11 +1,15 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import type {
+    AutoEncoderPatchType,
+    Decoder,
+    PatchableArrayAutoEncoder,
+} from '@stamhoofd/common-encoding';
 import {
     ObjectData,
     PatchableArray,
     PatchableArrayDecoder,
     PatchMap,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { Language } from '@stamhoofd/types/Language';
 import { Version } from '../Version.js';
 import { Email, EmailRecipient } from './Email.js';

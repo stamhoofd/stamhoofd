@@ -1,7 +1,7 @@
-import type { SQLResultNamespacedRow } from '@node/database';
-import { Migration } from '@node/database';
+import type { SQLResultNamespacedRow } from '@stamhoofd/node-database';
+import { Migration } from '@stamhoofd/node-database';
 import { Member } from '@stamhoofd/models';
-import { SQL, SQLSelect } from '@stamhoofd/sql';
+import { SQL, SQLSelect } from '@stamhoofd/node-sql';
 import { mergeTwoMembers } from '../helpers/MemberMerger.js';
 
 type MergeType = {

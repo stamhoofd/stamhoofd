@@ -1,4 +1,4 @@
-import type { PartialWithoutMethods } from '@common/encoding';
+import type { PartialWithoutMethods } from '@stamhoofd/common-encoding';
 import {
     ArrayDecoder,
     AutoEncoder,
@@ -6,12 +6,12 @@ import {
     IntegerDecoder,
     MapDecoder,
     StringDecoder,
-} from '@common/encoding';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import type { ObjectWithRecords, PatchAnswers } from '../members/ObjectWithRecords.js';
 import type { RecordAnswer } from '../members/records/RecordAnswer.js';
 import { RecordAnswerMapDecoder } from '../members/records/RecordAnswer.js';

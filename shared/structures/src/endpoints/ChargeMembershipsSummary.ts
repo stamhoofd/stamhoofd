@@ -5,7 +5,7 @@ import {
     MapDecoder,
     StringDecoder,
     field,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export class ChargeMembershipsTypeSummary extends AutoEncoder {

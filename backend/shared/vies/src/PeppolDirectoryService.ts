@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { PeppolEndointId } from '@stamhoofd/structures';
 import { PeppolScheme } from '@stamhoofd/structures';
 import axios from 'axios';

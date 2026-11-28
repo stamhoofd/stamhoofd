@@ -1,6 +1,6 @@
-import { column } from '@node/database';
-import { AnyDecoder, ArrayDecoder } from '@common/encoding';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import { AnyDecoder, ArrayDecoder } from '@stamhoofd/common-encoding';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { NamedObject } from '@stamhoofd/structures';
 import type { NotificationSubjectType } from '@stamhoofd/structures/notifications/NotificationSubjectType.js';
 import type { NotificationType } from '@stamhoofd/structures/notifications/NotificationType.js';

@@ -1,6 +1,6 @@
-import type { Data, Encodeable, EncodeContext, PlainObject } from '@common/encoding';
-import { ArrayDecoder, StringDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { Data, Encodeable, EncodeContext, PlainObject } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, StringDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 export class UitpasNumbersGetDetailsRequest implements Encodeable {
     uitpasNumbers: string[];

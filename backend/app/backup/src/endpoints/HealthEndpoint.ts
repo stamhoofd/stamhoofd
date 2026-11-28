@@ -1,8 +1,8 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { BackupHealth, getHealth } from '../helpers/backup.js';
-import { AutoEncoder, field, StringDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import { AutoEncoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { checkReplicaStatus } from '../helpers/replica-status.js';
 
 type Params = Record<string, never>;

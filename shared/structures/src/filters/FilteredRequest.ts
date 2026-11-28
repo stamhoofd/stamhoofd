@@ -1,9 +1,15 @@
-import type { Data, Decoder, Encodeable, EncodeContext, PlainObject } from '@common/encoding';
-import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import type {
+    Data,
+    Decoder,
+    Encodeable,
+    EncodeContext,
+    PlainObject,
+} from '@stamhoofd/common-encoding';
+import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@stamhoofd/common-encoding';
 
-import type { SortList } from '@stamhoofd/filters/SortList';
-import { encodeSortList, SortListDecoder } from '@stamhoofd/filters/SortList';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
+import type { SortList } from '@stamhoofd/common-filters/SortList';
+import { encodeSortList, SortListDecoder } from '@stamhoofd/common-filters/SortList';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilterTypes';
 import { StamhoofdFilterJSONDecoder } from './StamhoofdFilterDecoder.js';
 
 export { StamhoofdFilterDecoder, StamhoofdFilterJSONDecoder } from './StamhoofdFilterDecoder.js';

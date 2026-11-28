@@ -1,4 +1,4 @@
-import { usePresent } from '@browser/navigation';
+import { usePresent } from '@stamhoofd/browser-navigation';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { useFetchOrganizationRegistrationPeriods } from '#hooks/networking/useFetchOrganizationRegistrationPeriods';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';

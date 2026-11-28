@@ -1,4 +1,4 @@
-import type { Decoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
 import {
     ArrayDecoder,
     AutoEncoder,
@@ -9,13 +9,13 @@ import {
     IntegerDecoder,
     MapDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 
 import { Premise } from './addresses/Premise.js';
 import { DNSRecord } from './DNSRecord.js';
 import { MailchimpSettings } from './mailchimp/MailchimpSettings.js';
 import { StamhoofdFilterDecoder } from './filters/FilteredRequest.js';
-import { FilterWrapperMarker, unwrapFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import { FilterWrapperMarker, unwrapFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import type { RecordAnswer } from './members/records/RecordAnswer.js';
 import { RecordAnswerMapDecoder } from './members/records/RecordAnswer.js';

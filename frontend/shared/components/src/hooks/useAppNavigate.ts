@@ -1,5 +1,5 @@
-import { HistoryManager } from '@browser/navigation';
-import type { RouteNavigationOptions } from '@browser/navigation';
+import { HistoryManager } from '@stamhoofd/browser-navigation';
+import type { RouteNavigationOptions } from '@stamhoofd/browser-navigation';
 import type { AppRoute } from '@stamhoofd/structures';
 
 export type AppNavigateFunction = (route: AppRoute, options?: RouteNavigationOptions<any, any>) => Promise<void>;

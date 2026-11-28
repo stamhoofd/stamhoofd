@@ -1,11 +1,11 @@
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
     createExistsFilter,
     SQL,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 
 export const eventFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,

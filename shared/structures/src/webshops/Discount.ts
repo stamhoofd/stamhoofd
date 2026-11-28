@@ -1,4 +1,4 @@
-import type { Data, EncodeContext, PlainObject } from '@common/encoding';
+import type { Data, EncodeContext, PlainObject } from '@stamhoofd/common-encoding';
 import {
     ArrayDecoder,
     AutoEncoder,
@@ -9,7 +9,7 @@ import {
     ObjectData,
     StringDecoder,
     field,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';

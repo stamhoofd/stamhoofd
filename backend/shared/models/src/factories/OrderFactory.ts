@@ -1,4 +1,4 @@
-import { Database, Factory } from '@node/database';
+import { Database, Factory } from '@stamhoofd/node-database';
 import { Cart, Customer, OrderData, OrderStatus, PaymentMethod } from '@stamhoofd/structures';
 
 import { WebshopCounter } from '../helpers/WebshopCounter.js';

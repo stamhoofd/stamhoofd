@@ -11,9 +11,9 @@ import {
 } from '@stamhoofd/structures';
 import { SessionService } from '../../src/services/SessionService.js';
 
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { encodeObject, EncodeMedium, PatchableArray } from '@common/encoding';
-import { Request } from '@node/endpoints';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { encodeObject, EncodeMedium, PatchableArray } from '@stamhoofd/common-encoding';
+import { Request } from '@stamhoofd/node-endpoints';
 import { Member, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions } from '@stamhoofd/structures';

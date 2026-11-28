@@ -1,5 +1,5 @@
 import { TestUtils } from '@stamhoofd/test-utils';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import {
     BalanceItem,
     BalanceItemPaymentWithPrivatePayment,

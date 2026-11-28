@@ -1,4 +1,4 @@
-import { Factory } from '@node/database';
+import { Factory } from '@stamhoofd/node-database';
 
 import type { GroupPrice } from '@stamhoofd/structures';
 import { BundleDiscount } from '@stamhoofd/structures';

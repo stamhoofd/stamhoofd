@@ -1,5 +1,5 @@
-import type { ComponentWithProperties } from '@browser/navigation';
-import { useCurrentComponent } from '@browser/navigation';
+import type { ComponentWithProperties } from '@stamhoofd/browser-navigation';
+import { useCurrentComponent } from '@stamhoofd/browser-navigation';
 import type { InjectionKey, Ref, ShallowRef } from 'vue';
 import { computed, inject, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, provide, ref, shallowReactive, shallowRef, watch } from 'vue';
 

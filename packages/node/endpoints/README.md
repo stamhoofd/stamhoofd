@@ -2,9 +2,9 @@
 
 Typed Node.js endpoints using simple-encoding decoders.
 
-Use the private `@node/endpoints` workspace with `workspace:*` dependencies.
-Run `pnpm stam check lint @node/endpoints` and
-`pnpm stam check typecheck @node/endpoints` from the repository root.
+Inside this repository, depend on `@stamhoofd/node-endpoints` with `workspace:*`.
+Run `pnpm stam check lint @stamhoofd/node-endpoints` and
+`pnpm stam check typecheck @stamhoofd/node-endpoints` from the repository root.
 This package has no upstream test files; consumer API suites exercise its routing.
 
 See [Writing endpoints](docs/endpoints.md) for the endpoint lifecycle and an example.

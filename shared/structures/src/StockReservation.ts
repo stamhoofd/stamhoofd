@@ -1,4 +1,10 @@
-import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@stamhoofd/common-encoding';
 
 export class StockReservation extends AutoEncoder {
     @field({ decoder: StringDecoder, field: 'id' })

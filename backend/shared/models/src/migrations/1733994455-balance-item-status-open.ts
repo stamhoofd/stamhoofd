@@ -1,4 +1,4 @@
-import { Database, Migration } from '@node/database';
+import { Database, Migration } from '@stamhoofd/node-database';
 import { BalanceItemStatus } from '@stamhoofd/structures';
 
 export default new Migration(async () => {

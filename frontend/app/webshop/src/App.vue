@@ -7,10 +7,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
-import { isSimpleError, isSimpleErrors } from '@common/errors';
-import type { PushOptions } from '@browser/navigation';
-import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, useManualPresent } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
+import type { PushOptions } from '@stamhoofd/browser-navigation';
+import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, useManualPresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import LoadingView from '@stamhoofd/components/containers/LoadingView.vue';
@@ -245,7 +245,7 @@ watch(modalStack, (modalStack: InstanceType<typeof ModalStackComponent> | null) 
 <style lang="scss">
 // We need to include the component styling of vue-app-navigation first
 @use "@stamhoofd/scss/main";
-@use "@browser/navigation/dist/main.css" as VueAppNavigation;
+@use "@stamhoofd/browser-navigation/dist/main.css" as VueAppNavigation;
 @use "@stamhoofd/scss/base/dark-modus";
 
 body {

@@ -78,7 +78,7 @@ Understanding the difference can be tricky at first. The differences are describ
 
 <script lang="ts" setup>
     import MyView from './my-view.vue';
-    import { useShow } from '@browser/navigation';
+    import { useShow } from '@stamhoofd/browser-navigation';
 
     const show = useShow();
 

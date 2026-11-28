@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { DataValidator } from '@stamhoofd/utility';
 import type XLSX from 'xlsx';
 import type { BaseColumnMatcher } from '../ColumnMatcher';

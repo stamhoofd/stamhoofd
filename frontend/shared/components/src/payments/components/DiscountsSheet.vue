@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { usePopup } from '@browser/navigation';
+import { usePopup } from '@stamhoofd/browser-navigation';
 import STGrid from '#layout/STGrid.vue';
 import BalanceItemRow from '#payments/BalanceItemRow.vue';
 import type { BalanceItem } from '@stamhoofd/structures';

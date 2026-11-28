@@ -1,6 +1,6 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 import { DocumentTemplate } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import { DocumentStatus } from '@stamhoofd/structures';
 
 export async function initPublishedAtForPublishedDocuments() {

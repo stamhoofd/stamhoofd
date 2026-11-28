@@ -6,7 +6,7 @@ import {
     field,
     IntegerDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { NamedObject } from '../Event.js';
 import type { NotificationSubjectType } from './NotificationSubjectType.js';
 import type { NotificationType } from './NotificationType.js';

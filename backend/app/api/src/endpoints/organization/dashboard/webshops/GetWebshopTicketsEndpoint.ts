@@ -1,6 +1,6 @@
-import type { Decoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
 import { Ticket, Webshop } from '@stamhoofd/models';
 import type { CountFilteredRequest, TicketPrivate } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
@@ -11,8 +11,8 @@ import {
     PaginatedResponse,
 } from '@stamhoofd/structures';
 
-import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
-import { applySQLSorter, compileToSQLFilter, SQL } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/node-sql';
+import { applySQLSorter, compileToSQLFilter, SQL } from '@stamhoofd/node-sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
 import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper.js';

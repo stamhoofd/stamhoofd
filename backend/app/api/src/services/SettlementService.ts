@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { Payment } from '@stamhoofd/models';
 import { BalanceItemPayment, Order, Platform } from '@stamhoofd/models';
 import { Payment as PaymentModel } from '@stamhoofd/models';
@@ -8,7 +8,7 @@ import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
 import type { AbortSignal } from '@stamhoofd/queues';
 import { QueueHandler } from '@stamhoofd/queues';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import type { PaymentProvider } from '@stamhoofd/structures';
 import { PaymentMethod, SettlementReference } from '@stamhoofd/structures';
 import type { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';

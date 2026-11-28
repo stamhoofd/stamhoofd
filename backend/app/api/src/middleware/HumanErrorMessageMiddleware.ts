@@ -1,11 +1,16 @@
-import type { Request, RequestMiddleware } from '@node/endpoints';
-import type { SimpleError } from '@common/errors';
-import { isSimpleError, isSimpleErrors } from '@common/errors';
+import type { Request, RequestMiddleware } from '@stamhoofd/node-endpoints';
+import type { SimpleError } from '@stamhoofd/common-errors';
+import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
 
 /**
- * Human messages for error codes thrown by packages that cannot use $t themselves (e.g. @stamhoofd/filters).
+ * Human messages for error codes thrown by packages that cannot use $t themselves (the standalone libraries in /packages).
  */
-const humanMessages = new Map<string, () => string>([['unknown_filter', () => $t('%1IF')]]);
+const humanMessages = new Map<string, () => string>([
+    ['unknown_filter', () => $t('%1IF')],
+    ['invalid_sort', () => $t('%ZvO')],
+    ['sorter_join_overlap', () => $t('%GU')],
+    ['too_many_filter_values', () => $t('%1HH')],
+]);
 
 /**
  * Adds a translated human message to errors that were thrown without one.

@@ -15,7 +15,7 @@
         "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
-        "@node/logging": "workspace:*",
+        "@stamhoofd/node-logging": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "chalk": "5.6.2"

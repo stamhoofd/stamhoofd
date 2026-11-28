@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePresent } from '@browser/navigation';
+import { usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import AuditLogsContentView from './AuditLogsContentView.vue';
 import type { AuditLogCustomRenderers } from './components/RenderTextComponent';

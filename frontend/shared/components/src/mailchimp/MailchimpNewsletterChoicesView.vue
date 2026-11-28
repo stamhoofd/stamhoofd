@@ -22,8 +22,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
-import { useDismiss } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { useDismiss } from '@stamhoofd/browser-navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { RecordSettings } from '@stamhoofd/structures';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';

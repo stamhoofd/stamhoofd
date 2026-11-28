@@ -1,5 +1,5 @@
-import { Migration } from '@node/database';
-import { cloneObject } from '@common/encoding';
+import { Migration } from '@stamhoofd/node-database';
+import { cloneObject } from '@stamhoofd/common-encoding';
 import { Group, Organization } from '@stamhoofd/models';
 import type {
     OrganizationRecordsConfiguration,

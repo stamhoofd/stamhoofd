@@ -1,6 +1,6 @@
 import { registerTenantCron } from './helpers/registerTenantCron.js';
 import { DocumentTemplate } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 
 let lastRunDate: number | null = null;
 

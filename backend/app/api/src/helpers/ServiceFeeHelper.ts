@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { Payment, StripeAccount } from '@stamhoofd/models';
 import { Organization, Platform } from '@stamhoofd/models';
 import { PaymentMethod, PaymentProvider, STPackageType } from '@stamhoofd/structures';

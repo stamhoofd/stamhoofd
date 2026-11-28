@@ -1,6 +1,6 @@
-import type { ManyToOneRelation } from '@node/database';
-import { column } from '@node/database';
-import { QueryableModel } from '@stamhoofd/sql';
+import type { ManyToOneRelation } from '@stamhoofd/node-database';
+import { column } from '@stamhoofd/node-database';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import { CartReservedSeat } from '@stamhoofd/structures';
 import basex from 'base-x';
 import crypto from 'crypto';

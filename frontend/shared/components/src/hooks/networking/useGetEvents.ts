@@ -1,5 +1,5 @@
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
 import { useContext } from '../useContext';
 import type { RegistrationPeriodBase, StamhoofdFilter } from '@stamhoofd/structures';
 import { Event, EventPeriodHelper, LimitedFilteredRequest, mergeFilters, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';

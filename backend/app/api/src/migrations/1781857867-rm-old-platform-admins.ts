@@ -1,4 +1,4 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 import { User } from '@stamhoofd/models';
 
 export default new Migration(async () => {

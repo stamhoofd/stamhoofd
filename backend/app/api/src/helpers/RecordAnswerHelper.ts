@@ -4,9 +4,9 @@ import type {
     Identifiable,
     Patchable,
     PatchableArray,
-} from '@common/encoding';
-import { isPatchableArray } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import { isPatchableArray } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { RecordAnswerDecoder } from '@stamhoofd/structures';
 

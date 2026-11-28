@@ -1,5 +1,5 @@
-import { Model } from '@node/database';
-import type { PlainObject } from '@common/encoding';
+import { Model } from '@stamhoofd/node-database';
+import type { PlainObject } from '@stamhoofd/common-encoding';
 import type {
     MemberWithRegistrations,
     RegistrationWithMember,

@@ -1,4 +1,4 @@
-import { ComponentWithProperties } from '@browser/navigation';
+import { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { RegisterItem } from '@stamhoofd/structures';
 import type { NavigationActions } from '../../../types/NavigationActions';

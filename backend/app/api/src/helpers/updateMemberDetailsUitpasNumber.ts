@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { isSimpleError, SimpleError } from '@common/errors';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { isSimpleError, SimpleError } from '@stamhoofd/common-errors';
 import { Member } from '@stamhoofd/models';
 import type { MemberDetails, ReviewTimes } from '@stamhoofd/structures';
 import { UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';

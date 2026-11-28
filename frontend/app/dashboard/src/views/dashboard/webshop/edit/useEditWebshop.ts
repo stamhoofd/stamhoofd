@@ -1,5 +1,5 @@
-import type { Decoder } from '@common/encoding';
-import { usePop } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';

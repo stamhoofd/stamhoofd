@@ -1,6 +1,6 @@
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { ComponentWithProperties, usePresent } from '@browser/navigation';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, usePresent } from '@stamhoofd/browser-navigation';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import { useLoadRecentPeriods } from '@stamhoofd/components/hooks/networking/useLoadRecentPeriods';
 import { usePatchOrganizationPeriods } from '@stamhoofd/components/hooks/networking/usePatchOrganizationPeriods';

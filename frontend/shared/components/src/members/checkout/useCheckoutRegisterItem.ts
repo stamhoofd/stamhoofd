@@ -1,5 +1,5 @@
-import type { Decoder } from '@common/encoding';
-import { ComponentWithProperties, NavigationController } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, NavigationController } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';

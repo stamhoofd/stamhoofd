@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useDismiss } from '@browser/navigation';
+import { useDismiss } from '@stamhoofd/browser-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';

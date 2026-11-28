@@ -1,6 +1,6 @@
-import { Model } from '@node/database';
-import { SimpleError } from '@common/errors';
-import { logger } from '@node/logging';
+import { Model } from '@stamhoofd/node-database';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { logger } from '@stamhoofd/node-logging';
 import {
     BalanceItem,
     Group,
@@ -12,7 +12,7 @@ import {
     RegistrationPeriod,
 } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { SQL, SQLWhereSign } from '@stamhoofd/sql';
+import { SQL, SQLWhereSign } from '@stamhoofd/node-sql';
 import { AuditLogSource, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { Formatter, sleep, Sorter } from '@stamhoofd/utility';
 import { AuditLogService } from './AuditLogService.js';

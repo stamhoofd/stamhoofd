@@ -229,15 +229,15 @@ export * from './email/EmailTemplate.js';
 
 // Filters
 export * from './filters/FilteredRequest.js';
-export * from '@stamhoofd/filters/FilterCompilers';
+export * from '@stamhoofd/common-filters/FilterCompilers';
 export * from './filters/InMemoryFilter.js';
 export * from './filters/inMemoryFilterDefinitions.js';
 export * from './filters/InMemorySorter.js';
 export * from './filters/PropertyFilter.js';
 export * from './filters/searchFilterFactories.js';
-export * from '@stamhoofd/filters/Sorters';
-export * from '@stamhoofd/filters/SortList';
-export * from '@stamhoofd/filters/StamhoofdFilter';
+export * from '@stamhoofd/common-filters/Sorters';
+export * from '@stamhoofd/common-filters/SortList';
+export * from '@stamhoofd/common-filters/StamhoofdFilter';
 export * from './filters/isEqualFilter.js';
 export * from './filters/SelectablePdfDocumentFilter.js';
 

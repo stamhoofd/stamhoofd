@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePop } from '@browser/navigation';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import TransitionFade from '#transitions/TransitionFade.vue';
 import { usePlatform } from '#hooks/usePlatform.ts';

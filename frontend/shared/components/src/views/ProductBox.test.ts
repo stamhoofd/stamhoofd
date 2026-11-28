@@ -1,4 +1,4 @@
-import type { ComponentWithProperties } from '@browser/navigation';
+import type { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import { CartItem, Checkout, Product, ProductPrice, Webshop, WebshopMetaData, WebshopOrderMode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { expect, test, vi } from 'vitest';

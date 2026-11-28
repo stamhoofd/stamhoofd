@@ -11,7 +11,7 @@
         "./svgNamespacePlugin": "./svgNamespacePlugin.ts"
     },
     "dependencies": {
-        "@node/dev-tools": "workspace:*",
+        "@stamhoofd/node-dev-tools": "workspace:*",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/cli": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",

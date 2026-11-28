@@ -9,7 +9,7 @@ import {
     User,
 } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { SQL, SQLAlias, SQLCount, SQLSelectAs } from '@stamhoofd/sql';
+import { SQL, SQLAlias, SQLCount, SQLSelectAs } from '@stamhoofd/node-sql';
 import type { MemberDetails, PermissionRole } from '@stamhoofd/structures';
 import {
     AuditLogSource,

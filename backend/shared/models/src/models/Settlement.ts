@@ -1,6 +1,6 @@
-import { column } from '@node/database';
-import { ArrayDecoder } from '@common/encoding';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import type { PaymentProvider } from '@stamhoofd/structures';
 import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementStatus.js';
 import { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';

@@ -1,5 +1,5 @@
-import { AutoEncoder, field, StringDecoder } from '@common/encoding';
-import { isSimpleError } from '@common/errors';
+import { AutoEncoder, field, StringDecoder } from '@stamhoofd/common-encoding';
+import { isSimpleError } from '@stamhoofd/common-errors';
 
 /**
  * One error of the last sync attempt of a settlement, stored on the settlement so failing payouts

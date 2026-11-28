@@ -1,9 +1,9 @@
-import { column } from '@node/database';
+import { column } from '@stamhoofd/node-database';
 import { DocumentData, DocumentStatus, Document as DocumentStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SimpleError } from '@common/errors';
-import { QueryableModel } from '@stamhoofd/sql';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import type { Registration } from './Registration.js';
 
 export class Document extends QueryableModel {

@@ -1,6 +1,10 @@
 import type { RegistrationInvitation } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
-import { SQL, SQLOrderBy } from '@stamhoofd/sql';
+import type {
+    SQLOrderByDirection,
+    SQLSortDefinition,
+    SQLSortDefinitions,
+} from '@stamhoofd/node-sql';
+import { SQL, SQLOrderBy } from '@stamhoofd/node-sql';
 
 export const registrationInvitationSorters: SQLSortDefinitions<RegistrationInvitation> = new Map<
     string,

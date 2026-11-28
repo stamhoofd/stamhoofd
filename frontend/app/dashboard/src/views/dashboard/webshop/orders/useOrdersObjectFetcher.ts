@@ -1,5 +1,5 @@
-import { SimpleError } from '@common/errors';
-import { Request } from '@common/networking';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { Request } from '@stamhoofd/common-networking';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import type { CountFilteredRequest, PrivateOrderWithTickets, SortItem, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { assertSort, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection } from '@stamhoofd/structures';

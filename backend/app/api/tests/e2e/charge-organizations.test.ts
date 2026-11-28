@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { BalanceItem, OrganizationFactory } from '@stamhoofd/models';
 import { BalanceItemType, ChargeRequest, VATExcemptReason, Version } from '@stamhoofd/structures';

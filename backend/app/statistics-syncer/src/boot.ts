@@ -1,5 +1,5 @@
-import { Column, Database } from '@node/database';
-import { ApplicationLifecycle } from '@node/observability';
+import { Column, Database } from '@stamhoofd/node-database';
+import { ApplicationLifecycle } from '@stamhoofd/node-observability';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';

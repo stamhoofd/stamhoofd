@@ -38,8 +38,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
-import { ComponentWithProperties, useShow } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';

@@ -1,5 +1,5 @@
-import { Database } from '@node/database';
-import { SimpleError } from '@common/errors';
+import { Database } from '@stamhoofd/node-database';
+import { SimpleError } from '@stamhoofd/common-errors';
 import {
     BalanceItem,
     BalanceItemPayment,
@@ -10,7 +10,7 @@ import {
 } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { QueueHandler } from '@stamhoofd/queues';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import {
     BalanceItemRelation,
     BalanceItemRelationType,

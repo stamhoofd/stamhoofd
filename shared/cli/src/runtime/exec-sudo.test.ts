@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { runProcess } from '@node/opentelemetry-process';
+import { runProcess } from '@stamhoofd/node-opentelemetry-process';
 import { execSudo } from './process.js';
 import { withCliInteractiveOperation, withCliPrompt } from './telemetry.js';
 
@@ -11,8 +11,8 @@ vi.mock('./telemetry.js', () => ({
         (_label: string, callback: (writer: typeof write) => Promise<unknown>) => callback(write),
     ),
 }));
-vi.mock('@node/opentelemetry-process', async (importOriginal) => ({
-    ...(await importOriginal<typeof import('@node/opentelemetry-process')>()),
+vi.mock('@stamhoofd/node-opentelemetry-process', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@stamhoofd/node-opentelemetry-process')>()),
     runProcess: vi.fn(),
 }));
 

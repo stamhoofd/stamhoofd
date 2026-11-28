@@ -1,6 +1,6 @@
 import { BalanceItem, BalanceItemPayment, Invoice, Payment } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import {
     BalanceItemType,
     PaymentMethod,

@@ -36,9 +36,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, useCanDismiss, usePresent, useShow } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController, useCanDismiss, usePresent, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import type { useDismiss } from '@browser/navigation';
+import type { useDismiss } from '@stamhoofd/browser-navigation';
 
 import type { Checkout, Product, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { CartItem } from '@stamhoofd/structures';

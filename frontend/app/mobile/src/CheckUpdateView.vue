@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useDismiss } from '@browser/navigation';
+import { useDismiss } from '@stamhoofd/browser-navigation';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
 import type { UpdateOptions } from '@stamhoofd/frontend-platform/AppManager';

@@ -1,5 +1,5 @@
-import type { Decoder, Field } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, EnumDecoder, getOptionalId, isPatchMap, SymbolDecoder } from '@common/encoding';
+import type { Decoder, Field } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, AutoEncoder, EnumDecoder, getOptionalId, isPatchMap, SymbolDecoder } from '@stamhoofd/common-encoding';
 import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, getAuditLogEnumDecoderObject, getAuditLogEnumType, TranslatedString, Version } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 

@@ -1,6 +1,6 @@
-import { column } from '@node/database';
-import { SimpleError } from '@common/errors';
-import { QueryableModel, readDynamicSQLExpression, SQL } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { QueryableModel, readDynamicSQLExpression, SQL } from '@stamhoofd/node-sql';
 import basex from 'base-x';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';

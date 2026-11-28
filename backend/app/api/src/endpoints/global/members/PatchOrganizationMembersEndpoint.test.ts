@@ -1,8 +1,8 @@
-import { Column, Database } from '@node/database';
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray, PatchMap } from '@common/encoding';
-import type { Endpoint } from '@node/endpoints';
-import { Request } from '@node/endpoints';
+import { Column, Database } from '@stamhoofd/node-database';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray, PatchMap } from '@stamhoofd/common-encoding';
+import type { Endpoint } from '@stamhoofd/node-endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import {
     GroupFactory,
     Member,
@@ -18,7 +18,7 @@ import {
     User,
     UserFactory,
 } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import type { PatchAnswers } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';

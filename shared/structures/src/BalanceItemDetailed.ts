@@ -1,4 +1,4 @@
-import { field } from '@common/encoding';
+import { field } from '@stamhoofd/common-encoding';
 
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItem, BalanceItemPayment } from './BalanceItem.js';

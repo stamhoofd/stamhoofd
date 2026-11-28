@@ -240,8 +240,8 @@ import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 
-import { SimpleErrors } from '@common/errors';
-import { ComponentWithProperties, useDismiss, usePop, usePresent, useShow } from '@browser/navigation';
+import { SimpleErrors } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, useDismiss, usePop, usePresent, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';

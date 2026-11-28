@@ -7,7 +7,7 @@ import {
     IntegerDecoder,
     MapDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 import { PaymentMethod, PaymentMethodHelper } from './PaymentMethod.js';

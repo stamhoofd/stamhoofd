@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { AutoEncoder } from './AutoEncoder.js';
 import { Data } from './Data.js';
 import { PlainObject } from './Encodeable.js';

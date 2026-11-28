@@ -1,5 +1,5 @@
-import { Request } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import { Request } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { Organization, Token, User } from '@stamhoofd/models';
 import { OrganizationFactory, Payment, Token as TokenModel, UserFactory } from '@stamhoofd/models';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';

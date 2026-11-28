@@ -1,4 +1,4 @@
-import { field } from '@common/encoding';
+import { field } from '@stamhoofd/common-encoding';
 import { ImpersonatedBy } from './Impersonation.js';
 import { MembersBlob } from './members/MemberWithRegistrationsBlob.js';
 import { User } from './User.js';

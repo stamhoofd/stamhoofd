@@ -5,13 +5,16 @@ import type {
     FilterCompilerSelector,
     FilterDefinitions,
     RequiredFilterCompiler,
-} from '@stamhoofd/filters/FilterCompilers';
+} from '@stamhoofd/common-filters/FilterCompilers';
 import {
     assertFilterCompareValue,
     compileFilter,
     filterDefinitionsToSelector,
-} from '@stamhoofd/filters/FilterCompilers';
-import type { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+} from '@stamhoofd/common-filters/FilterCompilers';
+import type {
+    StamhoofdCompareValue,
+    StamhoofdFilter,
+} from '@stamhoofd/common-filters/StamhoofdFilter';
 
 export type InMemoryFilterRunner = (object: any) => boolean;
 

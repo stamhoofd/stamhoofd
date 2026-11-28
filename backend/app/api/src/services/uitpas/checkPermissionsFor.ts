@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { UitpasClientCredentialsStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

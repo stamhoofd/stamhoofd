@@ -1,4 +1,4 @@
-import { useFocused } from '@browser/navigation';
+import { useFocused } from '@stamhoofd/browser-navigation';
 import { onActivated, onBeforeUnmount, onDeactivated, onMounted, unref } from 'vue';
 
 export type KeyMatcher = (key: string, modifiers: { shift: boolean; ctrl: boolean; alt: boolean; meta: boolean }) => boolean;

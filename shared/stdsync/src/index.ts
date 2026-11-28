@@ -1,1 +1,1 @@
-export { StdSync, OutputStream } from '@node/terminal';
+export { StdSync, OutputStream } from '@stamhoofd/node-terminal';

@@ -1,6 +1,6 @@
-import { column, ManyToManyRelation } from '@node/database';
-import { EnumDecoder } from '@common/encoding';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column, ManyToManyRelation } from '@stamhoofd/node-database';
+import { EnumDecoder } from '@stamhoofd/common-encoding';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import type { RecordAnswer } from '@stamhoofd/structures';
 import { EventNotificationStatus, RecordAnswerMapDecoder } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';

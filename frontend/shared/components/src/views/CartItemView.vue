@@ -190,13 +190,13 @@
 
 <script lang="ts" setup>
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { useCanDismiss, useDismiss, usePresent, useShow } from '@browser/navigation';
+import { useCanDismiss, useDismiss, usePresent, useShow } from '@stamhoofd/browser-navigation';
 import type { CartItem, Checkout, PatchAnswers, ProductDateRange, Webshop } from '@stamhoofd/structures';
 import { CartStockHelper, Customer, ProductPrice, ProductType, UitpasNumberAndPrice, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { useContext } from '#hooks/useContext.ts';
-import { patchObject } from '@common/encoding';
+import { patchObject } from '@stamhoofd/common-encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';

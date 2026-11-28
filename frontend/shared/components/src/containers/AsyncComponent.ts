@@ -1,5 +1,5 @@
-import type { ImportRetryMethod } from '@browser/navigation';
-import { ComponentWithProperties } from '@browser/navigation';
+import type { ImportRetryMethod } from '@stamhoofd/browser-navigation';
+import { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 
 import { isModuleImportError } from '#errors/isModuleImportError.ts';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';

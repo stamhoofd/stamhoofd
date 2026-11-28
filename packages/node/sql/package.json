@@ -1,0 +1,37 @@
+{
+    "name": "@stamhoofd/node-sql",
+    "version": "2.159.0",
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist-types/index.d.ts",
+    "sideEffects": false,
+    "files": [
+        "dist",
+        "dist-types"
+    ],
+    "scripts": {
+        "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage"
+    },
+    "dependencies": {
+        "@stamhoofd/common-encoding": "workspace:*",
+        "@stamhoofd/common-errors": "workspace:*",
+        "@stamhoofd/node-database": "workspace:*",
+        "@stamhoofd/node-logging": "workspace:*",
+        "@stamhoofd/common-filters": "workspace:*",
+        "lru-cache": "11.5.3"
+    },
+    "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
+        "mysql2": "3.24.6",
+        "vitest": "4.1.12"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
+    }
+}

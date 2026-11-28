@@ -1,4 +1,4 @@
-import type { Data, Encodeable, EncodeContext } from '@common/encoding';
+import type { Data, Encodeable, EncodeContext } from '@stamhoofd/common-encoding';
 
 /**
  * OAuth2 token data with absolute expiration dates in memory and snake_case wire keys.

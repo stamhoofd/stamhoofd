@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { Organization } from '@stamhoofd/models';
 import { Platform, Webshop } from '@stamhoofd/models';
 import type {

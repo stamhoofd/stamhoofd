@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { isEmptyPatch, PatchMap } from '@common/encoding';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { isEmptyPatch, PatchMap } from '@stamhoofd/common-encoding';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@stamhoofd/common-errors';
 import type {
     BalanceItem,
     Document,
@@ -27,7 +27,7 @@ import {
     RegistrationPeriod,
     Webshop,
 } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import type {
     GroupCategory,
     MemberDetails,

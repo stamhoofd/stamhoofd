@@ -1,8 +1,8 @@
-import type { Data, Decoder, EncodeContext, PlainObject } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { Data, Decoder, EncodeContext, PlainObject } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { CountFilteredRequest, StamhoofdFilterJSONDecoder } from '../filters/FilteredRequest.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import { BreakdownPathItem } from '../PaymentBreakdown.js';
 
 /**

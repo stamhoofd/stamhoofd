@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { deepSet } from '../helpers/deepSet.js';
 import { isAutoEncoder } from '../helpers/isAutoEncoder.js';
 import { PatchableArray } from '../structs/PatchableArray.js';

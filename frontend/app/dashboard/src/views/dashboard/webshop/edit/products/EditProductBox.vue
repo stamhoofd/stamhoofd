@@ -467,9 +467,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@common/encoding';
-import { ObjectData, PatchableArray, VersionBoxDecoder } from '@common/encoding';
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { ObjectData, PatchableArray, VersionBoxDecoder } from '@stamhoofd/common-encoding';
+import { ComponentWithProperties, NavigationController, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import type { Validator } from '@stamhoofd/components/errors/Validator.ts';

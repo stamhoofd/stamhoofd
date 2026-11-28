@@ -6,9 +6,9 @@ import {
     IntegerDecoder,
     StringDecoder,
     URLDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Formatter } from '@stamhoofd/utility';
 import type { BalanceItem } from '../../BalanceItem.js';
 import type { Group } from '../../Group.js';

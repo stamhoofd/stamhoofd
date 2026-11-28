@@ -1,4 +1,4 @@
-import { column } from '@node/database';
+import { column } from '@stamhoofd/node-database';
 import {
     QueryableModel,
     SQL,
@@ -7,7 +7,7 @@ import {
     SQLWhereEqual,
     SQLWhereOr,
     SQLWhereSign,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { v4 as uuidv4 } from 'uuid';
 
 /**

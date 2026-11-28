@@ -92,10 +92,10 @@ import { BooleanStatus, Parent } from '@stamhoofd/structures';
 
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useAppContext } from '#context/appContext.ts';
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { SimpleError, SimpleErrors } from '@common/errors';
-import { usePresent } from '@browser/navigation';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { usePresent } from '@stamhoofd/browser-navigation';
 import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { computed, nextTick } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';

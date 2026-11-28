@@ -53,10 +53,10 @@
 import type { PlatformMember } from '@stamhoofd/structures';
 import { EmergencyContact } from '@stamhoofd/structures';
 
-import type { PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
-import { SimpleError, SimpleErrors } from '@common/errors';
-import { ComponentWithProperties, usePresent } from '@browser/navigation';
+import type { PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
+import { ComponentWithProperties, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { computed } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';

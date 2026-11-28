@@ -6,9 +6,9 @@ Encoding and decoding can get customized, and that's the whole point of this lib
 
 ## Installation
 
-This is a private workspace. Declare `"@common/encoding": "workspace:*"` in
+Inside this repository, declare `"@stamhoofd/common-encoding": "workspace:*"` in
 consuming packages. Run `pnpm stam test encoding` and
-`pnpm stam check typecheck @common/encoding` from the repository root.
+`pnpm stam check typecheck @stamhoofd/common-encoding` from the repository root.
 
 All consumers use this workspace implementation through explicit workspace
 dependencies, including the integrated networking, database and endpoint libraries.
@@ -29,7 +29,7 @@ Structures are data objects that can be encoded (converted to plain objects) and
 
 In Stamhoofd all structures are currently stored in the `shared/structures` folder. They are used by the backend and frontend. This facilitates seamless communication over the network and ensures secure data storage in both the database and browser.
 
-The encoding and decoding behavior is mostly implemented in the `@common/encoding` package.
+The encoding and decoding behavior is mostly implemented in the `@stamhoofd/common-encoding` package.
 
 ---
 
@@ -40,7 +40,7 @@ The encoding and decoding behavior is mostly implemented in the `@common/encodin
 The easiest way to create encodable and decodable structures is by extending the AutoEncoder class. Here's a basic example:
 
 ```typescript
-import { AutoEncoder, StringDecoder, NumberDecoder, field } from '@common/encoding';
+import { AutoEncoder, StringDecoder, NumberDecoder, field } from '@stamhoofd/common-encoding';
 
 class MyClass extends AutoEncoder {
     @field({ decoder: NumberDecoder })

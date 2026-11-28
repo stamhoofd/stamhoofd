@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { Payment, User } from '@stamhoofd/models';
 import type { Organization } from '@stamhoofd/models';
 import { MolliePayment, MollieToken, Platform } from '@stamhoofd/models';

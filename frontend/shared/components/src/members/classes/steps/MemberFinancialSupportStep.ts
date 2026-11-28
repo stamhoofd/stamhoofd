@@ -1,4 +1,4 @@
-import type { ComponentWithProperties } from '@browser/navigation';
+import type { ComponentWithProperties } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { getFinancialSupportSettingsOrDefault } from '@stamhoofd/structures';

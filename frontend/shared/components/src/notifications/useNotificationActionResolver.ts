@@ -1,7 +1,7 @@
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { UrlHelper } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { UrlHelper } from '@stamhoofd/browser-navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { useFetchOrganizationRegistrationPeriods } from '#hooks/networking/useFetchOrganizationRegistrationPeriods.ts';
 import type { Organization } from '@stamhoofd/structures';

@@ -116,8 +116,8 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType, PartialWithoutMethods } from '@common/encoding';
-import { usePop } from '@browser/navigation';
+import type { AutoEncoderPatchType, PartialWithoutMethods } from '@stamhoofd/common-encoding';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';

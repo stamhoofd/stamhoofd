@@ -1,4 +1,4 @@
-import type { AutoEncoder, NonScalarIdentifiable, AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
+import type { AutoEncoder, NonScalarIdentifiable, AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
 import type { Ref } from 'vue';
 import { computed } from 'vue';
 import { usePatchableArray } from './usePatchableArray';

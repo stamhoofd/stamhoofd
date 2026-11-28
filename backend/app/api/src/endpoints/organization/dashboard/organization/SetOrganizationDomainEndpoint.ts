@@ -1,7 +1,7 @@
-import type { Decoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError, SimpleErrors } from '@common/errors';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import type { Organization as OrganizationStruct } from '@stamhoofd/structures';
 import { DNSRecord, DNSRecordType, OrganizationDomains } from '@stamhoofd/structures';
 import NodeRSA from 'node-rsa';

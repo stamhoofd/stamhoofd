@@ -1,6 +1,6 @@
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Order, Webshop } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import type { Order as OrderStruct } from '@stamhoofd/structures';

@@ -48,7 +48,7 @@ export function sanitizedTraceExporter(destination: SpanExporter): SpanExporter 
             const safe: ReadableSpan[] = spans
                 .filter(
                     (span) =>
-                        span.instrumentationScope.name === '@node/observability' &&
+                        span.instrumentationScope.name === '@stamhoofd/node-observability' &&
                         spanNames.has(span.name),
                 )
                 .map((span) => ({
@@ -61,7 +61,7 @@ export function sanitizedTraceExporter(destination: SpanExporter): SpanExporter 
                     duration: span.duration,
                     ended: span.ended,
                     resource: span.resource,
-                    instrumentationScope: { name: '@node/observability' },
+                    instrumentationScope: { name: '@stamhoofd/node-observability' },
                     attributes: attributes(span.attributes),
                     status: { code: span.status.code },
                     events: [],
@@ -85,7 +85,7 @@ export function sanitizedLogExporter(destination: LogRecordExporter): LogRecordE
                 records
                     .filter(
                         (record) =>
-                            record.instrumentationScope.name === '@node/observability' &&
+                            record.instrumentationScope.name === '@stamhoofd/node-observability' &&
                             typeof record.body === 'string' &&
                             logBodies.has(record.body),
                     )
@@ -96,7 +96,7 @@ export function sanitizedLogExporter(destination: LogRecordExporter): LogRecordE
                         severityNumber: record.severityNumber,
                         body: record.body,
                         resource: record.resource,
-                        instrumentationScope: { name: '@node/observability' },
+                        instrumentationScope: { name: '@stamhoofd/node-observability' },
                         attributes: attributes(record.attributes),
                         droppedAttributesCount: record.droppedAttributesCount,
                     })),

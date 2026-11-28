@@ -1,4 +1,4 @@
-import { Factory } from '@node/database';
+import { Factory } from '@stamhoofd/node-database';
 
 import { STPackage } from '../models/index.js';
 import type { Organization } from '../models/Organization.js';

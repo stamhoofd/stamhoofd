@@ -1,4 +1,4 @@
-import type { Request, Response, ResponseMiddleware } from '@node/endpoints';
+import type { Request, Response, ResponseMiddleware } from '@stamhoofd/node-endpoints';
 
 export const CORSMiddleware: ResponseMiddleware = {
     handleResponse(request: Request, response: Response) {

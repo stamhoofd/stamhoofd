@@ -1,6 +1,10 @@
 import type { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
-import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
-import { SQL, SQLOrderBy } from '@stamhoofd/sql';
+import type {
+    SQLOrderByDirection,
+    SQLSortDefinition,
+    SQLSortDefinitions,
+} from '@stamhoofd/node-sql';
+import { SQL, SQLOrderBy } from '@stamhoofd/node-sql';
 
 /**
  * Only the recipient id is sortable: it is a uuidv7, so it follows creation order and is indexed per user.

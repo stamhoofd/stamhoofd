@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useNavigate } from '@browser/navigation';
+import { defineRoutes, useNavigate } from '@stamhoofd/browser-navigation';
 
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import SetupStepRows from '@stamhoofd/components/setupSteps/SetupStepRows.vue';

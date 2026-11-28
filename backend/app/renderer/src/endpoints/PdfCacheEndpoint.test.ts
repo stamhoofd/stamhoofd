@@ -1,4 +1,4 @@
-import { Request, TestServer } from '@node/endpoints';
+import { Request, TestServer } from '@stamhoofd/node-endpoints';
 import { signInternal } from '@stamhoofd/backend-env';
 import { FileCache } from '../helpers/FileCache.js';
 import { PdfCacheEndpoint } from './PdfCacheEndpoint.js';

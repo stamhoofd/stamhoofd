@@ -1,5 +1,5 @@
-import { Model } from '@node/database';
-import { SimpleError } from '@common/errors';
+import { Model } from '@stamhoofd/node-database';
+import { SimpleError } from '@stamhoofd/common-errors';
 import {
     Group,
     Member,
@@ -10,7 +10,7 @@ import {
     Registration,
 } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { SQL, SQLWhereSign } from '@stamhoofd/sql';
+import { SQL, SQLWhereSign } from '@stamhoofd/node-sql';
 import type {
     MemberResponsibility,
     Platform as PlatformStruct,

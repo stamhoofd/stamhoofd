@@ -23,9 +23,9 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@node/database": "workspace:*",
-        "@node/endpoints": "workspace:*",
-        "@node/logging": "workspace:*",
+        "@stamhoofd/node-database": "workspace:*",
+        "@stamhoofd/node-endpoints": "workspace:*",
+        "@stamhoofd/node-logging": "workspace:*",
         "@stamhoofd/backend-env": "workspace:*",
         "@stamhoofd/backend-middleware": "workspace:*",
         "@stamhoofd/structures": "workspace:*",

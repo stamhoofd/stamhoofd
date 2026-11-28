@@ -1,12 +1,12 @@
 import { Group, Member, Organization, RegistrationInvitation } from '@stamhoofd/models';
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterDefinitions } from '@stamhoofd/node-sql';
 import {
     baseSQLFilterCompilers,
     createColumnFilter,
     createJoinedRelationFilter,
     SQL,
     SQLValueType,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { memberFilterCompilers } from './members.js';
 

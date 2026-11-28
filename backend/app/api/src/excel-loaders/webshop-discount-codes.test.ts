@@ -1,4 +1,4 @@
-import { Database } from '@node/database';
+import { Database } from '@stamhoofd/node-database';
 import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import type { Organization, Webshop } from '@stamhoofd/models';
 import {

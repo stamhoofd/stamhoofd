@@ -1,20 +1,20 @@
-import type { OneToManyRelation } from '@node/database';
+import type { OneToManyRelation } from '@stamhoofd/node-database';
 import type {
     AutoEncoderPatchType,
     ConvertArrayToPatchableArray,
     Decoder,
     PatchableArrayAutoEncoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import {
     isEmptyPatch,
     isPatchableArray,
     PatchableArray,
     PatchableArrayDecoder,
     StringDecoder,
-} from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+} from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { MemberWithUsersRegistrationsAndGroups, Registration } from '@stamhoofd/models';
 import {
     AuditLog,
@@ -50,7 +50,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
-import { SQL, SQLWhereSign } from '@stamhoofd/sql';
+import { SQL, SQLWhereSign } from '@stamhoofd/node-sql';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { MembershipCharger } from '../../../helpers/MembershipCharger.js';

@@ -1,5 +1,5 @@
 import { Language } from '@stamhoofd/types/Language';
-import { EncodeMedium, ObjectData } from '@common/encoding';
+import { EncodeMedium, ObjectData } from '@stamhoofd/common-encoding';
 import { File } from '../files/File.js';
 import { getUsedReplacementFiles, Recipient, Replacement } from './EmailRequest.js';
 

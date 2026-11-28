@@ -1,4 +1,4 @@
-import { Factory } from '@node/database';
+import { Factory } from '@stamhoofd/node-database';
 import type { RecordCategory } from '@stamhoofd/structures';
 import { EventNotificationType } from '@stamhoofd/structures';
 

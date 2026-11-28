@@ -1,4 +1,4 @@
-const navigationPackage = '@browser/navigation';
+const navigationPackage = '@stamhoofd/browser-navigation';
 
 function unwrapExpression(node) {
     while (

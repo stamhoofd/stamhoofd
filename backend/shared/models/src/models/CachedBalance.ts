@@ -1,5 +1,5 @@
-import { column, Database } from '@node/database';
-import type { SQLWhere } from '@stamhoofd/sql';
+import { column, Database } from '@stamhoofd/node-database';
+import type { SQLWhere } from '@stamhoofd/node-sql';
 import {
     QueryableModel,
     SQL,
@@ -8,7 +8,7 @@ import {
     SQLSelectAs,
     SQLSum,
     SQLWhereSign,
-} from '@stamhoofd/sql';
+} from '@stamhoofd/node-sql';
 import {
     BalanceItemStatus,
     BalanceItem as BalanceItemStruct,

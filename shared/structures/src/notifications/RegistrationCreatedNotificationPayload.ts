@@ -1,5 +1,11 @@
-import type { Decoder } from '@common/encoding';
-import { AutoEncoder, field, ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import {
+    AutoEncoder,
+    field,
+    ObjectData,
+    VersionBox,
+    VersionBoxDecoder,
+} from '@stamhoofd/common-encoding';
 import { NamedObject } from '../Event.js';
 import { Version } from '../Version.js';
 

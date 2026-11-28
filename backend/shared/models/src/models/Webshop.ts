@@ -1,7 +1,7 @@
-import type { ManyToOneRelation } from '@node/database';
-import { column, Database } from '@node/database';
-import { ArrayDecoder } from '@common/encoding';
-import { QueryableModel } from '@stamhoofd/sql';
+import type { ManyToOneRelation } from '@stamhoofd/node-database';
+import { column, Database } from '@stamhoofd/node-database';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import {
     Category,
     DNSRecordStatus,

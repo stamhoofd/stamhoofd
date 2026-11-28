@@ -1,4 +1,4 @@
-import { column, Database } from '@node/database';
+import { column, Database } from '@stamhoofd/node-database';
 import {
     BalanceItemPaymentWithPayment,
     BalanceItemPaymentWithPrivatePayment,
@@ -16,9 +16,9 @@ import {
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { EnumDecoder, MapDecoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
-import { QueryableModel, SQL } from '@stamhoofd/sql';
+import { EnumDecoder, MapDecoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
+import { QueryableModel, SQL } from '@stamhoofd/node-sql';
 import { Payment } from './Payment.js';
 
 /**

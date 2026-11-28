@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentWithProperties, NavigationController } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import DateSelection from '#inputs/DateSelection.vue';
 import { useOrganization } from '#hooks/useOrganization.ts';

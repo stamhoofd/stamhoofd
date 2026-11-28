@@ -1,6 +1,6 @@
 # Development integration
 
-`@node/dev-tools` owns the typed Stam development protocol and producer adapters.
+`@stamhoofd/node-dev-tools` owns the typed Stam development protocol and producer adapters.
 It uses Node built-ins, TypeScript and concurrently; importing an emitter does not load the
 CLI, a telemetry SDK, Vite, or Nuxt. Framework dependencies provide adapter types.
 
@@ -32,5 +32,5 @@ failure disables delivery without preventing application execution. Close emitte
 to drain final events with a bounded deadline.
 
 Integration coverage lives with the CLI consumers. Run `pnpm stam test cli`,
-`pnpm stam check lint --filter @node/dev-tools`, and
-`pnpm stam check typecheck --filter @node/dev-tools` from the repository root.
+`pnpm stam check lint --filter @stamhoofd/node-dev-tools`, and
+`pnpm stam check typecheck --filter @stamhoofd/node-dev-tools` from the repository root.

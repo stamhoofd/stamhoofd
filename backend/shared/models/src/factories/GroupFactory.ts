@@ -1,4 +1,4 @@
-import { Factory } from '@node/database';
+import { Factory } from '@stamhoofd/node-database';
 import type { BundleDiscount, GroupPriceDiscount, GroupType } from '@stamhoofd/structures';
 import {
     BundleDiscountGroupPriceSettings,
@@ -8,7 +8,7 @@ import {
     TranslatedString,
 } from '@stamhoofd/structures';
 
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Group } from '../models/Group.js';
 import { RegistrationPeriod } from '../models/index.js';
 import type { Organization } from '../models/Organization.js';

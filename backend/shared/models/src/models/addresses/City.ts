@@ -1,9 +1,9 @@
-import { column } from '@node/database';
-import type { ManyToOneRelation } from '@node/database';
+import { column } from '@stamhoofd/node-database';
+import type { ManyToOneRelation } from '@stamhoofd/node-database';
 import type { Country } from '@stamhoofd/types/Country';
 import { v4 as uuidv4 } from 'uuid';
 
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel } from '@stamhoofd/node-sql';
 import type { Province } from './Province.js';
 
 export class City extends QueryableModel {

@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, IntegerDecoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, field, IntegerDecoder } from '@stamhoofd/common-encoding';
 import { BalanceItem, BalanceItemWithPayments } from '../BalanceItem.js';
 import { PaymentGeneral } from '../members/PaymentGeneral.js';
 import { BaseOrganization, Organization } from '../Organization.js';

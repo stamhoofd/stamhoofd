@@ -7,7 +7,7 @@ import {
     field,
     MapDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { Colors } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -5,7 +5,7 @@ import {
     field,
     IntegerDecoder,
     StringDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { Image } from './files/Image.js';
 
 export class OrganizationInvoiceSettings extends AutoEncoder {

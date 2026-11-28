@@ -1,5 +1,5 @@
-import { column, Database } from '@node/database';
-import { QueryableModel } from '@stamhoofd/sql';
+import { column, Database } from '@stamhoofd/node-database';
+import { QueryableModel } from '@stamhoofd/node-sql';
 
 export class ViesCachedResult extends QueryableModel {
     static table = 'vies_cached_results';

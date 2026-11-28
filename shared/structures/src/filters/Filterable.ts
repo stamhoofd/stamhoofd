@@ -1,4 +1,4 @@
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilterTypes';
 
 export interface Filterable {
     doesMatchFilter(filter: StamhoofdFilter): boolean;

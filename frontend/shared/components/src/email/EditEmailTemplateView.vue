@@ -31,8 +31,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { usePop } from '@browser/navigation';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { usePop } from '@stamhoofd/browser-navigation';
 import type { Replacement } from '@stamhoofd/structures';
 import { EmailTemplate, EmailTemplateType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';

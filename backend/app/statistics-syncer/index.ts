@@ -1,6 +1,6 @@
 import backendEnv from '@stamhoofd/backend-env';
 import { BackendApp } from '@stamhoofd/types/BackendApp';
-import { runApplication } from '@node/observability';
+import { runApplication } from '@stamhoofd/node-observability';
 
 process.title = 'stamhoofd-statistics-syncer';
 runApplication('stats', async (lifecycle) => {

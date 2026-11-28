@@ -30,8 +30,8 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@common/encoding": "workspace:*",
-        "@common/errors": "workspace:*",
+        "@stamhoofd/common-encoding": "workspace:*",
+        "@stamhoofd/common-errors": "workspace:*",
         "@stamhoofd/models": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",
@@ -40,7 +40,7 @@
     },
     "devDependencies": {
         "oxlint-plugin-stamhoofd": "workspace:*",
-        "@node/database": "workspace:*",
+        "@stamhoofd/node-database": "workspace:*",
         "@stamhoofd/backend-i18n": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "mysql2": "3.24.6",

@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { defineRoute } from '@browser/navigation';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { defineRoute } from '@stamhoofd/browser-navigation';
 import { useRequiredOrganization } from '#hooks/useOrganization';
 import { usePlatform } from '#hooks/usePlatform';
 import { usePatchOrganization } from '#organizations/usePatchOrganization';

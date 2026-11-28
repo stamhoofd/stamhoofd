@@ -1,4 +1,4 @@
-import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods } from '@common/encoding';
+import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods } from '@stamhoofd/common-encoding';
 import type { Ref } from 'vue';
 import { computed } from 'vue';
 

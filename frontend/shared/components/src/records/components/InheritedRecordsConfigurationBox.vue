@@ -76,8 +76,8 @@
 <script setup lang="ts">
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
-import { PatchMap } from '@common/encoding';
-import { usePresent } from '@browser/navigation';
+import { PatchMap } from '@stamhoofd/common-encoding';
+import { usePresent } from '@stamhoofd/browser-navigation';
 
 import { propertyFilterToString } from '#filters/UIFilter.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';

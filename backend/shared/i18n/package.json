@@ -27,8 +27,8 @@
         "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
-        "@node/endpoints": "workspace:*",
-        "@node/logging": "workspace:*",
+        "@stamhoofd/node-endpoints": "workspace:*",
+        "@stamhoofd/node-logging": "workspace:*",
         "@stamhoofd/locales": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*"

@@ -79,10 +79,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { ArrayDecoder, PatchableArray, PatchMap } from '@common/encoding';
-import { Request } from '@common/networking';
-import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@browser/navigation';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder, PatchableArray, PatchMap } from '@stamhoofd/common-encoding';
+import { Request } from '@stamhoofd/common-networking';
+import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';

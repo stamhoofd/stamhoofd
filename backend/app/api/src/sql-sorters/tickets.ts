@@ -1,6 +1,10 @@
 import type { Ticket } from '@stamhoofd/models';
-import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
-import { SQL, SQLOrderBy } from '@stamhoofd/sql';
+import type {
+    SQLOrderByDirection,
+    SQLSortDefinition,
+    SQLSortDefinitions,
+} from '@stamhoofd/node-sql';
+import { SQL, SQLOrderBy } from '@stamhoofd/node-sql';
 import { Formatter } from '@stamhoofd/utility';
 
 export const ticketSorters: SQLSortDefinitions<Ticket> = new Map<string, SQLSortDefinition<Ticket>>(

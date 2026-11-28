@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest';
-import type { DevEvent } from '@node/dev-tools/events';
+import type { DevEvent } from '@stamhoofd/node-dev-tools/events';
 import { DevLifecycle } from './dev-lifecycle.js';
 import { DevStatus } from './dev-status.js';
 import { isPortListening } from './port-probe.js';

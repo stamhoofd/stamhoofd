@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
 import type { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { usePatchOrganizationPeriods } from './usePatchOrganizationPeriods';
 

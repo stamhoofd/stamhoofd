@@ -1,5 +1,5 @@
-import type { Data, Decoder } from '@common/encoding';
-import { SimpleError } from '@common/errors';
+import type { Data, Decoder } from '@stamhoofd/common-encoding';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 function copyObject(value: object): Record<string, unknown> {
     const result = Object.create(null) as Record<string, unknown>;

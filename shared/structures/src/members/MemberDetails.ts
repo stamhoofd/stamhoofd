@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@stamhoofd/common-encoding';
 import {
     ArrayDecoder,
     AutoEncoder,
@@ -10,7 +10,7 @@ import {
     PatchableArray,
     StringDecoder,
     SymbolDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { DataValidator, Formatter, Sorter, StringCompare } from '@stamhoofd/utility';
 
 import { Language } from '@stamhoofd/types/Language';

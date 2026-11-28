@@ -1,4 +1,4 @@
-import { EncodeMedium } from '@common/encoding';
+import { EncodeMedium } from '@stamhoofd/common-encoding';
 import http from 'http';
 
 import { isReadableStream } from './isReadableStream.js';

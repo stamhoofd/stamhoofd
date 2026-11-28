@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, field, StringDecoder } from '@common/encoding';
+import { AutoEncoder, DateDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
 
 export class WebshopTicketsQuery extends AutoEncoder {
     /**

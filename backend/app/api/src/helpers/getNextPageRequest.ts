@@ -1,4 +1,4 @@
-import type { SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLSortDefinitions } from '@stamhoofd/node-sql';
 import { getSortFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 
 /**

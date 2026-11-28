@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, field } from '@stamhoofd/common-encoding';
 
 import { STPackage } from './STPackage.js';
 

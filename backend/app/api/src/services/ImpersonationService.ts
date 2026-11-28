@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { Token } from '@stamhoofd/models';
 import { AuditLog, ImpersonationToken, Organization, User } from '@stamhoofd/models';
 import {

@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@stamhoofd/common-errors';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import STInputBox from '#inputs/STInputBox.vue';
 import LoadingButton from '#navigation/LoadingButton.vue';

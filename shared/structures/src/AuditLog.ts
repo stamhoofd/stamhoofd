@@ -7,7 +7,7 @@ import {
     MapDecoder,
     StringDecoder,
     StringOrNumberDecoder,
-} from '@common/encoding';
+} from '@stamhoofd/common-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import type { RenderContext } from './AuditLogRenderer.js';
 import { renderTemplate } from './AuditLogRenderer.js';

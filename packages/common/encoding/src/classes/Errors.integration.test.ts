@@ -1,4 +1,4 @@
-import { isSimpleError, SimpleError, SimpleErrors } from '@common/errors';
+import { isSimpleError, SimpleError, SimpleErrors } from '@stamhoofd/common-errors';
 import { describe, expect, it } from 'vitest';
 import NumberDecoder from '../structs/NumberDecoder.js';
 import { ObjectData } from './ObjectData.js';

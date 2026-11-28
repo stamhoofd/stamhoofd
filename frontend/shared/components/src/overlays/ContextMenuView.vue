@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, HistoryManager, useCurrentComponent, useFocused, usePop, useUrl } from '@browser/navigation';
+import { ComponentWithProperties, HistoryManager, useCurrentComponent, useFocused, usePop, useUrl } from '@stamhoofd/browser-navigation';
 import { inject, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, useTemplateRef } from 'vue';
 import type { Ref } from 'vue';
 

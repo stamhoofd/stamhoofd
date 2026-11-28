@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
-import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
-import { ObjectData } from '@common/encoding';
+import type { AutoEncoderPatchType, Decoder } from '@stamhoofd/common-encoding';
+import { ObjectData } from '@stamhoofd/common-encoding';
 import { TestUtils } from '@stamhoofd/test-utils';
 import {
     BalanceItem,
@@ -21,7 +21,7 @@ import {
     compileToInMemoryFilter,
     createInMemoryFilterCompiler,
 } from './filters/InMemoryFilter.js';
-import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
+import type { StamhoofdFilter } from '@stamhoofd/common-filters/StamhoofdFilter';
 import { TranslatedString } from './TranslatedString.js';
 import { DetailedPayableBalance } from './endpoints/PayableBalanceCollection.js';
 import { BaseOrganization, Organization } from './Organization.js';

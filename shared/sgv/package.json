@@ -30,8 +30,8 @@
         "test": "vitest"
     },
     "dependencies": {
-        "@common/encoding": "workspace:*",
-        "@common/errors": "workspace:*",
+        "@stamhoofd/common-encoding": "workspace:*",
+        "@stamhoofd/common-errors": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*"

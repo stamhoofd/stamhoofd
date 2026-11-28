@@ -1,8 +1,12 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { isEmptyPatch, PatchableArrayDecoder, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type {
+    AutoEncoderPatchType,
+    Decoder,
+    PatchableArrayAutoEncoder,
+} from '@stamhoofd/common-encoding';
+import { isEmptyPatch, PatchableArrayDecoder, StringDecoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { Group, Registration } from '@stamhoofd/models';
 import { Member, RateLimiter } from '@stamhoofd/models';
 import { DocumentService } from '../../../services/DocumentService.js';
@@ -10,7 +14,7 @@ import type { MemberDetails, MembersBlob } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { BooleanStatus, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
-import type { OneToManyRelation } from '@node/database';
+import type { OneToManyRelation } from '@stamhoofd/node-database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';

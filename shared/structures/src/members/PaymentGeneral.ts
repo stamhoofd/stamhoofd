@@ -1,4 +1,4 @@
-import { ArrayDecoder, field, StringDecoder } from '@common/encoding';
+import { ArrayDecoder, field, StringDecoder } from '@stamhoofd/common-encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Sorter } from '@stamhoofd/utility';

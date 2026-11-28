@@ -1,4 +1,4 @@
-import { IntegerDecoder } from '@common/encoding';
+import { IntegerDecoder } from '@stamhoofd/common-encoding';
 
 export const upgradePriceFrom2To4DecimalPlaces = {
     decoder: IntegerDecoder,

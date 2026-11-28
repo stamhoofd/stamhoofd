@@ -136,12 +136,12 @@
 </template>
 
 <script setup lang="ts">
-import { isSimpleError, isSimpleErrors } from '@common/errors';
+import { isSimpleError, isSimpleErrors } from '@stamhoofd/common-errors';
 import {
     useCanDismiss,
     useCanPop,
     useDismiss,
-} from '@browser/navigation';
+} from '@stamhoofd/browser-navigation';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';

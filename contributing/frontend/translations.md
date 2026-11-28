@@ -23,3 +23,7 @@ To keep the translations readable, use a VSCode extension such as **`i18n-ally`*
 The \$t method will work normally in all places. In some very specific cases we’ve added wrappers to make sure they also work in unit tests. If you ever get errors, please ask Simon Backx
 
 For questions about the automatic translations, ask Bjarne
+
+## Libraries in `/packages`
+
+Libraries in `/packages` are standalone and published to npm, so they never use `$t`. They throw errors with a `code` and no `human` message. The API adds the translated message for those codes in `HumanErrorMessageMiddleware`: add new codes there.

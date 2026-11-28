@@ -1,5 +1,5 @@
-import { Database } from '@node/database';
-import type { SQLSelect } from '@stamhoofd/sql';
+import { Database } from '@stamhoofd/node-database';
+import type { SQLSelect } from '@stamhoofd/node-sql';
 import type { ProgressLogger } from '@stamhoofd/utility';
 import { LoggingTools } from '@stamhoofd/utility';
 

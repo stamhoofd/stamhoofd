@@ -28,10 +28,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@common/encoding';
-import { ArrayDecoder } from '@common/encoding';
-import { Request } from '@common/networking';
-import { usePop } from '@browser/navigation';
+import type { Decoder } from '@stamhoofd/common-encoding';
+import { ArrayDecoder } from '@stamhoofd/common-encoding';
+import { Request } from '@stamhoofd/common-networking';
+import { usePop } from '@stamhoofd/browser-navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { MailchimpAudience } from '@stamhoofd/structures/mailchimp/MailchimpAudience.js';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';

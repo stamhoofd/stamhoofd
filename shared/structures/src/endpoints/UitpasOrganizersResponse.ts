@@ -1,4 +1,10 @@
-import { AutoEncoder, StringDecoder, field, IntegerDecoder, ArrayDecoder } from '@common/encoding';
+import {
+    AutoEncoder,
+    StringDecoder,
+    field,
+    IntegerDecoder,
+    ArrayDecoder,
+} from '@stamhoofd/common-encoding';
 
 export class UitpasOrganizerResponse extends AutoEncoder {
     @field({ decoder: StringDecoder })

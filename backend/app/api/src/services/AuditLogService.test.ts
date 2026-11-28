@@ -1,5 +1,5 @@
-import { column, Model } from '@node/database';
-import { EnumDecoder } from '@common/encoding';
+import { column, Model } from '@stamhoofd/node-database';
+import { EnumDecoder } from '@stamhoofd/common-encoding';
 import { PaymentStatus } from '@stamhoofd/structures';
 
 import { AuditLogService, modelLogDefinitions } from './AuditLogService.js';

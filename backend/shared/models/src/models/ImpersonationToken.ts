@@ -1,5 +1,5 @@
-import { column } from '@node/database';
-import { QueryableModel, SQLWhereSign } from '@stamhoofd/sql';
+import { column } from '@stamhoofd/node-database';
+import { QueryableModel, SQLWhereSign } from '@stamhoofd/node-sql';
 import crypto from 'crypto';
 
 /**

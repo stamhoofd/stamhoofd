@@ -1,13 +1,17 @@
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArrayDecoder, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@node/endpoints';
-import { Endpoint, Response } from '@node/endpoints';
-import { SimpleError } from '@common/errors';
+import type {
+    AutoEncoderPatchType,
+    Decoder,
+    PatchableArrayAutoEncoder,
+} from '@stamhoofd/common-encoding';
+import { PatchableArrayDecoder, StringDecoder } from '@stamhoofd/common-encoding';
+import type { DecodedRequest, Request } from '@stamhoofd/node-endpoints';
+import { Endpoint, Response } from '@stamhoofd/node-endpoints';
+import { SimpleError } from '@stamhoofd/common-errors';
 import { Document, DocumentTemplate } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { DocumentTemplatePrivate } from '@stamhoofd/structures';
 
-import { SQL, SQLWhereSign } from '@stamhoofd/sql';
+import { SQL, SQLWhereSign } from '@stamhoofd/node-sql';
 import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;

@@ -96,7 +96,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useShow } from '@browser/navigation';
+import { ComponentWithProperties, useShow } from '@stamhoofd/browser-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import ImageComponent from '#views/ImageComponent.vue';
 import OrganizationLogo from '#context/OrganizationLogo.vue';

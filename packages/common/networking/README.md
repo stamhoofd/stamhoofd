@@ -2,9 +2,9 @@
 
 Simple and extendable frontend for simple-endpoints
 
-Use the private `@common/networking` workspace with `workspace:*` dependencies.
-Run `pnpm stam test common-networking`, `pnpm stam check lint @common/networking`,
-and `pnpm stam check typecheck @common/networking` from the repository root.
+Inside this repository, depend on `@stamhoofd/common-networking` with `workspace:*`.
+Run `pnpm stam test common-networking`, `pnpm stam check lint @stamhoofd/common-networking`,
+and `pnpm stam check typecheck @stamhoofd/common-networking` from the repository root.
 The `networking` test selector still belongs to the frontend service suite.
 
 The integration retains ES2019 assignment-style class fields to preserve the

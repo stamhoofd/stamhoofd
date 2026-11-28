@@ -61,7 +61,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useShow } from '@browser/navigation';
+import { useShow } from '@stamhoofd/browser-navigation';
 import { MFAManager } from '@stamhoofd/frontend-application/MFAManager';
 import type { TOTPSetupResponse } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
@@ -81,7 +81,7 @@ import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import STToolbar from '#navigation/STToolbar.vue';
 
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 import type { FreshAction } from './FreshAction';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 

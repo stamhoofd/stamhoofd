@@ -1,4 +1,4 @@
-import { SimpleError } from '@common/errors';
+import { SimpleError } from '@stamhoofd/common-errors';
 
 /**
  * This is almost identical than the backend QueueHandler, except that it does not automatically detect

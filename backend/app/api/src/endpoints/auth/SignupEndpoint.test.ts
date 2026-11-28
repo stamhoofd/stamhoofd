@@ -1,4 +1,4 @@
-import { Request } from '@node/endpoints';
+import { Request } from '@stamhoofd/node-endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { EmailVerificationCode, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { TestUtils } from '@stamhoofd/test-utils';

@@ -1,5 +1,5 @@
 import { Email } from '@stamhoofd/models';
-import { SQL } from '@stamhoofd/sql';
+import { SQL } from '@stamhoofd/node-sql';
 import type { EmailRecipient, LimitedFilteredRequest, MembersBlob } from '@stamhoofd/structures';
 import { PaginatedResponse, mergeFilters } from '@stamhoofd/structures';
 import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint.js';

@@ -1,4 +1,4 @@
-import { Migration } from '@node/database';
+import { Migration } from '@stamhoofd/node-database';
 import { BalanceItem, InvoicedBalanceItem } from '@stamhoofd/models';
 import { Formatter } from '@stamhoofd/utility';
 import { SeedTools } from '../helpers/SeedTools.js';

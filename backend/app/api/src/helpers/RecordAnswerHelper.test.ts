@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType } from '@common/encoding';
-import { PatchableArray } from '@common/encoding';
+import type { AutoEncoderPatchType } from '@stamhoofd/common-encoding';
+import { PatchableArray } from '@stamhoofd/common-encoding';
 import {
     FileType,
     RecordCategory,
